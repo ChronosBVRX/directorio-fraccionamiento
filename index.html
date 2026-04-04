@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Directorio - Ciudad Tres Marías</title>
+    <title>Vive Tres Marías - Directorio</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +15,10 @@
         tailwind.config = {
           theme: {
             extend: {
-              fontFamily: {
-                sans: ['Montserrat', 'sans-serif'],
-              },
+              fontFamily: { sans: ['Montserrat', 'sans-serif'] },
               colors: {
                 'tm-azul': '#22527b',       
                 'tm-azul-oscuro': '#143653',
-                'tm-azul-claro': '#eaf1f8', 
                 'tm-dorado': '#d4af37',     
                 'tm-gris': '#4b5563',
               }
@@ -31,69 +28,74 @@
     </script>
     <style>
         .active-filter { background-color: #22527b !important; color: white !important; }
-        img { transition: opacity 0.3s ease-in-out; }
-        img[loading] { opacity: 0; }
-        img[src] { opacity: 1; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris">
 
-    <header class="bg-white shadow-md sticky top-0 z-50 border-b-4 border-tm-azul">
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
         <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            
-            <a href="#" class="flex items-center flex-shrink-0">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo Ciudad Tres Marías" class="h-12 md:h-16 w-auto object-contain">
+            <a href="#" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-12 md:h-16 w-auto">
             </a>
             
-            <a href="https://wa.me/tu_numero" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-5 py-2.5 rounded-md text-sm font-bold transition shadow whitespace-nowrap">
-                Publicar Anuncio
-            </a>
+            <div id="nav-botones" class="flex gap-2">
+                <button onclick="abrirModalAuth()" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition">Entrar</button>
+                <button onclick="abrirModalNegocio()" id="btn-mi-negocio" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold text-sm transition">Publicar</button>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-sm transition">Salir</button>
+            </div>
         </div>
     </header>
 
-    <section class="max-w-7xl mx-auto mt-6 px-4">
-        <div class="relative overflow-hidden rounded-xl shadow-lg bg-tm-azul h-48 md:h-64 flex items-center">
-            <div class="absolute inset-0 flex items-center justify-between px-10 bg-gradient-to-r from-tm-azul via-tm-azul/80 to-transparent z-10">
-                <div class="max-w-md text-white">
-                    <span class="bg-tm-dorado text-white px-3 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider">Destacado Elite</span>
-                    <h2 class="text-3xl font-black mt-3">Hogwarts Snacks & Foods</h2>
-                    <p class="text-sm opacity-90 mt-2 font-light">¡Magia en cada bocado! Hamburguesas, alitas y postres temáticos entregados en tu puerta.</p>
-                    <button class="mt-5 bg-white text-tm-azul px-6 py-2.5 rounded font-bold text-sm shadow hover:bg-gray-100 transition">Ver Menú Mágico</button>
-                </div>
-                <div class="hidden md:block">
-                    <img src="https://images.unsplash.com/photo-1550507992-eb63ffee0847?auto=format&fit=crop&w=300" class="rounded-full border-4 border-white w-40 h-40 object-cover shadow-2xl">
-                </div>
-            </div>
-            <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200" class="w-full h-full object-cover opacity-20">
-        </div>
-    </section>
-
-    <nav class="max-w-7xl mx-auto mt-8 px-4 overflow-x-auto">
-        <div class="flex gap-2 pb-2 border-b border-gray-200">
-            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter whitespace-nowrap px-6 py-2 rounded-md border border-tm-azul text-tm-azul font-semibold text-sm hover:bg-tm-azul-claro hover:text-tm-azul transition">Todos</button>
-            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn whitespace-nowrap px-6 py-2 rounded-md border border-tm-azul text-tm-azul font-semibold text-sm hover:bg-tm-azul-claro hover:text-tm-azul transition">Alimentos</button>
-            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn whitespace-nowrap px-6 py-2 rounded-md border border-tm-azul text-tm-azul font-semibold text-sm hover:bg-tm-azul-claro hover:text-tm-azul transition">Servicios</button>
-            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn whitespace-nowrap px-6 py-2 rounded-md border border-tm-azul text-tm-azul font-semibold text-sm hover:bg-tm-azul-claro hover:text-tm-azul transition">Salud y Belleza</button>
-            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn whitespace-nowrap px-6 py-2 rounded-md border border-tm-azul text-tm-azul font-semibold text-sm hover:bg-tm-azul-claro hover:text-tm-azul transition">Hogar</button>
-        </div>
+    <nav class="max-w-7xl mx-auto mt-8 px-4 flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
+        <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Todos</button>
+        <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Alimentos</button>
+        <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Servicios</button>
+        <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Salud y Belleza</button>
+        <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Hogar</button>
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
+        <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
 
-    <footer class="bg-tm-azul-oscuro text-white py-12 mt-12">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="flex flex-col items-center justify-center text-white leading-none mb-4">
-                <span class="font-light tracking-[0.2em] text-xs">CIUDAD</span>
-                <span class="font-black text-2xl tracking-tight mt-1">TRES MARÍAS</span>
-            </div>
-            <p class="text-sm opacity-80 mt-2 font-light">Directorio Comercial Exclusivo</p>
-            <div class="w-16 h-0.5 bg-tm-dorado mx-auto mt-6"></div>
-            <p class="text-xs opacity-50 mt-6 font-light">© 2026 Reservados todos los derechos. Morelia, Michoacán.</p>
+    <div id="modal-auth" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 max-w-sm w-full relative">
+            <button onclick="cerrarModalAuth()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            <h2 id="auth-titulo" class="text-2xl font-black text-tm-azul mb-6 text-center">Entrar al Directorio</h2>
+            <input type="email" id="auth-email" placeholder="Correo Electrónico" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
+            <input type="password" id="auth-password" placeholder="Contraseña" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
+            <button onclick="procesarAuth()" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3 rounded font-bold transition">Continuar</button>
+            <button onclick="alternarModoAuth()" id="auth-btn-alterno" class="w-full text-xs mt-4 text-tm-dorado font-bold uppercase hover:underline">Quiero registrarme</button>
         </div>
-    </footer>
+    </div>
+
+    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
+            <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            <h2 class="text-2xl font-black text-tm-azul mb-2">Datos de tu Negocio</h2>
+            <p class="text-sm text-tm-gris mb-6">Completa la información para publicarte.</p>
+            
+            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Nombre</label>
+            <input type="text" id="neg-nombre" placeholder="Ej. Mi Negocio" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
+            
+            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Categoría</label>
+            <select id="neg-categoria" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none bg-white">
+                <option>Alimentos</option>
+                <option>Servicios</option>
+                <option>Salud</option>
+                <option>Hogar</option>
+            </select>
+            
+            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Descripción corta</label>
+            <textarea id="neg-desc" placeholder="¿Qué ofreces?" rows="3" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+            
+            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">WhatsApp (Solo números)</label>
+            <input type="number" id="neg-wa" placeholder="Ej. 4431234567" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
+            
+            <button onclick="guardarNegocio()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded font-bold transition">Publicar Ahora</button>
+        </div>
+    </div>
 
     <script>
         // CLAVES DE SUPABASE
@@ -101,81 +103,164 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // CONFIGURACIÓN DE ADMIN
+        const EMAIL_ADMIN = 'noirsysan@gmail.com'; 
+
         let todosLosAnuncios = [];
+        let usuarioActual = null;
+        let esModoRegistro = false;
 
-        // Cargar datos al inicio
-        async function cargarDatos() {
-            const contenedor = document.getElementById('contenedor-anuncios');
-            contenedor.innerHTML = '<div class="col-span-full text-center py-10 text-tm-azul opacity-50 animate-pulse font-semibold">Cargando directorio...</div>';
+        // AUTH LISTENER
+        supabase.auth.onAuthStateChange((event, session) => {
+            usuarioActual = session ? session.user : null;
+            document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
+            document.getElementById('btn-mi-negocio').classList.toggle('hidden', !usuarioActual);
+            document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
+            cargarDatos();
+        });
 
-            const { data, error } = await supabase
-                .from('anuncios')
-                .select('*')
-                .order('nivel_pago', { ascending: false });
+        // FUNCIONES MODAL AUTH
+        function abrirModalAuth() { document.getElementById('modal-auth').classList.remove('hidden'); }
+        function cerrarModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
+        function alternarModoAuth() { 
+            esModoRegistro = !esModoRegistro; 
+            document.getElementById('auth-titulo').innerText = esModoRegistro ? 'Crear Cuenta' : 'Entrar al Directorio'; 
+            document.getElementById('auth-btn-alterno').innerText = esModoRegistro ? 'Ya tengo cuenta' : 'Quiero registrarme';
+        }
 
-            if (error) {
-                console.error(error);
-                contenedor.innerHTML = '<p class="col-span-full text-center py-20 text-red-500 font-bold">Error al conectar con la base de datos.</p>';
+        async function procesarAuth() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
+            if(!email || !password) {
+                alert("Por favor ingresa correo y contraseña.");
                 return;
             }
-            todosLosAnuncios = data;
-            renderizar(todosLosAnuncios);
-        }
 
-        // Lógica de filtrado
-        function filtrar(categoria) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
-            document.getElementById(`btn-${categoria}`).classList.add('active-filter');
-
-            if (categoria === 'Todos') {
-                renderizar(todosLosAnuncios);
+            if(esModoRegistro) {
+                const { error } = await supabase.auth.signUp({ email, password });
+                if(error) alert("Error: " + error.message);
+                else { alert("Registro exitoso. Ahora estás dentro."); cerrarModalAuth(); }
             } else {
-                const filtrados = todosLosAnuncios.filter(a => a.categoria === categoria);
-                renderizar(filtrados);
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if(error) alert("Error: " + error.message);
+                else cerrarModalAuth();
             }
         }
 
-        // Dibujar las tarjetas de anuncios
+        async function cerrarSesion() { await supabase.auth.signOut(); }
+
+        // FUNCIONES MODAL NEGOCIO
+        function abrirModalNegocio() { document.getElementById('modal-negocio').classList.remove('hidden'); }
+        function cerrarModalNegocio() { document.getElementById('modal-negocio').classList.add('hidden'); }
+
+        async function guardarNegocio() {
+            const nuevo = {
+                user_id: usuarioActual.id,
+                nombre_negocio: document.getElementById('neg-nombre').value,
+                categoria: document.getElementById('neg-categoria').value,
+                descripcion: document.getElementById('neg-desc').value,
+                enlace_whatsapp: document.getElementById('neg-wa').value,
+                nivel_pago: 0
+            };
+            
+            if(!nuevo.nombre_negocio || !nuevo.descripcion || !nuevo.enlace_whatsapp) {
+                alert("Por favor llena todos los campos.");
+                return;
+            }
+
+            const { error } = await supabase.from('anuncios').insert([nuevo]);
+            if(error) {
+                alert("Hubo un error al guardar: " + error.message);
+            } else {
+                alert("Negocio publicado con éxito.");
+                cerrarModalNegocio();
+                document.getElementById('neg-nombre').value = '';
+                document.getElementById('neg-desc').value = '';
+                document.getElementById('neg-wa').value = '';
+                cargarDatos();
+            }
+        }
+
+        // CARGAR Y DIBUJAR DATOS
+        async function cargarDatos() {
+            const { data } = await supabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            todosLosAnuncios = data || [];
+            
+            // Verificamos cuál botón de filtro está activo actualmente
+            const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
+            filtrar(filtroActivo);
+        }
+
+        // FUNCIONES DE ADMIN
+        async function adminBorrar(id) {
+            if(confirm('¿Seguro que quieres borrar este anuncio permanentemente?')) {
+                await supabase.from('anuncios').delete().eq('id', id);
+                cargarDatos();
+            }
+        }
+
+        async function adminSubirNivel(id) {
+            const nivel = prompt('Ingresa el nivel (0=Gratis, 1=Imágenes, 2=Pro, 3=Elite):', '1');
+            if(nivel !== null && ["0","1","2","3"].includes(nivel)) {
+                await supabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
+                cargarDatos();
+            } else if (nivel !== null) {
+                alert("Nivel no válido. Ingresa un número del 0 al 3.");
+            }
+        }
+
+        // RENDERIZAR INTERFAZ
         function renderizar(lista) {
             const contenedor = document.getElementById('contenedor-anuncios');
             contenedor.innerHTML = '';
-
+            
             if (lista.length === 0) {
-                contenedor.innerHTML = '<p class="col-span-full text-center py-20 text-gray-400 font-medium">No hay anuncios registrados en esta categoría.</p>';
+                contenedor.innerHTML = '<p class="col-span-full text-center py-10 text-gray-400">No hay anuncios para mostrar.</p>';
                 return;
             }
 
-            lista.forEach(anuncio => {
-                const esPremium = anuncio.nivel_pago >= 2;
-                const esElite = anuncio.nivel_pago === 3;
-                
-                const bordeTarjeta = esElite ? 'border-tm-dorado ring-1 ring-tm-dorado/30 border-2' : (esPremium ? 'border-tm-azul ring-1 ring-tm-azul/10 border-2' : 'border-gray-200 border');
-                const colorBotonPrincipal = esElite ? 'bg-tm-dorado hover:bg-yellow-600 text-white' : 'bg-tm-azul hover:bg-tm-azul-oscuro text-white';
+            const esAdmin = usuarioActual && usuarioActual.email === EMAIL_ADMIN;
 
-                const tarjetaHtml = `
+            lista.forEach(a => {
+                const herramientasAdmin = esAdmin ? `
+                    <div class="mt-4 p-3 bg-red-50 rounded-lg flex justify-between border border-red-100">
+                        <button onclick="adminBorrar(${a.id})" class="text-red-600 text-xs font-bold uppercase hover:underline">Eliminar</button>
+                        <button onclick="adminSubirNivel(${a.id})" class="text-tm-azul text-xs font-bold uppercase hover:underline">Nivel (${a.nivel_pago}) ⚙️</button>
+                    </div>
+                ` : '';
+
+                const esPremium = a.nivel_pago >= 2;
+                const esElite = a.nivel_pago === 3;
+                const bordeTarjeta = esElite ? 'border-tm-dorado ring-1 ring-tm-dorado/30 border-2' : (esPremium ? 'border-tm-azul ring-1 ring-tm-azul/10 border-2' : 'border-gray-200 border');
+
+                contenedor.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm ${bordeTarjeta} overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full">
-                        ${anuncio.imagen_url ? `<img src="${anuncio.imagen_url}" alt="${anuncio.nombre_negocio}" class="w-full h-48 object-cover bg-tm-azul-claro" loading="lazy">` : ''}
+                        ${a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-48 object-cover bg-tm-azul-claro">` : ''}
                         <div class="p-6 flex flex-col flex-grow">
                             <div class="flex justify-between items-start gap-2">
-                                <span class="text-[10px] font-bold text-tm-azul bg-tm-azul-claro px-2.5 py-1 rounded-sm uppercase tracking-wider">${anuncio.categoria}</span>
-                                ${esElite ? '<span class="text-tm-dorado font-bold text-xs uppercase tracking-wide flex items-center gap-1">★ Elite</span>' : (esPremium ? '<span class="text-tm-azul font-bold text-xs uppercase tracking-wide">Destacado</span>' : '')}
+                                <span class="text-[10px] font-bold text-tm-azul bg-tm-azul-claro px-2.5 py-1 rounded-sm uppercase tracking-wider">${a.categoria}</span>
+                                ${esElite ? '<span class="text-tm-dorado font-bold text-xs uppercase tracking-wide">★ Elite</span>' : (esPremium ? '<span class="text-tm-azul font-bold text-xs uppercase tracking-wide">Destacado</span>' : '')}
                             </div>
-                            <h3 class="mt-3 font-bold text-xl text-tm-azul-oscuro leading-tight">${anuncio.nombre_negocio}</h3>
-                            <p class="text-sm text-tm-gris mt-2 flex-grow line-clamp-3 font-light">${anuncio.descripcion}</p>
-                            
+                            <h3 class="mt-3 font-bold text-xl text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
+                            <p class="text-sm text-tm-gris mt-2 flex-grow line-clamp-3 font-light">${a.descripcion}</p>
+                            ${herramientasAdmin}
                             <div class="mt-6 pt-4 border-t border-gray-100 flex gap-3">
-                                <a href="https://wa.me/${anuncio.enlace_whatsapp || ''}" target="_blank" class="flex-1 text-center bg-green-500 text-white py-2.5 rounded text-sm font-semibold hover:bg-green-600 transition shadow-sm">WhatsApp</a>
-                                ${esPremium ? `<button class="flex-1 ${colorBotonPrincipal} py-2.5 rounded text-sm font-semibold transition shadow-sm">Ver Perfil</button>` : ''}
+                                <a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 text-center bg-green-500 hover:bg-green-600 text-white py-2.5 rounded text-sm font-semibold transition shadow-sm">Contactar WhatsApp</a>
                             </div>
                         </div>
-                    </div>
-                `;
-                contenedor.innerHTML += tarjetaHtml;
+                    </div>`;
             });
         }
 
-        // Iniciar carga de datos
-        cargarDatos();
+        function filtrar(cat) { 
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+            const btnActivo = document.getElementById(`btn-${cat}`);
+            if (btnActivo) btnActivo.classList.add('active-filter');
+            
+            renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
+        }
+        
     </script>
 </body>
 </html>
