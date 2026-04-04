@@ -11,11 +11,11 @@
           theme: {
             extend: {
               colors: {
-                'bosque-morado': '#622e70',    /* Del texto BOSQUE y pétalo superior izquierdo */
-                'bosque-oliva': '#5d444e',     /* Del texto CAÑADAS y slogan */
-                'bosque-lima': '#a8c345',      /* Del texto 'del' y pétalo superior derecho */
-                'bosque-cian': '#34bec1',      /* Del pétalo inferior izquierdo */
-                'bosque-amarillo': '#ebd138',  /* Del pétalo inferior derecho */
+                'bosque-morado': '#622e70',    
+                'bosque-oliva': '#5d444e',     
+                'bosque-lima': '#a8c345',      
+                'bosque-cian': '#34bec1',      
+                'bosque-amarillo': '#ebd138',  
               }
             }
           }
@@ -48,12 +48,12 @@
     </main>
 
     <script>
-        // --- 1. CONFIGURA TU SUPABASE AQUÍ ---
-        const SUPABASE_URL = 'PON_AQUI_TU_PROJECT_URL';
-        const SUPABASE_KEY = 'PON_AQUI_TU_ANON_KEY';
+        // --- CONFIGURACIÓN DE SUPABASE CON TUS CLAVES EXACTAS ---
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- 2. LÓGICA DE DIBUJADO DE TARJETAS ---
+        // --- LÓGICA DE DIBUJADO DE TARJETAS ---
         async function cargarAnuncios() {
             let { data: anuncios, error } = await supabase
                 .from('anuncios')
@@ -62,18 +62,25 @@
 
             if (error) {
                 console.error("Error cargando datos:", error);
-                document.getElementById('contenedor-anuncios').innerHTML = '<p class="col-span-full text-red-500 text-center">Error al cargar los anuncios.</p>';
+                document.getElementById('contenedor-anuncios').innerHTML = '<p class="col-span-full text-red-500 text-center">Error al cargar los anuncios. Verifica tu base de datos en Supabase.</p>';
                 return;
             }
 
             const contenedor = document.getElementById('contenedor-anuncios');
+            
+            // Si la base de datos está vacía
+            if (anuncios.length === 0) {
+                contenedor.innerHTML = '<p class="col-span-full text-gray-500 text-center">Aún no hay negocios registrados. ¡Sé el primero en anunciarte!</p>';
+                return;
+            }
+
             contenedor.innerHTML = ''; 
 
             anuncios.forEach(anuncio => {
                 let htmlTarjeta = '';
 
                 if (anuncio.nivel_pago === 0) {
-                    // NIVEL GRATIS: Estilo limpio, borde gris, texto oscuro
+                    // NIVEL GRATIS
                     htmlTarjeta = `
                     <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                         <h3 class="font-bold text-lg text-bosque-oliva">${anuncio.nombre_negocio}</h3>
@@ -82,7 +89,7 @@
                     </div>`;
                 } 
                 else if (anuncio.nivel_pago >= 1) {
-                    // NIVELES PREMIUM: Lógica de colores según el nivel
+                    // NIVELES PREMIUM
                     let etiquetaColor = 'bg-bosque-cian';
                     let etiquetaTexto = 'Imágenes';
                     let bordeEspecial = 'border-gray-100';
