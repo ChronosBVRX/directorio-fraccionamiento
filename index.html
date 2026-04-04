@@ -111,8 +111,12 @@
     <script>
         // CONFIGURACIÓN DE SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'Tu_LLave_De_Supabase_Aqui'; // NOTA: Mantén la llave que me pasaste, la oculté aquí por seguridad.
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ¡IMPORTANTE! PEGA AQUÍ TU LLAVE REAL DE SUPABASE
+        const SUPABASE_KEY = 'TU_LLAVE_AQUI'; 
+        
+        // SOLUCIÓN AL ERROR: Cambiamos el nombre de la variable a "clienteSupabase"
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const EMAIL_ADMIN = 'noirsysan@gmail.com'; 
 
@@ -120,7 +124,7 @@
         let usuarioActual = null;
         let esModoRegistro = false;
 
-        // --- DATOS DE PRUEBA (MOCK DATA) PARA QUE NO SE VEA VACÍO ---
+        // --- DATOS DE PRUEBA (MOCK DATA) ---
         const anunciosDePrueba = [
             { id: 101, nombre_negocio: "Café de Especialidad Tres Marías", categoria: "Alimentos", descripcion: "El mejor café orgánico y postres artesanales recién horneados todas las mañanas.", enlace_whatsapp: "4430000000", nivel_pago: 3, imagen_url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80" },
             { id: 102, nombre_negocio: "Clínica Dental Sonrisas", categoria: "Salud", descripcion: "Odontología integral, ortodoncia y blanqueamiento con tecnología de punta.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=500&q=80" },
@@ -129,8 +133,8 @@
             { id: 105, nombre_negocio: "Boutique de Carnes", categoria: "Alimentos", descripcion: "Cortes finos, asadores y todo lo necesario para tu parrillada de fin de semana.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=500&q=80" }
         ];
 
-        // AUTH LISTENER
-        supabase.auth.onAuthStateChange((event, session) => {
+        // AUTH LISTENER (Usando la nueva variable)
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
             document.getElementById('btn-mi-negocio').classList.toggle('hidden', !usuarioActual);
@@ -141,7 +145,7 @@
         // FUNCIONES MODAL AUTH
         function abrirModalAuth() { 
             document.getElementById('modal-auth').classList.remove('hidden'); 
-            setModoAuth(false); // Por defecto abre en Iniciar Sesión
+            setModoAuth(false);
         }
         function cerrarModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
         
@@ -176,12 +180,12 @@
 
             try {
                 if(esModoRegistro) {
-                    const { error } = await supabase.auth.signUp({ email, password });
+                    const { error } = await clienteSupabase.auth.signUp({ email, password });
                     if(error) throw error;
                     alert("¡Registro exitoso! Ya puedes publicar tu negocio.");
                     cerrarModalAuth();
                 } else {
-                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    const { error } = await clienteSupabase.auth.signInWithPassword({ email, password });
                     if(error) throw error;
                     cerrarModalAuth();
                 }
@@ -193,7 +197,7 @@
             }
         }
 
-        async function cerrarSesion() { await supabase.auth.signOut(); }
+        async function cerrarSesion() { await clienteSupabase.auth.signOut(); }
 
         // FUNCIONES MODAL NEGOCIO
         function abrirModalNegocio() { document.getElementById('modal-negocio').classList.remove('hidden'); }
@@ -211,19 +215,18 @@
                 categoria: document.getElementById('neg-categoria').value,
                 descripcion: document.getElementById('neg-desc').value,
                 enlace_whatsapp: document.getElementById('neg-wa').value,
-                nivel_pago: 0 // Inicia siempre en plan gratis
+                nivel_pago: 0 
             };
 
-            const { data, error } = await supabase.from('anuncios').insert([nuevo]).select();
+            const { data, error } = await clienteSupabase.from('anuncios').insert([nuevo]).select();
             
             if(error) {
                 alert("Hubo un error en la base de datos: " + error.message);
             } else {
                 alert("¡Tu negocio fue publicado con éxito!");
                 cerrarModalNegocio();
-                document.querySelector('form').reset(); // Limpia el formulario
+                document.querySelector('#modal-negocio form').reset(); 
                 
-                // Agregarlo a la vista actual sin recargar
                 todosLosAnuncios.push(data[0]);
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
@@ -232,9 +235,8 @@
 
         // CARGAR Y DIBUJAR DATOS
         async function cargarDatos() {
-            const { data, error } = await supabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             
-            // Si hay un error (ej. tabla no existe) o la tabla está vacía, usamos los datos de prueba
             if (error || !data || data.length === 0) {
                 console.log("Cargando datos de prueba (Mock Data)...");
                 todosLosAnuncios = anunciosDePrueba;
@@ -246,14 +248,13 @@
             filtrar(filtroActivo);
         }
 
-        // FUNCIONES DE ADMIN (Ocultas para usuarios normales)
+        // FUNCIONES DE ADMIN
         async function adminBorrar(id) {
             if(confirm('¿Seguro que quieres borrar este anuncio permanentemente?')) {
-                // Si es un ID de prueba (menor a 1000), solo lo quitamos del array local
                 if (id < 1000) {
                     todosLosAnuncios = todosLosAnuncios.filter(a => a.id !== id);
                 } else {
-                    await supabase.from('anuncios').delete().eq('id', id);
+                    await clienteSupabase.from('anuncios').delete().eq('id', id);
                 }
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
@@ -267,7 +268,7 @@
                     const index = todosLosAnuncios.findIndex(a => a.id === id);
                     if(index !== -1) todosLosAnuncios[index].nivel_pago = parseInt(nivel);
                 } else {
-                    await supabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
+                    await clienteSupabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
                 }
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
@@ -288,7 +289,6 @@
                 return;
             }
 
-            // Ordenar para que los Elite/Pro salgan primero siempre
             lista.sort((a, b) => b.nivel_pago - a.nivel_pago);
 
             const esAdmin = usuarioActual && usuarioActual.email === EMAIL_ADMIN;
