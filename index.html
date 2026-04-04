@@ -16,13 +16,13 @@
           theme: {
             extend: {
               fontFamily: {
-                sans: ['Montserrat', 'sans-serif'], // Cambiamos la fuente de todo el sitio
+                sans: ['Montserrat', 'sans-serif'],
               },
               colors: {
-                'tm-azul': '#22527b',       /* El azul exacto del logo */
-                'tm-azul-oscuro': '#143653',/* Un azul más oscuro para botones y hover */
-                'tm-azul-claro': '#eaf1f8', /* Azul muy sutil para fondos */
-                'tm-dorado': '#d4af37',     /* Un tono dorado elegante para los niveles Premium */
+                'tm-azul': '#22527b',       
+                'tm-azul-oscuro': '#143653',
+                'tm-azul-claro': '#eaf1f8', 
+                'tm-dorado': '#d4af37',     
                 'tm-gris': '#4b5563',
               }
             }
@@ -39,11 +39,10 @@
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris">
 
     <header class="bg-white shadow-md sticky top-0 z-50 border-b-4 border-tm-azul">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
             
-            <a href="#" class="flex flex-col justify-center text-tm-azul leading-none">
-                <span class="font-light tracking-[0.2em] text-[10px] md:text-xs ml-1">CIUDAD</span>
-                <span class="font-black text-2xl md:text-3xl tracking-tight mt-0.5">TRES MARÍAS</span>
+            <a href="#" class="flex items-center flex-shrink-0">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/logo.png" alt="Logo Ciudad Tres Marías" class="h-12 md:h-16 w-auto object-contain">
             </a>
             
             <a href="https://wa.me/tu_numero" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-5 py-2.5 rounded-md text-sm font-bold transition shadow whitespace-nowrap">
@@ -97,7 +96,7 @@
     </footer>
 
     <script>
-        // TUS CLAVES EXACTAS DE SUPABASE
+        // CLAVES DE SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -150,7 +149,6 @@
                 const esPremium = anuncio.nivel_pago >= 2;
                 const esElite = anuncio.nivel_pago === 3;
                 
-                // Configuración visual según nivel (Ajustada al estilo corporativo)
                 const bordeTarjeta = esElite ? 'border-tm-dorado ring-1 ring-tm-dorado/30 border-2' : (esPremium ? 'border-tm-azul ring-1 ring-tm-azul/10 border-2' : 'border-gray-200 border');
                 const colorBotonPrincipal = esElite ? 'bg-tm-dorado hover:bg-yellow-600 text-white' : 'bg-tm-azul hover:bg-tm-azul-oscuro text-white';
 
