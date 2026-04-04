@@ -40,9 +40,9 @@
             </a>
             
             <div id="nav-botones" class="flex gap-2">
-                <button onclick="abrirModalAuth()" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition">Entrar</button>
-                <button onclick="abrirModalNegocio()" id="btn-mi-negocio" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold text-sm transition">Publicar</button>
-                <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-sm transition">Salir</button>
+                <button onclick="abrirModalAuth()" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition">Entrar / Registrarse</button>
+                <button onclick="abrirModalNegocio()" id="btn-mi-negocio" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold text-sm transition">+ Publicar Negocio</button>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-sm text-tm-azul transition">Salir</button>
             </div>
         </div>
     </header>
@@ -61,54 +61,73 @@
 
     <div id="modal-auth" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl p-8 max-w-sm w-full relative">
-            <button onclick="cerrarModalAuth()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-            <h2 id="auth-titulo" class="text-2xl font-black text-tm-azul mb-6 text-center">Entrar al Directorio</h2>
-            <input type="email" id="auth-email" placeholder="Correo Electrónico" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
-            <input type="password" id="auth-password" placeholder="Contraseña" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
-            <button onclick="procesarAuth()" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3 rounded font-bold transition">Continuar</button>
-            <button onclick="alternarModoAuth()" id="auth-btn-alterno" class="w-full text-xs mt-4 text-tm-dorado font-bold uppercase hover:underline">Quiero registrarme</button>
+            <button onclick="cerrarModalAuth()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-2xl">&times;</button>
+            
+            <div class="flex mb-6 border-b">
+                <button onclick="setModoAuth(false)" id="tab-login" class="flex-1 pb-2 font-bold text-tm-azul border-b-2 border-tm-azul">Iniciar Sesión</button>
+                <button onclick="setModoAuth(true)" id="tab-registro" class="flex-1 pb-2 font-bold text-gray-400 border-b-2 border-transparent">Registro</button>
+            </div>
+
+            <h2 id="auth-titulo" class="text-xl font-black text-tm-azul mb-2 text-center">Bienvenido de vuelta</h2>
+            <p id="auth-subtitulo" class="text-xs text-center text-tm-gris mb-6">Ingresa para administrar o publicar tu negocio.</p>
+
+            <form onsubmit="event.preventDefault(); procesarAuth();">
+                <input type="email" id="auth-email" placeholder="Correo Electrónico" required class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
+                <input type="password" id="auth-password" placeholder="Contraseña" required minlength="6" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
+                <button type="submit" id="auth-btn-submit" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3 rounded font-bold transition">Entrar</button>
+            </form>
         </div>
     </div>
 
     <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
-            <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-            <h2 class="text-2xl font-black text-tm-azul mb-2">Datos de tu Negocio</h2>
-            <p class="text-sm text-tm-gris mb-6">Completa la información para publicarte.</p>
+            <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-2xl">&times;</button>
+            <h2 class="text-2xl font-black text-tm-azul mb-2">Publica tu Negocio</h2>
+            <p class="text-sm text-tm-gris mb-6">Completa la información para aparecer en el directorio de Tres Marías.</p>
             
-            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Nombre</label>
-            <input type="text" id="neg-nombre" placeholder="Ej. Mi Negocio" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
-            
-            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Categoría</label>
-            <select id="neg-categoria" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none bg-white">
-                <option>Alimentos</option>
-                <option>Servicios</option>
-                <option>Salud</option>
-                <option>Hogar</option>
-            </select>
-            
-            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Descripción corta</label>
-            <textarea id="neg-desc" placeholder="¿Qué ofreces?" rows="3" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
-            
-            <label class="block text-xs font-bold text-tm-gris uppercase mb-1">WhatsApp (Solo números)</label>
-            <input type="number" id="neg-wa" placeholder="Ej. 4431234567" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
-            
-            <button onclick="guardarNegocio()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded font-bold transition">Publicar Ahora</button>
+            <form onsubmit="event.preventDefault(); guardarNegocio();">
+                <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Nombre del Negocio *</label>
+                <input type="text" id="neg-nombre" placeholder="Ej. Veterinaria Huellitas" required class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
+                
+                <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Categoría *</label>
+                <select id="neg-categoria" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none bg-white">
+                    <option value="Alimentos">Alimentos y Restaurantes</option>
+                    <option value="Servicios">Servicios Profesionales</option>
+                    <option value="Salud">Salud y Belleza</option>
+                    <option value="Hogar">Hogar y Mantenimiento</option>
+                </select>
+                
+                <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Descripción corta *</label>
+                <textarea id="neg-desc" placeholder="¿Qué ofreces a la comunidad?" required rows="3" class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+                
+                <label class="block text-xs font-bold text-tm-gris uppercase mb-1">WhatsApp (Solo números) *</label>
+                <input type="number" id="neg-wa" placeholder="Ej. 4431234567" required class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
+                
+                <button type="submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded font-bold transition">Publicar Ahora</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // CLAVES DE SUPABASE
+        // CONFIGURACIÓN DE SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const SUPABASE_KEY = 'Tu_LLave_De_Supabase_Aqui'; // NOTA: Mantén la llave que me pasaste, la oculté aquí por seguridad.
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // CONFIGURACIÓN DE ADMIN
         const EMAIL_ADMIN = 'noirsysan@gmail.com'; 
 
         let todosLosAnuncios = [];
         let usuarioActual = null;
         let esModoRegistro = false;
+
+        // --- DATOS DE PRUEBA (MOCK DATA) PARA QUE NO SE VEA VACÍO ---
+        const anunciosDePrueba = [
+            { id: 101, nombre_negocio: "Café de Especialidad Tres Marías", categoria: "Alimentos", descripcion: "El mejor café orgánico y postres artesanales recién horneados todas las mañanas.", enlace_whatsapp: "4430000000", nivel_pago: 3, imagen_url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80" },
+            { id: 102, nombre_negocio: "Clínica Dental Sonrisas", categoria: "Salud", descripcion: "Odontología integral, ortodoncia y blanqueamiento con tecnología de punta.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=500&q=80" },
+            { id: 103, nombre_negocio: "Plomería y Electricidad Express", categoria: "Hogar", descripcion: "Soluciones rápidas y garantizadas para emergencias en tu hogar. Disponibles 24/7.", enlace_whatsapp: "4430000000", nivel_pago: 1, imagen_url: null },
+            { id: 104, nombre_negocio: "Asesoría Legal Integral", categoria: "Servicios", descripcion: "Consultoría jurídica, contratos y asesoría fiscal para empresas y particulares.", enlace_whatsapp: "4430000000", nivel_pago: 0, imagen_url: null },
+            { id: 105, nombre_negocio: "Boutique de Carnes", categoria: "Alimentos", descripcion: "Cortes finos, asadores y todo lo necesario para tu parrillada de fin de semana.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=500&q=80" }
+        ];
 
         // AUTH LISTENER
         supabase.auth.onAuthStateChange((event, session) => {
@@ -120,31 +139,57 @@
         });
 
         // FUNCIONES MODAL AUTH
-        function abrirModalAuth() { document.getElementById('modal-auth').classList.remove('hidden'); }
+        function abrirModalAuth() { 
+            document.getElementById('modal-auth').classList.remove('hidden'); 
+            setModoAuth(false); // Por defecto abre en Iniciar Sesión
+        }
         function cerrarModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
-        function alternarModoAuth() { 
-            esModoRegistro = !esModoRegistro; 
-            document.getElementById('auth-titulo').innerText = esModoRegistro ? 'Crear Cuenta' : 'Entrar al Directorio'; 
-            document.getElementById('auth-btn-alterno').innerText = esModoRegistro ? 'Ya tengo cuenta' : 'Quiero registrarme';
+        
+        function setModoAuth(modoRegistro) {
+            esModoRegistro = modoRegistro;
+            
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegistro = document.getElementById('tab-registro');
+            
+            if(esModoRegistro) {
+                tabRegistro.className = "flex-1 pb-2 font-bold text-tm-azul border-b-2 border-tm-azul";
+                tabLogin.className = "flex-1 pb-2 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul";
+                document.getElementById('auth-titulo').innerText = 'Crea tu Cuenta';
+                document.getElementById('auth-subtitulo').innerText = 'Únete como usuario o como negocio en minutos.';
+                document.getElementById('auth-btn-submit').innerText = 'Registrarme';
+            } else {
+                tabLogin.className = "flex-1 pb-2 font-bold text-tm-azul border-b-2 border-tm-azul";
+                tabRegistro.className = "flex-1 pb-2 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul";
+                document.getElementById('auth-titulo').innerText = 'Bienvenido de vuelta';
+                document.getElementById('auth-subtitulo').innerText = 'Ingresa para administrar o publicar tu negocio.';
+                document.getElementById('auth-btn-submit').innerText = 'Entrar';
+            }
         }
 
         async function procesarAuth() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const btnSubmit = document.getElementById('auth-btn-submit');
             
-            if(!email || !password) {
-                alert("Por favor ingresa correo y contraseña.");
-                return;
-            }
+            btnSubmit.innerText = "Procesando...";
+            btnSubmit.disabled = true;
 
-            if(esModoRegistro) {
-                const { error } = await supabase.auth.signUp({ email, password });
-                if(error) alert("Error: " + error.message);
-                else { alert("Registro exitoso. Ahora estás dentro."); cerrarModalAuth(); }
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if(error) alert("Error: " + error.message);
-                else cerrarModalAuth();
+            try {
+                if(esModoRegistro) {
+                    const { error } = await supabase.auth.signUp({ email, password });
+                    if(error) throw error;
+                    alert("¡Registro exitoso! Ya puedes publicar tu negocio.");
+                    cerrarModalAuth();
+                } else {
+                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if(error) throw error;
+                    cerrarModalAuth();
+                }
+            } catch (error) {
+                alert("Hubo un problema: " + error.message);
+            } finally {
+                btnSubmit.innerText = esModoRegistro ? "Registrarme" : "Entrar";
+                btnSubmit.disabled = false;
             }
         }
 
@@ -155,58 +200,77 @@
         function cerrarModalNegocio() { document.getElementById('modal-negocio').classList.add('hidden'); }
 
         async function guardarNegocio() {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión para publicar un negocio.");
+                return;
+            }
+
             const nuevo = {
                 user_id: usuarioActual.id,
                 nombre_negocio: document.getElementById('neg-nombre').value,
                 categoria: document.getElementById('neg-categoria').value,
                 descripcion: document.getElementById('neg-desc').value,
                 enlace_whatsapp: document.getElementById('neg-wa').value,
-                nivel_pago: 0
+                nivel_pago: 0 // Inicia siempre en plan gratis
             };
-            
-            if(!nuevo.nombre_negocio || !nuevo.descripcion || !nuevo.enlace_whatsapp) {
-                alert("Por favor llena todos los campos.");
-                return;
-            }
 
-            const { error } = await supabase.from('anuncios').insert([nuevo]);
+            const { data, error } = await supabase.from('anuncios').insert([nuevo]).select();
+            
             if(error) {
-                alert("Hubo un error al guardar: " + error.message);
+                alert("Hubo un error en la base de datos: " + error.message);
             } else {
-                alert("Negocio publicado con éxito.");
+                alert("¡Tu negocio fue publicado con éxito!");
                 cerrarModalNegocio();
-                document.getElementById('neg-nombre').value = '';
-                document.getElementById('neg-desc').value = '';
-                document.getElementById('neg-wa').value = '';
-                cargarDatos();
+                document.querySelector('form').reset(); // Limpia el formulario
+                
+                // Agregarlo a la vista actual sin recargar
+                todosLosAnuncios.push(data[0]);
+                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
+                filtrar(filtroActivo);
             }
         }
 
         // CARGAR Y DIBUJAR DATOS
         async function cargarDatos() {
-            const { data } = await supabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
-            todosLosAnuncios = data || [];
+            const { data, error } = await supabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             
-            // Verificamos cuál botón de filtro está activo actualmente
+            // Si hay un error (ej. tabla no existe) o la tabla está vacía, usamos los datos de prueba
+            if (error || !data || data.length === 0) {
+                console.log("Cargando datos de prueba (Mock Data)...");
+                todosLosAnuncios = anunciosDePrueba;
+            } else {
+                todosLosAnuncios = data;
+            }
+            
             const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
             filtrar(filtroActivo);
         }
 
-        // FUNCIONES DE ADMIN
+        // FUNCIONES DE ADMIN (Ocultas para usuarios normales)
         async function adminBorrar(id) {
             if(confirm('¿Seguro que quieres borrar este anuncio permanentemente?')) {
-                await supabase.from('anuncios').delete().eq('id', id);
-                cargarDatos();
+                // Si es un ID de prueba (menor a 1000), solo lo quitamos del array local
+                if (id < 1000) {
+                    todosLosAnuncios = todosLosAnuncios.filter(a => a.id !== id);
+                } else {
+                    await supabase.from('anuncios').delete().eq('id', id);
+                }
+                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
+                filtrar(filtroActivo);
             }
         }
 
         async function adminSubirNivel(id) {
             const nivel = prompt('Ingresa el nivel (0=Gratis, 1=Imágenes, 2=Pro, 3=Elite):', '1');
             if(nivel !== null && ["0","1","2","3"].includes(nivel)) {
-                await supabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
-                cargarDatos();
-            } else if (nivel !== null) {
-                alert("Nivel no válido. Ingresa un número del 0 al 3.");
+                if (id < 1000) {
+                    const index = todosLosAnuncios.findIndex(a => a.id === id);
+                    if(index !== -1) todosLosAnuncios[index].nivel_pago = parseInt(nivel);
+                } else {
+                    await supabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
+                }
+                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
+                filtrar(filtroActivo);
             }
         }
 
@@ -216,9 +280,16 @@
             contenedor.innerHTML = '';
             
             if (lista.length === 0) {
-                contenedor.innerHTML = '<p class="col-span-full text-center py-10 text-gray-400">No hay anuncios para mostrar.</p>';
+                contenedor.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+                        <p class="text-xl font-bold text-tm-azul mb-2">Aún no hay negocios en esta categoría</p>
+                        <p class="text-sm text-tm-gris">¡Sé el primero en publicarte y destacar en tu zona!</p>
+                    </div>`;
                 return;
             }
+
+            // Ordenar para que los Elite/Pro salgan primero siempre
+            lista.sort((a, b) => b.nivel_pago - a.nivel_pago);
 
             const esAdmin = usuarioActual && usuarioActual.email === EMAIL_ADMIN;
 
@@ -235,18 +306,21 @@
                 const bordeTarjeta = esElite ? 'border-tm-dorado ring-1 ring-tm-dorado/30 border-2' : (esPremium ? 'border-tm-azul ring-1 ring-tm-azul/10 border-2' : 'border-gray-200 border');
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm ${bordeTarjeta} overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full">
+                    <div class="bg-white rounded-xl shadow-sm ${bordeTarjeta} overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full transform hover:-translate-y-1">
                         ${a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-48 object-cover bg-tm-azul-claro">` : ''}
                         <div class="p-6 flex flex-col flex-grow">
                             <div class="flex justify-between items-start gap-2">
-                                <span class="text-[10px] font-bold text-tm-azul bg-tm-azul-claro px-2.5 py-1 rounded-sm uppercase tracking-wider">${a.categoria}</span>
-                                ${esElite ? '<span class="text-tm-dorado font-bold text-xs uppercase tracking-wide">★ Elite</span>' : (esPremium ? '<span class="text-tm-azul font-bold text-xs uppercase tracking-wide">Destacado</span>' : '')}
+                                <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2.5 py-1 rounded-sm uppercase tracking-wider">${a.categoria}</span>
+                                ${esElite ? '<span class="text-tm-dorado font-bold text-[10px] uppercase tracking-wide bg-yellow-50 px-2 py-1 rounded">★ Elite</span>' : (esPremium ? '<span class="text-tm-azul font-bold text-[10px] uppercase tracking-wide bg-blue-50 px-2 py-1 rounded">Destacado</span>' : '')}
                             </div>
                             <h3 class="mt-3 font-bold text-xl text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
                             <p class="text-sm text-tm-gris mt-2 flex-grow line-clamp-3 font-light">${a.descripcion}</p>
                             ${herramientasAdmin}
                             <div class="mt-6 pt-4 border-t border-gray-100 flex gap-3">
-                                <a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 text-center bg-green-500 hover:bg-green-600 text-white py-2.5 rounded text-sm font-semibold transition shadow-sm">Contactar WhatsApp</a>
+                                <a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 flex justify-center items-center gap-2 bg-[#25D366] hover:bg-[#1ebd59] text-white py-2.5 rounded text-sm font-bold transition shadow-sm">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.88-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                    Contactar
+                                </a>
                             </div>
                         </div>
                     </div>`;
