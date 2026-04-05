@@ -3,124 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repartidores - Vive Tres Marías</title>
+    <title>Registro Repartidores - Vive Tres Marías</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37' }
+                }
+            }
+        }
     </script>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border-t-4 border-tm-dorado">
-        <div class="bg-tm-azul p-6 text-center">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border-t-4 border-tm-dorado">
+        <div class="bg-tm-azul p-6 text-center text-white">
             <span class="text-5xl">🛵</span>
-            <h1 class="text-white text-2xl font-black mt-2">App Repartidores</h1>
-            <p class="text-blue-200 text-sm">Gana dinero entregando en Tres Marías</p>
+            <h1 id="titulo-principal" class="text-2xl font-black mt-2">App Repartidores</h1>
+            <p id="subtitulo" class="text-blue-200 text-sm">Gana dinero entregando en Tres Marías</p>
         </div>
 
-        <div class="p-6">
-            <form id="form-login" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Correo Electrónico</label>
-                    <input type="email" id="log-email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Contraseña</label>
-                    <input type="password" id="log-pass" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
-                </div>
-                <button type="submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow-md">Iniciar Sesión</button>
-                <p class="text-center text-sm text-gray-500 mt-4">¿No tienes cuenta? <button type="button" onclick="toggleForm()" class="text-tm-azul font-bold hover:underline">Regístrate</button></p>
-            </form>
+        <div class="p-8">
+            <div id="auth-msg" class="hidden w-full p-3 rounded-lg mb-6 text-sm font-bold text-center"></div>
 
-            <form id="form-registro" class="space-y-4 hidden">
+            <form id="form-repartidor" class="space-y-4">
+                
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Nombre Completo</label>
-                    <input type="text" id="reg-nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre Completo</label>
+                    <input type="text" id="reg-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
-                        <input type="tel" id="reg-telefono" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label>
+                        <input type="tel" id="reg-telefono" placeholder="4431234567" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Vehículo</label>
-                        <select id="reg-vehiculo" class="w-full px-4 py-2 border rounded-lg outline-none">
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo</label>
+                        <select id="reg-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none cursor-pointer">
                             <option value="Moto">Motocicleta</option>
                             <option value="Bici">Bicicleta</option>
                             <option value="Auto">Automóvil</option>
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Correo Electrónico</label>
-                    <input type="email" id="reg-email" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+
+                <hr class="my-4">
+
+                <div id="seccion-auth" class="space-y-4">
+                    <p class="text-xs text-gray-400 font-semibold italic text-center">Crea una cuenta nueva o inicia sesión si ya eres cliente</p>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Correo Electrónico</label>
+                        <input type="email" id="reg-email" class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Contraseña</label>
+                        <input type="password" id="reg-pass" minlength="6" class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Contraseña</label>
-                    <input type="password" id="reg-pass" class="w-full px-4 py-2 border rounded-lg outline-none" required minlength="6">
-                </div>
-                <button type="submit" class="w-full bg-tm-azul hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition shadow-md">Crear Cuenta</button>
-                <p class="text-center text-sm text-gray-500 mt-4">¿Ya tienes cuenta? <button type="button" onclick="toggleForm()" class="text-tm-dorado font-bold hover:underline">Inicia Sesión</button></p>
+
+                <button type="submit" id="btn-submit" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-4 rounded-xl font-bold transition shadow-lg mt-4">
+                    Registrarme como Repartidor
+                </button>
+
+                <p id="link-login" class="text-center text-sm text-gray-500 mt-4">
+                    ¿Ya tienes cuenta de cliente? <a href="login.html" class="text-tm-dorado font-bold hover:underline">Inicia sesión primero</a>
+                </p>
             </form>
         </div>
     </div>
 
     <script>
-        // Inicialización de Supabase con URL deducida y tu Anon Key
-        const clienteSupabase = window.supabase.createClient(
-            'https://vlnpefgqodnxcqeztcnh.supabase.co', 
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'
-        );
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function toggleForm() {
-            document.getElementById('form-login').classList.toggle('hidden');
-            document.getElementById('form-registro').classList.toggle('hidden');
+        // Referencias de UI
+        const authMsg = document.getElementById('auth-msg');
+        const seccionAuth = document.getElementById('seccion-auth');
+        const btnSubmit = document.getElementById('btn-submit');
+        const tituloPrincipal = document.getElementById('titulo-principal');
+        const subtitulo = document.getElementById('subtitulo');
+        const linkLogin = document.getElementById('link-login');
+
+        function mostrarMensaje(texto, esError) {
+            authMsg.innerText = texto;
+            authMsg.className = `w-full p-3 rounded-lg mb-6 text-sm font-bold text-center ${esError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            authMsg.classList.remove('hidden');
         }
 
-        // LOGIN
-        document.getElementById('form-login').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('log-email').value;
-            const pass = document.getElementById('log-pass').value;
+        // 1. VERIFICAR SI EL USUARIO YA ESTÁ LOGUEADO (Como cliente)
+        async function verificarEstadoSesion() {
+            const { data: { session } } = await clienteSupabase.auth.getSession();
             
-            const { data, error } = await clienteSupabase.auth.signInWithPassword({ email, password: pass });
-            if (error) return alert("Error: " + error.message);
-            window.location.href = 'panel-repartidor.html'; // Redirigir al panel
-        });
+            if (session) {
+                // Adaptar formulario para usuario existente
+                seccionAuth.classList.add('hidden');
+                linkLogin.classList.add('hidden');
+                tituloPrincipal.innerText = "Activar Perfil de Reparto";
+                subtitulo.innerText = "Completa los datos para tu cuenta actual";
+                btnSubmit.innerText = "Confirmar y Activar Perfil";
+                
+                // Intentar pre-cargar el nombre si existe en metadata
+                if (session.user.user_metadata?.nombre_completo) {
+                    document.getElementById('reg-nombre').value = session.user.user_metadata.nombre_completo;
+                }
+            }
+        }
+        verificarEstadoSesion();
 
-        // REGISTRO
-        document.getElementById('form-registro').addEventListener('submit', async (e) => {
+        // 2. PROCESAR EL FORMULARIO
+        document.getElementById('form-repartidor').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Procesando...";
+            authMsg.classList.add('hidden');
+
             const nombre = document.getElementById('reg-nombre').value;
             const telefono = document.getElementById('reg-telefono').value;
             const vehiculo = document.getElementById('reg-vehiculo').value;
 
-            // 1. Crear usuario en Auth
-            const { data, error } = await clienteSupabase.auth.signUp({ email, password: pass });
-            if (error) return alert("Error al registrar: " + error.message);
+            try {
+                let userId;
+                const { data: { session } } = await clienteSupabase.auth.getSession();
 
-            // 2. Insertar en tabla repartidores
-            if (data.user) {
-                const { error: dbError } = await clienteSupabase.from('repartidores').insert([{
-                    id: data.user.id,
-                    nombre,
-                    telefono,
-                    vehiculo
-                }]);
-                if (dbError) return alert("Error guardando perfil: " + dbError.message);
-                
-                alert("Registro exitoso. Iniciando sesión...");
-                window.location.href = 'panel-repartidor.html';
+                // CASO A: El usuario no ha iniciado sesión (Nueva cuenta)
+                if (!session) {
+                    const email = document.getElementById('reg-email').value;
+                    const pass = document.getElementById('reg-pass').value;
+
+                    if (!email || !pass) throw new Error("Debes ingresar correo y contraseña");
+
+                    const { data: authData, error: authError } = await clienteSupabase.auth.signUp({
+                        email,
+                        password: pass,
+                        options: { data: { nombre_completo: nombre } }
+                    });
+
+                    if (authError) throw authError;
+                    userId = authData.user.id;
+                } else {
+                    // CASO B: El usuario ya está logueado (Usamos su ID actual)
+                    userId = session.user.id;
+                }
+
+                // 3. INSERTAR DATOS EN LA TABLA REPARTIDORES
+                const { error: dbError } = await clienteSupabase
+                    .from('repartidores')
+                    .insert([{
+                        id: userId,
+                        nombre: nombre,
+                        telefono: telefono,
+                        vehiculo: vehiculo
+                    }]);
+
+                if (dbError) {
+                    // Manejar si el usuario ya es repartidor (ID duplicado)
+                    if (dbError.code === "23505") throw new Error("Ya estás registrado como repartidor.");
+                    throw dbError;
+                }
+
+                mostrarMensaje("¡Registro exitoso! Redirigiendo...", false);
+                setTimeout(() => window.location.href = 'panel-repartidor.html', 2000);
+
+            } catch (err) {
+                mostrarMensaje(err.message, true);
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = session ? "Confirmar y Activar Perfil" : "Registrarme como Repartidor";
             }
-        });
-
-        // Check auth status
-        clienteSupabase.auth.onAuthStateChange((event, session) => {
-            if (session) window.location.href = 'panel-repartidor.html';
         });
     </script>
 </body>
