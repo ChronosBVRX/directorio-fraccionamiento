@@ -89,9 +89,14 @@
             
             usuarioId = session.user.id;
             
-            // Cargar nombre en el header
+            // Cargar nombre en el header (con validación por si está vacío en la BD)
             const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).single();
-            if(perfil) document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
+            
+            if (perfil && perfil.nombre) {
+                document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
+            } else {
+                document.getElementById('nombre-repartidor').innerText = 'Hola, Repartidor';
+            }
 
             // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Recuperación de sesión)
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
