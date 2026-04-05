@@ -3,130 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel - Repartidor</title>
+    <title>Panel Repartidor - Vive Tres Marías</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
     </script>
 </head>
 <body class="bg-gray-50 h-screen flex flex-col font-sans">
 
-    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md">
-        <h1 class="font-black text-lg">App Repartidor</h1>
+    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md z-10 relative">
+        <div>
+            <h1 class="font-black text-lg leading-tight">App Repartidor</h1>
+            <p id="nombre-repartidor" class="text-xs text-blue-200">Cargando...</p>
+        </div>
         <div class="flex items-center gap-3">
-            <span id="estado-texto" class="font-bold text-sm text-red-300">Desconectado</span>
+            <span id="estado-texto" class="font-bold text-sm text-red-300 transition-colors">Desconectado</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-estado" class="sr-only peer" onchange="cambiarEstado()">
                 <div class="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
             </label>
-            <button onclick="cerrarSesion()" class="text-xs bg-red-500 px-2 py-1 rounded">Salir</button>
+            <button onclick="cerrarSesion()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded font-bold transition">Salir</button>
         </div>
     </header>
 
-    <main class="flex-grow p-4 overflow-y-auto">
-        <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm">Pedidos Pendientes</h2>
-        <div id="contenedor-pedidos" class="space-y-4">
+    <main class="flex-grow p-4 overflow-y-auto w-full max-w-md mx-auto">
+        
+        <div id="vista-pendientes" class="block">
+            <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm flex items-center justify-between">
+                <span>Pedidos Disponibles</span>
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tm-dorado opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-tm-dorado"></span>
+                </span>
+            </h2>
+            <div id="contenedor-pedidos" class="space-y-4">
+                <p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir pedidos...</p>
             </div>
+        </div>
+
+        <div id="vista-activo" class="hidden h-full flex flex-col">
+            <div class="bg-white rounded-2xl shadow-xl border-t-4 border-tm-azul overflow-hidden flex-grow flex flex-col">
+                <div class="p-6 bg-blue-50 border-b text-center">
+                    <span class="bg-tm-azul text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse">En Tránsito</span>
+                    <h2 class="text-2xl font-black text-tm-azul mt-3">Detalle del Pedido</h2>
+                </div>
+                
+                <div class="p-6 space-y-4 flex-grow" id="info-pedido-activo">
+                    </div>
+
+                <div class="p-4 bg-gray-50 grid gap-3">
+                    <button onclick="abrirRutaMaps()" class="w-full bg-blue-100 text-tm-azul font-bold py-3 rounded-lg flex justify-center items-center gap-2 hover:bg-blue-200 transition">
+                        📍 Navegar con Google Maps
+                    </button>
+                    <button onclick="finalizarPedido()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-lg shadow-md transition text-lg">
+                        ✅ Marcar como Entregado
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        const supabase = window.supabase.createClient('TU_URL', 'TU_KEY'); // <-- INSERTA TUS CREDENCIALES
+        // Configuración de Supabase (Ya con tus credenciales)
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Variables de Estado
         let usuarioId = null;
         let watchId = null;
+        let ultimaVezEnviado = 0;
+        let pedidoActivo = null; // Guardará todo el objeto del pedido si está en curso
 
+        // Coordenadas aprox del centro de Tres Marías y Radio de 5km
+        const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
+        const RADIO_PERMITIDO_METROS = 5000; 
+
+        // ================= INICIALIZACIÓN =================
         async function init() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
+            
             usuarioId = session.user.id;
             
-            cargarPedidosPendientes();
-            suscribirseAPedidos();
-        }
+            // Cargar nombre en el header
+            const { data: perfil } = await supabase.from('repartidores').select('nombre').eq('id', usuarioId).single();
+            if(perfil) document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
 
-        // 1. Manejar Estado (Activo/Inactivo) y GPS
-        async function cambiarEstado() {
-            const activo = document.getElementById('toggle-estado').checked;
-            document.getElementById('estado-texto').innerText = activo ? 'Conectado' : 'Desconectado';
-            document.getElementById('estado-texto').className = activo ? 'font-bold text-sm text-green-300' : 'font-bold text-sm text-red-300';
+            // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Recuperación de sesión)
+            const { data: pedidoPendiente } = await supabase.from('pedidos')
+                .select('*')
+                .eq('repartidor_id', usuarioId)
+                .eq('estado', 'aceptado')
+                .single();
 
-            await supabase.from('repartidores').update({ esta_activo: activo }).eq('id', usuarioId);
-
-            if (activo) {
-                if (navigator.geolocation) {
-                    watchId = navigator.geolocation.watchPosition(async (pos) => {
-                        const { latitude, longitude } = pos.coords;
-                        await supabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
-                    }, (error) => console.error(error), { enableHighAccuracy: true });
-                }
+            if (pedidoPendiente) {
+                // Si recargó la página y estaba entregando, restauramos la pantalla
+                pedidoActivo = pedidoPendiente;
+                document.getElementById('toggle-estado').checked = true; // Forzar switch a prendido
+                document.getElementById('estado-texto').innerText = 'En Ruta';
+                document.getElementById('estado-texto').className = 'font-bold text-sm text-tm-dorado';
+                iniciarRastreoInteligente();
+                mostrarPantallaActivo();
             } else {
-                if (watchId) navigator.geolocation.clearWatch(watchId);
+                cargarPedidosDisponibles();
+                suscribirseAPedidos();
             }
         }
 
-        // 2. Cargar Pedidos que no han sido asignados
-        async function cargarPedidosPendientes() {
-            const { data, error } = await supabase.from('pedidos').select('*').eq('estado', 'pendiente');
-            if(data) renderizarPedidos(data);
+        // ================= UTILIDADES =================
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; const rad = Math.PI / 180;
+            const a = Math.sin((lat2 - lat1)*rad/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin((lon2 - lon1)*rad/2)**2;
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
         }
 
-        // 3. Tiempo Real: Escuchar nuevos pedidos al instante
-        function suscribirseAPedidos() {
-            supabase.channel('pedidos-nuevos')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, payload => {
-                // Agregar el nuevo pedido a la UI
-                cargarPedidosPendientes(); 
-                // Aquí podrías agregar un sonido de notificación
-            })
-            .subscribe();
+        // ================= ESTADO Y GEOLOCALIZACIÓN =================
+        async function cambiarEstado() {
+            const toggle = document.getElementById('toggle-estado');
+            const textoEstado = document.getElementById('estado-texto');
+            
+            if (toggle.checked) {
+                textoEstado.innerText = 'Buscando GPS...';
+                textoEstado.className = 'font-bold text-sm text-yellow-500';
+                toggle.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
+
+                    if (distancia > RADIO_PERMITIDO_METROS) {
+                        alert("Estás fuera de la zona de Tres Marías. Acércate para trabajar.");
+                        forzarDesconexion();
+                        return;
+                    }
+
+                    await supabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
+                    textoEstado.innerText = 'Conectado';
+                    textoEstado.className = 'font-bold text-sm text-green-400';
+                    toggle.disabled = false;
+                    
+                    cargarPedidosDisponibles(); // Cargar al conectarse
+                    iniciarRastreoInteligente();
+
+                }, (error) => {
+                    alert("GPS obligatorio. Activa tu ubicación y dale permisos al navegador.");
+                    forzarDesconexion();
+                }, { enableHighAccuracy: true });
+
+            } else {
+                if(pedidoActivo) {
+                    alert("No puedes desconectarte mientras tienes un pedido en curso.");
+                    toggle.checked = true;
+                    return;
+                }
+                forzarDesconexion(true);
+            }
         }
 
-        function renderizarPedidos(pedidos) {
+        function forzarDesconexion(esManual = false) {
+            document.getElementById('toggle-estado').checked = false;
+            document.getElementById('toggle-estado').disabled = false;
+            document.getElementById('estado-texto').innerText = 'Desconectado';
+            document.getElementById('estado-texto').className = 'font-bold text-sm text-red-300';
+            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir pedidos...</p>';
+            
+            if(watchId) navigator.geolocation.clearWatch(watchId);
+            if(usuarioId) supabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+        }
+
+        function iniciarRastreoInteligente() {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+
+            watchId = navigator.geolocation.watchPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                
+                if (!pedidoActivo) {
+                    // Solo validar geocerca
+                    if (calcularDistancia(latitude, longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng) > RADIO_PERMITIDO_METROS) {
+                        forzarDesconexion();
+                        alert("Desconectado por salir de la zona.");
+                    }
+                    return;
+                }
+
+                // SI HAY PEDIDO ACTIVO: Enviar a Supabase cada 10 segundos
+                const ahora = Date.now();
+                if (ahora - ultimaVezEnviado > 10000) {
+                    await supabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
+                    ultimaVezEnviado = ahora;
+                }
+            }, console.error, { enableHighAccuracy: true });
+        }
+
+        // ================= LOGICA DE PEDIDOS =================
+        async function cargarPedidosDisponibles() {
+            if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
+
+            const { data } = await supabase.from('pedidos').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
             const contenedor = document.getElementById('contenedor-pedidos');
-            if(pedidos.length === 0) {
+            
+            if(!data || data.length === 0) {
                 contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">Buscando pedidos cercanos...</p>';
                 return;
             }
             
-            contenedor.innerHTML = pedidos.map(p => `
-                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-tm-dorado">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-black text-lg text-tm-azul-oscuro">Nueva Orden</p>
-                            <p class="text-sm text-gray-600">📍 ${p.cliente_direccion}</p>
-                            <p class="text-sm text-gray-600">👤 ${p.cliente_nombre}</p>
-                        </div>
-                        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">Pendiente</span>
+            contenedor.innerHTML = data.map(p => `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-tm-dorado transition hover:shadow-md">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">Pendiente</span>
+                        <span class="text-gray-400 text-xs font-mono">ID: ${p.id.substring(0,6)}</span>
                     </div>
-                    <div class="mt-4 border-t pt-3 flex justify-between items-center">
-                        <span class="font-bold text-xl">$${p.total}</span>
-                        <button onclick="aceptarPedido('${p.id}')" class="bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition">Aceptar Pedido</button>
+                    <p class="font-bold text-gray-800 text-lg mb-1">👤 ${p.cliente_nombre}</p>
+                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.cliente_direccion}</p>
+                    
+                    <div class="border-t border-dashed pt-3 flex justify-between items-center">
+                        <p class="text-xs text-gray-400">Total a cobrar:</p>
+                        <span class="font-black text-xl text-tm-azul">$${p.total}</span>
                     </div>
+                    <button onclick="aceptarPedido('${p.id}')" class="mt-4 w-full bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow">Aceptar Viaje</button>
                 </div>
             `).join('');
         }
 
-        async function aceptarPedido(pedidoId) {
-            const { error } = await supabase
-                .from('pedidos')
+        function suscribirseAPedidos() {
+            supabase.channel('pedidos-nuevos')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
+                    if(!pedidoActivo) cargarPedidosDisponibles(); 
+                }).subscribe();
+        }
+
+        async function aceptarPedido(id_pedido) {
+            const { data: pedidoComprobacion } = await supabase.from('pedidos').select('estado').eq('id', id_pedido).single();
+            if(pedidoComprobacion.estado !== 'pendiente') return alert("Alguien más ya tomó este pedido.");
+
+            const { data: pedido, error } = await supabase.from('pedidos')
                 .update({ estado: 'aceptado', repartidor_id: usuarioId })
-                .eq('id', pedidoId);
+                .eq('id', id_pedido)
+                .select().single();
             
-            if(error) alert("Este pedido ya fue tomado por alguien más.");
-            else {
-                alert("¡Pedido Aceptado! Dirígete al local.");
-                cargarPedidosPendientes(); // Recargar para quitarlo de pendientes
-            }
+            if(error) return alert("Error al aceptar.");
+            
+            pedidoActivo = pedido;
+            document.getElementById('estado-texto').innerText = 'En Ruta';
+            document.getElementById('estado-texto').className = 'font-bold text-sm text-tm-dorado';
+            
+            mostrarPantallaActivo();
+        }
+
+        // ================= INTERFAZ PEDIDO ACTIVO =================
+        function mostrarPantallaActivo() {
+            document.getElementById('vista-pendientes').classList.add('hidden');
+            document.getElementById('vista-activo').classList.remove('hidden');
+
+            document.getElementById('info-pedido-activo').innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg border">
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Cliente</p>
+                    <p class="font-bold text-lg text-gray-800">${pedidoActivo.cliente_nombre}</p>
+                    <a href="tel:${pedidoActivo.cliente_telefono || ''}" class="text-tm-azul text-sm font-bold mt-1 inline-block hover:underline">📞 Llamar al cliente</a>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border">
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Dirección de Entrega</p>
+                    <p class="text-gray-700">${pedidoActivo.cliente_direccion}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border flex justify-between items-center">
+                    <p class="text-sm text-gray-500 font-bold uppercase">Monto Exacto:</p>
+                    <p class="text-3xl font-black text-green-600">$${pedidoActivo.total}</p>
+                </div>
+            `;
+        }
+
+        function abrirRutaMaps() {
+            // Abre Google Maps buscando la dirección (Codificada para URL)
+            const direccionCodificada = encodeURIComponent(`${pedidoActivo.cliente_direccion}, Tres Marias, Morelia`);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`, '_blank');
+        }
+
+        async function finalizarPedido() {
+            if(!confirm("¿Confirmas que ya entregaste el pedido y cobraste?")) return;
+
+            await supabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
+            
+            alert("¡Excelente trabajo! Pedido finalizado.");
+            pedidoActivo = null;
+            document.getElementById('estado-texto').innerText = 'Conectado';
+            document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
+            
+            // Regresamos a la vista de pendientes
+            document.getElementById('vista-activo').classList.add('hidden');
+            document.getElementById('vista-pendientes').classList.remove('hidden');
+            cargarPedidosDisponibles();
         }
 
         async function cerrarSesion() {
-            if(watchId) navigator.geolocation.clearWatch(watchId);
-            await supabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            if(pedidoActivo) return alert("No puedes cerrar sesión a mitad de un pedido.");
+            forzarDesconexion(true);
             await supabase.auth.signOut();
             window.location.reload();
         }
 
+        // Arrancar
         init();
     </script>
 </body>
