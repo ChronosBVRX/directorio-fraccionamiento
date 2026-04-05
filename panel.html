@@ -11,6 +11,10 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
         tailwind.config = {
           theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
@@ -22,14 +26,50 @@
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
         <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         <h2 class="text-xl sm:text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
-        <p class="text-sm sm:text-base text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tus negocios.</p>
+        <p class="text-sm sm:text-base text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tu perfil y negocios.</p>
         <a href="login.html" target="_parent" class="bg-tm-azul text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
     </div>
 
     <div id="si-auth" class="hidden max-w-6xl mx-auto">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+        
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8 shadow-sm mb-10 sm:mb-12">
+            <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
+            <p class="text-xs sm:text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y ubica tu domicilio para recibir pedidos o servicios.</p>
+            
+            <form onsubmit="event.preventDefault(); guardarPerfil();" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
+                        <input type="text" id="perfil-nombre" required placeholder="Tu nombre" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Teléfono</label>
+                        <input type="tel" id="perfil-telefono" required placeholder="A 10 dígitos" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Dirección Completa</label>
+                        <textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto, Referencias..." class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="perfil-lat">
+                    <input type="hidden" id="perfil-lng">
+                    
+                    <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg text-sm sm:text-base font-bold transition shadow-md">
+                        Guardar Perfil
+                    </button>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio con el pin 📍</label>
+                    <div id="mapa-perfil" class="w-full h-64 sm:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div>
+                    <p class="text-[10px] sm:text-xs text-gray-400 mt-2 text-center">Puedes arrastrar el pin o hacer clic en el mapa.</p>
+                </div>
+            </form>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h1>
+                <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h2>
                 <p class="text-xs sm:text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
             </div>
             <button onclick="abrirModalNegocio()" class="w-full sm:w-auto bg-tm-azul text-white px-4 sm:px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro text-sm sm:text-base font-bold transition">+ Nuevo Negocio (Gratis)</button>
@@ -46,18 +86,15 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0">
-                
                 <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col">
                     <h3 class="font-bold text-base sm:text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
                     <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">Gratis</p>
-                    
                     <div class="mt-4 mb-5 bg-white border border-gray-200 rounded-lg p-3 shadow-sm pointer-events-none select-none">
                         <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
                         <div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div>
                         <div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div>
                         <div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">Contactar</div>
                     </div>
-
                     <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Para empezar a tener presencia.</p>
                     <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Nombre y descripción</span></li>
@@ -72,7 +109,6 @@
                     <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
                     <h3 class="font-bold text-base sm:text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
                     <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
-                    
                     <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg shadow-sm overflow-hidden pointer-events-none select-none">
                         <div class="w-full h-14 sm:h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
                         <div class="p-3">
@@ -81,7 +117,6 @@
                             <div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Menú</div>
                         </div>
                     </div>
-
                     <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Muestra todo tu catálogo con fotos.</p>
                     <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Básico, más:</span></span></li>
@@ -95,7 +130,6 @@
                     <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[9px] sm:text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
                     <h3 class="font-bold text-base sm:text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
                     <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
-                    
                     <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg shadow-md overflow-hidden pointer-events-none select-none">
                         <div class="w-full h-14 sm:h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
                         <div class="p-3">
@@ -104,7 +138,6 @@
                             <div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div>
                         </div>
                     </div>
-
                     <p class="text-xs sm:text-sm text-gray-500 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
                     <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-800 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Nivel 1, más:</span></span></li>
@@ -126,7 +159,7 @@
         </div>
     </div>
 
-    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
+    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white rounded-2xl p-5 sm:p-8 w-full sm:max-w-lg relative max-h-[90vh] overflow-y-auto">
             <button onclick="cerrarModalNegocio()" class="absolute top-3 right-3 sm:top-4 sm:right-4 text-2xl sm:text-3xl font-bold text-gray-400 hover:text-black leading-none">&times;</button>
             <h2 class="text-xl sm:text-2xl font-black text-tm-azul mb-4 pr-6" id="titulo-modal-negocio">Datos de tu Negocio</h2>
@@ -185,6 +218,8 @@
         const ADMIN_WA = '4430000000'; // PON TU NÚMERO DE TELÉFONO AQUÍ
 
         let usuarioActual = null;
+        let map = null;
+        let marker = null;
 
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
@@ -192,12 +227,116 @@
                 document.getElementById('no-auth').classList.add('hidden');
                 document.getElementById('si-auth').classList.remove('hidden');
                 cargarMisNegocios();
+                cargarPerfil(); // Cargar datos del usuario
             } else {
                 document.getElementById('no-auth').classList.remove('hidden');
                 document.getElementById('si-auth').classList.add('hidden');
             }
         });
 
+        // ----------------------------------------
+        // LÓGICA DEL PERFIL Y MAPA
+        // ----------------------------------------
+        async function cargarPerfil() {
+            const { data, error } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .single();
+            
+            // Coordenadas base por defecto
+            let lat = 19.7028;
+            let lng = -101.1924;
+
+            if (data && !error) {
+                document.getElementById('perfil-nombre').value = data.nombre_completo || '';
+                document.getElementById('perfil-telefono').value = data.telefono || '';
+                document.getElementById('perfil-direccion').value = data.direccion || '';
+                if(data.latitud && data.longitud) {
+                    lat = data.latitud;
+                    lng = data.longitud;
+                }
+            }
+
+            inicializarMapa(lat, lng);
+        }
+
+        function inicializarMapa(lat, lng) {
+            document.getElementById('perfil-lat').value = lat;
+            document.getElementById('perfil-lng').value = lng;
+
+            // setTimeout para evitar bugs de renderizado de Leaflet dentro de contenedores ocultos
+            setTimeout(() => {
+                if (!map) {
+                    map = L.map('mapa-perfil').setView([lat, lng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+
+                    // Evento al arrastrar el pin
+                    marker.on('dragend', function (e) {
+                        const posicion = marker.getLatLng();
+                        document.getElementById('perfil-lat').value = posicion.lat;
+                        document.getElementById('perfil-lng').value = posicion.lng;
+                    });
+
+                    // Evento al dar clic en el mapa
+                    map.on('click', function(e) {
+                        marker.setLatLng(e.latlng);
+                        document.getElementById('perfil-lat').value = e.latlng.lat;
+                        document.getElementById('perfil-lng').value = e.latlng.lng;
+                    });
+                } else {
+                    map.setView([lat, lng], 13);
+                    marker.setLatLng([lat, lng]);
+                    map.invalidateSize(); // Refresca el lienzo
+                }
+            }, 300);
+        }
+
+        async function guardarPerfil() {
+            const btn = document.getElementById('btn-guardar-perfil');
+            const textoOriginal = btn.innerText;
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+
+            const payload = {
+                user_id: usuarioActual.id,
+                nombre_completo: document.getElementById('perfil-nombre').value,
+                telefono: document.getElementById('perfil-telefono').value,
+                direccion: document.getElementById('perfil-direccion').value,
+                latitud: document.getElementById('perfil-lat').value,
+                longitud: document.getElementById('perfil-lng').value
+            };
+
+            // Intentamos actualizar primero (Upsert es ideal, pero simulamos comprobando)
+            const { data: existe } = await clienteSupabase.from('perfiles').select('id').eq('user_id', usuarioActual.id).single();
+
+            let error = null;
+            if (existe) {
+                const res = await clienteSupabase.from('perfiles').update(payload).eq('user_id', usuarioActual.id);
+                error = res.error;
+            } else {
+                const res = await clienteSupabase.from('perfiles').insert([payload]);
+                error = res.error;
+            }
+
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+
+            if (error) {
+                alert("Error al guardar perfil: " + error.message);
+            } else {
+                alert("¡Perfil actualizado con éxito! Esta información se usará para tus pedidos.");
+            }
+        }
+
+
+        // ----------------------------------------
+        // LÓGICA DE NEGOCIOS (INACTIVA)
+        // ----------------------------------------
         async function cargarMisNegocios() {
             const { data, error } = await clienteSupabase
                 .from('anuncios')
@@ -212,7 +351,6 @@
                 return;
             }
 
-            // Clases responsivas aplicadas a las tarjetas generadas
             contenedor.innerHTML = data.map(n => `
                 <div class="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 hover:shadow-md transition">
                     <div class="flex-grow w-full">
