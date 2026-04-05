@@ -37,14 +37,25 @@
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-1 flex items-center justify-between gap-2 sm:gap-4">
-            <a href="#" onclick="mostrarVista('directorio')" class="flex items-center shrink-0">
+            <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0">
                 <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-16 md:h-20 w-auto object-contain">
             </a>
             
-            <div id="nav-botones" class="flex gap-2 items-center">
-                <button onclick="mostrarVista('directorio')" id="btn-inicio" class="hidden text-tm-azul font-bold text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 hover:underline">Inicio</button>
+            <div id="nav-botones" class="flex gap-3 sm:gap-4 items-center">
+                
+                <div id="contenedor-switch" class="hidden items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
+                    <span class="text-xs sm:text-sm font-bold text-tm-azul" id="label-modo-comprar">🛍️ Comprar</span>
+                    
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
+                    </label>
+                    
+                    <span class="text-xs sm:text-sm font-bold text-gray-400" id="label-modo-vender">🏪 Vender</span>
+                </div>
+
                 <a href="login.html" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-xs sm:text-sm transition inline-block text-center">Entrar / Registrarse</a>
-                <button onclick="mostrarVista('panel')" id="btn-panel" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-xs sm:text-sm transition">Mi Panel</button>
+                
                 <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-xs sm:text-sm text-tm-azul transition">Salir</button>
             </div>
         </div>
@@ -136,28 +147,51 @@
         // AUTH LISTENER
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
+            
+            // Ocultar botón de login si hay sesión
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
-            document.getElementById('btn-panel').classList.toggle('hidden', !usuarioActual);
+            
+            // Mostrar el Switch y botón de salir si hay sesión
+            document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
             if(usuarioActual) {
                 cargarDatos(); 
             } else {
-                mostrarVista('directorio');
+                // Si cierra sesión, forzamos la vista del directorio y reiniciamos el switch
+                document.getElementById('toggle-modo').checked = false;
+                cambiarModoPlataforma();
             }
         });
 
-        // NAVEGACIÓN
+        // NUEVA LÓGICA DEL SWITCH DE MODO
+        function cambiarModoPlataforma() {
+            const isVendedor = document.getElementById('toggle-modo').checked;
+            const labelComprar = document.getElementById('label-modo-comprar');
+            const labelVender = document.getElementById('label-modo-vender');
+
+            if(isVendedor) {
+                // Cambiar a modo Vendedor (Panel)
+                mostrarVista('panel');
+                labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
+                labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
+            } else {
+                // Cambiar a modo Comprador (Directorio)
+                mostrarVista('directorio');
+                labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
+                labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
+            }
+        }
+
+        // NAVEGACIÓN INTERNA
         function mostrarVista(vista) {
             if(vista === 'directorio') {
                 document.getElementById('vista-directorio').classList.remove('hidden');
                 document.getElementById('vista-iframe-container').classList.add('hidden');
-                document.getElementById('btn-inicio').classList.add('hidden');
                 cargarDatos();
             } else {
                 document.getElementById('vista-directorio').classList.add('hidden');
                 document.getElementById('vista-iframe-container').classList.remove('hidden');
-                document.getElementById('btn-inicio').classList.remove('hidden');
             }
         }
 
@@ -269,7 +303,6 @@
 
         function cerrarMenu() { 
             document.getElementById('modal-menu').classList.add('hidden'); 
-            // Limpiar formulario al cerrar
             document.getElementById('cliente-nombre').value = '';
             document.getElementById('cliente-telefono').value = '';
             document.getElementById('cliente-direccion').value = '';
@@ -289,7 +322,7 @@
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
         
-        // NUEVA LÓGICA: Procesar pedido a Supabase en lugar de WhatsApp
+        // Procesar pedido a Supabase
         async function procesarPedido() {
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
@@ -326,9 +359,8 @@
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // Insertar en la tabla "pedidos"
             const { data, error } = await clienteSupabase.from('pedidos').insert([{
-                negocio_id: negocioActualPedido.id, // Se requiere que tu tabla de anuncios tenga una columna 'id'
+                negocio_id: negocioActualPedido.id, 
                 cliente_nombre: nombre,
                 cliente_telefono: telefono,
                 cliente_direccion: direccion,
