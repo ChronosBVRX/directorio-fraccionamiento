@@ -89,8 +89,8 @@
             
             usuarioId = session.user.id;
             
-            // Cargar nombre en el header (con validación por si está vacío en la BD)
-            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).single();
+            // Cargar nombre en el header (usamos maybeSingle para no generar errores si no lo encuentra)
+            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).maybeSingle();
             
             if (perfil && perfil.nombre) {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
@@ -98,12 +98,12 @@
                 document.getElementById('nombre-repartidor').innerText = 'Hola, Repartidor';
             }
 
-            // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Recuperación de sesión)
+            // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Usamos maybeSingle para evitar el error 406 en consola)
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*')
                 .eq('repartidor_id', usuarioId)
                 .eq('estado', 'aceptado')
-                .single();
+                .maybeSingle();
 
             if (pedidoPendiente) {
                 // Restauramos la pantalla si tenía un pedido en curso
