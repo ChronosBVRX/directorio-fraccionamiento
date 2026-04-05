@@ -69,7 +69,9 @@
             </div>
 
             <h2 id="auth-titulo" class="text-xl font-black text-tm-azul mb-2 text-center">Bienvenido de vuelta</h2>
-            <p id="auth-subtitulo" class="text-xs text-center text-tm-gris mb-6">Ingresa para administrar o publicar tu negocio.</p>
+            <p id="auth-subtitulo" class="text-xs text-center text-tm-gris mb-4">Ingresa para administrar o publicar tu negocio.</p>
+
+            <div id="auth-msg" class="hidden w-full p-3 rounded mb-4 text-sm font-bold text-center"></div>
 
             <form onsubmit="event.preventDefault(); procesarAuth();">
                 <input type="email" id="auth-email" placeholder="Correo Electrónico" required class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
@@ -83,8 +85,10 @@
         <div class="bg-white rounded-xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
             <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-2xl">&times;</button>
             <h2 class="text-2xl font-black text-tm-azul mb-2">Publica tu Negocio</h2>
-            <p class="text-sm text-tm-gris mb-6">Completa la información para aparecer en el directorio de Tres Marías.</p>
+            <p class="text-sm text-tm-gris mb-4">Completa la información para aparecer en el directorio de Tres Marías.</p>
             
+            <div id="negocio-msg" class="hidden w-full p-3 rounded mb-4 text-sm font-bold text-center"></div>
+
             <form onsubmit="event.preventDefault(); guardarNegocio();">
                 <label class="block text-xs font-bold text-tm-gris uppercase mb-1">Nombre del Negocio *</label>
                 <input type="text" id="neg-nombre" placeholder="Ej. Veterinaria Huellitas" required class="w-full p-3 border rounded mb-3 focus:ring-2 focus:ring-tm-azul outline-none">
@@ -103,19 +107,16 @@
                 <label class="block text-xs font-bold text-tm-gris uppercase mb-1">WhatsApp (Solo números) *</label>
                 <input type="number" id="neg-wa" placeholder="Ej. 4431234567" required class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-tm-azul outline-none">
                 
-                <button type="submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded font-bold transition">Publicar Ahora</button>
+                <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded font-bold transition">Publicar Ahora</button>
             </form>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE
+        // CONFIGURACIÓN DE SUPABASE CON TU CLAVE REAL
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         
-        // ¡IMPORTANTE! PEGA AQUÍ TU LLAVE REAL DE SUPABASE
-        const SUPABASE_KEY = 'TU_LLAVE_AQUI'; 
-        
-        // SOLUCIÓN AL ERROR: Cambiamos el nombre de la variable a "clienteSupabase"
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const EMAIL_ADMIN = 'noirsysan@gmail.com'; 
@@ -133,7 +134,24 @@
             { id: 105, nombre_negocio: "Boutique de Carnes", categoria: "Alimentos", descripcion: "Cortes finos, asadores y todo lo necesario para tu parrillada de fin de semana.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=500&q=80" }
         ];
 
-        // AUTH LISTENER (Usando la nueva variable)
+        // FUNCIONES DE NOTIFICACIÓN EN UI
+        function mostrarMensajeUI(idElemento, mensaje, esError) {
+            const div = document.getElementById(idElemento);
+            div.innerText = mensaje;
+            div.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            
+            if (esError) {
+                div.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                div.classList.add('bg-green-100', 'text-green-700');
+            }
+        }
+
+        function ocultarMensajeUI(idElemento) {
+            document.getElementById(idElemento).classList.add('hidden');
+        }
+
+        // AUTH LISTENER
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
@@ -145,12 +163,19 @@
         // FUNCIONES MODAL AUTH
         function abrirModalAuth() { 
             document.getElementById('modal-auth').classList.remove('hidden'); 
+            ocultarMensajeUI('auth-msg');
             setModoAuth(false);
         }
-        function cerrarModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
+        
+        function cerrarModalAuth() { 
+            document.getElementById('modal-auth').classList.add('hidden'); 
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+        }
         
         function setModoAuth(modoRegistro) {
             esModoRegistro = modoRegistro;
+            ocultarMensajeUI('auth-msg');
             
             const tabLogin = document.getElementById('tab-login');
             const tabRegistro = document.getElementById('tab-registro');
@@ -175,6 +200,7 @@
             const password = document.getElementById('auth-password').value;
             const btnSubmit = document.getElementById('auth-btn-submit');
             
+            ocultarMensajeUI('auth-msg');
             btnSubmit.innerText = "Procesando...";
             btnSubmit.disabled = true;
 
@@ -182,15 +208,21 @@
                 if(esModoRegistro) {
                     const { error } = await clienteSupabase.auth.signUp({ email, password });
                     if(error) throw error;
-                    alert("¡Registro exitoso! Ya puedes publicar tu negocio.");
-                    cerrarModalAuth();
+                    
+                    mostrarMensajeUI('auth-msg', "¡Registro exitoso! Ya puedes publicar tu negocio.", false);
+                    setTimeout(cerrarModalAuth, 2000); 
                 } else {
                     const { error } = await clienteSupabase.auth.signInWithPassword({ email, password });
-                    if(error) throw error;
+                    if(error) {
+                        if(error.message.includes("Invalid login credentials")) {
+                            throw new Error("Correo o contraseña incorrectos.");
+                        }
+                        throw error;
+                    }
                     cerrarModalAuth();
                 }
             } catch (error) {
-                alert("Hubo un problema: " + error.message);
+                mostrarMensajeUI('auth-msg', error.message, true);
             } finally {
                 btnSubmit.innerText = esModoRegistro ? "Registrarme" : "Entrar";
                 btnSubmit.disabled = false;
@@ -200,14 +232,25 @@
         async function cerrarSesion() { await clienteSupabase.auth.signOut(); }
 
         // FUNCIONES MODAL NEGOCIO
-        function abrirModalNegocio() { document.getElementById('modal-negocio').classList.remove('hidden'); }
-        function cerrarModalNegocio() { document.getElementById('modal-negocio').classList.add('hidden'); }
+        function abrirModalNegocio() { 
+            document.getElementById('modal-negocio').classList.remove('hidden'); 
+            ocultarMensajeUI('negocio-msg');
+        }
+        
+        function cerrarModalNegocio() { 
+            document.getElementById('modal-negocio').classList.add('hidden'); 
+        }
 
         async function guardarNegocio() {
             if (!usuarioActual) {
-                alert("Debes iniciar sesión para publicar un negocio.");
+                mostrarMensajeUI('negocio-msg', "Debes iniciar sesión para publicar.", true);
                 return;
             }
+
+            const btnSubmit = document.getElementById('neg-btn-submit');
+            btnSubmit.innerText = "Publicando...";
+            btnSubmit.disabled = true;
+            ocultarMensajeUI('negocio-msg');
 
             const nuevo = {
                 user_id: usuarioActual.id,
@@ -218,18 +261,26 @@
                 nivel_pago: 0 
             };
 
-            const { data, error } = await clienteSupabase.from('anuncios').insert([nuevo]).select();
-            
-            if(error) {
-                alert("Hubo un error en la base de datos: " + error.message);
-            } else {
-                alert("¡Tu negocio fue publicado con éxito!");
-                cerrarModalNegocio();
-                document.querySelector('#modal-negocio form').reset(); 
+            try {
+                const { data, error } = await clienteSupabase.from('anuncios').insert([nuevo]).select();
+                if(error) throw error;
+
+                mostrarMensajeUI('negocio-msg', "¡Tu negocio fue publicado con éxito!", false);
                 
                 todosLosAnuncios.push(data[0]);
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
+
+                setTimeout(() => {
+                    document.querySelector('#modal-negocio form').reset(); 
+                    cerrarModalNegocio();
+                }, 2000);
+
+            } catch (error) {
+                mostrarMensajeUI('negocio-msg', "Error al guardar: " + error.message, true);
+            } finally {
+                btnSubmit.innerText = "Publicar Ahora";
+                btnSubmit.disabled = false;
             }
         }
 
