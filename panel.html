@@ -17,39 +17,39 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 font-sans text-tm-gris p-4 md:p-8">
+<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
 
-    <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden">
-        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
-        <p class="text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tus negocios.</p>
-        <a href="login.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
+    <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
+        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <h2 class="text-xl sm:text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
+        <p class="text-sm sm:text-base text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tus negocios.</p>
+        <a href="login.html" target="_parent" class="bg-tm-azul text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
     </div>
 
     <div id="si-auth" class="hidden max-w-6xl mx-auto">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
             <div>
-                <h1 class="text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h1>
-                <p class="text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
+                <h1 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h1>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
             </div>
-            <button onclick="abrirModalNegocio()" class="bg-tm-azul text-white px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro font-bold transition">+ Nuevo Negocio (Gratis)</button>
+            <button onclick="abrirModalNegocio()" class="w-full sm:w-auto bg-tm-azul text-white px-4 sm:px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro text-sm sm:text-base font-bold transition">+ Nuevo Negocio (Gratis)</button>
         </div>
 
-        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-5 mb-16">
-            <div class="text-center py-10 text-gray-400">Cargando tus negocios...</div>
+        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-4 sm:gap-5 mb-12 sm:mb-16">
+            <div class="text-center py-10 text-gray-400 text-sm sm:text-base">Cargando tus negocios...</div>
         </div>
 
-        <div class="border-t border-gray-200 pt-12 mb-10">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
-                <p class="text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
+        <div class="border-t border-gray-200 pt-8 sm:pt-12 mb-8 sm:mb-10">
+            <div class="text-center mb-8 sm:mb-10 px-2">
+                <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
+                <p class="text-sm sm:text-base text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0">
                 
-                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col">
-                    <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
-                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
+                <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col">
+                    <h3 class="font-bold text-base sm:text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
+                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">Gratis</p>
                     
                     <div class="mt-4 mb-5 bg-white border border-gray-200 rounded-lg p-3 shadow-sm pointer-events-none select-none">
                         <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
@@ -58,23 +58,23 @@
                         <div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">Contactar</div>
                     </div>
 
-                    <p class="text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Para empezar a tener presencia.</p>
-                    <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                    <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Para empezar a tener presencia.</p>
+                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Nombre y descripción</span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Categoría en el directorio</span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Botón directo a tu WhatsApp</span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Dirección y horarios</span></li>
                     </ul>
-                    <button disabled class="w-full bg-gray-100 text-gray-500 py-3 rounded-lg font-bold cursor-not-allowed">Plan Actual</button>
+                    <button disabled class="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base cursor-not-allowed">Plan Actual</button>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-blue-400 p-6 shadow-lg flex flex-col relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
-                    <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
-                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/pago único</span></p>
+                <div class="bg-white rounded-2xl border border-blue-400 p-5 sm:p-6 shadow-lg flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
+                    <h3 class="font-bold text-base sm:text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
+                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
                     
                     <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg shadow-sm overflow-hidden pointer-events-none select-none">
-                        <div class="w-full h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
+                        <div class="w-full h-14 sm:h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
                         <div class="p-3">
                             <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
                             <div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div>
@@ -82,8 +82,8 @@
                         </div>
                     </div>
 
-                    <p class="text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Muestra todo tu catálogo con fotos.</p>
-                    <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                    <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Muestra todo tu catálogo con fotos.</p>
+                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Básico, más:</span></span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">🖼️</span> <span><b>Imagen de portada</b> para destacar tu anuncio.</span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">📋</span> <span>Botón para mostrar tu <b>Menú/Catálogo</b> interactivo.</span></li>
@@ -91,13 +91,13 @@
                     </ul>
                 </div>
 
-                <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 shadow-xl flex flex-col relative overflow-hidden transform md:scale-105 z-10">
-                    <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
-                    <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
-                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/pago único</span></p>
+                <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-5 sm:p-6 shadow-xl flex flex-col relative overflow-hidden transform md:scale-105 z-10">
+                    <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[9px] sm:text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
+                    <h3 class="font-bold text-base sm:text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
+                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
                     
                     <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg shadow-md overflow-hidden pointer-events-none select-none">
-                        <div class="w-full h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
+                        <div class="w-full h-14 sm:h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
                         <div class="p-3">
                             <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
                             <div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div>
@@ -105,8 +105,8 @@
                         </div>
                     </div>
 
-                    <p class="text-sm text-gray-500 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
-                    <ul class="text-sm space-y-3 flex-grow text-gray-800 mb-6">
+                    <p class="text-xs sm:text-sm text-gray-500 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
+                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-800 mb-6">
                         <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Nivel 1, más:</span></span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">🛒</span> <span><b>Carrito de compras</b> interactivo.</span></li>
                         <li class="flex items-start gap-2"><span class="shrink-0">📱</span> <span>Pedidos desglosados directo en tu WhatsApp.</span></li>
@@ -117,63 +117,63 @@
 
             </div>
             
-            <div class="mt-10 text-center bg-blue-50 rounded-xl p-6 border border-blue-100 max-w-3xl mx-auto">
-                <p class="font-bold text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
-                <a href="https://wa.me/4430000000?text=Hola,%20quiero%20mejorar%20mi%20anuncio%20en%20el%20Directorio." target="_blank" class="inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-8 py-3 rounded-full font-bold transition shadow-md">
+            <div class="mt-8 sm:mt-10 text-center bg-blue-50 rounded-xl p-5 sm:p-6 border border-blue-100 max-w-3xl mx-auto px-4">
+                <p class="font-bold text-base sm:text-lg text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
+                <a href="https://wa.me/4430000000?text=Hola,%20quiero%20mejorar%20mi%20anuncio%20en%20el%20Directorio." target="_blank" class="block sm:inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold transition shadow-md">
                     Contactar a Soporte por WhatsApp
                 </a>
             </div>
         </div>
     </div>
 
-    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
-            <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-black">&times;</button>
-            <h2 class="text-2xl font-black text-tm-azul mb-4" id="titulo-modal-negocio">Datos de tu Negocio</h2>
+    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-2xl p-5 sm:p-8 w-full sm:max-w-lg relative max-h-[90vh] overflow-y-auto">
+            <button onclick="cerrarModalNegocio()" class="absolute top-3 right-3 sm:top-4 sm:right-4 text-2xl sm:text-3xl font-bold text-gray-400 hover:text-black leading-none">&times;</button>
+            <h2 class="text-xl sm:text-2xl font-black text-tm-azul mb-4 pr-6" id="titulo-modal-negocio">Datos de tu Negocio</h2>
             
-            <form onsubmit="event.preventDefault(); guardarNegocio();" class="space-y-4">
+            <form onsubmit="event.preventDefault(); guardarNegocio();" class="space-y-3 sm:space-y-4">
                 <input type="hidden" id="neg-id">
                 
                 <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">Nombre *</label>
-                    <input type="text" id="neg-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Nombre *</label>
+                    <input type="text" id="neg-nombre" required class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                 </div>
                 
                 <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">Categoría *</label>
-                    <select id="neg-categoria" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Categoría *</label>
+                    <select id="neg-categoria" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                         <option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">Descripción Corta *</label>
-                    <textarea id="neg-desc" required rows="2" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Descripción Corta *</label>
+                    <textarea id="neg-desc" required rows="2" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
                 </div>
                 
                 <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">Dirección Física</label>
-                    <input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Dirección Física</label>
+                    <input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label class="text-xs font-bold uppercase text-gray-500">Horarios</label>
-                        <input type="text" id="neg-horario" placeholder="Ej. L-V 9am a 6pm" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Horarios</label>
+                        <input type="text" id="neg-horario" placeholder="Ej. L-V 9am a 6pm" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                     <div>
-                        <label class="text-xs font-bold uppercase text-gray-500">WhatsApp *</label>
-                        <input type="number" id="neg-wa" placeholder="Solo números" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">WhatsApp *</label>
+                        <input type="number" id="neg-wa" placeholder="Solo números" required class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                 </div>
                 
-                <div id="campo-imagen" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">
-                    <label class="text-xs font-bold uppercase text-tm-azul">URL de Imagen (Desbloqueado Nivel 1+)</label>
-                    <input type="url" id="neg-img" placeholder="https://..." class="w-full p-2.5 bg-white border rounded-lg mt-2 focus:ring-2 focus:ring-tm-azul outline-none">
-                    <p class="text-xs text-blue-600 mt-1">Sube tu imagen a sitios como Imgur y pega aquí el link directo (.jpg o .png)</p>
+                <div id="campo-imagen" class="hidden bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-100 mt-2">
+                    <label class="text-[10px] sm:text-xs font-bold uppercase text-tm-azul">URL de Imagen (Desbloqueado Nivel 1+)</label>
+                    <input type="url" id="neg-img" placeholder="https://..." class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-white border rounded-lg mt-2 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <p class="text-[10px] sm:text-xs text-blue-600 mt-1 leading-tight">Sube tu imagen a sitios como Imgur y pega aquí el link directo (.jpg o .png)</p>
                 </div>
 
-                <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3.5 rounded-lg font-bold mt-6 transition shadow-md">Guardar Cambios</button>
+                <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 sm:py-3.5 rounded-lg text-sm sm:text-base font-bold mt-4 sm:mt-6 transition shadow-md">Guardar Cambios</button>
             </form>
         </div>
     </div>
@@ -208,25 +208,26 @@
             const contenedor = document.getElementById('contenedor-mis-negocios');
             
             if (error || !data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-10 rounded-2xl border border-dashed border-gray-300 text-center"><p class="text-gray-500">Aún no has publicado ningún negocio.</p></div>`;
+                contenedor.innerHTML = `<div class="bg-white p-6 sm:p-10 rounded-2xl border border-dashed border-gray-300 text-center"><p class="text-sm sm:text-base text-gray-500">Aún no has publicado ningún negocio.</p></div>`;
                 return;
             }
 
+            // Clases responsivas aplicadas a las tarjetas generadas
             contenedor.innerHTML = data.map(n => `
-                <div class="bg-white p-5 md:p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3">
-                            <h3 class="font-bold text-xl text-tm-azul-oscuro">${n.nombre_negocio}</h3>
-                            <span class="bg-gray-100 text-gray-600 border border-gray-200 text-[10px] uppercase tracking-wider px-2 py-1 rounded font-bold">Nivel ${n.nivel_pago}</span>
+                <div class="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 hover:shadow-md transition">
+                    <div class="flex-grow w-full">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <h3 class="font-bold text-lg sm:text-xl text-tm-azul-oscuro leading-tight">${n.nombre_negocio}</h3>
+                            <span class="bg-gray-100 text-gray-600 border border-gray-200 text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-bold shrink-0">Nivel ${n.nivel_pago}</span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-2 line-clamp-2">${n.descripcion}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 line-clamp-2">${n.descripcion}</p>
                     </div>
                     
-                    <div class="flex gap-2 w-full md:w-auto shrink-0">
-                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="flex-1 md:flex-none border-2 border-tm-azul text-tm-azul px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-50 transition">Editar</button>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
+                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto border-2 border-tm-azul text-tm-azul px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold hover:bg-blue-50 transition">Editar</button>
                         
-                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20mejorar%20el%20nivel%20de%20mi%20negocio%20'${n.nombre_negocio}'%20en%20Vive%20Tres%20Marias." target="_blank" class="flex-1 md:flex-none bg-tm-dorado hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition text-center shadow-sm flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20mejorar%20el%20nivel%20de%20mi%20negocio%20'${n.nombre_negocio}'%20en%20Vive%20Tres%20Marias." target="_blank" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition text-center shadow-sm flex items-center justify-center gap-2">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                             Mejorar Plan
                         </a>
                     </div>
@@ -253,7 +254,6 @@
             document.getElementById('neg-horario').value = n.horarios || '';
             document.getElementById('neg-wa').value = n.enlace_whatsapp || '';
             
-            // Ya que los niveles cambiaron, el Nivel 1 ya tiene imagen
             if(n.nivel_pago >= 1) {
                 document.getElementById('campo-imagen').classList.remove('hidden');
                 document.getElementById('neg-img').value = n.imagen_url || '';
