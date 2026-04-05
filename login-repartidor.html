@@ -99,12 +99,25 @@
             authMsg.classList.remove('hidden');
         }
 
-        // 1. VERIFICAR SI EL USUARIO YA ESTÁ LOGUEADO (Como cliente)
+        // 1. VERIFICAR SI EL USUARIO YA ESTÁ LOGUEADO Y SI YA ES REPARTIDOR
         async function verificarEstadoSesion() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             
             if (session) {
-                // Adaptar formulario para usuario existente
+                // Buscar si el usuario ya existe en la tabla repartidores
+                const { data: esRepartidor } = await clienteSupabase
+                    .from('repartidores')
+                    .select('id')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (esRepartidor) {
+                    // Si ya es repartidor, lo mandamos directo a su panel
+                    window.location.href = 'panel-repartidor.html';
+                    return; // Detenemos el resto del código
+                }
+
+                // Si NO es repartidor (solo es cliente), adaptamos el formulario
                 seccionAuth.classList.add('hidden');
                 linkLogin.classList.add('hidden');
                 tituloPrincipal.innerText = "Activar Perfil de Reparto";
@@ -166,15 +179,19 @@
 
                 if (dbError) {
                     // Manejar si el usuario ya es repartidor (ID duplicado)
-                    if (dbError.code === "23505") throw new Error("Ya estás registrado como repartidor.");
+                    if (dbError.code === "23505") {
+                        window.location.href = 'panel-repartidor.html'; 
+                        return;
+                    }
                     throw dbError;
                 }
 
                 mostrarMensaje("¡Registro exitoso! Redirigiendo...", false);
-                setTimeout(() => window.location.href = 'panel-repartidor.html', 2000);
+                setTimeout(() => window.location.href = 'panel-repartidor.html', 1000);
 
             } catch (err) {
                 mostrarMensaje(err.message, true);
+                const { data: { session } } = await clienteSupabase.auth.getSession();
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = session ? "Confirmar y Activar Perfil" : "Registrarme como Repartidor";
             }
