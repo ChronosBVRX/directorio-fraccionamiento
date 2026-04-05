@@ -12,6 +12,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <script src="https://js.stripe.com/v3/"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -87,10 +89,10 @@
             <div class="border-t border-gray-200 pt-8 sm:pt-12 mb-8 sm:mb-10">
                 <div class="text-center mb-8 sm:mb-10 px-2">
                     <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
-                    <p class="text-sm sm:text-base text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
+                    <p class="text-sm sm:text-base text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas. Para suscribirte, usa el botón "Mejorar Plan" en la tarjeta de tu negocio arriba.</p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0 opacity-90">
                     <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col">
                         <h3 class="font-bold text-base sm:text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
                         <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">Gratis</p>
@@ -107,13 +109,12 @@
                             <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Botón directo a tu WhatsApp</span></li>
                             <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Dirección y horarios</span></li>
                         </ul>
-                        <button disabled class="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base cursor-not-allowed">Plan Actual</button>
                     </div>
 
                     <div class="bg-white rounded-2xl border border-blue-400 p-5 sm:p-6 shadow-lg flex flex-col relative overflow-hidden">
                         <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
                         <h3 class="font-bold text-base sm:text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
-                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
+                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/mes</span></p>
                         <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg shadow-sm overflow-hidden pointer-events-none select-none">
                             <div class="w-full h-14 sm:h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
                             <div class="p-3">
@@ -134,7 +135,7 @@
                     <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-5 sm:p-6 shadow-xl flex flex-col relative overflow-hidden transform md:scale-105 z-10">
                         <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[9px] sm:text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
                         <h3 class="font-bold text-base sm:text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
-                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
+                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/mes</span></p>
                         <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg shadow-md overflow-hidden pointer-events-none select-none">
                             <div class="w-full h-14 sm:h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
                             <div class="p-3">
@@ -152,13 +153,6 @@
                             <li class="flex items-start gap-2"><span class="shrink-0">👑</span> <span>Aparece siempre en los primeros lugares.</span></li>
                         </ul>
                     </div>
-                </div>
-                
-                <div class="mt-8 sm:mt-10 text-center bg-blue-50 rounded-xl p-5 sm:p-6 border border-blue-100 max-w-3xl mx-auto px-4">
-                    <p class="font-bold text-base sm:text-lg text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
-                    <a href="https://wa.me/4430000000?text=Hola,%20quiero%20mejorar%20mi%20anuncio%20en%20el%20Directorio." target="_blank" class="block sm:inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold transition shadow-md">
-                        Contactar a Soporte por WhatsApp
-                    </a>
                 </div>
             </div>
         </div>
@@ -191,273 +185,4 @@
                 </div>
                 
                 <div>
-                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Dirección Física</label>
-                    <input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
-                </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Horarios</label>
-                        <input type="text" id="neg-horario" placeholder="Ej. L-V 9am a 6pm" class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">WhatsApp *</label>
-                        <input type="number" id="neg-wa" placeholder="Solo números" required class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                </div>
-                
-                <div id="campo-imagen" class="hidden bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-100 mt-2">
-                    <label class="text-[10px] sm:text-xs font-bold uppercase text-tm-azul">URL de Imagen (Desbloqueado Nivel 1+)</label>
-                    <input type="url" id="neg-img" placeholder="https://..." class="w-full text-sm sm:text-base p-2 sm:p-2.5 bg-white border rounded-lg mt-2 focus:ring-2 focus:ring-tm-azul outline-none">
-                    <p class="text-[10px] sm:text-xs text-blue-600 mt-1 leading-tight">Sube tu imagen a sitios como Imgur y pega aquí el link directo (.jpg o .png)</p>
-                </div>
-
-                <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 sm:py-3.5 rounded-lg text-sm sm:text-base font-bold mt-4 sm:mt-6 transition shadow-md">Guardar Cambios</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // LECTOR DE URL PARA SABER QUÉ MOSTRAR
-        document.addEventListener("DOMContentLoaded", () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const view = urlParams.get('view') || 'perfil'; // Por defecto muestra el perfil
-            
-            if (view === 'negocio') {
-                document.getElementById('seccion-negocios').classList.remove('hidden');
-            } else {
-                document.getElementById('seccion-perfil').classList.remove('hidden');
-            }
-        });
-
-        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
-        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const ADMIN_WA = '4430000000'; // PON TU NÚMERO DE TELÉFONO AQUÍ
-
-        let usuarioActual = null;
-        let map = null;
-        let marker = null;
-
-        // --- SISTEMA DE NOTIFICACIONES (TOAST) ---
-        function mostrarNotificacion(mensaje, tipo = 'exito') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
-            const icon = tipo === 'error' ? '⚠️' : '✅';
-
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 pointer-events-auto max-w-sm`;
-            toast.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">${icon}</span>
-                    <span class="text-sm font-bold leading-tight">${mensaje}</span>
-                </div>
-                <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-lg leading-none">&times;</button>
-            `;
-            
-            container.appendChild(toast);
-
-            setTimeout(() => { toast.classList.remove('translate-y-[-100%]', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                if(document.body.contains(toast)) {
-                    toast.classList.add('translate-y-[-100%]', 'opacity-0');
-                    setTimeout(() => toast.remove(), 300);
-                }
-            }, 5000);
-        }
-
-        clienteSupabase.auth.onAuthStateChange((event, session) => {
-            usuarioActual = session ? session.user : null;
-            if(usuarioActual) {
-                document.getElementById('no-auth').classList.add('hidden');
-                document.getElementById('si-auth').classList.remove('hidden');
-                cargarMisNegocios();
-                cargarPerfil();
-            } else {
-                document.getElementById('no-auth').classList.remove('hidden');
-                document.getElementById('si-auth').classList.add('hidden');
-            }
-        });
-
-        async function cargarPerfil() {
-            const { data, error } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
-            
-            let lat = 19.7028;
-            let lng = -101.1924;
-
-            if (data && !error) {
-                document.getElementById('perfil-nombre').value = data.nombre_completo || '';
-                document.getElementById('perfil-telefono').value = data.telefono || '';
-                document.getElementById('perfil-direccion').value = data.direccion || '';
-                if(data.latitud && data.longitud) { lat = data.latitud; lng = data.longitud; }
-            }
-
-            inicializarMapa(lat, lng);
-        }
-
-        function inicializarMapa(lat, lng) {
-            document.getElementById('perfil-lat').value = lat;
-            document.getElementById('perfil-lng').value = lng;
-
-            setTimeout(() => {
-                // Solo inicializar si la sección de perfil está visible o se está creando en el DOM
-                if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-
-                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-
-                    marker.on('dragend', function (e) {
-                        const posicion = marker.getLatLng();
-                        document.getElementById('perfil-lat').value = posicion.lat;
-                        document.getElementById('perfil-lng').value = posicion.lng;
-                    });
-
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                        document.getElementById('perfil-lat').value = e.latlng.lat;
-                        document.getElementById('perfil-lng').value = e.latlng.lng;
-                    });
-                } else {
-                    map.setView([lat, lng], 13);
-                    marker.setLatLng([lat, lng]);
-                    map.invalidateSize(); 
-                }
-            }, 300);
-        }
-
-        async function guardarPerfil() {
-            const btn = document.getElementById('btn-guardar-perfil');
-            const textoOriginal = btn.innerText;
-            btn.innerText = "Guardando..."; btn.disabled = true;
-
-            const payload = {
-                user_id: usuarioActual.id,
-                nombre_completo: document.getElementById('perfil-nombre').value,
-                telefono: document.getElementById('perfil-telefono').value,
-                direccion: document.getElementById('perfil-direccion').value,
-                latitud: document.getElementById('perfil-lat').value,
-                longitud: document.getElementById('perfil-lng').value
-            };
-
-            const { data: existe } = await clienteSupabase.from('perfiles').select('id').eq('user_id', usuarioActual.id).single();
-
-            let error = null;
-            if (existe) {
-                const res = await clienteSupabase.from('perfiles').update(payload).eq('user_id', usuarioActual.id);
-                error = res.error;
-            } else {
-                const res = await clienteSupabase.from('perfiles').insert([payload]);
-                error = res.error;
-            }
-
-            btn.innerText = textoOriginal; btn.disabled = false;
-
-            if (error) {
-                mostrarNotificacion("Error de Supabase: Verifica que creaste la tabla 'perfiles'. Detalle: " + error.message, "error");
-            } else {
-                mostrarNotificacion("¡Perfil guardado correctamente!", "exito");
-            }
-        }
-
-        async function cargarMisNegocios() {
-            const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
-            
-            const contenedor = document.getElementById('contenedor-mis-negocios');
-            
-            if (error || !data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-6 sm:p-10 rounded-2xl border border-dashed border-gray-300 text-center"><p class="text-sm sm:text-base text-gray-500">Aún no has publicado ningún negocio.</p></div>`;
-                return;
-            }
-
-            contenedor.innerHTML = data.map(n => `
-                <div class="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 hover:shadow-md transition">
-                    <div class="flex-grow w-full">
-                        <div class="flex items-center gap-2 sm:gap-3">
-                            <h3 class="font-bold text-lg sm:text-xl text-tm-azul-oscuro leading-tight">${n.nombre_negocio}</h3>
-                            <span class="bg-gray-100 text-gray-600 border border-gray-200 text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-bold shrink-0">Nivel ${n.nivel_pago}</span>
-                        </div>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 line-clamp-2">${n.descripcion}</p>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
-                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto border-2 border-tm-azul text-tm-azul px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold hover:bg-blue-50 transition">Editar</button>
-                        
-                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20mejorar%20el%20nivel%20de%20mi%20negocio%20'${n.nombre_negocio}'%20en%20Vive%20Tres%20Marias." target="_blank" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition text-center shadow-sm flex items-center justify-center gap-2">
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            Mejorar Plan
-                        </a>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function abrirModalNegocio() {
-            document.getElementById('modal-negocio').classList.remove('hidden');
-            document.getElementById('titulo-modal-negocio').innerText = "Nuevo Negocio";
-            document.querySelector('#modal-negocio form').reset();
-            document.getElementById('neg-id').value = '';
-            document.getElementById('campo-imagen').classList.add('hidden');
-        }
-
-        function editarNegocio(n) {
-            abrirModalNegocio();
-            document.getElementById('titulo-modal-negocio').innerText = "Editar Negocio";
-            document.getElementById('neg-id').value = n.id;
-            document.getElementById('neg-nombre').value = n.nombre_negocio || '';
-            document.getElementById('neg-categoria').value = n.categoria || 'Servicios';
-            document.getElementById('neg-desc').value = n.descripcion || '';
-            document.getElementById('neg-dir').value = n.direccion || '';
-            document.getElementById('neg-horario').value = n.horarios || '';
-            document.getElementById('neg-wa').value = n.enlace_whatsapp || '';
-            
-            if(n.nivel_pago >= 1) {
-                document.getElementById('campo-imagen').classList.remove('hidden');
-                document.getElementById('neg-img').value = n.imagen_url || '';
-            } else {
-                document.getElementById('campo-imagen').classList.add('hidden');
-            }
-        }
-
-        function cerrarModalNegocio() { document.getElementById('modal-negocio').classList.add('hidden'); }
-
-        async function guardarNegocio() {
-            const btn = document.getElementById('neg-btn-submit');
-            btn.disabled = true; btn.innerText = "Guardando...";
-            
-            const id = document.getElementById('neg-id').value;
-            const payload = {
-                nombre_negocio: document.getElementById('neg-nombre').value,
-                categoria: document.getElementById('neg-categoria').value,
-                descripcion: document.getElementById('neg-desc').value,
-                direccion: document.getElementById('neg-dir').value,
-                horarios: document.getElementById('neg-horario').value,
-                enlace_whatsapp: document.getElementById('neg-wa').value,
-                imagen_url: document.getElementById('neg-img')?.value || null
-            };
-
-            try {
-                if (id) {
-                    const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-                    if(error) throw error;
-                } else {
-                    payload.user_id = usuarioActual.id;
-                    payload.nivel_pago = 0; 
-                    const { error } = await clienteSupabase.from('anuncios').insert([payload]);
-                    if(error) throw error;
-                }
-                cerrarModalNegocio();
-                cargarMisNegocios();
-                mostrarNotificacion("¡Negocio guardado exitosamente!", "exito");
-            } catch (error) {
-                mostrarNotificacion("Hubo un problema al guardar el negocio: " + error.message, "error");
-            } finally {
-                btn.disabled = false; btn.innerText = "Guardar Cambios";
-            }
-        }
-    </script>
-</body>
-</html>
+                    <label class
