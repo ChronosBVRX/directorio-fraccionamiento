@@ -68,7 +68,11 @@
     </div>
 
     <script>
-        const supabase = window.supabase.createClient('TU_URL', 'TU_KEY'); // <-- INSERTA TUS CREDENCIALES
+        // Inicialización de Supabase con URL deducida y tu Anon Key
+        const clienteSupabase = window.supabase.createClient(
+            'https://vlnpefgqodnxcqeztcnh.supabase.co', 
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'
+        );
 
         function toggleForm() {
             document.getElementById('form-login').classList.toggle('hidden');
@@ -81,7 +85,7 @@
             const email = document.getElementById('log-email').value;
             const pass = document.getElementById('log-pass').value;
             
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+            const { data, error } = await clienteSupabase.auth.signInWithPassword({ email, password: pass });
             if (error) return alert("Error: " + error.message);
             window.location.href = 'panel-repartidor.html'; // Redirigir al panel
         });
@@ -96,12 +100,12 @@
             const vehiculo = document.getElementById('reg-vehiculo').value;
 
             // 1. Crear usuario en Auth
-            const { data, error } = await supabase.auth.signUp({ email, password: pass });
+            const { data, error } = await clienteSupabase.auth.signUp({ email, password: pass });
             if (error) return alert("Error al registrar: " + error.message);
 
             // 2. Insertar en tabla repartidores
             if (data.user) {
-                const { error: dbError } = await supabase.from('repartidores').insert([{
+                const { error: dbError } = await clienteSupabase.from('repartidores').insert([{
                     id: data.user.id,
                     nombre,
                     telefono,
@@ -115,7 +119,7 @@
         });
 
         // Check auth status
-        supabase.auth.onAuthStateChange((event, session) => {
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
             if (session) window.location.href = 'panel-repartidor.html';
         });
     </script>
