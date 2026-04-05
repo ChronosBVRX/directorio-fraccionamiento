@@ -67,16 +67,16 @@
     </main>
 
     <script>
-        // Configuración de Supabase (Ya con tus credenciales)
+        // Configuración de Supabase
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Variables de Estado
         let usuarioId = null;
         let watchId = null;
         let ultimaVezEnviado = 0;
-        let pedidoActivo = null; // Guardará todo el objeto del pedido si está en curso
+        let pedidoActivo = null;
 
         // Coordenadas aprox del centro de Tres Marías y Radio de 5km
         const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
@@ -84,26 +84,26 @@
 
         // ================= INICIALIZACIÓN =================
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
             
             usuarioId = session.user.id;
             
             // Cargar nombre en el header
-            const { data: perfil } = await supabase.from('repartidores').select('nombre').eq('id', usuarioId).single();
+            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).single();
             if(perfil) document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
 
             // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Recuperación de sesión)
-            const { data: pedidoPendiente } = await supabase.from('pedidos')
+            const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*')
                 .eq('repartidor_id', usuarioId)
                 .eq('estado', 'aceptado')
                 .single();
 
             if (pedidoPendiente) {
-                // Si recargó la página y estaba entregando, restauramos la pantalla
+                // Restauramos la pantalla si tenía un pedido en curso
                 pedidoActivo = pedidoPendiente;
-                document.getElementById('toggle-estado').checked = true; // Forzar switch a prendido
+                document.getElementById('toggle-estado').checked = true;
                 document.getElementById('estado-texto').innerText = 'En Ruta';
                 document.getElementById('estado-texto').className = 'font-bold text-sm text-tm-dorado';
                 iniciarRastreoInteligente();
@@ -140,12 +140,12 @@
                         return;
                     }
 
-                    await supabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
+                    await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     textoEstado.innerText = 'Conectado';
                     textoEstado.className = 'font-bold text-sm text-green-400';
                     toggle.disabled = false;
                     
-                    cargarPedidosDisponibles(); // Cargar al conectarse
+                    cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
 
                 }, (error) => {
@@ -171,7 +171,7 @@
             document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir pedidos...</p>';
             
             if(watchId) navigator.geolocation.clearWatch(watchId);
-            if(usuarioId) supabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            if(usuarioId) clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
         }
 
         function iniciarRastreoInteligente() {
@@ -181,7 +181,6 @@
                 const { latitude, longitude } = pos.coords;
                 
                 if (!pedidoActivo) {
-                    // Solo validar geocerca
                     if (calcularDistancia(latitude, longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng) > RADIO_PERMITIDO_METROS) {
                         forzarDesconexion();
                         alert("Desconectado por salir de la zona.");
@@ -189,10 +188,9 @@
                     return;
                 }
 
-                // SI HAY PEDIDO ACTIVO: Enviar a Supabase cada 10 segundos
                 const ahora = Date.now();
                 if (ahora - ultimaVezEnviado > 10000) {
-                    await supabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
+                    await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
                     ultimaVezEnviado = ahora;
                 }
             }, console.error, { enableHighAccuracy: true });
@@ -202,7 +200,7 @@
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
-            const { data } = await supabase.from('pedidos').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+            const { data } = await clienteSupabase.from('pedidos').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
             const contenedor = document.getElementById('contenedor-pedidos');
             
             if(!data || data.length === 0) {
@@ -229,17 +227,17 @@
         }
 
         function suscribirseAPedidos() {
-            supabase.channel('pedidos-nuevos')
+            clienteSupabase.channel('pedidos-nuevos')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
                     if(!pedidoActivo) cargarPedidosDisponibles(); 
                 }).subscribe();
         }
 
         async function aceptarPedido(id_pedido) {
-            const { data: pedidoComprobacion } = await supabase.from('pedidos').select('estado').eq('id', id_pedido).single();
+            const { data: pedidoComprobacion } = await clienteSupabase.from('pedidos').select('estado').eq('id', id_pedido).single();
             if(pedidoComprobacion.estado !== 'pendiente') return alert("Alguien más ya tomó este pedido.");
 
-            const { data: pedido, error } = await supabase.from('pedidos')
+            const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'aceptado', repartidor_id: usuarioId })
                 .eq('id', id_pedido)
                 .select().single();
@@ -276,7 +274,6 @@
         }
 
         function abrirRutaMaps() {
-            // Abre Google Maps buscando la dirección (Codificada para URL)
             const direccionCodificada = encodeURIComponent(`${pedidoActivo.cliente_direccion}, Tres Marias, Morelia`);
             window.open(`https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`, '_blank');
         }
@@ -284,14 +281,13 @@
         async function finalizarPedido() {
             if(!confirm("¿Confirmas que ya entregaste el pedido y cobraste?")) return;
 
-            await supabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
+            await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
             
             alert("¡Excelente trabajo! Pedido finalizado.");
             pedidoActivo = null;
             document.getElementById('estado-texto').innerText = 'Conectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
             
-            // Regresamos a la vista de pendientes
             document.getElementById('vista-activo').classList.add('hidden');
             document.getElementById('vista-pendientes').classList.remove('hidden');
             cargarPedidosDisponibles();
@@ -300,7 +296,7 @@
         async function cerrarSesion() {
             if(pedidoActivo) return alert("No puedes cerrar sesión a mitad de un pedido.");
             forzarDesconexion(true);
-            await supabase.auth.signOut();
+            await clienteSupabase.auth.signOut();
             window.location.reload();
         }
 
