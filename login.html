@@ -143,19 +143,29 @@
             btn.disabled = true; btn.innerText = "Creando cuenta...";
 
             try {
-                // AQUÍ GUARDAMOS LOS DATOS EXTRA USANDO OPTIONS.DATA
-                const { error } = await clienteSupabase.auth.signUp({
+                // 1. Crear el usuario en auth.users
+                const { data, error } = await clienteSupabase.auth.signUp({
                     email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            nombre_completo: nombre,
-                            telefono: telefono
-                        }
-                    }
+                    password: password
                 });
                 
                 if(error) throw error;
+                
+                // 2. Si se creó exitosamente, insertamos sus datos en la tabla perfiles
+                if (data.user) {
+                    const { error: errorPerfil } = await clienteSupabase.from('perfiles').insert([
+                        {
+                            user_id: data.user.id,
+                            nombre_completo: nombre,
+                            telefono: telefono
+                        }
+                    ]);
+
+                    if (errorPerfil) {
+                        console.error("Error al guardar el perfil público:", errorPerfil.message);
+                        // Puedes decidir si lanzar un error o dejarlo pasar (por ahora lo dejamos pasar porque la cuenta sí se creó)
+                    }
+                }
                 
                 mostrarMensaje("¡Cuenta creada exitosamente! Entrando...", false);
                 // Si es exitoso, el onAuthStateChange lo redirigirá automáticamente
