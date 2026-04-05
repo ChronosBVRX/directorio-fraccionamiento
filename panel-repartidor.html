@@ -16,7 +16,10 @@
     <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md z-10 relative">
         <div>
             <h1 class="font-black text-lg leading-tight">App Repartidor</h1>
-            <p id="nombre-repartidor" class="text-xs text-blue-200">Cargando...</p>
+            <button onclick="abrirPerfil()" class="text-xs text-blue-200 hover:text-white transition flex items-center gap-1 mt-0.5">
+                <span id="nombre-repartidor">Cargando...</span>
+                <span>✏️</span>
+            </button>
         </div>
         <div class="flex items-center gap-3">
             <span id="estado-texto" class="font-bold text-sm text-red-300 transition-colors">Desconectado</span>
@@ -28,7 +31,7 @@
         </div>
     </header>
 
-    <main class="flex-grow p-4 overflow-y-auto w-full max-w-md mx-auto">
+    <main class="flex-grow p-4 overflow-y-auto w-full max-w-md mx-auto relative">
         
         <div id="vista-pendientes" class="block">
             <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm flex items-center justify-between">
@@ -64,6 +67,35 @@
             </div>
         </div>
 
+        <div id="vista-perfil" class="hidden h-full flex flex-col">
+            <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm">Mis Datos Personales</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-tm-dorado">
+                <form id="form-editar-perfil" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre Completo</label>
+                        <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp de Contacto</label>
+                        <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo Actual</label>
+                        <select id="edit-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none cursor-pointer">
+                            <option value="Moto">Motocicleta</option>
+                            <option value="Bici">Bicicleta</option>
+                            <option value="Auto">Automóvil</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="cerrarPerfil()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button type="submit" id="btn-guardar-perfil" class="flex-1 bg-tm-azul text-white font-bold py-3 rounded-lg hover:bg-tm-azul-oscuro transition shadow-md">Guardar Datos</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -89,16 +121,15 @@
             
             usuarioId = session.user.id;
             
-            // Cargar nombre en el header (usamos maybeSingle para no generar errores si no lo encuentra)
+            // Cargar nombre en el header
             const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).maybeSingle();
-            
             if (perfil && perfil.nombre) {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             } else {
-                document.getElementById('nombre-repartidor').innerText = 'Hola, Repartidor';
+                document.getElementById('nombre-repartidor').innerText = 'Mi Perfil';
             }
 
-            // VERIFICAR SI HAY UN PEDIDO A MEDIAS (Usamos maybeSingle para evitar el error 406 en consola)
+            // VERIFICAR SI HAY UN PEDIDO A MEDIAS
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*')
                 .eq('repartidor_id', usuarioId)
@@ -106,7 +137,6 @@
                 .maybeSingle();
 
             if (pedidoPendiente) {
-                // Restauramos la pantalla si tenía un pedido en curso
                 pedidoActivo = pedidoPendiente;
                 document.getElementById('toggle-estado').checked = true;
                 document.getElementById('estado-texto').innerText = 'En Ruta';
@@ -118,6 +148,58 @@
                 suscribirseAPedidos();
             }
         }
+
+        // ================= GESTIÓN DE PERFIL (NUEVO) =================
+        async function abrirPerfil() {
+            if (pedidoActivo) return alert("No puedes editar tu perfil mientras tienes un pedido en tránsito.");
+
+            // Ocultar la pantalla de pedidos y mostrar la del perfil
+            document.getElementById('vista-pendientes').classList.add('hidden');
+            document.getElementById('vista-perfil').classList.remove('hidden');
+
+            // Descargar los datos más recientes del usuario desde Supabase
+            const { data } = await clienteSupabase.from('repartidores').select('*').eq('id', usuarioId).single();
+            if (data) {
+                document.getElementById('edit-nombre').value = data.nombre || '';
+                document.getElementById('edit-telefono').value = data.telefono || '';
+                document.getElementById('edit-vehiculo').value = data.vehiculo || 'Moto';
+            }
+        }
+
+        function cerrarPerfil() {
+            document.getElementById('vista-perfil').classList.add('hidden');
+            document.getElementById('vista-pendientes').classList.remove('hidden');
+        }
+
+        // Procesar el formulario de guardado
+        document.getElementById('form-editar-perfil').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-guardar-perfil');
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+
+            const nombre = document.getElementById('edit-nombre').value;
+            const telefono = document.getElementById('edit-telefono').value;
+            const vehiculo = document.getElementById('edit-vehiculo').value;
+
+            // Enviar actualización a Supabase
+            const { error } = await clienteSupabase.from('repartidores')
+                .update({ nombre: nombre, telefono: telefono, vehiculo: vehiculo })
+                .eq('id', usuarioId);
+
+            btn.innerText = "Guardar Datos";
+            btn.disabled = false;
+
+            if (error) {
+                alert("Error al actualizar: " + error.message);
+            } else {
+                alert("Tus datos han sido actualizados exitosamente.");
+                // Actualizar el nombre en la cabecera en tiempo real
+                document.getElementById('nombre-repartidor').innerText = `Hola, ${nombre.split(' ')[0]}`;
+                cerrarPerfil();
+            }
+        });
+
 
         // ================= UTILIDADES =================
         function calcularDistancia(lat1, lon1, lat2, lon2) {
@@ -259,6 +341,7 @@
         // ================= INTERFAZ PEDIDO ACTIVO =================
         function mostrarPantallaActivo() {
             document.getElementById('vista-pendientes').classList.add('hidden');
+            document.getElementById('vista-perfil').classList.add('hidden'); // Aseguramos que el perfil se cierre
             document.getElementById('vista-activo').classList.remove('hidden');
 
             document.getElementById('info-pedido-activo').innerHTML = `
