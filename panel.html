@@ -21,7 +21,9 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
+<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative">
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
         <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -32,131 +34,135 @@
 
     <div id="si-auth" class="hidden max-w-6xl mx-auto">
         
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8 shadow-sm mb-10 sm:mb-12">
-            <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
-            <p class="text-xs sm:text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y ubica tu domicilio para recibir pedidos o servicios.</p>
-            
-            <form onsubmit="event.preventDefault(); guardarPerfil();" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
-                        <input type="text" id="perfil-nombre" required placeholder="Tu nombre" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Teléfono</label>
-                        <input type="tel" id="perfil-telefono" required placeholder="A 10 dígitos" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Dirección Completa</label>
-                        <textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto, Referencias..." class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
-                    </div>
-                    
-                    <input type="hidden" id="perfil-lat">
-                    <input type="hidden" id="perfil-lng">
-                    
-                    <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg text-sm sm:text-base font-bold transition shadow-md">
-                        Guardar Perfil
-                    </button>
-                </div>
-
-                <div class="flex flex-col">
-                    <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio con el pin 📍</label>
-                    <div id="mapa-perfil" class="w-full h-64 sm:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div>
-                    <p class="text-[10px] sm:text-xs text-gray-400 mt-2 text-center">Puedes arrastrar el pin o hacer clic en el mapa.</p>
-                </div>
-            </form>
-        </div>
-
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div>
-                <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h2>
-                <p class="text-xs sm:text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
-            </div>
-            <button onclick="abrirModalNegocio()" class="w-full sm:w-auto bg-tm-azul text-white px-4 sm:px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro text-sm sm:text-base font-bold transition">+ Nuevo Negocio (Gratis)</button>
-        </div>
-
-        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-4 sm:gap-5 mb-12 sm:mb-16">
-            <div class="text-center py-10 text-gray-400 text-sm sm:text-base">Cargando tus negocios...</div>
-        </div>
-
-        <div class="border-t border-gray-200 pt-8 sm:pt-12 mb-8 sm:mb-10">
-            <div class="text-center mb-8 sm:mb-10 px-2">
-                <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
-                <p class="text-sm sm:text-base text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0">
-                <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col">
-                    <h3 class="font-bold text-base sm:text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
-                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">Gratis</p>
-                    <div class="mt-4 mb-5 bg-white border border-gray-200 rounded-lg p-3 shadow-sm pointer-events-none select-none">
-                        <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
-                        <div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div>
-                        <div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div>
-                        <div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">Contactar</div>
-                    </div>
-                    <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Para empezar a tener presencia.</p>
-                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Nombre y descripción</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Categoría en el directorio</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Botón directo a tu WhatsApp</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Dirección y horarios</span></li>
-                    </ul>
-                    <button disabled class="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base cursor-not-allowed">Plan Actual</button>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-blue-400 p-5 sm:p-6 shadow-lg flex flex-col relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
-                    <h3 class="font-bold text-base sm:text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
-                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
-                    <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg shadow-sm overflow-hidden pointer-events-none select-none">
-                        <div class="w-full h-14 sm:h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
-                        <div class="p-3">
-                            <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
-                            <div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div>
-                            <div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Menú</div>
+        <div id="seccion-perfil" class="hidden">
+            <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8 shadow-sm mb-10 sm:mb-12">
+                <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
+                <p class="text-xs sm:text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y ubica tu domicilio para recibir pedidos o servicios.</p>
+                
+                <form onsubmit="event.preventDefault(); guardarPerfil();" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
+                            <input type="text" id="perfil-nombre" required placeholder="Tu nombre" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                         </div>
-                    </div>
-                    <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Muestra todo tu catálogo con fotos.</p>
-                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Básico, más:</span></span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">🖼️</span> <span><b>Imagen de portada</b> para destacar tu anuncio.</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">📋</span> <span>Botón para mostrar tu <b>Menú/Catálogo</b> interactivo.</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">💲</span> <span>Detalle de precios a tus clientes.</span></li>
-                    </ul>
-                </div>
-
-                <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-5 sm:p-6 shadow-xl flex flex-col relative overflow-hidden transform md:scale-105 z-10">
-                    <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[9px] sm:text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
-                    <h3 class="font-bold text-base sm:text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
-                    <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
-                    <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg shadow-md overflow-hidden pointer-events-none select-none">
-                        <div class="w-full h-14 sm:h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
-                        <div class="p-3">
-                            <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
-                            <div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div>
-                            <div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div>
+                        <div>
+                            <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Teléfono</label>
+                            <input type="tel" id="perfil-telefono" required placeholder="A 10 dígitos" class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                         </div>
+                        <div>
+                            <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500">Dirección Completa</label>
+                            <textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto, Referencias..." class="w-full text-sm sm:text-base p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+                        </div>
+                        
+                        <input type="hidden" id="perfil-lat">
+                        <input type="hidden" id="perfil-lng">
+                        
+                        <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg text-sm sm:text-base font-bold transition shadow-md">
+                            Guardar Perfil
+                        </button>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-500 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
-                    <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-800 mb-6">
-                        <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Nivel 1, más:</span></span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">🛒</span> <span><b>Carrito de compras</b> interactivo.</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">📱</span> <span>Pedidos desglosados directo en tu WhatsApp.</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">💳</span> <span>Mención de aceptación de pagos con tarjeta.</span></li>
-                        <li class="flex items-start gap-2"><span class="shrink-0">👑</span> <span>Aparece siempre en los primeros lugares.</span></li>
-                    </ul>
-                </div>
 
-            </div>
-            
-            <div class="mt-8 sm:mt-10 text-center bg-blue-50 rounded-xl p-5 sm:p-6 border border-blue-100 max-w-3xl mx-auto px-4">
-                <p class="font-bold text-base sm:text-lg text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
-                <a href="https://wa.me/4430000000?text=Hola,%20quiero%20mejorar%20mi%20anuncio%20en%20el%20Directorio." target="_blank" class="block sm:inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold transition shadow-md">
-                    Contactar a Soporte por WhatsApp
-                </a>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] sm:text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio con el pin 📍</label>
+                        <div id="mapa-perfil" class="w-full h-64 sm:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div>
+                        <p class="text-[10px] sm:text-xs text-gray-400 mt-2 text-center">Puedes arrastrar el pin o hacer clic en el mapa.</p>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <div id="seccion-negocios" class="hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
+                </div>
+                <button onclick="abrirModalNegocio()" class="w-full sm:w-auto bg-tm-azul text-white px-4 sm:px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro text-sm sm:text-base font-bold transition">+ Nuevo Negocio (Gratis)</button>
+            </div>
+
+            <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-4 sm:gap-5 mb-12 sm:mb-16">
+                <div class="text-center py-10 text-gray-400 text-sm sm:text-base">Cargando tus negocios...</div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-8 sm:pt-12 mb-8 sm:mb-10">
+                <div class="text-center mb-8 sm:mb-10 px-2">
+                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
+                    <p class="text-sm sm:text-base text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-2 sm:px-0">
+                    <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col">
+                        <h3 class="font-bold text-base sm:text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
+                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">Gratis</p>
+                        <div class="mt-4 mb-5 bg-white border border-gray-200 rounded-lg p-3 shadow-sm pointer-events-none select-none">
+                            <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
+                            <div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div>
+                            <div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div>
+                            <div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">Contactar</div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Para empezar a tener presencia.</p>
+                        <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Nombre y descripción</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Categoría en el directorio</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Botón directo a tu WhatsApp</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span>Dirección y horarios</span></li>
+                        </ul>
+                        <button disabled class="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base cursor-not-allowed">Plan Actual</button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-blue-400 p-5 sm:p-6 shadow-lg flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
+                        <h3 class="font-bold text-base sm:text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
+                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$150 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
+                        <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg shadow-sm overflow-hidden pointer-events-none select-none">
+                            <div class="w-full h-14 sm:h-16 bg-blue-100 flex items-center justify-center text-xs text-blue-500">🌅 Tu Imagen Aquí</div>
+                            <div class="p-3">
+                                <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
+                                <div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div>
+                                <div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Menú</div>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-100">Muestra todo tu catálogo con fotos.</p>
+                        <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Básico, más:</span></span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">🖼️</span> <span><b>Imagen de portada</b> para destacar tu anuncio.</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">📋</span> <span>Botón para mostrar tu <b>Menú/Catálogo</b> interactivo.</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">💲</span> <span>Detalle de precios a tus clientes.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-5 sm:p-6 shadow-xl flex flex-col relative overflow-hidden transform md:scale-105 z-10">
+                        <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[9px] sm:text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
+                        <h3 class="font-bold text-base sm:text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 2)</h3>
+                        <p class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mt-1 sm:mt-2">$300 <span class="text-xs sm:text-sm font-normal text-gray-400">/pago único</span></p>
+                        <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg shadow-md overflow-hidden pointer-events-none select-none">
+                            <div class="w-full h-14 sm:h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Tu Imagen Aquí</div>
+                            <div class="p-3">
+                                <div class="w-12 h-3 bg-blue-50 rounded mb-2"></div>
+                                <div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div>
+                                <div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-500 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
+                        <ul class="text-xs sm:text-sm space-y-3 flex-grow text-gray-800 mb-6">
+                            <li class="flex items-start gap-2"><span class="shrink-0">✔️</span> <span><span class="font-bold">Todo lo del Nivel 1, más:</span></span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">🛒</span> <span><b>Carrito de compras</b> interactivo.</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">📱</span> <span>Pedidos desglosados directo en tu WhatsApp.</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">💳</span> <span>Mención de aceptación de pagos con tarjeta.</span></li>
+                            <li class="flex items-start gap-2"><span class="shrink-0">👑</span> <span>Aparece siempre en los primeros lugares.</span></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 sm:mt-10 text-center bg-blue-50 rounded-xl p-5 sm:p-6 border border-blue-100 max-w-3xl mx-auto px-4">
+                    <p class="font-bold text-base sm:text-lg text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
+                    <a href="https://wa.me/4430000000?text=Hola,%20quiero%20mejorar%20mi%20anuncio%20en%20el%20Directorio." target="_blank" class="block sm:inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-bold transition shadow-md">
+                        Contactar a Soporte por WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-3 sm:p-4">
@@ -212,6 +218,18 @@
     </div>
 
     <script>
+        // LECTOR DE URL PARA SABER QUÉ MOSTRAR
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view') || 'perfil'; // Por defecto muestra el perfil
+            
+            if (view === 'negocio') {
+                document.getElementById('seccion-negocios').classList.remove('hidden');
+            } else {
+                document.getElementById('seccion-perfil').classList.remove('hidden');
+            }
+        });
+
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -221,30 +239,50 @@
         let map = null;
         let marker = null;
 
+        // --- SISTEMA DE NOTIFICACIONES (TOAST) ---
+        function mostrarNotificacion(mensaje, tipo = 'exito') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
+            const icon = tipo === 'error' ? '⚠️' : '✅';
+
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 pointer-events-auto max-w-sm`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">${icon}</span>
+                    <span class="text-sm font-bold leading-tight">${mensaje}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-lg leading-none">&times;</button>
+            `;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => { toast.classList.remove('translate-y-[-100%]', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                if(document.body.contains(toast)) {
+                    toast.classList.add('translate-y-[-100%]', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             if(usuarioActual) {
                 document.getElementById('no-auth').classList.add('hidden');
                 document.getElementById('si-auth').classList.remove('hidden');
                 cargarMisNegocios();
-                cargarPerfil(); // Cargar datos del usuario
+                cargarPerfil();
             } else {
                 document.getElementById('no-auth').classList.remove('hidden');
                 document.getElementById('si-auth').classList.add('hidden');
             }
         });
 
-        // ----------------------------------------
-        // LÓGICA DEL PERFIL Y MAPA
-        // ----------------------------------------
         async function cargarPerfil() {
-            const { data, error } = await clienteSupabase
-                .from('perfiles')
-                .select('*')
-                .eq('user_id', usuarioActual.id)
-                .single();
+            const { data, error } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
             
-            // Coordenadas base por defecto
             let lat = 19.7028;
             let lng = -101.1924;
 
@@ -252,10 +290,7 @@
                 document.getElementById('perfil-nombre').value = data.nombre_completo || '';
                 document.getElementById('perfil-telefono').value = data.telefono || '';
                 document.getElementById('perfil-direccion').value = data.direccion || '';
-                if(data.latitud && data.longitud) {
-                    lat = data.latitud;
-                    lng = data.longitud;
-                }
+                if(data.latitud && data.longitud) { lat = data.latitud; lng = data.longitud; }
             }
 
             inicializarMapa(lat, lng);
@@ -265,8 +300,8 @@
             document.getElementById('perfil-lat').value = lat;
             document.getElementById('perfil-lng').value = lng;
 
-            // setTimeout para evitar bugs de renderizado de Leaflet dentro de contenedores ocultos
             setTimeout(() => {
+                // Solo inicializar si la sección de perfil está visible o se está creando en el DOM
                 if (!map) {
                     map = L.map('mapa-perfil').setView([lat, lng], 13);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -275,14 +310,12 @@
 
                     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
 
-                    // Evento al arrastrar el pin
                     marker.on('dragend', function (e) {
                         const posicion = marker.getLatLng();
                         document.getElementById('perfil-lat').value = posicion.lat;
                         document.getElementById('perfil-lng').value = posicion.lng;
                     });
 
-                    // Evento al dar clic en el mapa
                     map.on('click', function(e) {
                         marker.setLatLng(e.latlng);
                         document.getElementById('perfil-lat').value = e.latlng.lat;
@@ -291,7 +324,7 @@
                 } else {
                     map.setView([lat, lng], 13);
                     marker.setLatLng([lat, lng]);
-                    map.invalidateSize(); // Refresca el lienzo
+                    map.invalidateSize(); 
                 }
             }, 300);
         }
@@ -299,8 +332,7 @@
         async function guardarPerfil() {
             const btn = document.getElementById('btn-guardar-perfil');
             const textoOriginal = btn.innerText;
-            btn.innerText = "Guardando...";
-            btn.disabled = true;
+            btn.innerText = "Guardando..."; btn.disabled = true;
 
             const payload = {
                 user_id: usuarioActual.id,
@@ -311,7 +343,6 @@
                 longitud: document.getElementById('perfil-lng').value
             };
 
-            // Intentamos actualizar primero (Upsert es ideal, pero simulamos comprobando)
             const { data: existe } = await clienteSupabase.from('perfiles').select('id').eq('user_id', usuarioActual.id).single();
 
             let error = null;
@@ -323,26 +354,17 @@
                 error = res.error;
             }
 
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
+            btn.innerText = textoOriginal; btn.disabled = false;
 
             if (error) {
-                alert("Error al guardar perfil: " + error.message);
+                mostrarNotificacion("Error de Supabase: Verifica que creaste la tabla 'perfiles'. Detalle: " + error.message, "error");
             } else {
-                alert("¡Perfil actualizado con éxito! Esta información se usará para tus pedidos.");
+                mostrarNotificacion("¡Perfil guardado correctamente!", "exito");
             }
         }
 
-
-        // ----------------------------------------
-        // LÓGICA DE NEGOCIOS (INACTIVA)
-        // ----------------------------------------
         async function cargarMisNegocios() {
-            const { data, error } = await clienteSupabase
-                .from('anuncios')
-                .select('*')
-                .eq('user_id', usuarioActual.id)
-                .order('id', { ascending: false });
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             
             const contenedor = document.getElementById('contenedor-mis-negocios');
             
@@ -429,8 +451,9 @@
                 }
                 cerrarModalNegocio();
                 cargarMisNegocios();
+                mostrarNotificacion("¡Negocio guardado exitosamente!", "exito");
             } catch (error) {
-                alert("Hubo un problema al guardar: " + error.message);
+                mostrarNotificacion("Hubo un problema al guardar el negocio: " + error.message, "error");
             } finally {
                 btn.disabled = false; btn.innerText = "Guardar Cambios";
             }
