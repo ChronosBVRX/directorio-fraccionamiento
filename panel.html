@@ -22,25 +22,97 @@
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden">
         <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
-        <p class="text-gray-500">Por favor inicia sesión en la página principal para acceder a tu panel de control.</p>
+        <p class="text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tus negocios.</p>
+        <a href="login.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
     </div>
 
-    <div id="si-auth" class="hidden max-w-5xl mx-auto">
+    <div id="si-auth" class="hidden max-w-6xl mx-auto">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h1>
                 <p class="text-sm text-gray-500 mt-1">Administra la información que ven tus clientes.</p>
             </div>
-            <button onclick="abrirModalNegocio()" class="bg-tm-azul text-white px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro font-bold">+ Nuevo Negocio (Gratis)</button>
+            <button onclick="abrirModalNegocio()" class="bg-tm-azul text-white px-5 py-2.5 rounded-lg shadow hover:bg-tm-azul-oscuro font-bold transition">+ Nuevo Negocio (Gratis)</button>
         </div>
 
-        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-5">
+        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-5 mb-16">
             <div class="text-center py-10 text-gray-400">Cargando tus negocios...</div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-12 mb-10">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-black text-tm-azul-oscuro">Mejora tu visibilidad</h2>
+                <p class="text-gray-500 mt-2">Sube de nivel y obtén herramientas poderosas para vender más a través del directorio.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col">
+                    <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico (Nivel 0)</h3>
+                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
+                    <p class="text-sm text-gray-400 mt-1 mb-6 pb-6 border-b border-gray-100">Para empezar a tener presencia.</p>
+                    <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                        <li class="flex gap-2"><span>✔️</span> Nombre y descripción</li>
+                        <li class="flex gap-2"><span>✔️</span> Categoría en el directorio</li>
+                        <li class="flex gap-2"><span>✔️</span> Botón directo a tu WhatsApp</li>
+                        <li class="flex gap-2"><span>✔️</span> Dirección y horarios</li>
+                    </ul>
+                    <button disabled class="w-full bg-gray-100 text-gray-500 py-3 rounded-lg font-bold cursor-not-allowed">Plan Actual</button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-tm-azul/30 p-6 shadow-md flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-tm-azul text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Destacado</div>
+                    <h3 class="font-bold text-lg text-tm-azul uppercase tracking-wide">Plus (Nivel 1)</h3>
+                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$100 <span class="text-sm font-normal text-gray-400">/pago único</span></p>
+                    <p class="text-sm text-gray-400 mt-1 mb-6 pb-6 border-b border-gray-100">Atrae más clientes visualmente.</p>
+                    <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                        <li class="flex gap-2"><span>✔️</span> <span class="font-bold">Todo lo del Básico, más:</span></li>
+                        <li class="flex gap-2"><span>🖼️</span> <b>Imagen de portada</b> para destacar tu anuncio.</li>
+                        <li class="flex gap-2"><span>⭐</span> Borde resaltado en el directorio.</li>
+                        <li class="flex gap-2"><span>⬆️</span> Posicionamiento más alto que los básicos.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-blue-400 p-6 shadow-lg flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
+                    <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 2)</h3>
+                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/pago único</span></p>
+                    <p class="text-sm text-gray-400 mt-1 mb-6 pb-6 border-b border-gray-100">Muestra todo tu catálogo.</p>
+                    <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                        <li class="flex gap-2"><span>✔️</span> <span class="font-bold">Todo lo del Nivel 1, más:</span></li>
+                        <li class="flex gap-2"><span>📋</span> Botón para mostrar tu <b>Menú/Catálogo</b>.</li>
+                        <li class="flex gap-2"><span>💲</span> Precios e información detallada de tus productos.</li>
+                        <li class="flex gap-2"><span>⬆️</span> Posicionamiento superior.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 shadow-xl flex flex-col relative overflow-hidden transform scale-105 z-10">
+                    <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
+                    <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-4">Elite (Nivel 3)</h3>
+                    <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$500 <span class="text-sm font-normal text-gray-400">/pago único</span></p>
+                    <p class="text-sm text-gray-500 mt-1 mb-4 pb-4 border-b border-yellow-200">Convierte el directorio en tu app de pedidos.</p>
+                    <ul class="text-sm space-y-3 flex-grow text-gray-800 mb-6">
+                        <li class="flex gap-2"><span>✔️</span> <span class="font-bold">Todo lo del Nivel 2, más:</span></li>
+                        <li class="flex gap-2"><span>🛒</span> <b>Carrito de compras</b> interactivo para tus clientes.</li>
+                        <li class="flex gap-2"><span>📱</span> Recibe pedidos desglosados y calculados en tu WhatsApp.</li>
+                        <li class="flex gap-2"><span>💳</span> Mención de aceptación de pagos con tarjeta/transferencia.</li>
+                        <li class="flex gap-2"><span>👑</span> Aparece siempre en los primeros lugares.</li>
+                    </ul>
+                </div>
+
+            </div>
+            
+            <div class="mt-10 text-center bg-blue-50 rounded-xl p-6 border border-blue-100">
+                <p class="font-bold text-tm-azul-oscuro mb-3">¿Listo para subir de nivel y vender más?</p>
+                <a href="https://wa.me/4430000000?text=Hola,%20tengo%20una%20duda%20sobre%20los%20planes%20del%20Directorio." target="_blank" class="inline-block bg-tm-dorado hover:bg-yellow-600 text-white px-8 py-3 rounded-full font-bold transition shadow-md">
+                    Contactar a Soporte por WhatsApp
+                </a>
+            </div>
         </div>
     </div>
 
     <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
             <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-black">&times;</button>
             <h2 class="text-2xl font-black text-tm-azul mb-4" id="titulo-modal-negocio">Datos de tu Negocio</h2>
             
@@ -49,40 +121,41 @@
                 
                 <div>
                     <label class="text-xs font-bold uppercase text-gray-500">Nombre *</label>
-                    <input type="text" id="neg-nombre" required class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <input type="text" id="neg-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                 </div>
                 
                 <div>
                     <label class="text-xs font-bold uppercase text-gray-500">Categoría *</label>
-                    <select id="neg-categoria" class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <select id="neg-categoria" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                         <option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option>
                     </select>
                 </div>
                 
                 <div>
                     <label class="text-xs font-bold uppercase text-gray-500">Descripción Corta *</label>
-                    <textarea id="neg-desc" required rows="2" class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
+                    <textarea id="neg-desc" required rows="2" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none"></textarea>
                 </div>
                 
                 <div>
                     <label class="text-xs font-bold uppercase text-gray-500">Dirección Física</label>
-                    <input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs font-bold uppercase text-gray-500">Horarios</label>
-                        <input type="text" id="neg-horario" placeholder="Ej. L-V 9am a 6pm" class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                        <input type="text" id="neg-horario" placeholder="Ej. L-V 9am a 6pm" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                     <div>
                         <label class="text-xs font-bold uppercase text-gray-500">WhatsApp *</label>
-                        <input type="number" id="neg-wa" placeholder="Solo números" required class="w-full p-2.5 bg-gray-50 border rounded mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                        <input type="number" id="neg-wa" placeholder="Solo números" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                 </div>
                 
                 <div id="campo-imagen" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">
                     <label class="text-xs font-bold uppercase text-tm-azul">URL de Imagen (Desbloqueado Nivel 1+)</label>
-                    <input type="url" id="neg-img" placeholder="https://..." class="w-full p-2 bg-white border rounded mt-2 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <input type="url" id="neg-img" placeholder="https://..." class="w-full p-2.5 bg-white border rounded-lg mt-2 focus:ring-2 focus:ring-tm-azul outline-none">
+                    <p class="text-xs text-blue-600 mt-1">Sube tu imagen a sitios como Imgur y pega aquí el link directo (.jpg o .png)</p>
                 </div>
 
                 <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3.5 rounded-lg font-bold mt-6 transition shadow-md">Guardar Cambios</button>
@@ -91,12 +164,12 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE (Se comparte gracias a que está en el mismo dominio)
+        // CONFIGURACIÓN SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const ADMIN_WA = '4430000000'; // Tu número para ventas de nivel
+        const ADMIN_WA = '4430000000'; // PON TU NÚMERO DE TELÉFONO AQUÍ PARA RECIBIR MENSAJES DE UPGRADE
 
         let usuarioActual = null;
 
@@ -124,12 +197,12 @@
             const contenedor = document.getElementById('contenedor-mis-negocios');
             
             if (error || !data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-10 rounded-xl border border-dashed border-gray-300 text-center"><p class="text-gray-500">Aún no has publicado ningún negocio.</p></div>`;
+                contenedor.innerHTML = `<div class="bg-white p-10 rounded-2xl border border-dashed border-gray-300 text-center"><p class="text-gray-500">Aún no has publicado ningún negocio.</p></div>`;
                 return;
             }
 
             contenedor.innerHTML = data.map(n => `
-                <div class="bg-white p-5 md:p-6 rounded-xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
+                <div class="bg-white p-5 md:p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
                     <div class="flex-grow">
                         <div class="flex items-center gap-3">
                             <h3 class="font-bold text-xl text-tm-azul-oscuro">${n.nombre_negocio}</h3>
@@ -139,10 +212,11 @@
                     </div>
                     
                     <div class="flex gap-2 w-full md:w-auto shrink-0">
-                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="flex-1 md:flex-none border-2 border-tm-azul text-tm-azul px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-50 transition">Editar</button>
-                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20mejorar%20el%20nivel%20de%20mi%20negocio%20'${n.nombre_negocio}'%20en%20Vive%20Tres%20Marias." target="_blank" class="flex-1 md:flex-none bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition text-center shadow-sm flex items-center justify-center gap-1">
+                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="flex-1 md:flex-none border-2 border-tm-azul text-tm-azul px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-50 transition">Editar</button>
+                        
+                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20mejorar%20el%20nivel%20de%20mi%20negocio%20'${n.nombre_negocio}'%20en%20Vive%20Tres%20Marias." target="_blank" class="flex-1 md:flex-none bg-tm-dorado hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition text-center shadow-sm flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            Mejorar Nivel
+                            Mejorar Plan
                         </a>
                     </div>
                 </div>
@@ -155,7 +229,7 @@
             document.getElementById('titulo-modal-negocio').innerText = "Nuevo Negocio";
             document.querySelector('#modal-negocio form').reset();
             document.getElementById('neg-id').value = '';
-            document.getElementById('campo-imagen').classList.add('hidden'); // Oculto en Nivel 0
+            document.getElementById('campo-imagen').classList.add('hidden');
         }
 
         function editarNegocio(n) {
@@ -169,7 +243,7 @@
             document.getElementById('neg-horario').value = n.horarios || '';
             document.getElementById('neg-wa').value = n.enlace_whatsapp || '';
             
-            // Si el negocio tiene nivel 1 o más, le mostramos el campo de imagen
+            // Mostrar imagen solo si tiene plan de pago
             if(n.nivel_pago >= 1) {
                 document.getElementById('campo-imagen').classList.remove('hidden');
                 document.getElementById('neg-img').value = n.imagen_url || '';
@@ -201,12 +275,12 @@
                     if(error) throw error;
                 } else {
                     payload.user_id = usuarioActual.id;
-                    payload.nivel_pago = 0; // Por defecto
+                    payload.nivel_pago = 0; // Por defecto inicia gratis
                     const { error } = await clienteSupabase.from('anuncios').insert([payload]);
                     if(error) throw error;
                 }
                 cerrarModalNegocio();
-                cargarMisNegocios(); // Recargar la lista en el panel
+                cargarMisNegocios();
             } catch (error) {
                 alert("Hubo un problema al guardar: " + error.message);
             } finally {
