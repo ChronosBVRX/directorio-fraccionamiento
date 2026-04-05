@@ -28,9 +28,9 @@
                 <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-12 w-auto">
             </a>
             
-            <div id="nav-botones" class="flex gap-2">
+            <div id="nav-botones" class="flex gap-2 items-center">
                 <button onclick="mostrarVista('directorio')" id="btn-inicio" class="hidden text-tm-azul font-bold text-sm px-4 py-2 hover:underline">Inicio</button>
-                <button onclick="abrirModalAuth()" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition">Entrar / Registrarse</button>
+                <a href="login.html" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition inline-block">Entrar / Registrarse</a>
                 <button onclick="mostrarVista('panel')" id="btn-panel" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold text-sm transition">Mi Panel</button>
                 <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-sm text-tm-azul transition">Salir</button>
             </div>
@@ -52,22 +52,6 @@
 
     <div id="vista-iframe-container" class="hidden flex-grow w-full">
         <iframe src="panel.html" id="panel-iframe" class="w-full h-full min-h-[85vh] border-none"></iframe>
-    </div>
-
-    <div id="modal-auth" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl p-8 max-w-sm w-full relative">
-            <button onclick="document.getElementById('modal-auth').classList.add('hidden')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
-            <div class="flex mb-6 border-b">
-                <button onclick="setModoAuth(false)" id="tab-login" class="flex-1 pb-2 font-bold text-tm-azul border-b-2 border-tm-azul">Entrar</button>
-                <button onclick="setModoAuth(true)" id="tab-registro" class="flex-1 pb-2 font-bold text-gray-400 border-b-2 border-transparent">Registro</button>
-            </div>
-            <div id="auth-msg" class="hidden w-full p-3 rounded mb-4 text-sm font-bold text-center"></div>
-            <form onsubmit="event.preventDefault(); procesarAuth();">
-                <input type="email" id="auth-email" placeholder="Correo" required class="w-full p-3 border rounded mb-3">
-                <input type="password" id="auth-password" placeholder="Contraseña" required class="w-full p-3 border rounded mb-4">
-                <button type="submit" id="auth-btn-submit" class="w-full bg-tm-azul text-white py-3 rounded font-bold">Entrar</button>
-            </form>
-        </div>
     </div>
 
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -94,7 +78,6 @@
 
         let todosLosAnuncios = [];
         let usuarioActual = null;
-        let esModoRegistro = false;
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
@@ -131,10 +114,13 @@
 
         // CARGA DE DATOS PÚBLICOS
         async function cargarDatos() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            if (error) {
+                console.error("Error al cargar datos:", error);
+            }
             todosLosAnuncios = data || [];
             
-            if(document.getElementById('vista-directorio').classList.contains('hidden') === false) {
+            if(!document.getElementById('vista-directorio').classList.contains('hidden')) {
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
             }
@@ -156,16 +142,16 @@
                 
                 let botones = '';
                 if(recibePedidos) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-2 rounded font-bold text-sm">Menú y Pedir</button>`;
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-2 rounded font-bold text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
                 } else if(tieneMenu) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-2 rounded font-bold text-sm">Ver Menú</button>`;
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-2 rounded font-bold text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
-                    botones = `<a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-2 rounded font-bold text-sm">Contactar</a>`;
+                    botones = `<a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-2 rounded font-bold text-sm hover:bg-green-600 transition">Contactar</a>`;
                 }
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (recibePedidos ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col">
-                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-40 object-cover">` : ''}
+                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (recibePedidos ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-lg transition">
+                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-40 object-cover bg-gray-100">` : ''}
                         <div class="p-5 flex flex-col flex-grow">
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
                             <h3 class="mt-2 font-bold text-lg text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
@@ -192,7 +178,13 @@
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
             
             const contenedorLista = document.getElementById('menu-lista');
-            const menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []);
+            
+            let menuArr = [];
+            try {
+                menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []);
+            } catch (e) {
+                console.error("Error al parsear el menú:", e);
+            }
 
             if(menuArr.length === 0) {
                 contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10">Este negocio aún no ha agregado productos.</p>`;
@@ -205,10 +197,10 @@
                             <p class="text-tm-dorado font-bold mt-1">$${item.precio}</p>
                         </div>
                         ${permitePedidos ? `
-                        <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="w-8 h-8 bg-white rounded shadow-sm text-red-500 font-bold">-</button>
+                        <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-1 shadow-inner">
+                            <button onclick="cambiarCantidad(${index}, -1)" class="w-8 h-8 bg-white rounded shadow-sm text-red-500 font-bold hover:bg-gray-50">-</button>
                             <span id="cant-${index}" class="font-bold w-4 text-center">0</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="w-8 h-8 bg-white rounded shadow-sm text-tm-azul font-bold">+</button>
+                            <button onclick="cambiarCantidad(${index}, 1)" class="w-8 h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50">+</button>
                         </div>` : ''}
                     </div>
                 `).join('');
@@ -224,23 +216,27 @@
         }
 
         function cerrarMenu() { document.getElementById('modal-menu').classList.add('hidden'); }
+        
         function cambiarCantidad(index, cambio) {
             if(!carritoActual[index]) carritoActual[index] = 0;
             carritoActual[index] = Math.max(0, carritoActual[index] + cambio);
             document.getElementById(`cant-${index}`).innerText = carritoActual[index];
             actualizarTotal();
         }
+        
         function actualizarTotal() {
             let total = 0;
             const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
             for (let i in carritoActual) total += carritoActual[i] * menu[i].precio;
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
+        
         function enviarPedidoWA() {
             let total = 0;
             let resumen = `Hola! Quiero hacer un pedido a *${negocioActualPedido.nombre_negocio}*:%0A%0A`;
             const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
             let tieneItems = false;
+            
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
                     tieneItems = true;
@@ -255,29 +251,10 @@
             cerrarMenu();
         }
 
-        // AUTH
-        function abrirModalAuth() { document.getElementById('modal-auth').classList.remove('hidden'); setModoAuth(false); }
-        function setModoAuth(reg) { esModoRegistro = reg; document.getElementById('auth-btn-submit').innerText = reg ? 'Registrarme' : 'Entrar'; }
-        async function procesarAuth() {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            const msg = document.getElementById('auth-msg'); msg.classList.add('hidden');
-            try {
-                if(esModoRegistro) {
-                    const { error } = await clienteSupabase.auth.signUp({email:e, password:p});
-                    if(error) throw error;
-                    msg.innerText = "¡Registro exitoso!"; msg.className = "w-full p-3 rounded mb-4 text-sm font-bold text-center bg-green-100 text-green-700";
-                    setTimeout(() => { document.getElementById('modal-auth').classList.add('hidden'); mostrarVista('panel'); }, 1500);
-                } else {
-                    const { error } = await clienteSupabase.auth.signInWithPassword({email:e, password:p});
-                    if(error) throw error;
-                    document.getElementById('modal-auth').classList.add('hidden');
-                    mostrarVista('panel');
-                }
-            } catch (err) {
-                msg.innerText = "Error: " + err.message; msg.className = "w-full p-3 rounded mb-4 text-sm font-bold text-center bg-red-100 text-red-700";
-            }
+        async function cerrarSesion() { 
+            await clienteSupabase.auth.signOut(); 
+            window.location.reload(); 
         }
-        async function cerrarSesion() { await clienteSupabase.auth.signOut(); }
 
     </script>
 </body>
