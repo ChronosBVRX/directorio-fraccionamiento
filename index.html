@@ -17,18 +17,12 @@
         }
     </script>
     <style>
-        /* Estilos del botón activo */
         .active-filter { 
             background-color: #22527b !important; 
             border-color: #22527b !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        /* Fuerza el color blanco en el texto cuando el filtro está activo */
-        .active-filter .label-categoria { 
-            color: white !important; 
-        }
-        
-        /* Ocultar barra de scroll para un look de app móvil */
+        .active-filter .label-categoria { color: white !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -45,14 +39,16 @@
                 
                 <div id="contenedor-switch" class="hidden items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
                     <span class="text-xs sm:text-sm font-bold text-tm-azul" id="label-modo-comprar">🛍️ Comprar</span>
-                    
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
                         <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
                     </label>
-                    
                     <span class="text-xs sm:text-sm font-bold text-gray-400" id="label-modo-vender">🏪 Vender</span>
                 </div>
+
+                <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-xs sm:text-sm px-2 py-1.5 hover:underline flex items-center gap-1 transition">
+                    <span class="text-lg">👤</span> <span class="hidden sm:inline">Mi Perfil</span>
+                </button>
 
                 <a href="login.html" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-xs sm:text-sm transition inline-block text-center">Entrar / Registrarse</a>
                 
@@ -63,32 +59,26 @@
 
     <div id="vista-directorio" class="block flex-grow">
         <nav class="max-w-7xl mx-auto mt-4 sm:mt-6 px-2 sm:px-4 flex gap-2 sm:gap-3 overflow-x-auto pb-4 pt-2 border-b border-gray-200 hide-scrollbar snap-x">
-            
             <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
                 <span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span>
                 <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span>
             </button>
-            
             <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
                 <span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span>
                 <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span>
             </button>
-            
             <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
                 <span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span>
                 <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span>
             </button>
-            
             <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
                 <span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span>
                 <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span>
             </button>
-            
             <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
                 <span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span>
                 <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span>
             </button>
-
         </nav>
 
         <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
@@ -134,7 +124,6 @@
     </a>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -144,46 +133,58 @@
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
-        // AUTH LISTENER
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             
-            // Ocultar botón de login si hay sesión
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
-            
-            // Mostrar el Switch y botón de salir si hay sesión
             document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
             if(usuarioActual) {
                 cargarDatos(); 
+                // Asegurar que se muestre Mi Perfil si el switch está en Comprar
+                const isVendedor = document.getElementById('toggle-modo').checked;
+                document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
             } else {
-                // Si cierra sesión, forzamos la vista del directorio y reiniciamos el switch
                 document.getElementById('toggle-modo').checked = false;
+                document.getElementById('btn-perfil').classList.add('hidden');
                 cambiarModoPlataforma();
             }
         });
 
-        // NUEVA LÓGICA DEL SWITCH DE MODO
+        // NUEVA LÓGICA DEL SWITCH
         function cambiarModoPlataforma() {
             const isVendedor = document.getElementById('toggle-modo').checked;
             const labelComprar = document.getElementById('label-modo-comprar');
             const labelVender = document.getElementById('label-modo-vender');
+            const btnPerfil = document.getElementById('btn-perfil');
+            const iframe = document.getElementById('panel-iframe');
 
             if(isVendedor) {
-                // Cambiar a modo Vendedor (Panel)
+                // MODO VENDEDOR: Cargar iframe con vista de negocios
+                iframe.src = "panel.html?view=negocio";
                 mostrarVista('panel');
+                
+                if(btnPerfil) btnPerfil.classList.add('hidden');
                 labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
                 labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
             } else {
-                // Cambiar a modo Comprador (Directorio)
+                // MODO COMPRADOR: Mostrar directorio
                 mostrarVista('directorio');
+                
+                if(btnPerfil && usuarioActual) btnPerfil.classList.remove('hidden');
                 labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
                 labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
             }
         }
 
-        // NAVEGACIÓN INTERNA
+        // FUNCIÓN PARA ABRIR EL PERFIL COMO USUARIO
+        function abrirPerfil() {
+            const iframe = document.getElementById('panel-iframe');
+            iframe.src = "panel.html?view=perfil";
+            mostrarVista('panel');
+        }
+
         function mostrarVista(vista) {
             if(vista === 'directorio') {
                 document.getElementById('vista-directorio').classList.remove('hidden');
@@ -195,12 +196,9 @@
             }
         }
 
-        // CARGA DE DATOS PÚBLICOS
         async function cargarDatos() {
             const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
-            if (error) {
-                console.error("Error al cargar datos:", error);
-            }
+            if (error) console.error("Error al cargar datos:", error);
             todosLosAnuncios = data || [];
             
             if(!document.getElementById('vista-directorio').classList.contains('hidden')) {
@@ -256,7 +254,6 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // LÓGICA DE MENÚ Y CARRITO
         function abrirMenu(negocio, permitePedidos) {
             negocioActualPedido = negocio;
             carritoActual = {};
@@ -264,13 +261,8 @@
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
             
             const contenedorLista = document.getElementById('menu-lista');
-            
             let menuArr = [];
-            try {
-                menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []);
-            } catch (e) {
-                console.error("Error al parsear el menú:", e);
-            }
+            try { menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []); } catch (e) {}
 
             if(menuArr.length === 0) {
                 contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10 text-sm">Este negocio aún no ha agregado productos.</p>`;
@@ -322,15 +314,12 @@
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
         
-        // Procesar pedido a Supabase
         async function procesarPedido() {
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
             const direccion = document.getElementById('cliente-direccion').value.trim();
 
-            if (!nombre || !telefono || !direccion) {
-                return alert("Por favor, llena todos tus datos de envío (Nombre, Teléfono y Dirección).");
-            }
+            if (!nombre || !telefono || !direccion) return alert("Por favor, llena todos tus datos de envío.");
 
             let total = 0;
             let detallesPedido = [];
@@ -340,41 +329,24 @@
                 if(carritoActual[i] > 0) {
                     let subtotal = carritoActual[i] * menu[i].precio;
                     total += subtotal;
-                    detallesPedido.push({
-                        cantidad: carritoActual[i],
-                        producto: menu[i].nombre,
-                        precio_unitario: menu[i].precio,
-                        subtotal: subtotal
-                    });
+                    detallesPedido.push({ cantidad: carritoActual[i], producto: menu[i].nombre, precio_unitario: menu[i].precio, subtotal: subtotal });
                 }
             }
 
-            if(detallesPedido.length === 0) {
-                return alert("Por favor agrega productos a tu pedido.");
-            }
+            if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
 
             const btn = document.getElementById('btn-confirmar-pedido');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Enviando...';
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = 'Enviando...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
 
             const { data, error } = await clienteSupabase.from('pedidos').insert([{
-                negocio_id: negocioActualPedido.id, 
-                cliente_nombre: nombre,
-                cliente_telefono: telefono,
-                cliente_direccion: direccion,
-                detalles_pedido: detallesPedido,
-                total: total,
-                estado: 'pendiente'
+                negocio_id: negocioActualPedido.id, cliente_nombre: nombre, cliente_telefono: telefono,
+                cliente_direccion: direccion, detalles_pedido: detallesPedido, total: total, estado: 'pendiente'
             }]);
 
-            btn.innerHTML = textoOriginal;
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             if (error) {
-                console.error("Error al procesar el pedido:", error);
                 alert("Hubo un error al enviar tu pedido. Intenta nuevamente.");
             } else {
                 alert("¡Pedido enviado con éxito! Los repartidores han sido notificados.");
@@ -386,7 +358,6 @@
             await clienteSupabase.auth.signOut(); 
             window.location.reload(); 
         }
-
     </script>
 </body>
 </html>
