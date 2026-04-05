@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vive Tres Marías - Directorio & Pedidos</title>
+    <title>Vive Tres Marías - Directorio</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
         .active-filter { background-color: #22527b !important; color: white !important; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-tm-gris">
+<body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col">
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
         <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
@@ -29,6 +29,7 @@
             </a>
             
             <div id="nav-botones" class="flex gap-2">
+                <button onclick="mostrarVista('directorio')" id="btn-inicio" class="hidden text-tm-azul font-bold text-sm px-4 py-2 hover:underline">Inicio</button>
                 <button onclick="abrirModalAuth()" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-2 rounded font-bold text-sm transition">Entrar / Registrarse</button>
                 <button onclick="mostrarVista('panel')" id="btn-panel" class="hidden bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded font-bold text-sm transition">Mi Panel</button>
                 <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-sm text-tm-azul transition">Salir</button>
@@ -36,7 +37,7 @@
         </div>
     </header>
 
-    <div id="vista-directorio" class="block">
+    <div id="vista-directorio" class="block flex-grow">
         <nav class="max-w-7xl mx-auto mt-6 px-4 flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
             <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Todos</button>
             <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn px-6 py-2 rounded-md border border-tm-azul text-sm font-bold text-tm-azul transition">Alimentos</button>
@@ -49,13 +50,8 @@
         </main>
     </div>
 
-    <div id="vista-panel" class="hidden max-w-5xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-black text-tm-azul-oscuro">Mis Negocios</h1>
-            <button onclick="abrirModalNegocio()" class="bg-tm-azul text-white px-5 py-2.5 rounded shadow hover:bg-tm-azul-oscuro font-bold">+ Nuevo Negocio (Gratis)</button>
-        </div>
-        <div id="contenedor-mis-negocios" class="grid grid-cols-1 gap-4">
-            </div>
+    <div id="vista-iframe-container" class="hidden flex-grow w-full">
+        <iframe src="panel.html" id="panel-iframe" class="w-full h-full min-h-[85vh] border-none"></iframe>
     </div>
 
     <div id="modal-auth" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -74,52 +70,18 @@
         </div>
     </div>
 
-    <div id="modal-negocio" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
-            <button onclick="cerrarModalNegocio()" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
-            <h2 class="text-2xl font-black text-tm-azul mb-4" id="titulo-modal-negocio">Datos de tu Negocio</h2>
-            <div id="negocio-msg" class="hidden w-full p-3 rounded mb-4 text-sm font-bold text-center"></div>
-            
-            <form onsubmit="event.preventDefault(); guardarNegocio();" class="space-y-3">
-                <input type="hidden" id="neg-id"> <div><label class="text-xs font-bold uppercase">Nombre *</label><input type="text" id="neg-nombre" required class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold uppercase">Categoría *</label>
-                    <select id="neg-categoria" class="w-full p-2 border rounded">
-                        <option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option>
-                    </select>
-                </div>
-                <div><label class="text-xs font-bold uppercase">Descripción *</label><textarea id="neg-desc" required rows="2" class="w-full p-2 border rounded"></textarea></div>
-                <div><label class="text-xs font-bold uppercase">Dirección Física</label><input type="text" id="neg-dir" placeholder="Ej. Av. Principal 123" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold uppercase">Horarios</label><input type="text" id="neg-horario" placeholder="Ej. Lunes a Viernes 9am - 6pm" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold uppercase">WhatsApp Ventas (Solo números) *</label><input type="number" id="neg-wa" required class="w-full p-2 border rounded"></div>
-                
-                <div id="campo-imagen" class="hidden bg-blue-50 p-3 rounded border border-blue-100">
-                    <label class="text-xs font-bold uppercase text-tm-azul">URL de Imagen (Nivel 1+)</label>
-                    <input type="url" id="neg-img" placeholder="https://..." class="w-full p-2 border rounded mt-1">
-                </div>
-
-                <button type="submit" id="neg-btn-submit" class="w-full bg-tm-dorado text-white py-3 rounded font-bold mt-4">Guardar Negocio</button>
-            </form>
-        </div>
-    </div>
-
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-md w-full relative flex flex-col max-h-[85vh] overflow-hidden">
             <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                 <h2 id="menu-titulo" class="font-black text-xl text-tm-azul">Menú</h2>
                 <button onclick="cerrarMenu()" class="text-2xl text-gray-500 hover:text-black">&times;</button>
             </div>
-            
-            <div id="menu-lista" class="p-4 overflow-y-auto flex-grow space-y-4">
-                </div>
-
+            <div id="menu-lista" class="p-4 overflow-y-auto flex-grow space-y-4"></div>
             <div id="menu-carrito" class="hidden p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                 <div class="flex justify-between items-center mb-3 font-bold text-lg">
-                    <span>Total:</span>
-                    <span id="menu-total" class="text-tm-azul">$0.00</span>
+                    <span>Total:</span><span id="menu-total" class="text-tm-azul">$0.00</span>
                 </div>
-                <button onclick="enviarPedidoWA()" class="w-full bg-[#25D366] text-white py-3 rounded-lg font-bold flex justify-center items-center gap-2">
-                    Hacer Pedido por WhatsApp
-                </button>
+                <button onclick="enviarPedidoWA()" class="w-full bg-[#25D366] text-white py-3 rounded-lg font-bold flex justify-center items-center gap-2">Hacer Pedido por WhatsApp</button>
             </div>
         </div>
     </div>
@@ -130,13 +92,9 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const ADMIN_WA = '4430000000'; // PON AQUÍ TU NÚMERO DE ADMIN PARA VENDER SUSCRIPCIONES
-
         let todosLosAnuncios = [];
         let usuarioActual = null;
         let esModoRegistro = false;
-
-        // ESTADO DEL CARRITO (Para el Nivel 3)
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
@@ -147,42 +105,41 @@
             document.getElementById('btn-panel').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
-            if(usuarioActual) cargarDatos(); 
-            else mostrarVista('directorio');
+            if(usuarioActual) {
+                // Notificamos al iframe que la sesión cambió (por si está abierto)
+                const iframe = document.getElementById('panel-iframe');
+                if(iframe) iframe.contentWindow.location.reload();
+                cargarDatos(); 
+            } else {
+                mostrarVista('directorio');
+            }
         });
 
         // NAVEGACIÓN
         function mostrarVista(vista) {
-            document.getElementById('vista-directorio').style.display = vista === 'directorio' ? 'block' : 'none';
-            document.getElementById('vista-panel').style.display = vista === 'panel' ? 'block' : 'none';
-            if(vista === 'directorio') cargarDatos();
-            if(vista === 'panel') renderizarPanel();
+            if(vista === 'directorio') {
+                document.getElementById('vista-directorio').classList.remove('hidden');
+                document.getElementById('vista-iframe-container').classList.add('hidden');
+                document.getElementById('btn-inicio').classList.add('hidden');
+                cargarDatos(); // Recargamos para ver si hizo cambios en el panel
+            } else {
+                document.getElementById('vista-directorio').classList.add('hidden');
+                document.getElementById('vista-iframe-container').classList.remove('hidden');
+                document.getElementById('btn-inicio').classList.remove('hidden');
+            }
         }
 
-        // CARGA DE DATOS PRINCIPAL
+        // CARGA DE DATOS PÚBLICOS
         async function cargarDatos() {
             const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             todosLosAnuncios = data || [];
             
-            // Inyectamos un menú de prueba a los que tengan nivel 2 o 3 si no tienen (solo para visualización)
-            todosLosAnuncios.forEach(a => {
-                if(a.nivel_pago >= 2 && (!a.menu || a.menu.length === 0)) {
-                    a.menu = [
-                        { nombre: "Servicio/Platillo Especial", desc: "Descripción detallada", precio: 150 },
-                        { nombre: "Paquete Básico", desc: "Ideal para empezar", precio: 250 }
-                    ];
-                }
-            });
-
-            if(document.getElementById('vista-directorio').style.display !== 'none') {
+            if(document.getElementById('vista-directorio').classList.contains('hidden') === false) {
                 const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
                 filtrar(filtroActivo);
-            } else {
-                renderizarPanel();
             }
         }
 
-        // RENDERIZAR DIRECTORIO
         function renderizar(lista) {
             const contenedor = document.getElementById('contenedor-anuncios');
             contenedor.innerHTML = '';
@@ -197,7 +154,6 @@
                 const tieneMenu = a.nivel_pago >= 2;
                 const recibePedidos = a.nivel_pago === 3;
                 
-                // Botonera condicional
                 let botones = '';
                 if(recibePedidos) {
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-2 rounded font-bold text-sm">Menú y Pedir</button>`;
@@ -214,13 +170,9 @@
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
                             <h3 class="mt-2 font-bold text-lg text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
                             <p class="text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
-                            
                             ${a.direccion ? `<p class="text-xs text-gray-500 mt-3 flex items-center gap-1">📍 ${a.direccion}</p>` : ''}
                             ${a.horarios ? `<p class="text-xs text-gray-500 mt-1 flex items-center gap-1">🕒 ${a.horarios}</p>` : ''}
-                            
-                            <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                                ${botones}
-                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">${botones}</div>
                         </div>
                     </div>`;
             });
@@ -232,105 +184,15 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // RENDERIZAR PANEL DE DUEÑO
-        function renderizarPanel() {
-            const contenedor = document.getElementById('contenedor-mis-negocios');
-            const misNegocios = todosLosAnuncios.filter(a => a.user_id === usuarioActual.id);
-            
-            if(misNegocios.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-8 rounded-xl border text-center"><p>No has publicado ningún negocio.</p></div>`;
-                return;
-            }
-
-            contenedor.innerHTML = misNegocios.map(n => `
-                <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-lg text-tm-azul-oscuro">${n.nombre_negocio}</h3>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-bold">Nivel ${n.nivel_pago}</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-1">${n.descripcion}</p>
-                    </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick='editarNegocio(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="flex-1 sm:flex-none border border-tm-azul text-tm-azul px-4 py-2 rounded text-sm font-bold hover:bg-blue-50">Editar Datos</button>
-                        <a href="https://wa.me/${ADMIN_WA}?text=Hola,%20quiero%20subir%20mi%20negocio%20'${n.nombre_negocio}'%20al%20siguiente%20nivel." target="_blank" class="flex-1 sm:flex-none bg-tm-dorado text-white px-4 py-2 rounded text-sm font-bold hover:bg-yellow-600 text-center">⭐ Subir de Nivel</a>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // LÓGICA DE FORMULARIO (CREAR/EDITAR)
-        function abrirModalNegocio() {
-            document.getElementById('modal-negocio').classList.remove('hidden');
-            document.getElementById('titulo-modal-negocio').innerText = "Nuevo Negocio";
-            document.querySelector('#modal-negocio form').reset();
-            document.getElementById('neg-id').value = '';
-            document.getElementById('campo-imagen').classList.add('hidden'); // Oculto por defecto en nivel 0
-        }
-
-        function editarNegocio(n) {
-            abrirModalNegocio();
-            document.getElementById('titulo-modal-negocio').innerText = "Editar Negocio";
-            document.getElementById('neg-id').value = n.id;
-            document.getElementById('neg-nombre').value = n.nombre_negocio || '';
-            document.getElementById('neg-categoria').value = n.categoria || 'Servicios';
-            document.getElementById('neg-desc').value = n.descripcion || '';
-            document.getElementById('neg-dir').value = n.direccion || '';
-            document.getElementById('neg-horario').value = n.horarios || '';
-            document.getElementById('neg-wa').value = n.enlace_whatsapp || '';
-            
-            if(n.nivel_pago >= 1) {
-                document.getElementById('campo-imagen').classList.remove('hidden');
-                document.getElementById('neg-img').value = n.imagen_url || '';
-            }
-        }
-
-        function cerrarModalNegocio() { document.getElementById('modal-negocio').classList.add('hidden'); }
-
-        async function guardarNegocio() {
-            const btn = document.getElementById('neg-btn-submit');
-            btn.disabled = true; btn.innerText = "Guardando...";
-            
-            const id = document.getElementById('neg-id').value;
-            const payload = {
-                nombre_negocio: document.getElementById('neg-nombre').value,
-                categoria: document.getElementById('neg-categoria').value,
-                descripcion: document.getElementById('neg-desc').value,
-                direccion: document.getElementById('neg-dir').value,
-                horarios: document.getElementById('neg-horario').value,
-                enlace_whatsapp: document.getElementById('neg-wa').value,
-                imagen_url: document.getElementById('neg-img')?.value || null
-            };
-
-            try {
-                if (id) {
-                    const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-                    if(error) throw error;
-                } else {
-                    payload.user_id = usuarioActual.id;
-                    payload.nivel_pago = 0; // Siempre inician en 0
-                    const { error } = await clienteSupabase.from('anuncios').insert([payload]);
-                    if(error) throw error;
-                }
-                cerrarModalNegocio();
-                cargarDatos(); // Recarga todo
-            } catch (error) {
-                alert("Error: " + error.message);
-            } finally {
-                btn.disabled = false; btn.innerText = "Guardar Negocio";
-            }
-        }
-
-        // LOGICA DE MENÚ Y CARRITO (NIVEL 2 Y 3)
+        // LÓGICA DE MENÚ Y CARRITO
         function abrirMenu(negocio, permitePedidos) {
             negocioActualPedido = negocio;
-            carritoActual = {}; // Limpia carrito
-
+            carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
             
             const contenedorLista = document.getElementById('menu-lista');
-            const menuArr = negocio.menu || [];
+            const menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []);
 
             if(menuArr.length === 0) {
                 contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10">Este negocio aún no ha agregado productos.</p>`;
@@ -344,9 +206,9 @@
                         </div>
                         ${permitePedidos ? `
                         <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm text-lg font-bold text-red-500">-</button>
+                            <button onclick="cambiarCantidad(${index}, -1)" class="w-8 h-8 bg-white rounded shadow-sm text-red-500 font-bold">-</button>
                             <span id="cant-${index}" class="font-bold w-4 text-center">0</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm text-lg font-bold text-tm-azul">+</button>
+                            <button onclick="cambiarCantidad(${index}, 1)" class="w-8 h-8 bg-white rounded shadow-sm text-tm-azul font-bold">+</button>
                         </div>` : ''}
                     </div>
                 `).join('');
@@ -362,32 +224,23 @@
         }
 
         function cerrarMenu() { document.getElementById('modal-menu').classList.add('hidden'); }
-
         function cambiarCantidad(index, cambio) {
             if(!carritoActual[index]) carritoActual[index] = 0;
-            carritoActual[index] += cambio;
-            if(carritoActual[index] < 0) carritoActual[index] = 0;
-            
+            carritoActual[index] = Math.max(0, carritoActual[index] + cambio);
             document.getElementById(`cant-${index}`).innerText = carritoActual[index];
             actualizarTotal();
         }
-
         function actualizarTotal() {
             let total = 0;
-            const menu = negocioActualPedido.menu;
-            for (let i in carritoActual) {
-                total += carritoActual[i] * menu[i].precio;
-            }
+            const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
+            for (let i in carritoActual) total += carritoActual[i] * menu[i].precio;
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
-
         function enviarPedidoWA() {
             let total = 0;
             let resumen = `Hola! Quiero hacer un pedido a *${negocioActualPedido.nombre_negocio}*:%0A%0A`;
-            
-            const menu = negocioActualPedido.menu;
+            const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
             let tieneItems = false;
-
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
                     tieneItems = true;
@@ -396,26 +249,33 @@
                     resumen += `- ${carritoActual[i]}x ${menu[i].nombre} ($${subtotal})%0A`;
                 }
             }
-
             if(!tieneItems) return alert("Por favor agrega productos a tu pedido.");
-
             resumen += `%0A*Total: $${total.toFixed(2)}*`;
-            
-            // Si quieres indicar que puede pagar con tarjeta:
-            if(negocioActualPedido.acepta_tarjeta) resumen += `%0A%0A(Mencioné que aceptan pago con tarjeta/transferencia)`;
-
             window.open(`https://wa.me/${negocioActualPedido.enlace_whatsapp}?text=${resumen}`, '_blank');
             cerrarMenu();
         }
 
-        // AUTH BASIC
+        // AUTH
         function abrirModalAuth() { document.getElementById('modal-auth').classList.remove('hidden'); setModoAuth(false); }
         function setModoAuth(reg) { esModoRegistro = reg; document.getElementById('auth-btn-submit').innerText = reg ? 'Registrarme' : 'Entrar'; }
         async function procesarAuth() {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            if(esModoRegistro) await clienteSupabase.auth.signUp({email:e, password:p});
-            else await clienteSupabase.auth.signInWithPassword({email:e, password:p});
-            document.getElementById('modal-auth').classList.add('hidden');
+            const msg = document.getElementById('auth-msg'); msg.classList.add('hidden');
+            try {
+                if(esModoRegistro) {
+                    const { error } = await clienteSupabase.auth.signUp({email:e, password:p});
+                    if(error) throw error;
+                    msg.innerText = "¡Registro exitoso!"; msg.className = "w-full p-3 rounded mb-4 text-sm font-bold text-center bg-green-100 text-green-700";
+                    setTimeout(() => { document.getElementById('modal-auth').classList.add('hidden'); mostrarVista('panel'); }, 1500);
+                } else {
+                    const { error } = await clienteSupabase.auth.signInWithPassword({email:e, password:p});
+                    if(error) throw error;
+                    document.getElementById('modal-auth').classList.add('hidden');
+                    mostrarVista('panel');
+                }
+            } catch (err) {
+                msg.innerText = "Error: " + err.message; msg.className = "w-full p-3 rounded mb-4 text-sm font-bold text-center bg-red-100 text-red-700";
+            }
         }
         async function cerrarSesion() { await clienteSupabase.auth.signOut(); }
 
