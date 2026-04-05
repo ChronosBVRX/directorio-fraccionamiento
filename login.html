@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - Vive Tres Marías</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+          theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans text-tm-gris min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b-4 border-tm-azul py-4 px-6 flex justify-center sm:justify-start">
+        <a href="index.html">
+            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 w-auto">
+        </a>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
+            
+            <div class="flex border-b bg-gray-50">
+                <button onclick="cambiarPestaña('login')" id="tab-login" class="flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white">Iniciar Sesión</button>
+                <button onclick="cambiarPestaña('registro')" id="tab-registro" class="flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition">Crear Cuenta</button>
+            </div>
+
+            <div class="p-8">
+                <div id="auth-msg" class="hidden w-full p-3 rounded-lg mb-6 text-sm font-bold text-center"></div>
+
+                <form id="form-login" onsubmit="event.preventDefault(); procesarLogin();" class="space-y-4 block">
+                    <h2 class="text-2xl font-black text-tm-azul-oscuro text-center mb-6">Bienvenido de vuelta</h2>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Correo Electrónico</label>
+                        <input type="email" id="login-email" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Contraseña</label>
+                        <input type="password" id="login-password" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <button type="submit" id="btn-login-submit" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Entrar a mi cuenta</button>
+                </form>
+
+                <form id="form-registro" onsubmit="event.preventDefault(); procesarRegistro();" class="space-y-4 hidden">
+                    <h2 class="text-2xl font-black text-tm-azul-oscuro text-center mb-6">Únete a la plataforma</h2>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre Completo *</label>
+                        <input type="text" id="reg-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp de Contacto *</label>
+                        <input type="number" id="reg-telefono" placeholder="Ej. 4431234567" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Correo Electrónico *</label>
+                        <input type="email" id="reg-email" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Contraseña *</label>
+                        <input type="password" id="reg-password" minlength="6" placeholder="Mínimo 6 caracteres" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    
+                    <button type="submit" id="btn-reg-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Comenzar Ahora</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Si ya está logueado, lo mandamos al index para que vea su panel
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
+            if (session) window.location.href = 'index.html';
+        });
+
+        function cambiarPestaña(vista) {
+            document.getElementById('auth-msg').classList.add('hidden');
+            
+            const btnLogin = document.getElementById('tab-login');
+            const btnReg = document.getElementById('tab-registro');
+            const formLogin = document.getElementById('form-login');
+            const formReg = document.getElementById('form-registro');
+
+            if (vista === 'login') {
+                btnLogin.className = "flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white";
+                btnReg.className = "flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition";
+                formLogin.classList.replace('hidden', 'block');
+                formReg.classList.replace('block', 'hidden');
+            } else {
+                btnReg.className = "flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white";
+                btnLogin.className = "flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition";
+                formReg.classList.replace('hidden', 'block');
+                formLogin.classList.replace('block', 'hidden');
+            }
+        }
+
+        function mostrarMensaje(texto, esError) {
+            const div = document.getElementById('auth-msg');
+            div.innerText = texto;
+            div.className = `w-full p-3 rounded-lg mb-6 text-sm font-bold text-center ${esError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            div.classList.remove('hidden');
+        }
+
+        async function procesarLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login-submit');
+            
+            btn.disabled = true; btn.innerText = "Verificando...";
+            
+            try {
+                const { error } = await clienteSupabase.auth.signInWithPassword({ email, password });
+                if(error) {
+                    if(error.message.includes("Invalid login credentials")) throw new Error("Correo o contraseña incorrectos.");
+                    throw error;
+                }
+                // Si es exitoso, el onAuthStateChange lo redirigirá automáticamente
+            } catch (err) {
+                mostrarMensaje(err.message, true);
+                btn.disabled = false; btn.innerText = "Entrar a mi cuenta";
+            }
+        }
+
+        async function procesarRegistro() {
+            const nombre = document.getElementById('reg-nombre').value;
+            const telefono = document.getElementById('reg-telefono').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const btn = document.getElementById('btn-reg-submit');
+
+            btn.disabled = true; btn.innerText = "Creando cuenta...";
+
+            try {
+                // AQUÍ GUARDAMOS LOS DATOS EXTRA USANDO OPTIONS.DATA
+                const { error } = await clienteSupabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            nombre_completo: nombre,
+                            telefono: telefono
+                        }
+                    }
+                });
+                
+                if(error) throw error;
+                
+                mostrarMensaje("¡Cuenta creada exitosamente! Entrando...", false);
+                // Si es exitoso, el onAuthStateChange lo redirigirá automáticamente
+            } catch (err) {
+                mostrarMensaje("Error: " + err.message, true);
+                btn.disabled = false; btn.innerText = "Comenzar Ahora";
+            }
+        }
+    </script>
+</body>
+</html>
