@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repartidores - Vive Tres Marías</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+    </script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border-t-4 border-tm-dorado">
+        <div class="bg-tm-azul p-6 text-center">
+            <span class="text-5xl">🛵</span>
+            <h1 class="text-white text-2xl font-black mt-2">App Repartidores</h1>
+            <p class="text-blue-200 text-sm">Gana dinero entregando en Tres Marías</p>
+        </div>
+
+        <div class="p-6">
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Correo Electrónico</label>
+                    <input type="email" id="log-email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Contraseña</label>
+                    <input type="password" id="log-pass" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
+                </div>
+                <button type="submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow-md">Iniciar Sesión</button>
+                <p class="text-center text-sm text-gray-500 mt-4">¿No tienes cuenta? <button type="button" onclick="toggleForm()" class="text-tm-azul font-bold hover:underline">Regístrate</button></p>
+            </form>
+
+            <form id="form-registro" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Nombre Completo</label>
+                    <input type="text" id="reg-nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
+                        <input type="tel" id="reg-telefono" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Vehículo</label>
+                        <select id="reg-vehiculo" class="w-full px-4 py-2 border rounded-lg outline-none">
+                            <option value="Moto">Motocicleta</option>
+                            <option value="Bici">Bicicleta</option>
+                            <option value="Auto">Automóvil</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Correo Electrónico</label>
+                    <input type="email" id="reg-email" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Contraseña</label>
+                    <input type="password" id="reg-pass" class="w-full px-4 py-2 border rounded-lg outline-none" required minlength="6">
+                </div>
+                <button type="submit" class="w-full bg-tm-azul hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition shadow-md">Crear Cuenta</button>
+                <p class="text-center text-sm text-gray-500 mt-4">¿Ya tienes cuenta? <button type="button" onclick="toggleForm()" class="text-tm-dorado font-bold hover:underline">Inicia Sesión</button></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const supabase = window.supabase.createClient('TU_URL', 'TU_KEY'); // <-- INSERTA TUS CREDENCIALES
+
+        function toggleForm() {
+            document.getElementById('form-login').classList.toggle('hidden');
+            document.getElementById('form-registro').classList.toggle('hidden');
+        }
+
+        // LOGIN
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('log-email').value;
+            const pass = document.getElementById('log-pass').value;
+            
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+            if (error) return alert("Error: " + error.message);
+            window.location.href = 'panel-repartidor.html'; // Redirigir al panel
+        });
+
+        // REGISTRO
+        document.getElementById('form-registro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const nombre = document.getElementById('reg-nombre').value;
+            const telefono = document.getElementById('reg-telefono').value;
+            const vehiculo = document.getElementById('reg-vehiculo').value;
+
+            // 1. Crear usuario en Auth
+            const { data, error } = await supabase.auth.signUp({ email, password: pass });
+            if (error) return alert("Error al registrar: " + error.message);
+
+            // 2. Insertar en tabla repartidores
+            if (data.user) {
+                const { error: dbError } = await supabase.from('repartidores').insert([{
+                    id: data.user.id,
+                    nombre,
+                    telefono,
+                    vehiculo
+                }]);
+                if (dbError) return alert("Error guardando perfil: " + dbError.message);
+                
+                alert("Registro exitoso. Iniciando sesión...");
+                window.location.href = 'panel-repartidor.html';
+            }
+        });
+
+        // Check auth status
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) window.location.href = 'panel-repartidor.html';
+        });
+    </script>
+</body>
+</html>
