@@ -81,7 +81,7 @@
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
-        // AUTH LISTENER
+        // AUTH LISTENER CORREGIDO (Ya no recarga el iframe)
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
@@ -89,9 +89,6 @@
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
             if(usuarioActual) {
-                // Notificamos al iframe que la sesión cambió (por si está abierto)
-                const iframe = document.getElementById('panel-iframe');
-                if(iframe) iframe.contentWindow.location.reload();
                 cargarDatos(); 
             } else {
                 mostrarVista('directorio');
