@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Repartidor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+    </script>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col font-sans">
+
+    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md">
+        <h1 class="font-black text-lg">App Repartidor</h1>
+        <div class="flex items-center gap-3">
+            <span id="estado-texto" class="font-bold text-sm text-red-300">Desconectado</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggle-estado" class="sr-only peer" onchange="cambiarEstado()">
+                <div class="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+            </label>
+            <button onclick="cerrarSesion()" class="text-xs bg-red-500 px-2 py-1 rounded">Salir</button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 overflow-y-auto">
+        <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm">Pedidos Pendientes</h2>
+        <div id="contenedor-pedidos" class="space-y-4">
+            </div>
+    </main>
+
+    <script>
+        const supabase = window.supabase.createClient('TU_URL', 'TU_KEY'); // <-- INSERTA TUS CREDENCIALES
+        let usuarioId = null;
+        let watchId = null;
+
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return window.location.href = 'login-repartidor.html';
+            usuarioId = session.user.id;
+            
+            cargarPedidosPendientes();
+            suscribirseAPedidos();
+        }
+
+        // 1. Manejar Estado (Activo/Inactivo) y GPS
+        async function cambiarEstado() {
+            const activo = document.getElementById('toggle-estado').checked;
+            document.getElementById('estado-texto').innerText = activo ? 'Conectado' : 'Desconectado';
+            document.getElementById('estado-texto').className = activo ? 'font-bold text-sm text-green-300' : 'font-bold text-sm text-red-300';
+
+            await supabase.from('repartidores').update({ esta_activo: activo }).eq('id', usuarioId);
+
+            if (activo) {
+                if (navigator.geolocation) {
+                    watchId = navigator.geolocation.watchPosition(async (pos) => {
+                        const { latitude, longitude } = pos.coords;
+                        await supabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
+                    }, (error) => console.error(error), { enableHighAccuracy: true });
+                }
+            } else {
+                if (watchId) navigator.geolocation.clearWatch(watchId);
+            }
+        }
+
+        // 2. Cargar Pedidos que no han sido asignados
+        async function cargarPedidosPendientes() {
+            const { data, error } = await supabase.from('pedidos').select('*').eq('estado', 'pendiente');
+            if(data) renderizarPedidos(data);
+        }
+
+        // 3. Tiempo Real: Escuchar nuevos pedidos al instante
+        function suscribirseAPedidos() {
+            supabase.channel('pedidos-nuevos')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, payload => {
+                // Agregar el nuevo pedido a la UI
+                cargarPedidosPendientes(); 
+                // Aquí podrías agregar un sonido de notificación
+            })
+            .subscribe();
+        }
+
+        function renderizarPedidos(pedidos) {
+            const contenedor = document.getElementById('contenedor-pedidos');
+            if(pedidos.length === 0) {
+                contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">Buscando pedidos cercanos...</p>';
+                return;
+            }
+            
+            contenedor.innerHTML = pedidos.map(p => `
+                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-tm-dorado">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-black text-lg text-tm-azul-oscuro">Nueva Orden</p>
+                            <p class="text-sm text-gray-600">📍 ${p.cliente_direccion}</p>
+                            <p class="text-sm text-gray-600">👤 ${p.cliente_nombre}</p>
+                        </div>
+                        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">Pendiente</span>
+                    </div>
+                    <div class="mt-4 border-t pt-3 flex justify-between items-center">
+                        <span class="font-bold text-xl">$${p.total}</span>
+                        <button onclick="aceptarPedido('${p.id}')" class="bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition">Aceptar Pedido</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function aceptarPedido(pedidoId) {
+            const { error } = await supabase
+                .from('pedidos')
+                .update({ estado: 'aceptado', repartidor_id: usuarioId })
+                .eq('id', pedidoId);
+            
+            if(error) alert("Este pedido ya fue tomado por alguien más.");
+            else {
+                alert("¡Pedido Aceptado! Dirígete al local.");
+                cargarPedidosPendientes(); // Recargar para quitarlo de pendientes
+            }
+        }
+
+        async function cerrarSesion() {
+            if(watchId) navigator.geolocation.clearWatch(watchId);
+            await supabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        init();
+    </script>
+</body>
+</html>
