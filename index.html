@@ -113,26 +113,16 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE CON TU CLAVE REAL
+        // CONFIGURACIÓN DE SUPABASE
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         const EMAIL_ADMIN = 'noirsysan@gmail.com'; 
 
         let todosLosAnuncios = [];
         let usuarioActual = null;
         let esModoRegistro = false;
-
-        // --- DATOS DE PRUEBA (MOCK DATA) ---
-        const anunciosDePrueba = [
-            { id: 101, nombre_negocio: "Café de Especialidad Tres Marías", categoria: "Alimentos", descripcion: "El mejor café orgánico y postres artesanales recién horneados todas las mañanas.", enlace_whatsapp: "4430000000", nivel_pago: 3, imagen_url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80" },
-            { id: 102, nombre_negocio: "Clínica Dental Sonrisas", categoria: "Salud", descripcion: "Odontología integral, ortodoncia y blanqueamiento con tecnología de punta.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=500&q=80" },
-            { id: 103, nombre_negocio: "Plomería y Electricidad Express", categoria: "Hogar", descripcion: "Soluciones rápidas y garantizadas para emergencias en tu hogar. Disponibles 24/7.", enlace_whatsapp: "4430000000", nivel_pago: 1, imagen_url: null },
-            { id: 104, nombre_negocio: "Asesoría Legal Integral", categoria: "Servicios", descripcion: "Consultoría jurídica, contratos y asesoría fiscal para empresas y particulares.", enlace_whatsapp: "4430000000", nivel_pago: 0, imagen_url: null },
-            { id: 105, nombre_negocio: "Boutique de Carnes", categoria: "Alimentos", descripcion: "Cortes finos, asadores y todo lo necesario para tu parrillada de fin de semana.", enlace_whatsapp: "4430000000", nivel_pago: 2, imagen_url: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=500&q=80" }
-        ];
 
         // FUNCIONES DE NOTIFICACIÓN EN UI
         function mostrarMensajeUI(idElemento, mensaje, esError) {
@@ -262,14 +252,13 @@
             };
 
             try {
-                const { data, error } = await clienteSupabase.from('anuncios').insert([nuevo]).select();
+                const { error } = await clienteSupabase.from('anuncios').insert([nuevo]);
                 if(error) throw error;
 
                 mostrarMensajeUI('negocio-msg', "¡Tu negocio fue publicado con éxito!", false);
                 
-                todosLosAnuncios.push(data[0]);
-                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
-                filtrar(filtroActivo);
+                // Recargar datos desde Supabase para asegurar que tenemos el ID real
+                await cargarDatos();
 
                 setTimeout(() => {
                     document.querySelector('#modal-negocio form').reset(); 
@@ -284,45 +273,42 @@
             }
         }
 
-        // CARGAR Y DIBUJAR DATOS
+        // CARGAR Y DIBUJAR DATOS (AHORA 100% REAL DESDE SUPABASE)
         async function cargarDatos() {
             const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             
-            if (error || !data || data.length === 0) {
-                console.log("Cargando datos de prueba (Mock Data)...");
-                todosLosAnuncios = anunciosDePrueba;
+            if (error) {
+                console.error("Error obteniendo datos:", error.message);
+                todosLosAnuncios = [];
             } else {
-                todosLosAnuncios = data;
+                todosLosAnuncios = data || [];
             }
             
             const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
             filtrar(filtroActivo);
         }
 
-        // FUNCIONES DE ADMIN
+        // FUNCIONES DE ADMIN (AHORA 100% REALES)
         async function adminBorrar(id) {
             if(confirm('¿Seguro que quieres borrar este anuncio permanentemente?')) {
-                if (id < 1000) {
-                    todosLosAnuncios = todosLosAnuncios.filter(a => a.id !== id);
+                const { error } = await clienteSupabase.from('anuncios').delete().eq('id', id);
+                if (error) {
+                    alert("Error al eliminar: " + error.message);
                 } else {
-                    await clienteSupabase.from('anuncios').delete().eq('id', id);
+                    cargarDatos();
                 }
-                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
-                filtrar(filtroActivo);
             }
         }
 
         async function adminSubirNivel(id) {
             const nivel = prompt('Ingresa el nivel (0=Gratis, 1=Imágenes, 2=Pro, 3=Elite):', '1');
             if(nivel !== null && ["0","1","2","3"].includes(nivel)) {
-                if (id < 1000) {
-                    const index = todosLosAnuncios.findIndex(a => a.id === id);
-                    if(index !== -1) todosLosAnuncios[index].nivel_pago = parseInt(nivel);
+                const { error } = await clienteSupabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
+                if (error) {
+                    alert("Error al actualizar: " + error.message);
                 } else {
-                    await clienteSupabase.from('anuncios').update({ nivel_pago: parseInt(nivel) }).eq('id', id);
+                    cargarDatos();
                 }
-                const filtroActivo = document.querySelector('.active-filter').id.replace('btn-', '');
-                filtrar(filtroActivo);
             }
         }
 
@@ -340,6 +326,7 @@
                 return;
             }
 
+            // Ordenamos por nivel_pago (mayor a menor) para que los premium salgan arriba
             lista.sort((a, b) => b.nivel_pago - a.nivel_pago);
 
             const esAdmin = usuarioActual && usuarioActual.email === EMAIL_ADMIN;
