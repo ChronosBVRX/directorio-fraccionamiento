@@ -33,7 +33,7 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col">
+<body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col relative">
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-1 flex items-center justify-between gap-2 sm:gap-4">
@@ -90,20 +90,37 @@
     </div>
 
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[85vh] sm:max-h-[90vh] overflow-hidden">
+        <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden">
             <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
                 <h2 id="menu-titulo" class="font-black text-lg sm:text-xl text-tm-azul truncate pr-4">Menú</h2>
                 <button onclick="cerrarMenu()" class="text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
             </div>
             <div id="menu-lista" class="p-3 sm:p-4 overflow-y-auto flex-grow space-y-4"></div>
+            
             <div id="menu-carrito" class="hidden p-3 sm:p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                 <div class="flex justify-between items-center mb-3 font-bold text-base sm:text-lg">
                     <span>Total:</span><span id="menu-total" class="text-tm-azul">$0.00</span>
                 </div>
-                <button onclick="enviarPedidoWA()" class="w-full bg-[#25D366] text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2">Hacer Pedido por WhatsApp</button>
+                
+                <div id="formulario-envio" class="space-y-2 mb-3">
+                    <input type="text" id="cliente-nombre" placeholder="Tu Nombre Completo" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
+                    <input type="tel" id="cliente-telefono" placeholder="Tu Teléfono" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
+                    <textarea id="cliente-direccion" placeholder="Calle, Número, Coto (Ej. Coto Encinos #12)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" rows="2" required></textarea>
+                </div>
+
+                <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition">
+                    Confirmar Pedido
+                </button>
             </div>
         </div>
     </div>
+
+    <a href="login-repartidor.html" class="fixed bottom-6 right-6 z-50 bg-tm-azul-oscuro text-white p-3 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-2 border-2 border-tm-dorado group cursor-pointer">
+        <span class="text-2xl sm:text-3xl drop-shadow-md">🛵</span>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-sm sm:text-base tracking-wide">
+            Soy Repartidor
+        </span>
+    </a>
 
     <script>
         // CONFIGURACIÓN SUPABASE
@@ -176,7 +193,6 @@
                 const recibePedidos = a.nivel_pago === 3;
                 
                 let botones = '';
-                // Ajuste responsivo para el texto y padding de los botones dentro de la tarjeta
                 if(recibePedidos) {
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
                 } else if(tieneMenu) {
@@ -251,7 +267,13 @@
             }
         }
 
-        function cerrarMenu() { document.getElementById('modal-menu').classList.add('hidden'); }
+        function cerrarMenu() { 
+            document.getElementById('modal-menu').classList.add('hidden'); 
+            // Limpiar formulario al cerrar
+            document.getElementById('cliente-nombre').value = '';
+            document.getElementById('cliente-telefono').value = '';
+            document.getElementById('cliente-direccion').value = '';
+        }
         
         function cambiarCantidad(index, cambio) {
             if(!carritoActual[index]) carritoActual[index] = 0;
@@ -267,24 +289,65 @@
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
         
-        function enviarPedidoWA() {
+        // NUEVA LÓGICA: Procesar pedido a Supabase en lugar de WhatsApp
+        async function procesarPedido() {
+            const nombre = document.getElementById('cliente-nombre').value.trim();
+            const telefono = document.getElementById('cliente-telefono').value.trim();
+            const direccion = document.getElementById('cliente-direccion').value.trim();
+
+            if (!nombre || !telefono || !direccion) {
+                return alert("Por favor, llena todos tus datos de envío (Nombre, Teléfono y Dirección).");
+            }
+
             let total = 0;
-            let resumen = `Hola! Quiero hacer un pedido a *${negocioActualPedido.nombre_negocio}*:%0A%0A`;
+            let detallesPedido = [];
             const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
-            let tieneItems = false;
             
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
-                    tieneItems = true;
                     let subtotal = carritoActual[i] * menu[i].precio;
                     total += subtotal;
-                    resumen += `- ${carritoActual[i]}x ${menu[i].nombre} ($${subtotal})%0A`;
+                    detallesPedido.push({
+                        cantidad: carritoActual[i],
+                        producto: menu[i].nombre,
+                        precio_unitario: menu[i].precio,
+                        subtotal: subtotal
+                    });
                 }
             }
-            if(!tieneItems) return alert("Por favor agrega productos a tu pedido.");
-            resumen += `%0A*Total: $${total.toFixed(2)}*`;
-            window.open(`https://wa.me/${negocioActualPedido.enlace_whatsapp}?text=${resumen}`, '_blank');
-            cerrarMenu();
+
+            if(detallesPedido.length === 0) {
+                return alert("Por favor agrega productos a tu pedido.");
+            }
+
+            const btn = document.getElementById('btn-confirmar-pedido');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = 'Enviando...';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Insertar en la tabla "pedidos"
+            const { data, error } = await clienteSupabase.from('pedidos').insert([{
+                negocio_id: negocioActualPedido.id, // Se requiere que tu tabla de anuncios tenga una columna 'id'
+                cliente_nombre: nombre,
+                cliente_telefono: telefono,
+                cliente_direccion: direccion,
+                detalles_pedido: detallesPedido,
+                total: total,
+                estado: 'pendiente'
+            }]);
+
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            if (error) {
+                console.error("Error al procesar el pedido:", error);
+                alert("Hubo un error al enviar tu pedido. Intenta nuevamente.");
+            } else {
+                alert("¡Pedido enviado con éxito! Los repartidores han sido notificados.");
+                cerrarMenu();
+            }
         }
 
         async function cerrarSesion() { 
