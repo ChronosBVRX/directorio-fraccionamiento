@@ -17,17 +17,16 @@
         <div>
             <h1 class="font-black text-lg leading-tight">App Repartidor</h1>
             <button onclick="abrirPerfil()" class="text-xs text-blue-200 hover:text-white transition flex items-center gap-1 mt-0.5">
-                <span id="nombre-repartidor">Cargando...</span>
-                <span>✏️</span>
+                <span id="nombre-repartidor">Cargando...</span> ✏️
             </button>
         </div>
         <div class="flex items-center gap-3">
-            <span id="estado-texto" class="font-bold text-sm text-red-300 transition-colors">Desconectado</span>
+            <span id="estado-texto" class="font-bold text-sm text-red-300">Desconectado</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-estado" class="sr-only peer" onchange="cambiarEstado()">
-                <div class="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                <div class="w-11 h-6 bg-gray-400 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
             </label>
-            <button onclick="cerrarSesion()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded font-bold transition">Salir</button>
+            <button onclick="cerrarSesion()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded font-bold">Salir</button>
         </div>
     </header>
 
@@ -37,12 +36,12 @@
             <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm flex items-center justify-between">
                 <span>Mis Pedidos Asignados</span>
                 <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tm-dorado opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-tm-dorado"></span>
+                  <span class="animate-ping absolute h-full w-full rounded-full bg-tm-dorado opacity-75"></span>
+                  <span class="relative rounded-full h-3 w-3 bg-tm-dorado"></span>
                 </span>
             </h2>
             <div id="contenedor-pedidos" class="space-y-4">
-                <p class="text-center text-gray-400 mt-10 text-sm">Conéctate para ver si te asignaron un viaje...</p>
+                <p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir viajes...</p>
             </div>
         </div>
 
@@ -52,9 +51,7 @@
                     <span id="badge-fase" class="bg-tm-azul text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse">En Tránsito</span>
                     <h2 class="text-2xl font-black text-tm-azul mt-3">Detalle del Viaje</h2>
                 </div>
-                
-                <div class="p-6 space-y-4 flex-grow flex flex-col justify-center" id="info-pedido-activo">
-                </div>
+                <div class="p-6 space-y-4 flex-grow flex flex-col justify-center" id="info-pedido-activo"></div>
             </div>
         </div>
 
@@ -62,31 +59,16 @@
             <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm">Mis Datos Personales</h2>
             <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-tm-dorado">
                 <form id="form-editar-perfil" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre Completo</label>
-                        <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label>
-                        <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo Actual</label>
-                        <select id="edit-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none cursor-pointer">
-                            <option value="Moto">Motocicleta</option>
-                            <option value="Bici">Bicicleta</option>
-                            <option value="Auto">Automóvil</option>
-                        </select>
-                    </div>
-                    
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre</label><input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></div>
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label><input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></div>
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo</label><select id="edit-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"><option value="Moto">Motocicleta</option><option value="Bici">Bicicleta</option><option value="Auto">Automóvil</option></select></div>
                     <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="cerrarPerfil()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
-                        <button type="submit" id="btn-guardar-perfil" class="flex-1 bg-tm-azul text-white font-bold py-3 rounded-lg hover:bg-tm-azul-oscuro transition shadow-md">Guardar Datos</button>
+                        <button type="button" onclick="cerrarPerfil()" class="flex-1 bg-gray-200 font-bold py-3 rounded-lg">Cancelar</button>
+                        <button type="submit" class="flex-1 bg-tm-azul text-white font-bold py-3 rounded-lg">Guardar</button>
                     </div>
                 </form>
             </div>
         </div>
-
     </main>
 
     <script>
@@ -102,45 +84,26 @@
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
-            
             usuarioId = session.user.id;
             
-            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre, esta_activo').eq('id', usuarioId).maybeSingle();
-            if (perfil && perfil.nombre) {
-                document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
-            }
+            const { data: perf } = await clienteSupabase.from('repartidores').select('nombre, esta_activo').eq('id', usuarioId).maybeSingle();
+            if (perf?.nombre) document.getElementById('nombre-repartidor').innerText = `Hola, ${perf.nombre.split(' ')[0]}`;
 
-            const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
-                .eq('repartidor_id', usuarioId)
-                .in('estado', ['asignado', 'aceptado', 'en_camino'])
-                .order('creado_en', { ascending: false })
-                .limit(1)
-                .maybeSingle();
+            const { data: ped } = await clienteSupabase.from('pedidos').select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)').eq('repartidor_id', usuarioId).in('estado', ['asignado', 'aceptado', 'en_camino']).order('creado_en', { ascending: false }).limit(1).maybeSingle();
 
-            if (pedidoPendiente) {
-                if (pedidoPendiente.estado === 'asignado') {
-                    document.getElementById('toggle-estado').checked = true;
-                    marcarConectadoUI();
-                    cargarPedidosDisponibles();
-                    iniciarRastreoInteligente();
-                } else {
-                    pedidoActivo = pedidoPendiente;
-                    document.getElementById('toggle-estado').checked = true;
-                    marcarConectadoUI();
-                    iniciarRastreoInteligente();
-                    mostrarPantallaActivo();
-                }
-                suscribirseAPedidos();
+            if (ped) {
+                document.getElementById('toggle-estado').checked = true;
+                marcarConectadoUI();
+                iniciarRastreoInteligente();
+                if (ped.estado === 'asignado') cargarPedidosDisponibles();
+                else { pedidoActivo = ped; mostrarPantallaActivo(); }
+            } else if (perf?.esta_activo) {
+                document.getElementById('toggle-estado').checked = true;
+                cambiarEstado();
             } else {
-                if (perfil && perfil.esta_activo) {
-                    document.getElementById('toggle-estado').checked = true;
-                    cambiarEstado(); 
-                } else {
-                    cargarPedidosDisponibles();
-                }
-                suscribirseAPedidos();
+                cargarPedidosDisponibles();
             }
+            suscribirseAPedidos();
         }
 
         function marcarConectadoUI() {
@@ -149,314 +112,156 @@
             document.getElementById('toggle-estado').disabled = false;
         }
 
-        async function abrirPerfil() {
-            if (pedidoActivo) return alert("No puedes editar tu perfil mientras tienes un pedido en curso.");
-            document.getElementById('vista-pendientes').classList.add('hidden');
-            document.getElementById('vista-perfil').classList.remove('hidden');
-
-            const { data } = await clienteSupabase.from('repartidores').select('*').eq('id', usuarioId).single();
-            if (data) {
-                document.getElementById('edit-nombre').value = data.nombre || '';
-                document.getElementById('edit-telefono').value = data.telefono || '';
-                document.getElementById('edit-vehiculo').value = data.vehiculo || 'Moto';
-            }
-        }
-
-        function cerrarPerfil() {
-            document.getElementById('vista-perfil').classList.add('hidden');
-            document.getElementById('vista-pendientes').classList.remove('hidden');
-        }
-
-        document.getElementById('form-editar-perfil').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-guardar-perfil');
-            btn.innerText = "Guardando..."; btn.disabled = true;
-
-            const nombre = document.getElementById('edit-nombre').value;
-            const telefono = document.getElementById('edit-telefono').value;
-            const vehiculo = document.getElementById('edit-vehiculo').value;
-
-            const { error } = await clienteSupabase.from('repartidores').update({ nombre, telefono, vehiculo }).eq('id', usuarioId);
-            btn.innerText = "Guardar Datos"; btn.disabled = false;
-
-            if (error) alert("Error: " + error.message);
-            else {
-                document.getElementById('nombre-repartidor').innerText = `Hola, ${nombre.split(' ')[0]}`;
-                cerrarPerfil();
-            }
-        });
-
         async function cambiarEstado() {
             const toggle = document.getElementById('toggle-estado');
-            const textoEstado = document.getElementById('estado-texto');
-            
             if (toggle.checked) {
-                textoEstado.innerText = 'Conectando...';
-                textoEstado.className = 'font-bold text-sm text-yellow-500';
-                toggle.disabled = true;
-
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     marcarConectadoUI();
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
-                }, () => {
-                    alert("GPS obligatorio. Activa tu ubicación y dale permisos al navegador para poder trabajar.");
-                    forzarDesconexion();
-                }, { enableHighAccuracy: true });
+                }, () => { alert("GPS obligatorio."); forzarDesconexion(); }, { enableHighAccuracy: true });
             } else {
-                if(pedidoActivo) {
-                    alert("Termina tu pedido actual antes de desconectarte.");
-                    toggle.checked = true;
-                    return;
-                }
-                forzarDesconexion(true);
+                if(pedidoActivo) { alert("Termina el pedido primero."); toggle.checked = true; return; }
+                forzarDesconexion();
             }
         }
 
         function forzarDesconexion() {
             document.getElementById('toggle-estado').checked = false;
-            document.getElementById('toggle-estado').disabled = false;
             document.getElementById('estado-texto').innerText = 'Desconectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-red-300';
-            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para ver si te asignaron un viaje...</p>';
-            
             if(watchId) navigator.geolocation.clearWatch(watchId);
-            if(usuarioId) clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
         }
 
         function iniciarRastreoInteligente() {
             if (watchId) navigator.geolocation.clearWatch(watchId);
-
             watchId = navigator.geolocation.watchPosition(async (pos) => {
-                const { latitude, longitude } = pos.coords;
-                
-                if (!pedidoActivo) return; 
-
+                if (!pedidoActivo) return;
                 const ahora = Date.now();
-                if (ahora - ultimaVezEnviado > 10000) { 
-                    await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
-
-                    // EL GPS SOLO SE ENVÍA SI EL ESTADO ES 'en_camino'
+                if (ahora - ultimaVezEnviado > 10000) {
+                    await clienteSupabase.from('repartidores').update({ latitud: pos.coords.latitude, longitud: pos.coords.longitude }).eq('id', usuarioId);
                     if (pedidoActivo.estado === 'en_camino') {
-                        await clienteSupabase.from('pedidos')
-                            .update({ repartidor_lat: latitude, repartidor_lng: longitude })
-                            .eq('id', pedidoActivo.id);
+                        await clienteSupabase.from('pedidos').update({ repartidor_lat: pos.coords.latitude, repartidor_lng: pos.coords.longitude }).eq('id', pedidoActivo.id);
                     }
                     ultimaVezEnviado = ahora;
                 }
-            }, console.error, { enableHighAccuracy: true });
+            }, null, { enableHighAccuracy: true });
         }
 
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
-
-            const { data } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
-                .eq('estado', 'asignado')
-                .eq('repartidor_id', usuarioId) 
-                .order('creado_en', { ascending: false });
-            
+            const { data } = await clienteSupabase.from('pedidos').select('*, anuncios(*)').eq('estado', 'asignado').eq('repartidor_id', usuarioId).order('creado_en', { ascending: false });
             const contenedor = document.getElementById('contenedor-pedidos');
-            if(!data || data.length === 0) {
-                contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">No tienes viajes asignados por el momento.</p>';
-                return;
-            }
+            if(!data || data.length === 0) { contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Sin viajes asignados.</p>'; return; }
             
             contenedor.innerHTML = data.map(p => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-tm-dorado transition hover:shadow-md">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded shadow-sm">⭐ Te Eligieron</span>
-                        <span class="text-gray-400 text-xs font-mono">Folio: ${p.folio}</span>
-                    </div>
-                    <p class="text-xs text-tm-azul uppercase font-bold mb-1">De: ${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
-                    <p class="font-bold text-gray-800 text-lg mb-1">Para: ${p.cliente_nombre}</p>
-                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.cliente_direccion}</p>
-                    
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-l-tm-dorado">
+                    <span class="bg-yellow-100 text-yellow-800 text-[10px] font-black px-2 py-1 rounded uppercase">⭐ Te eligieron</span>
+                    <p class="text-xs font-bold text-tm-azul mt-2">${p.anuncios?.nombre_negocio}</p>
+                    <p class="font-black text-lg text-gray-800">${p.cliente_nombre}</p>
+                    <p class="text-sm text-gray-500 mb-4">📍 ${p.cliente_direccion}</p>
                     <div class="border-t border-dashed pt-3 flex justify-between items-center">
-                        <p class="text-xs text-gray-400">Total a cobrar:</p>
-                        <span class="font-black text-xl text-tm-azul">$${p.total}</span>
+                        <span class="text-sm font-black text-tm-azul">$${p.total}</span>
+                        <div class="flex gap-2">
+                            <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${p.anuncios?.enlace_whatsapp}')" class="bg-gray-100 px-3 py-2 rounded-lg font-bold text-xs">Rechazar</button>
+                            <button onclick="aceptarPedido('${p.id}')" class="bg-tm-dorado text-white px-4 py-2 rounded-lg font-bold text-xs">Aceptar</button>
+                        </div>
                     </div>
-                    
-                    <div class="flex gap-2 mt-4">
-                        <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${p.anuncios ? p.anuncios.enlace_whatsapp : ''}')" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-lg transition shadow-sm text-sm">Rechazar</button>
-                        <button onclick="aceptarPedido('${p.id}')" class="w-2/3 bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow">Aceptar Viaje</button>
-                    </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         function reproducirBeep() {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const ctx = new AudioContext();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = "sine";
-                osc.frequency.value = 880;
-                gain.gain.setValueAtTime(1, ctx.currentTime);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = 880; osc.start();
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
-                osc.start();
                 osc.stop(ctx.currentTime + 1);
-            } catch(e) { console.log(e); }
+            } catch(e){}
         }
 
         function suscribirseAPedidos() {
-            clienteSupabase.channel('pedidos-nuevos')
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, payload => {
-                    const nuevo = payload.new;
-                    
-                    if(!pedidoActivo) cargarPedidosDisponibles(); 
-
-                    if (nuevo && nuevo.estado === 'asignado' && nuevo.repartidor_id === usuarioId) {
-                        if (navigator.vibrate) navigator.vibrate([500, 200, 500]); 
-                        reproducirBeep(); 
-                        
-                        setTimeout(() => {
-                            alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
-                        }, 500);
-                    }
-                }).subscribe();
+            clienteSupabase.channel('peds').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, payload => {
+                if(!pedidoActivo) cargarPedidosDisponibles();
+                if (payload.new.estado === 'asignado' && payload.new.repartidor_id === usuarioId) {
+                    reproducirBeep(); if(navigator.vibrate) navigator.vibrate([500,200,500]);
+                    setTimeout(() => alert("¡🔔 VIAJE ASIGNADO!"), 500);
+                }
+            }).subscribe();
         }
 
-        async function rechazarPedido(id_pedido, folio, whatsappNegocio) {
-            if(!confirm("¿Estás seguro de rechazar este viaje? Se le avisará al vendedor para que asigne a otro repartidor.")) return;
-            
-            const { error } = await clienteSupabase.from('pedidos')
-                .update({ estado: 'esperando_activacion', repartidor_id: null })
-                .eq('id', id_pedido);
-
-            if(error) return alert("Hubo un error al rechazar el pedido: " + error.message);
-            
-            if (whatsappNegocio) {
-                let numero = whatsappNegocio.replace(/\D/g, '');
-                
-                const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folio}`;
-                
-                let mensaje = `Hola, por el momento no puedo aceptar el pedido con Folio: *${folio}*.\n\nPor favor, vuelve a asignarlo a otro repartidor dando clic en este enlace directo:\n${linkActivacion}`;
-                
-                window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
-            } else {
-                alert("Pedido rechazado. (El negocio no tiene un WhatsApp registrado para notificarle automáticamente).");
+        async function rechazarPedido(id, folio, wa) {
+            if(!confirm("¿Rechazar viaje?")) return;
+            await clienteSupabase.from('pedidos').update({ estado: 'esperando_activacion', repartidor_id: null }).eq('id', id);
+            if(wa) {
+                const ruta = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                const link = `${ruta}/activar_pedido.html?folio=${folio}`;
+                const msg = `No puedo aceptar el pedido *${folio}*. Asígnalo de nuevo aquí:\n${link}`;
+                window.open(`https://wa.me/${wa.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
             }
-
             cargarPedidosDisponibles();
         }
 
-        async function aceptarPedido(id_pedido) {
-            const { data: check } = await clienteSupabase.from('pedidos').select('estado, repartidor_id').eq('id', id_pedido).single();
-            if(check.estado !== 'asignado' || check.repartidor_id !== usuarioId) return alert("Este pedido ya no está disponible.");
-
-            const { data: pedido, error } = await clienteSupabase.from('pedidos')
-                .update({ estado: 'aceptado' })
-                .eq('id', id_pedido)
-                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)').single();
-            
-            if(error) return alert("Error al aceptar: " + error.message);
-            
-            pedidoActivo = pedido;
-            mostrarPantallaActivo();
+        async function aceptarPedido(id) {
+            const { data: ped, error } = await clienteSupabase.from('pedidos').update({ estado: 'aceptado' }).eq('id', id).select('*, anuncios(*)').single();
+            if(!error) { pedidoActivo = ped; mostrarPantallaActivo(); }
         }
 
         async function iniciarEntrega() {
-            const { data: pedido, error } = await clienteSupabase.from('pedidos')
-                .update({ estado: 'en_camino' })
-                .eq('id', pedidoActivo.id)
-                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)').single();
-
-            if(error) return alert("Error al iniciar entrega.");
-
-            pedidoActivo = pedido;
-            alert("¡GPS Activado!\nEl cliente ya puede rastrear tu ubicación en el mapa.");
-            mostrarPantallaActivo();
+            const { data: ped, error } = await clienteSupabase.from('pedidos').update({ estado: 'en_camino' }).eq('id', pedidoActivo.id).select('*, anuncios(*)').single();
+            if(!error) { pedidoActivo = ped; alert("GPS Activado."); mostrarPantallaActivo(); }
         }
 
         function mostrarPantallaActivo() {
             document.getElementById('vista-pendientes').classList.add('hidden');
-            document.getElementById('vista-perfil').classList.add('hidden');
             document.getElementById('vista-activo').classList.remove('hidden');
-
-            const infoContainer = document.getElementById('info-pedido-activo');
-            const estadoTexto = document.getElementById('estado-texto');
-            const badgeFase = document.getElementById('badge-fase');
+            const info = document.getElementById('info-pedido-activo');
+            
+            const txtPago = pedidoActivo.pago_confirmado 
+                ? `<div class="bg-green-100 text-green-700 p-3 rounded-lg text-center font-black text-xs mb-4">✅ YA ESTÁ PAGADO - NO COBRAR</div>`
+                : `<div class="bg-red-100 text-red-700 p-3 rounded-lg text-center font-black text-xs mb-4">⚠️ COBRAR $${pedidoActivo.total} EN EFECTIVO</div>`;
 
             if (pedidoActivo.estado === 'aceptado') {
-                estadoTexto.innerText = 'Voy al Negocio';
-                estadoTexto.className = 'font-bold text-sm text-yellow-500';
-                badgeFase.innerText = "Fase 1: Recolección";
-                badgeFase.className = "bg-yellow-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse";
-
-                infoContainer.innerHTML = `
-                    <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 shadow-sm">
-                        <p class="text-xs text-yellow-600 uppercase font-black tracking-wider mb-2">Recoger Pedido en:</p>
-                        <p class="font-bold text-xl text-yellow-900">${pedidoActivo.anuncios ? pedidoActivo.anuncios.nombre_negocio : 'El negocio'}</p>
-                        <p class="text-sm text-yellow-700 mt-1">📍 ${pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : 'Revisa la dirección con el cliente'}</p>
-                        <p class="text-xs text-yellow-600 mt-4 font-mono font-bold bg-yellow-200 inline-block px-2 py-1 rounded">Folio: ${pedidoActivo.folio}</p>
+                document.getElementById('badge-fase').innerText = "Fase 1: Recolección";
+                info.innerHTML = `
+                    <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200">
+                        ${txtPago}
+                        <p class="text-xs text-yellow-600 font-black uppercase mb-1">Recoger en:</p>
+                        <p class="font-bold text-xl text-yellow-900">${pedidoActivo.anuncios?.nombre_negocio}</p>
+                        <p class="text-sm text-yellow-700 mt-1">📍 ${pedidoActivo.anuncios?.direccion}</p>
                     </div>
-                    
-                    <button onclick="iniciarEntrega()" class="w-full mt-auto bg-tm-dorado hover:bg-yellow-600 text-white font-black py-4 rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
-                        <span>📦</span> Ya tengo el pedido
-                    </button>
-                `;
-            } else if (pedidoActivo.estado === 'en_camino') {
-                estadoTexto.innerText = 'En Ruta al Cliente';
-                estadoTexto.className = 'font-bold text-sm text-green-500';
-                badgeFase.innerText = "Fase 2: Entrega GPS Activo";
-                badgeFase.className = "bg-green-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse";
-
-                infoContainer.innerHTML = `
-                    <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
-                        <p class="text-xs text-gray-500 uppercase font-black tracking-wider mb-1">Entregar a</p>
+                    <button onclick="iniciarEntrega()" class="w-full mt-6 bg-tm-dorado text-white font-black py-4 rounded-xl shadow-lg transition text-lg">📦 YA TENGO EL PEDIDO</button>`;
+            } else {
+                document.getElementById('badge-fase').innerText = "Fase 2: Entrega GPS Activo";
+                info.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        ${txtPago}
+                        <p class="text-xs text-gray-500 font-black uppercase mb-1">Entregar a:</p>
                         <p class="font-bold text-xl text-gray-800">${pedidoActivo.cliente_nombre}</p>
-                        <p class="text-sm text-gray-600 mt-1">📍 ${pedidoActivo.cliente_direccion}</p>
-                        <a href="tel:${pedidoActivo.cliente_telefono || ''}" class="bg-white border border-tm-azul text-tm-azul px-3 py-1.5 rounded-lg text-sm font-bold mt-3 inline-block hover:bg-blue-50">📞 Llamar</a>
+                        <p class="text-sm text-gray-600">📍 ${pedidoActivo.cliente_direccion}</p>
+                        <a href="tel:${pedidoActivo.cliente_telefono}" class="bg-white border border-tm-azul text-tm-azul px-4 py-2 rounded-lg text-xs font-bold mt-4 inline-block">📞 Llamar</a>
                     </div>
-                    
-                    <div class="bg-white p-4 rounded-lg border shadow-sm flex justify-between items-center mt-3">
-                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Cobrar al entregar:</p>
-                        <p class="text-3xl font-black text-green-600">$${pedidoActivo.total}</p>
-                    </div>
-                    
                     <div class="mt-auto grid gap-3 pt-4">
-                        <button onclick="abrirRutaMaps()" class="w-full bg-blue-100 text-tm-azul font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 hover:bg-blue-200 transition">
-                            📍 Abrir en Google Maps
-                        </button>
-                        <button onclick="finalizarPedido()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
-                            <span>✅</span> Pedido Entregado
-                        </button>
-                    </div>
-                `;
+                        <button onclick="window.open('http://googleusercontent.com/maps.google.com/2{encodeURIComponent(pedidoActivo.cliente_direccion)}', '_blank')" class="w-full bg-blue-100 text-tm-azul font-bold py-4 rounded-xl">📍 ABRIR MAPA</button>
+                        <button onclick="finalizarPedido()" class="w-full bg-green-500 text-white font-black py-4 rounded-xl shadow-lg">✅ PEDIDO ENTREGADO</button>
+                    </div>`;
             }
         }
 
-        function abrirRutaMaps() {
-            let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
-            const direccionCodificada = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
-            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
-        }
-
         async function finalizarPedido() {
-            if(!confirm("¿Confirmas que ya entregaste el pedido y recibiste el dinero?")) return;
-
+            if(!confirm("¿Entregado y cobrado?")) return;
             await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
-            
-            alert("¡Excelente trabajo! Pedido finalizado.");
-            pedidoActivo = null;
-            marcarConectadoUI();
-            
+            pedidoActivo = null; marcarConectadoUI();
             document.getElementById('vista-activo').classList.add('hidden');
             document.getElementById('vista-pendientes').classList.remove('hidden');
             cargarPedidosDisponibles();
         }
 
-        async function cerrarSesion() {
-            if(pedidoActivo) return alert("Termina el pedido actual antes de salir.");
-            forzarDesconexion(true);
-            await clienteSupabase.auth.signOut();
-            window.location.reload();
-        }
+        async function cerrarSesion() { if(pedidoActivo) return; forzarDesconexion(); await clienteSupabase.auth.signOut(); window.location.reload(); }
 
         init();
     </script>
