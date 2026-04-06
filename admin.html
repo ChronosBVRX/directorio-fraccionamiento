@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración General - Vive Tres Marías</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans text-tm-gris min-h-screen">
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="pantalla-carga" class="flex flex-col items-center justify-center h-screen bg-gray-100 absolute inset-0 z-50">
+        <div class="w-12 h-12 border-4 border-tm-azul border-t-tm-dorado rounded-full animate-spin mb-4"></div>
+        <h2 class="text-xl font-bold text-tm-azul-oscuro">Verificando credenciales...</h2>
+    </div>
+
+    <div id="pantalla-denegado" class="hidden flex-col items-center justify-center h-screen text-center px-4 bg-gray-100 absolute inset-0 z-40">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border-t-4 border-red-500">
+            <span class="text-5xl mb-4 block">🚫</span>
+            <h2 class="text-2xl font-black text-tm-azul-oscuro mb-2">Acceso Restringido</h2>
+            <p class="text-gray-500 mb-6">Esta área es exclusiva para administradores del sistema. Tu cuenta no tiene los permisos necesarios.</p>
+            <a href="index.html" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition block w-full">Volver al Inicio</a>
+        </div>
+    </div>
+
+    <div id="panel-admin" class="hidden flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-tm-azul-oscuro text-white flex flex-col shadow-2xl z-20 hidden md:flex">
+            <div class="p-6 border-b border-white/10 text-center">
+                <h1 class="text-xl font-black text-tm-dorado">Vive Tres Marías</h1>
+                <p class="text-xs text-white/50 uppercase tracking-widest mt-1">Super Admin</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <button class="w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition">
+                    🏢 Negocios Registrados
+                </button>
+                </nav>
+            <div class="p-4 border-t border-white/10">
+                <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-100 px-4 py-2 rounded-lg text-sm font-bold transition">
+                    Salir del Panel
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2>
+                    <p class="text-sm text-gray-500 mt-1">Gestiona todos los anuncios de la plataforma.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                                <th class="p-4 font-bold">Negocio</th>
+                                <th class="p-4 font-bold">Categoría</th>
+                                <th class="p-4 font-bold text-center">Plan</th>
+                                <th class="p-4 font-bold text-center">WhatsApp</th>
+                                <th class="p-4 font-bold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-negocios" class="divide-y divide-gray-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Pega aquí tus credenciales de Supabase
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioAdmin = null;
+
+        function mostrarNotificacion(mensaje, tipo = 'exito') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 pointer-events-auto max-w-sm`;
+            toast.innerHTML = `<span class="text-sm font-bold leading-tight">${mensaje}</span><button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-lg">&times;</button>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-[-100%]', 'opacity-0'); }, 10);
+            setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 5000);
+        }
+
+        // 1. Verificación de Seguridad al Cargar
+        document.addEventListener("DOMContentLoaded", async () => {
+            const { data: { session } } = await clienteSupabase.auth.getSession();
+            
+            if (!session) {
+                bloquearAcceso();
+                return;
+            }
+
+            usuarioAdmin = session.user;
+
+            // Verificar si es administrador en la tabla perfiles
+            const { data: perfil, error } = await clienteSupabase
+                .from('perfiles')
+                .select('es_admin')
+                .eq('user_id', usuarioAdmin.id)
+                .single();
+
+            if (error || !perfil || perfil.es_admin !== true) {
+                bloquearAcceso();
+                return;
+            }
+
+            // Si llega aquí, ES ADMIN. Mostrar panel.
+            concederAcceso();
+        });
+
+        function bloquearAcceso() {
+            document.getElementById('pantalla-carga').classList.add('hidden');
+            document.getElementById('pantalla-denegado').classList.remove('hidden');
+            document.getElementById('panel-admin').classList.add('hidden');
+        }
+
+        function concederAcceso() {
+            document.getElementById('pantalla-carga').classList.add('hidden');
+            document.getElementById('pantalla-denegado').classList.add('hidden');
+            document.getElementById('panel-admin').classList.remove('hidden');
+            cargarTodosLosNegocios();
+        }
+
+        // 2. Funciones del Panel de Administración
+        async function cargarTodosLosNegocios() {
+            const tbody = document.getElementById('tabla-negocios');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">Cargando negocios...</td></tr>';
+
+            const { data: negocios, error } = await clienteSupabase
+                .from('anuncios')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                mostrarNotificacion("Error al cargar negocios: " + error.message, "error");
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-400">Error al conectar con la base de datos.</td></tr>';
+                return;
+            }
+
+            if (!negocios || negocios.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">No hay negocios registrados en la plataforma.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = negocios.map(n => {
+                let badgeClase = 'bg-gray-100 text-gray-600';
+                let badgeTexto = 'Básico';
+                
+                if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro (N1)'; }
+                if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite (N2)'; }
+
+                return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                ${n.imagen_url ? `<img src="${n.imagen_url}" class="w-10 h-10 rounded object-cover">` : `<div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sin Img</div>`}
+                                <div>
+                                    <p class="font-bold text-tm-azul-oscuro">${n.nombre_negocio}</p>
+                                    <p class="text-[10px] text-gray-400">ID: ${n.id}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-sm text-gray-600">${n.categoria || 'Sin categoría'}</td>
+                        <td class="p-4 text-center">
+                            <span class="${badgeClase} text-[10px] uppercase px-2 py-1 rounded font-bold whitespace-nowrap">
+                                ${badgeTexto}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center text-sm">
+                            ${n.enlace_whatsapp ? `<a href="https://wa.me/${n.enlace_whatsapp}" target="_blank" class="text-[#25D366] font-bold hover:underline">${n.enlace_whatsapp}</a>` : '-'}
+                        </td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="eliminarNegocio(${n.id})" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs font-bold transition border border-transparent hover:border-red-200">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function eliminarNegocio(id) {
+            if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo? Esta acción no se puede deshacer y borrará sus productos asociados.")) {
+                return;
+            }
+
+            try {
+                // 1. Borrar productos asociados primero (para evitar errores de clave foránea)
+                await clienteSupabase.from('productos').delete().eq('anuncio_id', id);
+                
+                // 2. Borrar el negocio
+                const { error } = await clienteSupabase.from('anuncios').delete().eq('id', id);
+                
+                if (error) throw error;
+
+                mostrarNotificacion("Negocio eliminado correctamente.", "exito");
+                cargarTodosLosNegocios(); // Recargar la tabla
+                
+            } catch (error) {
+                mostrarNotificacion("Error al eliminar: " + error.message, "error");
+            }
+        }
+
+        async function cerrarSesion() {
+            await clienteSupabase.auth.signOut();
+            window.location.href = "index.html"; // Redirige a tu página de inicio o login
+        }
+    </script>
+</body>
+</html>
