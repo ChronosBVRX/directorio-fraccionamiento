@@ -110,11 +110,12 @@
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             }
 
+            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('repartidor_id', usuarioId)
                 .in('estado', ['asignado', 'aceptado', 'en_camino'])
-                .order('created_at', { ascending: false })
+                .order('creado_en', { ascending: false })
                 .limit(1)
                 .maybeSingle();
 
@@ -237,7 +238,6 @@
                 if (ahora - ultimaVezEnviado > 10000) { 
                     await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
 
-                    // EL GPS SOLO SE ENVÍA SI EL ESTADO ES 'en_camino'
                     if (pedidoActivo.estado === 'en_camino') {
                         await clienteSupabase.from('pedidos')
                             .update({ repartidor_lat: latitude, repartidor_lng: longitude })
@@ -251,11 +251,12 @@
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
+            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
             const { data } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('estado', 'asignado')
-                .eq('repartidor_id', usuarioId)
-                .order('created_at', { ascending: false });
+                .eq('repartidor_id', usuarioId) 
+                .order('creado_en', { ascending: false });
             
             const contenedor = document.getElementById('contenedor-pedidos');
             if(!data || data.length === 0) {
@@ -271,7 +272,7 @@
                     </div>
                     <p class="text-xs text-tm-azul uppercase font-bold mb-1">De: ${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
                     <p class="font-bold text-gray-800 text-lg mb-1">Para: ${p.cliente_nombre}</p>
-                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.anuncios ? p.anuncios.direccion : 'Revisa en la app'}</p>
+                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.cliente_direccion}</p>
                     
                     <div class="border-t border-dashed pt-3 flex justify-between items-center">
                         <p class="text-xs text-gray-400">Total a cobrar:</p>
@@ -307,14 +308,12 @@
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, payload => {
                     const nuevo = payload.new;
                     
-                    // Asegurarnos de recargar la lista de pedidos de fondo
                     if(!pedidoActivo) cargarPedidosDisponibles(); 
 
                     if (nuevo && nuevo.estado === 'asignado' && nuevo.repartidor_id === usuarioId) {
                         if (navigator.vibrate) navigator.vibrate([500, 200, 500]); 
                         reproducirBeep(); 
                         
-                        // Retrasamos el alert 500ms para que la tarjeta se dibuje primero en pantalla
                         setTimeout(() => {
                             alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
                         }, 500);
@@ -322,11 +321,9 @@
                 }).subscribe();
         }
 
-        // NUEVO: Función para rechazar el pedido
         async function rechazarPedido(id_pedido) {
             if(!confirm("¿Estás seguro de rechazar este viaje? El vendedor tendrá que asignar a otro repartidor.")) return;
             
-            // Regresamos el estado para que el vendedor pueda reasignar
             const { error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'esperando_activacion', repartidor_id: null })
                 .eq('id', id_pedido);
@@ -423,10 +420,9 @@
         }
 
         function abrirRutaMaps() {
-            // Fase 1 = Va al negocio, Fase 2 = Va al cliente
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
             const direccionCodificada = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
-            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
+            window.open(`https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`, '_blank');
         }
 
         async function finalizarPedido() {
