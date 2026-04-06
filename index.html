@@ -38,50 +38,54 @@
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col relative">
 
-    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-1 flex items-center justify-between gap-1.5 sm:gap-4">
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul relative">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2">
+            
             <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-16 md:h-20 w-auto object-contain">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-14 w-auto object-contain">
             </a>
             
-            <div id="nav-botones" class="flex gap-2 sm:gap-4 items-center shrink-0">
-                
-                <a href="rastreo.html" class="text-tm-dorado hover:text-yellow-600 font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 flex items-center gap-1 transition shrink-0">
-                    <span class="text-sm sm:text-lg">📍</span> <span class="hidden sm:inline">Seguir Pedido</span>
-                </a>
-
-                <div id="contenedor-switch" class="hidden items-center gap-1.5 sm:gap-2 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-gray-200 shrink-0">
-                    <span class="text-xs sm:text-sm font-bold text-tm-azul whitespace-nowrap" id="label-modo-comprar">
-                        <span class="sm:hidden">🛍️</span>
-                        <span class="hidden sm:inline">🛍️ Comprar</span>
-                    </span>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                        <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
-                        <div class="w-9 h-5 sm:w-11 sm:h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
-                    </label>
-                    <span class="text-xs sm:text-sm font-bold text-gray-400 whitespace-nowrap" id="label-modo-vender">
-                        <span class="sm:hidden">🏪</span>
-                        <span class="hidden sm:inline">🏪 Vender</span>
-                    </span>
-                </div>
-
-                <a href="admin.html" id="btn-admin" class="hidden text-white bg-red-600 hover:bg-red-700 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shrink-0 shadow-sm">
-                    <span class="text-sm sm:text-base">⚙️</span> <span class="hidden sm:inline">Admin</span>
-                </a>
-
-                <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shadow-sm shrink-0">
-                    <span class="text-sm sm:text-base">📱</span> 
-                    <span class="hidden sm:inline">Descargar App</span>
-                </button>
-
-                <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 hover:underline flex items-center gap-1 transition shrink-0">
-                    <span class="text-sm sm:text-lg">👤</span> <span class="hidden sm:inline">Mi Perfil</span>
-                </button>
-
-                <a href="login.html" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm transition inline-block text-center shrink-0">Entrar</a>
-                
-                <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm text-tm-azul transition shrink-0">Salir</button>
+            <div id="contenedor-switch" class="hidden items-center gap-1.5 sm:gap-2 bg-gray-100 px-2 py-1 rounded-full border border-gray-200 shrink-0 mx-auto">
+                <span class="text-[10px] sm:text-xs font-bold text-tm-azul" id="label-modo-comprar">🛍️</span>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
+                    <div class="w-8 h-4 sm:w-10 sm:h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 sm:after:h-4 sm:after:w-4 after:transition-all peer-checked:bg-tm-dorado"></div>
+                </label>
+                <span class="text-[10px] sm:text-xs font-bold text-gray-400" id="label-modo-vender">🏪</span>
             </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                
+                <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                    <span class="text-sm sm:text-base">📱</span> <span class="hidden sm:inline">Descargar</span>
+                </button>
+
+                <button onclick="toggleMenuPrincipal()" class="bg-gray-100 text-tm-azul p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm border border-gray-200">
+                    <span class="text-lg sm:text-xl leading-none">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">📍</span> Seguir Pedido
+            </a>
+            
+            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🔑</span> Entrar
+            </a>
+
+            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">👤</span> Mi Perfil
+            </button>
+            
+            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                <span class="text-lg">⚙️</span> Admin
+            </a>
+            
+            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🚪</span> Salir
+            </button>
         </div>
     </header>
 
@@ -161,6 +165,21 @@
         let carritoActual = {}; 
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
+
+        // Lógica del menú hamburguesa
+        function toggleMenuPrincipal() {
+            const menu = document.getElementById('dropdown-principal');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (event) => {
+            const menu = document.getElementById('dropdown-principal');
+            const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]');
+            
+            if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
 
         async function verificarRolAdmin(userId) {
             try {
@@ -474,14 +493,14 @@
         const btnInstalar = document.getElementById('btn-instalar');
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Previene el mini-banner predeterminado
+            e.preventDefault(); 
             eventoInstalacion = e;
-            btnInstalar.classList.remove('hidden'); // Muestra nuestro botón
+            btnInstalar.classList.remove('hidden'); 
         });
 
         btnInstalar.addEventListener('click', async () => {
             if (!eventoInstalacion) return;
-            eventoInstalacion.prompt(); // Muestra el diálogo nativo
+            eventoInstalacion.prompt(); 
             
             const { outcome } = await eventoInstalacion.userChoice;
             if (outcome === 'accepted') {
@@ -492,7 +511,7 @@
         });
 
         window.addEventListener('appinstalled', () => {
-            btnInstalar.classList.add('hidden'); // Ocultar si ya se instaló
+            btnInstalar.classList.add('hidden'); 
             console.log('PWA instalada correctamente');
         });
     </script>
