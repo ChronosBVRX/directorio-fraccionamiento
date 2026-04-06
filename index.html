@@ -4,144 +4,445 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vive Tres Marías - Directorio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+        tailwind.config = {
+          theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
+        }
     </script>
+    <style>
+        .active-filter { 
+            background-color: #22527b !important; 
+            border-color: #22527b !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .active-filter .label-categoria { color: white !important; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col relative">
 
-    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul p-2">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" class="h-12 sm:h-20" alt="Logo">
-            <div class="flex gap-2 items-center">
-                <a href="rastreo.html" class="text-tm-dorado font-bold text-xs">📍 Seguir Pedido</a>
-                <a href="login.html" id="btn-login" class="bg-tm-azul text-white px-4 py-2 rounded font-bold text-xs">Entrar</a>
-                <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-xs">👤 Mi Perfil</button>
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-1 flex items-center justify-between gap-1.5 sm:gap-4">
+            <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-16 md:h-20 w-auto object-contain">
+            </a>
+            
+            <div id="nav-botones" class="flex gap-2 sm:gap-4 items-center shrink-0">
+                
+                <a href="rastreo.html" class="text-tm-dorado hover:text-yellow-600 font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 flex items-center gap-1 transition shrink-0">
+                    <span class="text-sm sm:text-lg">📍</span> <span class="hidden sm:inline">Seguir Pedido</span>
+                </a>
+
+                <div id="contenedor-switch" class="hidden items-center gap-1.5 sm:gap-2 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-gray-200 shrink-0">
+                    <span class="text-xs sm:text-sm font-bold text-tm-azul whitespace-nowrap" id="label-modo-comprar">
+                        <span class="sm:hidden">🛍️</span>
+                        <span class="hidden sm:inline">🛍️ Comprar</span>
+                    </span>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
+                        <div class="w-9 h-5 sm:w-11 sm:h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
+                    </label>
+                    <span class="text-xs sm:text-sm font-bold text-gray-400 whitespace-nowrap" id="label-modo-vender">
+                        <span class="sm:hidden">🏪</span>
+                        <span class="hidden sm:inline">🏪 Vender</span>
+                    </span>
+                </div>
+
+                <a href="admin.html" id="btn-admin" class="hidden text-white bg-red-600 hover:bg-red-700 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shrink-0 shadow-sm">
+                    <span class="text-sm sm:text-base">⚙️</span> <span class="hidden sm:inline">Admin</span>
+                </a>
+
+                <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 hover:underline flex items-center gap-1 transition shrink-0">
+                    <span class="text-sm sm:text-lg">👤</span> <span class="hidden sm:inline">Mi Perfil</span>
+                </button>
+
+                <a href="login.html" id="btn-login" class="bg-tm-azul hover:bg-tm-azul-oscuro text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm transition inline-block text-center shrink-0">Entrar</a>
+                
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden bg-gray-200 hover:bg-gray-300 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm text-tm-azul transition shrink-0">Salir</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </main>
+    <div id="vista-directorio" class="block flex-grow">
+        <nav class="max-w-7xl mx-auto mt-4 sm:mt-6 px-2 sm:px-4 flex gap-2 sm:gap-3 overflow-x-auto pb-4 pt-2 border-b border-gray-200 hide-scrollbar snap-x">
+            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span>
+            </button>
+            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span>
+            </button>
+            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span>
+            </button>
+            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span>
+            </button>
+            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span>
+            </button>
+        </nav>
 
-    <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <h2 id="menu-titulo" class="font-black text-tm-azul">Menú</h2>
-                <button onclick="cerrarMenu()" class="text-2xl">&times;</button>
+        <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+            <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
+        </main>
+    </div>
+
+    <div id="vista-iframe-container" class="hidden flex-grow w-full">
+        <iframe src="panel.html" id="panel-iframe" class="w-full h-full min-h-[85vh] border-none"></iframe>
+    </div>
+
+    <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h2 id="menu-titulo" class="font-black text-lg sm:text-xl text-tm-azul truncate pr-4">Menú</h2>
+                <button onclick="cerrarMenu()" class="text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
             </div>
-            <div id="menu-lista" class="p-4 overflow-y-auto flex-grow space-y-4"></div>
-            <div id="menu-carrito" class="p-4 border-t bg-white shadow-lg">
-                <p class="font-black text-lg mb-4 text-right">Total: <span id="menu-total" class="text-tm-azul">$0.00</span></p>
-                <div class="space-y-2 mb-4">
-                    <input type="text" id="cliente-nombre" placeholder="Nombre Completo" class="w-full p-2 border rounded">
-                    <input type="tel" id="cliente-telefono" placeholder="Teléfono" class="w-full p-2 border rounded">
-                    <textarea id="cliente-direccion" placeholder="Dirección Exacta" class="w-full p-2 border rounded"></textarea>
+            <div id="menu-lista" class="p-3 sm:p-4 overflow-y-auto flex-grow space-y-4"></div>
+            
+            <div id="menu-carrito" class="hidden p-3 sm:p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                <div class="flex justify-between items-center mb-3 font-bold text-base sm:text-lg">
+                    <span>Total:</span><span id="menu-total" class="text-tm-azul">$0.00</span>
                 </div>
-                <button onclick="procesarPedido()" class="w-full bg-tm-dorado text-white py-3 rounded-lg font-black uppercase">Confirmar Pedido</button>
+                
+                <div id="formulario-envio" class="space-y-2 mb-3">
+                    <input type="text" id="cliente-nombre" placeholder="Tu Nombre Completo" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
+                    <input type="tel" id="cliente-telefono" placeholder="Tu Teléfono" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
+                    <textarea id="cliente-direccion" placeholder="Calle, Número, Coto (Ej. Coto Encinos #12)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" rows="2" required></textarea>
+                </div>
+
+                <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition">
+                    Confirmar Pedido
+                </button>
             </div>
         </div>
     </div>
+
+    <a href="login-repartidor.html" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-tm-azul-oscuro text-white p-2.5 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 border-2 border-tm-dorado group cursor-pointer">
+        <span class="text-xl sm:text-3xl drop-shadow-md">🛵</span>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-[11px] sm:text-base tracking-wide">
+            Soy Repartidor
+        </span>
+    </a>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let todosLosAnuncios = [];
         let usuarioActual = null;
-        let carritoActual = {};
+        let carritoActual = {}; 
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            usuarioActual = session?.user || null;
-            if(usuarioActual) {
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('btn-perfil').classList.remove('hidden');
-                const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle();
-                perfilUsuarioActual = data;
-            }
-            cargarDatos();
-        });
-
-        async function cargarDatos() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
-            const contenedor = document.getElementById('contenedor-anuncios');
-            contenedor.innerHTML = data.map(a => `
-                <div class="bg-white rounded-xl shadow border p-5 flex flex-col">
-                    <h3 class="font-black text-tm-azul-oscuro">${a.nombre_negocio}</h3>
-                    <p class="text-xs text-gray-500 my-2">${a.descripcion}</p>
-                    <button onclick='abrirMenu(${JSON.stringify(a)}, true)' class="mt-auto bg-tm-dorado text-white py-2 rounded font-bold text-xs uppercase">Ver Menú y Pedir</button>
-                </div>`).join('');
+        async function verificarRolAdmin(userId) {
+            try {
+                const { data, error } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', userId).single();
+                if (data && data.es_admin === true) {
+                    document.getElementById('btn-admin').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin').classList.add('hidden');
+                }
+            } catch (err) { console.error("Error al verificar rol de admin:", err); }
         }
 
-        async function abrirMenu(negocio) {
-            negocioActualPedido = negocio; carritoActual = {};
+        async function cargarPerfilUsuario() {
+            if (!usuarioActual) return;
+            const { data, error } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .maybeSingle(); 
+            
+            if (data) {
+                perfilUsuarioActual = data;
+            }
+        }
+
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
+            usuarioActual = session ? session.user : null;
+            document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
+            document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
+            document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
+            
+            if(usuarioActual) {
+                cargarDatos(); 
+                cargarPerfilUsuario();
+                const isVendedor = document.getElementById('toggle-modo').checked;
+                document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
+                verificarRolAdmin(usuarioActual.id);
+            } else {
+                perfilUsuarioActual = null;
+                document.getElementById('toggle-modo').checked = false;
+                document.getElementById('btn-perfil').classList.add('hidden');
+                document.getElementById('btn-admin').classList.add('hidden');
+                cambiarModoPlataforma();
+            }
+        });
+
+        function cambiarModoPlataforma() {
+            const isVendedor = document.getElementById('toggle-modo').checked;
+            const labelComprar = document.getElementById('label-modo-comprar');
+            const labelVender = document.getElementById('label-modo-vender');
+            const btnPerfil = document.getElementById('btn-perfil');
+            const iframe = document.getElementById('panel-iframe');
+
+            if(isVendedor) {
+                iframe.src = "panel.html?view=negocio";
+                mostrarVista('panel');
+                if(btnPerfil) btnPerfil.classList.add('hidden');
+                labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
+                labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
+            } else {
+                mostrarVista('directorio');
+                if(btnPerfil && usuarioActual) btnPerfil.classList.remove('hidden');
+                labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
+                labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
+            }
+        }
+
+        function abrirPerfil() {
+            const iframe = document.getElementById('panel-iframe');
+            iframe.src = "panel.html?view=perfil";
+            mostrarVista('panel');
+        }
+
+        function mostrarVista(vista) {
+            if(vista === 'directorio') {
+                document.getElementById('vista-directorio').classList.remove('hidden');
+                document.getElementById('vista-iframe-container').classList.add('hidden');
+                cargarDatos();
+            } else {
+                document.getElementById('vista-directorio').classList.add('hidden');
+                document.getElementById('vista-iframe-container').classList.remove('hidden');
+            }
+        }
+
+        async function cargarDatos() {
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            if (error) console.error("Error al cargar datos:", error);
+            todosLosAnuncios = data || [];
+            
+            if(!document.getElementById('vista-directorio').classList.contains('hidden')) {
+                const navBtn = document.querySelector('.active-filter');
+                if (navBtn) {
+                    const filtroActivo = navBtn.id.replace('btn-', '');
+                    filtrar(filtroActivo);
+                }
+            }
+        }
+
+        function renderizar(lista) {
+            const contenedor = document.getElementById('contenedor-anuncios');
+            contenedor.innerHTML = '';
+            
+            if (lista.length === 0) {
+                contenedor.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">No hay negocios aquí.</p>`;
+                return;
+            }
+
+            lista.forEach(a => {
+                const esGratis = a.nivel_pago === 0;
+                const tieneMenu = a.nivel_pago >= 2;
+                
+                let botones = '';
+                if(tieneMenu) {
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
+                } else if(a.nivel_pago === 1) {
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
+                } else {
+                    let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
+                    botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
+                }
+
+                contenedor.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition">
+                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
+                        <div class="p-4 sm:p-5 flex flex-col flex-grow">
+                            <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
+                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
+                            <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
+                            ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 flex items-start sm:items-center gap-1">📍 <span>${a.direccion}</span></p>` : ''}
+                            ${a.horarios ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start sm:items-center gap-1">🕒 <span>${a.horarios}</span></p>` : ''}
+                            <div class="mt-auto pt-4 border-t border-gray-100 flex gap-2 w-full">${botones}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function filtrar(cat) { 
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+            document.getElementById(`btn-${cat}`)?.classList.add('active-filter');
+            renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
+        }
+
+        async function abrirMenu(negocio, permitePedidos) {
+            negocioActualPedido = negocio;
+            carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
-            
-            if(perfilUsuarioActual) {
+
+            if (perfilUsuarioActual) {
                 document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
                 document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
                 document.getElementById('cliente-direccion').value = perfilUsuarioActual.direccion || '';
+            } else {
+                document.getElementById('cliente-nombre').value = '';
+                document.getElementById('cliente-telefono').value = '';
+                document.getElementById('cliente-direccion').value = '';
+            }
+            
+            const contenedorLista = document.getElementById('menu-lista');
+            contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
+            
+            const { data: productosLista, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id);
+            
+            if(!productosLista || productosLista.length === 0) {
+                contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10 text-sm">Este negocio aún no ha agregado productos.</p>`;
+                document.getElementById('menu-carrito').classList.add('hidden');
+                return;
             }
 
-            const { data: prods } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id);
-            negocioActualPedido.productosArr = prods;
-            document.getElementById('menu-lista').innerHTML = prods.map((p, i) => `
-                <div class="flex justify-between items-center border-b pb-2">
-                    <div><p class="font-bold text-sm">${p.nombre}</p><p class="text-tm-dorado font-bold">$${p.precio}</p></div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="cambiarCant(${i},-1)" class="w-6 h-6 bg-gray-200 rounded">-</button>
-                        <span id="cant-${i}" class="font-bold text-sm">0</span>
-                        <button onclick="cambiarCant(${i},1)" class="w-6 h-6 bg-tm-azul text-white rounded">+</button>
+            negocioActualPedido.productosArr = productosLista;
+
+            contenedorLista.innerHTML = productosLista.map((item, index) => `
+                <div class="border-b pb-3 flex justify-between items-center gap-2">
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro">${item.nombre}</h4>
+                        <p class="text-[11px] sm:text-xs text-tm-gris line-clamp-2">${item.descripcion || ''}</p>
+                        <p class="text-tm-dorado font-bold mt-1 text-sm sm:text-base">$${item.precio}</p>
                     </div>
-                </div>`).join('');
+                    ${permitePedidos ? `
+                    <div class="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1 shadow-inner shrink-0">
+                        <button onclick="cambiarCantidad(${index}, -1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-red-500 font-bold hover:bg-gray-50 flex items-center justify-center">-</button>
+                        <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
+                        <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
+                    </div>` : ''}
+                </div>
+            `).join('');
+
+            const divCarrito = document.getElementById('menu-carrito');
+            if(permitePedidos && productosLista.length > 0) {
+                divCarrito.classList.remove('hidden');
+                actualizarTotal();
+            } else {
+                divCarrito.classList.add('hidden');
+            }
         }
 
-        function cambiarCant(i, c) {
-            carritoActual[i] = Math.max(0, (carritoActual[i] || 0) + c);
-            document.getElementById(`cant-${i}`).innerText = carritoActual[i];
-            let t = 0;
-            for(let key in carritoActual) t += carritoActual[key] * negocioActualPedido.productosArr[key].precio;
-            document.getElementById('menu-total').innerText = `$${t.toFixed(2)}`;
+        function cerrarMenu() { 
+            document.getElementById('modal-menu').classList.add('hidden'); 
+            document.getElementById('cliente-nombre').value = '';
+            document.getElementById('cliente-telefono').value = '';
+            document.getElementById('cliente-direccion').value = '';
         }
-
+        
+        function cambiarCantidad(index, cambio) {
+            if(!carritoActual[index]) carritoActual[index] = 0;
+            carritoActual[index] = Math.max(0, carritoActual[index] + cambio);
+            document.getElementById(`cant-${index}`).innerText = carritoActual[index];
+            actualizarTotal();
+        }
+        
+        function actualizarTotal() {
+            let total = 0;
+            const prodList = negocioActualPedido.productosArr;
+            for (let i in carritoActual) total += carritoActual[i] * prodList[i].precio;
+            document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
+        }
+        
         async function procesarPedido() {
-            const n = document.getElementById('cliente-nombre').value;
-            const t = document.getElementById('cliente-telefono').value;
-            const d = document.getElementById('cliente-direccion').value;
-            if(!n || !t || !d) return alert("Llena tus datos.");
+            const nombre = document.getElementById('cliente-nombre').value.trim();
+            const telefono = document.getElementById('cliente-telefono').value.trim();
+            const direccion = document.getElementById('cliente-direccion').value.trim();
 
-            let total = 0; let peds = [];
-            for(let i in carritoActual) {
+            if (!nombre || !telefono || !direccion) return alert("Por favor, llena todos tus datos de envío.");
+
+            let total = 0;
+            let detallesPedido = [];
+            const prodList = negocioActualPedido.productosArr;
+            
+            let textoPedido = `*NUEVO PEDIDO DE VIVE TRES MARÍAS* 🚀\n\n`;
+            textoPedido += `*Cliente:* ${nombre}\n`;
+            textoPedido += `*Teléfono:* ${telefono}\n`;
+            textoPedido += `*Dirección:* ${direccion}\n\n`;
+            textoPedido += `*Detalle:*\n`;
+            
+            for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
-                    let sub = carritoActual[i] * negocioActualPedido.productosArr[i].precio;
-                    total += sub;
-                    peds.push(`${carritoActual[i]}x ${negocioActualPedido.productosArr[i].nombre}`);
+                    let subtotal = carritoActual[i] * prodList[i].precio;
+                    total += subtotal;
+                    detallesPedido.push({ cantidad: carritoActual[i], producto: prodList[i].nombre, precio_unitario: prodList[i].precio, subtotal: subtotal });
+                    textoPedido += `- ${carritoActual[i]}x ${prodList[i].nombre} ...... $${subtotal.toFixed(2)}\n`;
                 }
             }
-            if(peds.length === 0) return alert("Carrito vacío.");
 
-            const folio = 'VTM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            await clienteSupabase.from('pedidos').insert([{
-                folio, negocio_id: negocioActualPedido.id, cliente_id: usuarioActual?.id,
-                cliente_nombre: n, cliente_telefono: t, cliente_direccion: d,
-                total, estado: 'esperando_activacion', detalles_pedido: peds
+            if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
+
+            const btn = document.getElementById('btn-confirmar-pedido');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = 'Generando folio...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const folioVenta = 'VTM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+            const { error } = await clienteSupabase.from('pedidos').insert([{
+                folio: folioVenta,
+                negocio_id: negocioActualPedido.id, 
+                cliente_id: usuarioActual ? usuarioActual.id : null, 
+                cliente_nombre: nombre, 
+                cliente_telefono: telefono,
+                cliente_direccion: direccion, 
+                detalles_pedido: detallesPedido, 
+                total: total, 
+                estado: 'esperando_activacion'
             }]);
 
-            const base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const msg = `*NUEVO PEDIDO*\nCliente: ${n}\nTotal: $${total}\nFolio: ${folio}\nActiva aquí:\n${base}/activar_pedido.html?folio=${folio}`;
-            window.open(`https://wa.me/${negocioActualPedido.enlace_whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-            cerrarMenu();
+            btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            if (error) {
+                console.error(error);
+                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
+            } else {
+                textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
+                textoPedido += `*Folio:* ${folioVenta}\n\n`;
+                
+                const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+                
+                textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
+
+                let numeroVendedor = negocioActualPedido.enlace_whatsapp;
+                numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
+                
+                if(numeroVendedor) {
+                    const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
+                    window.open(urlWa, '_blank');
+                } else {
+                    alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+                }
+
+                alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
+                cerrarMenu();
+            }
         }
 
-        function cerrarMenu() { document.getElementById('modal-menu').classList.add('hidden'); }
-        function abrirPerfil() { window.location.href = "panel.html?view=perfil"; }
+        async function cerrarSesion() { 
+            await clienteSupabase.auth.signOut(); 
+            window.location.reload(); 
+        }
     </script>
 </body>
 </html>
