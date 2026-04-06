@@ -72,9 +72,8 @@
         let marcadorMoto = null;
         let suscripcionGPS = null;
 
-        // Ícono personalizado para la moto
         const iconoMoto = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', // Icono moto genérico
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png',
             iconSize: [40, 40],
             iconAnchor: [20, 20]
         });
@@ -101,7 +100,6 @@
                 return;
             }
 
-            // Ocultar búsqueda y mostrar mapa
             document.getElementById('pantalla-busqueda').classList.add('hidden');
             document.getElementById('pantalla-mapa').classList.remove('hidden');
             
@@ -111,11 +109,12 @@
         }
 
         function inicializarMapa() {
-            // Centro de Tres Marías por defecto
-            mapa = L.map('mapa-rastreo', { zoomControl: false }).setView([19.6942, -101.1278], 14);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(mapa);
+            if(!mapa) {
+                mapa = L.map('mapa-rastreo', { zoomControl: false }).setView([19.6942, -101.1278], 14);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(mapa);
+            }
         }
 
         function actualizarInterfazPedido(pedido) {
@@ -138,13 +137,12 @@
                 elEstado.innerText = "En Camino"; elEstado.className = "text-green-500 font-black text-lg uppercase";
                 elDesc.innerText = "¡Tu pedido va hacia tu domicilio! Síguelo en el mapa.";
                 
-                // Si el repartidor ya tiene GPS activo en DB
                 if(pedido.repartidor_lat && pedido.repartidor_lng) {
                     actualizarPosicionMoto(pedido.repartidor_lat, pedido.repartidor_lng);
                 }
             } else if (pedido.estado === 'entregado') {
                 elEstado.innerText = "Entregado"; elEstado.className = "text-gray-500 font-black text-lg uppercase";
-                elDesc.innerText = "¡Disfruta tu pedido! Gracias por usar Vive Tres Marías.";
+                elDesc.innerText = "¡Disfruta tu pedido! Gracias por usar la plataforma.";
             }
         }
 
@@ -154,11 +152,9 @@
             
             if(!marcadorMoto) {
                 marcadorMoto = L.marker(nuevaPos, {icon: iconoMoto}).addTo(mapa);
-                mapa.setView(nuevaPos, 16); // Hacer zoom cuando aparece
+                mapa.setView(nuevaPos, 16); 
             } else {
                 marcadorMoto.setLatLng(nuevaPos);
-                // Si quieres que la cámara siga a la moto siempre, descomenta esto:
-                // mapa.setView(nuevaPos); 
             }
         }
 
@@ -172,7 +168,6 @@
                 }, async (payload) => {
                     const datosNuevos = payload.new;
                     
-                    // Si no teníamos el nombre del repartidor y ya se asignó, volvemos a consultar
                     if(!datosNuevos.repartidores) {
                         const { data } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('id', datosNuevos.id).single();
                         if(data) actualizarInterfazPedido(data);
@@ -180,12 +175,22 @@
                         actualizarInterfazPedido(datosNuevos);
                     }
 
-                    // Si está en camino y hay GPS
                     if (datosNuevos.estado === 'en_camino' && datosNuevos.repartidor_lat) {
                         actualizarPosicionMoto(datosNuevos.repartidor_lat, datosNuevos.repartidor_lng);
                     }
                 }).subscribe();
         }
+
+        // --- NUEVO: Autoejecutar si viene el folio en la URL ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const folioEnUrl = urlParams.get('folio');
+            
+            if (folioEnUrl) {
+                document.getElementById('input-folio').value = folioEnUrl;
+                buscarPedido(); 
+            }
+        });
     </script>
 </body>
 </html>
