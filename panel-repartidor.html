@@ -99,10 +99,6 @@
         let ultimaVezEnviado = 0;
         let pedidoActivo = null;
 
-        const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
-        const RADIO_PERMITIDO_METROS = 5000; 
-
-        // 1. MODIFICADO: Recuperación inteligente tras F5
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
@@ -115,7 +111,6 @@
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             }
 
-            // Buscamos si hay pedido pendiente, y ahora INCLUIMOS 'asignado'
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('repartidor_id', usuarioId)
@@ -196,34 +191,23 @@
             }
         });
 
-        function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; const rad = Math.PI / 180;
-            const a = Math.sin((lat2 - lat1)*rad/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin((lon2 - lon1)*rad/2)**2;
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-        }
-
         async function cambiarEstado() {
             const toggle = document.getElementById('toggle-estado');
             const textoEstado = document.getElementById('estado-texto');
             
             if (toggle.checked) {
-                textoEstado.innerText = 'Buscando GPS...';
+                textoEstado.innerText = 'Conectando...';
                 textoEstado.className = 'font-bold text-sm text-yellow-500';
                 toggle.disabled = true;
 
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
-                    if (distancia > RADIO_PERMITIDO_METROS) {
-                        alert("Estás fuera de la zona. Acércate para trabajar.");
-                        forzarDesconexion();
-                        return;
-                    }
+                    // Sin restricción de distancia. Conexión libre.
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     marcarConectadoUI();
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
                 }, () => {
-                    alert("GPS obligatorio. Activa tu ubicación.");
+                    alert("GPS obligatorio. Activa tu ubicación y dale permisos al navegador para poder trabajar.");
                     forzarDesconexion();
                 }, { enableHighAccuracy: true });
             } else {
@@ -303,17 +287,15 @@
             `).join('');
         }
 
-        // 2. MODIFICADO: Generar sonido y alerta cuando el vendedor asigne
         function reproducirBeep() {
             try {
-                // Sonido de alerta muy simple generado por JS puro sin necesidad de MP3
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 osc.type = "sine";
-                osc.frequency.value = 880; // Tono alto
+                osc.frequency.value = 880;
                 gain.gain.setValueAtTime(1, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
                 osc.start();
@@ -326,11 +308,9 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
                     const nuevo = payload.new;
                     
-                    // Si el vendedor actualizó el pedido a 'asignado' y el ID es el mío
                     if (nuevo && nuevo.estado === 'asignado' && nuevo.repartidor_id === usuarioId) {
-                        if (navigator.vibrate) navigator.vibrate([500, 200, 500]); // Vibrar si el celular lo soporta
-                        reproducirBeep(); // Sonar beep
-                        // La alerta pausa el navegador, garantizando que el repartidor la vea
+                        if (navigator.vibrate) navigator.vibrate([500, 200, 500]); 
+                        reproducirBeep(); 
                         alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
                     }
 
@@ -426,7 +406,7 @@
 
         function abrirRutaMaps() {
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
-            const direccionCodificada = encodeURIComponent(`${direccion}, Tres Marias, Morelia, Michoacan`);
+            const direccionCodificada = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
             window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
         }
 
