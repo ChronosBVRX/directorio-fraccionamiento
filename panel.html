@@ -195,22 +195,7 @@
     </div>
 
     <div id="modal-suscripcion" class="hidden fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md relative">
-            <button onclick="document.getElementById('modal-suscripcion').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-black font-bold text-2xl leading-none">×</button>
-            <h2 class="text-xl font-black text-tm-azul-oscuro mb-4">Elige tu Plan</h2>
-            <input type="hidden" id="sub-anuncio-id">
-            <div class="space-y-4">
-                <button onclick="iniciarPagoStripe(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="w-full border-2 border-blue-400 rounded-xl p-4 text-left hover:bg-blue-50 transition flex justify-between items-center">
-                    <div><h3 class="font-bold text-blue-600 text-lg">Pro (Nivel 1)</h3><p class="text-sm text-gray-500">Imágenes y catálogo</p></div>
-                    <span class="font-black text-xl text-tm-azul-oscuro">$150<span class="text-xs font-normal">/mes</span></span>
-                </button>
-                <button onclick="iniciarPagoStripe(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="w-full border-2 border-tm-dorado rounded-xl p-4 text-left hover:bg-yellow-50 transition flex justify-between items-center">
-                    <div><h3 class="font-bold text-tm-dorado text-lg">Elite (Nivel 2)</h3><p class="text-sm text-gray-500">Menú interactivo</p></div>
-                    <span class="font-black text-xl text-tm-azul-oscuro">$300<span class="text-xs font-normal">/mes</span></span>
-                </button>
-            </div>
         </div>
-    </div>
 
     <script>
         const stripe = Stripe('pk_live_51TIbWAGtW4zuRQv9BoUbQxHh1hHUdLMysM1q5aglozGBNkdBXV2EFiyTPYDZf0gKRM2JjFy2bHLEsJHlvT8nlNfT004EDyUyWi');
@@ -279,10 +264,11 @@
         }
 
         async function cargarMisPedidos() {
+            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
             const { data, error } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio)')
                 .eq('cliente_id', usuarioActual.id)
-                .order('created_at', { ascending: false })
+                .order('creado_en', { ascending: false })
                 .limit(5);
 
             const contenedor = document.getElementById('contenedor-mis-pedidos');
@@ -297,6 +283,7 @@
                 let textoEstado = p.estado;
                 
                 if(p.estado === 'esperando_activacion') { colorEstado = 'bg-yellow-100 text-yellow-700'; textoEstado = 'Pendiente de Pago'; }
+                if(p.estado === 'asignado') { colorEstado = 'bg-orange-100 text-orange-700'; textoEstado = 'Asignando Repartidor'; }
                 if(p.estado === 'pendiente') { colorEstado = 'bg-blue-100 text-blue-700'; textoEstado = 'Buscando Repartidor'; }
                 if(p.estado === 'aceptado' || p.estado === 'en_camino') { colorEstado = 'bg-green-100 text-green-700'; textoEstado = 'En Ruta'; }
 
