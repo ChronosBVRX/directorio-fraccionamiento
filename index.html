@@ -37,6 +37,10 @@
             
             <div id="nav-botones" class="flex gap-2 sm:gap-4 items-center shrink-0">
                 
+                <a href="rastreo.html" class="text-tm-dorado hover:text-yellow-600 font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 flex items-center gap-1 transition shrink-0">
+                    <span class="text-sm sm:text-lg">📍</span> <span class="hidden sm:inline">Seguir Pedido</span>
+                </a>
+
                 <div id="contenedor-switch" class="hidden items-center gap-1.5 sm:gap-2 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-gray-200 shrink-0">
                     <span class="text-xs sm:text-sm font-bold text-tm-azul whitespace-nowrap" id="label-modo-comprar">
                         <span class="sm:hidden">🛍️</span>
@@ -104,7 +108,7 @@
         <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden">
             <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
                 <h2 id="menu-titulo" class="font-black text-lg sm:text-xl text-tm-azul truncate pr-4">Menú</h2>
-                <button onclick="cerrarMenu()" class="text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
+                <button onclick="cerrarMenu()" class="text-3xl leading-none text-gray-500 hover:text-black">×</button>
             </div>
             <div id="menu-lista" class="p-3 sm:p-4 overflow-y-auto flex-grow space-y-4"></div>
             
@@ -143,28 +147,19 @@
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
-        // NUEVO: Función para verificar si el usuario es administrador
         async function verificarRolAdmin(userId) {
             try {
-                const { data, error } = await clienteSupabase
-                    .from('perfiles')
-                    .select('es_admin')
-                    .eq('user_id', userId)
-                    .single();
-
+                const { data, error } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', userId).single();
                 if (data && data.es_admin === true) {
                     document.getElementById('btn-admin').classList.remove('hidden');
                 } else {
                     document.getElementById('btn-admin').classList.add('hidden');
                 }
-            } catch (err) {
-                console.error("Error al verificar rol de admin:", err);
-            }
+            } catch (err) { console.error("Error al verificar rol de admin:", err); }
         }
 
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
-            
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
             document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
@@ -173,13 +168,11 @@
                 cargarDatos(); 
                 const isVendedor = document.getElementById('toggle-modo').checked;
                 document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
-                
-                // Disparamos la verificación de administrador
                 verificarRolAdmin(usuarioActual.id);
             } else {
                 document.getElementById('toggle-modo').checked = false;
                 document.getElementById('btn-perfil').classList.add('hidden');
-                document.getElementById('btn-admin').classList.add('hidden'); // Ocultar si se cierra sesión
+                document.getElementById('btn-admin').classList.add('hidden');
                 cambiarModoPlataforma();
             }
         });
@@ -194,13 +187,11 @@
             if(isVendedor) {
                 iframe.src = "panel.html?view=negocio";
                 mostrarVista('panel');
-                
                 if(btnPerfil) btnPerfil.classList.add('hidden');
                 labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
                 labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
             } else {
                 mostrarVista('directorio');
-                
                 if(btnPerfil && usuarioActual) btnPerfil.classList.remove('hidden');
                 labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
                 labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
@@ -250,19 +241,20 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                const recibePedidos = a.nivel_pago === 3;
+                const recibePedidos = a.nivel_pago === 3; // Supongo que nivel 3 es élite. Si élite es 2, ajusta esto.
                 
                 let botones = '';
-                if(recibePedidos) {
+                if(tieneMenu) { // Asumiendo que desde Nivel 2 ya pueden recibir pedidos
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
-                } else if(tieneMenu) {
+                } else if(a.nivel_pago === 1) {
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
-                    botones = `<a href="https://wa.me/${a.enlace_whatsapp}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
+                    let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
+                    botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
                 }
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (recibePedidos ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition">
+                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition">
                         ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
@@ -282,38 +274,46 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        function abrirMenu(negocio, permitePedidos) {
+        // CARGAR PRODUCTOS DESDE LA TABLA 'productos' (Mejor que usar la columna JSON 'menu')
+        async function abrirMenu(negocio, permitePedidos) {
             negocioActualPedido = negocio;
             carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
             
             const contenedorLista = document.getElementById('menu-lista');
-            let menuArr = [];
-            try { menuArr = typeof negocio.menu === 'string' ? JSON.parse(negocio.menu) : (negocio.menu || []); } catch (e) {}
-
-            if(menuArr.length === 0) {
+            contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
+            
+            // Consultar a la tabla productos
+            const { data: productosLista, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id);
+            
+            if(!productosLista || productosLista.length === 0) {
                 contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10 text-sm">Este negocio aún no ha agregado productos.</p>`;
-            } else {
-                contenedorLista.innerHTML = menuArr.map((item, index) => `
-                    <div class="border-b pb-3 flex justify-between items-center gap-2">
-                        <div class="flex-grow">
-                            <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro">${item.nombre}</h4>
-                            <p class="text-[11px] sm:text-xs text-tm-gris line-clamp-2">${item.desc || ''}</p>
-                            <p class="text-tm-dorado font-bold mt-1 text-sm sm:text-base">$${item.precio}</p>
-                        </div>
-                        ${permitePedidos ? `
-                        <div class="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1 shadow-inner shrink-0">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-red-500 font-bold hover:bg-gray-50 flex items-center justify-center">-</button>
-                            <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
-                        </div>` : ''}
-                    </div>
-                `).join('');
+                document.getElementById('menu-carrito').classList.add('hidden');
+                return;
             }
 
+            // Guardamos los productos en el objeto negocio para usarlos luego
+            negocioActualPedido.productosArr = productosLista;
+
+            contenedorLista.innerHTML = productosLista.map((item, index) => `
+                <div class="border-b pb-3 flex justify-between items-center gap-2">
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro">${item.nombre}</h4>
+                        <p class="text-[11px] sm:text-xs text-tm-gris line-clamp-2">${item.descripcion || ''}</p>
+                        <p class="text-tm-dorado font-bold mt-1 text-sm sm:text-base">$${item.precio}</p>
+                    </div>
+                    ${permitePedidos ? `
+                    <div class="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1 shadow-inner shrink-0">
+                        <button onclick="cambiarCantidad(${index}, -1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-red-500 font-bold hover:bg-gray-50 flex items-center justify-center">-</button>
+                        <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
+                        <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
+                    </div>` : ''}
+                </div>
+            `).join('');
+
             const divCarrito = document.getElementById('menu-carrito');
-            if(permitePedidos && menuArr.length > 0) {
+            if(permitePedidos && productosLista.length > 0) {
                 divCarrito.classList.remove('hidden');
                 actualizarTotal();
             } else {
@@ -337,11 +337,12 @@
         
         function actualizarTotal() {
             let total = 0;
-            const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
-            for (let i in carritoActual) total += carritoActual[i] * menu[i].precio;
+            const prodList = negocioActualPedido.productosArr;
+            for (let i in carritoActual) total += carritoActual[i] * prodList[i].precio;
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
         
+        // --- FUNCIÓN ACTUALIZADA CON WHATSAPP Y GPS FLOW ---
         async function procesarPedido() {
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
@@ -351,13 +352,20 @@
 
             let total = 0;
             let detallesPedido = [];
-            const menu = typeof negocioActualPedido.menu === 'string' ? JSON.parse(negocioActualPedido.menu) : negocioActualPedido.menu;
+            const prodList = negocioActualPedido.productosArr;
+            
+            let textoPedido = `*NUEVO PEDIDO DE VIVE TRES MARÍAS* 🚀\n\n`;
+            textoPedido += `*Cliente:* ${nombre}\n`;
+            textoPedido += `*Teléfono:* ${telefono}\n`;
+            textoPedido += `*Dirección:* ${direccion}\n\n`;
+            textoPedido += `*Detalle:*\n`;
             
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
-                    let subtotal = carritoActual[i] * menu[i].precio;
+                    let subtotal = carritoActual[i] * prodList[i].precio;
                     total += subtotal;
-                    detallesPedido.push({ cantidad: carritoActual[i], producto: menu[i].nombre, precio_unitario: menu[i].precio, subtotal: subtotal });
+                    detallesPedido.push({ cantidad: carritoActual[i], producto: prodList[i].nombre, precio_unitario: prodList[i].precio, subtotal: subtotal });
+                    textoPedido += `- ${carritoActual[i]}x ${prodList[i].nombre} ...... $${subtotal.toFixed(2)}\n`;
                 }
             }
 
@@ -365,19 +373,48 @@
 
             const btn = document.getElementById('btn-confirmar-pedido');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Enviando...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = 'Generando folio...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            const { data, error } = await clienteSupabase.from('pedidos').insert([{
-                negocio_id: negocioActualPedido.id, cliente_nombre: nombre, cliente_telefono: telefono,
-                cliente_direccion: direccion, detalles_pedido: detallesPedido, total: total, estado: 'pendiente'
+            // Generar folio único
+            const folioVenta = 'VTM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+            // Guardar en Supabase como 'esperando_activacion'
+            const { error } = await clienteSupabase.from('pedidos').insert([{
+                folio: folioVenta,
+                negocio_id: negocioActualPedido.id, 
+                cliente_nombre: nombre, 
+                cliente_telefono: telefono,
+                cliente_direccion: direccion, 
+                detalles_pedido: detallesPedido, 
+                total: total, 
+                estado: 'esperando_activacion'
             }]);
 
             btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             if (error) {
-                alert("Hubo un error al enviar tu pedido. Intenta nuevamente.");
+                console.error(error);
+                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
             } else {
-                alert("¡Pedido enviado con éxito! Los repartidores han sido notificados.");
+                textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
+                textoPedido += `*Folio:* ${folioVenta}\n\n`;
+                
+                // Link para el vendedor. Utiliza el origen actual (tu dominio real)
+                const linkActivacion = `${window.location.origin}/activar_pedido.html?folio=${folioVenta}`;
+                textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
+
+                // Abrir WhatsApp al negocio
+                let numeroVendedor = negocioActualPedido.enlace_whatsapp;
+                numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
+                
+                if(numeroVendedor) {
+                    const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
+                    window.open(urlWa, '_blank');
+                } else {
+                    alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+                }
+
+                alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
                 cerrarMenu();
             }
         }
