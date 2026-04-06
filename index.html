@@ -419,7 +419,9 @@
                 textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
                 textoPedido += `*Folio:* ${folioVenta}\n\n`;
                 
-                const linkActivacion = `${window.location.origin}/activar_pedido.html?folio=${folioVenta}`;
+                const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+                
                 textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
 
                 let numeroVendedor = negocioActualPedido.enlace_whatsapp;
