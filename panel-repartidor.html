@@ -123,16 +123,26 @@
                 }, () => { alert("GPS obligatorio."); forzarDesconexion(); }, { enableHighAccuracy: true });
             } else {
                 if(pedidoActivo) { alert("Termina el pedido primero."); toggle.checked = true; return; }
-                forzarDesconexion();
+                await forzarDesconexion(); // AHORA ESPERA
             }
         }
 
-        function forzarDesconexion() {
+        // CORRECCIÓN: Ahora es una función asíncrona para asegurar que la base de datos se actualice
+        async function forzarDesconexion() {
             document.getElementById('toggle-estado').checked = false;
             document.getElementById('estado-texto').innerText = 'Desconectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-red-300';
-            if(watchId) navigator.geolocation.clearWatch(watchId);
-            clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir viajes...</p>';
+            
+            if(watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            if(usuarioId) {
+                // AWAIT clave para que no corte la conexión antes de guardar
+                await clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
+            }
         }
 
         function iniciarRastreoInteligente() {
@@ -174,7 +184,7 @@
 
         function reproducirBeep() {
             try {
-                const ctx = new AudioContext();
+                const ctx = new window.AudioContext();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
@@ -261,7 +271,23 @@
             cargarPedidosDisponibles();
         }
 
-        async function cerrarSesion() { if(pedidoActivo) return; forzarDesconexion(); await clienteSupabase.auth.signOut(); window.location.reload(); }
+        // CORRECCIÓN: Se agregó 'await' para forzar a que termine la desconexión antes de salir
+        async function cerrarSesion() { 
+            if(pedidoActivo) {
+                alert("Termina el pedido primero.");
+                return; 
+            }
+            await forzarDesconexion(); 
+            await clienteSupabase.auth.signOut(); 
+            window.location.reload(); 
+        }
+        
+        // Seguro extra por si cierran la pestaña de golpe (navegadores lo soportan parcialmente)
+        window.addEventListener('beforeunload', (e) => {
+            if(usuarioId && document.getElementById('toggle-estado').checked) {
+                clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId).then();
+            }
+        });
 
         init();
     </script>
