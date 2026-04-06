@@ -146,6 +146,7 @@
         let usuarioActual = null;
         let carritoActual = {}; 
         let negocioActualPedido = null;
+        let perfilUsuarioActual = null;
 
         async function verificarRolAdmin(userId) {
             try {
@@ -158,6 +159,19 @@
             } catch (err) { console.error("Error al verificar rol de admin:", err); }
         }
 
+        async function cargarPerfilUsuario() {
+            if (!usuarioActual) return;
+            const { data, error } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .maybeSingle(); 
+            
+            if (data) {
+                perfilUsuarioActual = data;
+            }
+        }
+
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
@@ -166,10 +180,12 @@
             
             if(usuarioActual) {
                 cargarDatos(); 
+                cargarPerfilUsuario();
                 const isVendedor = document.getElementById('toggle-modo').checked;
                 document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
                 verificarRolAdmin(usuarioActual.id);
             } else {
+                perfilUsuarioActual = null;
                 document.getElementById('toggle-modo').checked = false;
                 document.getElementById('btn-perfil').classList.add('hidden');
                 document.getElementById('btn-admin').classList.add('hidden');
@@ -241,7 +257,6 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                const recibePedidos = a.nivel_pago === 3;
                 
                 let botones = '';
                 if(tieneMenu) {
@@ -279,6 +294,16 @@
             carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
+
+            if (perfilUsuarioActual) {
+                document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
+                document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
+                document.getElementById('cliente-direccion').value = perfilUsuarioActual.direccion || '';
+            } else {
+                document.getElementById('cliente-nombre').value = '';
+                document.getElementById('cliente-telefono').value = '';
+                document.getElementById('cliente-direccion').value = '';
+            }
             
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
