@@ -89,6 +89,22 @@
 
     </main>
 
+    <div id="modal-custom" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="p-6 text-center">
+                <div id="modal-icono" class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <span class="text-2xl" id="icono-texto">⚠️</span>
+                </div>
+                <h3 class="text-xl font-black text-gray-800 mb-2" id="modal-titulo">Atención</h3>
+                <p class="text-sm text-gray-600 mb-6" id="modal-mensaje">Mensaje</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="btn-modal-cancelar" class="hidden flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Cancelar</button>
+                    <button id="btn-modal-aceptar" class="flex-1 text-white font-bold py-3 rounded-xl transition shadow-md">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
@@ -103,6 +119,70 @@
         const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
         const RADIO_PERMITIDO_METROS = 5000; 
 
+        // --- SISTEMA DE ALERTAS PERSONALIZADO ---
+        function mostrarAlerta(mensaje, tipo = 'error', callbackConfirmar = null) {
+            const modal = document.getElementById('modal-custom');
+            const content = document.getElementById('modal-content');
+            const titulo = document.getElementById('modal-titulo');
+            const texto = document.getElementById('modal-mensaje');
+            const iconoContenedor = document.getElementById('modal-icono');
+            const iconoTexto = document.getElementById('icono-texto');
+            const btnCancelar = document.getElementById('btn-modal-cancelar');
+            const btnAceptar = document.getElementById('btn-modal-aceptar');
+
+            texto.innerText = mensaje;
+
+            // Clonar botones para limpiar EventListeners previos
+            const nuevoBtnAceptar = btnAceptar.cloneNode(true);
+            btnAceptar.parentNode.replaceChild(nuevoBtnAceptar, btnAceptar);
+            const nuevoBtnCancelar = btnCancelar.cloneNode(true);
+            btnCancelar.parentNode.replaceChild(nuevoBtnCancelar, btnCancelar);
+
+            // Configuración visual según el tipo de alerta
+            if (tipo === 'error') {
+                titulo.innerText = 'Atención';
+                iconoContenedor.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4';
+                iconoTexto.innerText = '⚠️';
+                nuevoBtnCancelar.classList.add('hidden');
+                nuevoBtnAceptar.className = 'flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow-md';
+            } else if (tipo === 'exito') {
+                titulo.innerText = '¡Excelente!';
+                iconoContenedor.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4';
+                iconoTexto.innerText = '✅';
+                nuevoBtnCancelar.classList.add('hidden');
+                nuevoBtnAceptar.className = 'flex-1 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition shadow-md';
+            } else if (tipo === 'confirmar') {
+                titulo.innerText = 'Confirmación';
+                iconoContenedor.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4';
+                iconoTexto.innerText = '❓';
+                nuevoBtnCancelar.classList.remove('hidden');
+                nuevoBtnAceptar.className = 'flex-1 bg-tm-azul text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition shadow-md';
+            }
+
+            // Animar entrada
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+
+            // Función para cerrar modal con animación
+            const cerrarModal = () => {
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            };
+
+            // Asignar eventos
+            nuevoBtnAceptar.onclick = () => {
+                cerrarModal();
+                if (callbackConfirmar) callbackConfirmar();
+            };
+            nuevoBtnCancelar.onclick = cerrarModal;
+        }
+
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
@@ -114,7 +194,6 @@
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             }
 
-            // Buscar si hay pedidos aceptados o en camino para este repartidor
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('repartidor_id', usuarioId)
@@ -135,7 +214,7 @@
         }
 
         async function abrirPerfil() {
-            if (pedidoActivo) return alert("No puedes editar tu perfil mientras tienes un pedido en curso.");
+            if (pedidoActivo) return mostrarAlerta("No puedes editar tu perfil mientras tienes un pedido en curso.", 'error');
             document.getElementById('vista-pendientes').classList.add('hidden');
             document.getElementById('vista-perfil').classList.remove('hidden');
 
@@ -164,8 +243,9 @@
             const { error } = await clienteSupabase.from('repartidores').update({ nombre, telefono, vehiculo }).eq('id', usuarioId);
             btn.innerText = "Guardar Datos"; btn.disabled = false;
 
-            if (error) alert("Error: " + error.message);
-            else {
+            if (error) {
+                mostrarAlerta("Error: " + error.message, 'error');
+            } else {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${nombre.split(' ')[0]}`;
                 cerrarPerfil();
             }
@@ -189,7 +269,7 @@
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
                     if (distancia > RADIO_PERMITIDO_METROS) {
-                        alert("Estás fuera de la zona. Acércate para trabajar.");
+                        mostrarAlerta("Estás fuera de la zona. Acércate para trabajar.", 'error');
                         forzarDesconexion();
                         return;
                     }
@@ -200,12 +280,12 @@
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
                 }, () => {
-                    alert("GPS obligatorio. Activa tu ubicación.");
+                    mostrarAlerta("GPS obligatorio. Activa tu ubicación para trabajar.", 'error');
                     forzarDesconexion();
                 }, { enableHighAccuracy: true });
             } else {
                 if(pedidoActivo) {
-                    alert("Termina tu pedido actual antes de desconectarte.");
+                    mostrarAlerta("Termina tu pedido actual antes de desconectarte.", 'error');
                     toggle.checked = true;
                     return;
                 }
@@ -224,20 +304,18 @@
             if(usuarioId) clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
         }
 
-        // --- RASTREO CONDICIONAL ---
         function iniciarRastreoInteligente() {
             if (watchId) navigator.geolocation.clearWatch(watchId);
 
             watchId = navigator.geolocation.watchPosition(async (pos) => {
                 const { latitude, longitude } = pos.coords;
                 
-                if (!pedidoActivo) return; // Si no hay pedido, no gasta internet enviando
+                if (!pedidoActivo) return;
 
                 const ahora = Date.now();
-                if (ahora - ultimaVezEnviado > 10000) { // Actualizar cada 10 segs
+                if (ahora - ultimaVezEnviado > 10000) { 
                     await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
 
-                    // Si ya recogió la comida, mandar coordenadas a la tabla PEDIDOS para el cliente
                     if (pedidoActivo.estado === 'en_camino') {
                         await clienteSupabase.from('pedidos')
                             .update({ repartidor_lat: latitude, repartidor_lng: longitude })
@@ -290,14 +368,14 @@
 
         async function aceptarPedido(id_pedido) {
             const { data: check } = await clienteSupabase.from('pedidos').select('estado').eq('id', id_pedido).single();
-            if(check.estado !== 'pendiente') return alert("Alguien más ya tomó este pedido.");
+            if(check.estado !== 'pendiente') return mostrarAlerta("Alguien más ya tomó este pedido.", 'error');
 
             const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'aceptado', repartidor_id: usuarioId })
                 .eq('id', id_pedido)
                 .select('*, anuncios(nombre_negocio, direccion)').single();
             
-            if(error) return alert("Error al aceptar.");
+            if(error) return mostrarAlerta("Error al aceptar el pedido.", 'error');
             
             pedidoActivo = pedido;
             mostrarPantallaActivo();
@@ -309,10 +387,10 @@
                 .eq('id', pedidoActivo.id)
                 .select('*, anuncios(nombre_negocio, direccion)').single();
 
-            if(error) return alert("Error al iniciar entrega.");
+            if(error) return mostrarAlerta("Error al iniciar entrega.", 'error');
 
             pedidoActivo = pedido;
-            alert("¡GPS Activado!\nEl cliente ya puede rastrear tu ubicación en el mapa.");
+            mostrarAlerta("¡GPS Activado!\nEl cliente ya puede rastrear tu ubicación en el mapa.", 'exito');
             mostrarPantallaActivo();
         }
 
@@ -381,25 +459,28 @@
         }
 
         async function finalizarPedido() {
-            if(!confirm("¿Confirmas que ya entregaste el pedido y recibiste el dinero?")) return;
-
-            await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
-            
-            alert("¡Excelente trabajo! Pedido finalizado.");
-            pedidoActivo = null;
-            document.getElementById('estado-texto').innerText = 'Conectado';
-            document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
-            
-            document.getElementById('vista-activo').classList.add('hidden');
-            document.getElementById('vista-pendientes').classList.remove('hidden');
-            cargarPedidosDisponibles();
+            mostrarAlerta("¿Confirmas que ya entregaste el pedido y recibiste el dinero?", 'confirmar', async () => {
+                await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
+                
+                mostrarAlerta("¡Excelente trabajo! Pedido finalizado.", 'exito');
+                pedidoActivo = null;
+                document.getElementById('estado-texto').innerText = 'Conectado';
+                document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
+                
+                document.getElementById('vista-activo').classList.add('hidden');
+                document.getElementById('vista-pendientes').classList.remove('hidden');
+                cargarPedidosDisponibles();
+            });
         }
 
         async function cerrarSesion() {
-            if(pedidoActivo) return alert("Termina el pedido actual antes de salir.");
-            forzarDesconexion(true);
-            await clienteSupabase.auth.signOut();
-            window.location.reload();
+            if(pedidoActivo) return mostrarAlerta("Termina el pedido actual antes de salir.", 'error');
+            
+            mostrarAlerta("¿Estás seguro de que deseas cerrar sesión?", 'confirmar', async () => {
+                forzarDesconexion(true);
+                await clienteSupabase.auth.signOut();
+                window.location.reload();
+            });
         }
 
         init();
