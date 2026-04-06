@@ -186,11 +186,16 @@
 
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
-                    if (distancia > RADIO_PERMITIDO_METROS) {
+                    
+                    // 👇 DESACTIVADO PARA PRUEBAS: Quita los /* y */ para volver a activar la restricción
+                    /* if (distancia > RADIO_PERMITIDO_METROS) {
                         alert("Estás fuera de la zona. Acércate para trabajar.");
                         forzarDesconexion();
                         return;
                     }
+                    */ 
+                    // 👆 FIN DEL BLOQUE
+
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     textoEstado.innerText = 'Conectado';
                     textoEstado.className = 'font-bold text-sm text-green-400';
@@ -244,7 +249,6 @@
             }, console.error, { enableHighAccuracy: true });
         }
 
-        // NUEVO: Ahora solo busca pedidos en estado "asignado" que sean exclusivos para su ID
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
@@ -377,7 +381,7 @@
         function abrirRutaMaps() {
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
             const direccionCodificada = encodeURIComponent(`${direccion}, Tres Marias, Morelia, Michoacan`);
-            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
+            window.open(`https://maps.google.com/?q=$${direccionCodificada}`, '_blank');
         }
 
         async function finalizarPedido() {
