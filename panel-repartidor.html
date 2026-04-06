@@ -105,7 +105,6 @@
             
             usuarioId = session.user.id;
             
-            // Traemos también 'esta_activo' para saber si estaba en línea antes de recargar
             const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre, esta_activo').eq('id', usuarioId).maybeSingle();
             if (perfil && perfil.nombre) {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
@@ -121,13 +120,11 @@
 
             if (pedidoPendiente) {
                 if (pedidoPendiente.estado === 'asignado') {
-                    // Si recargó y apenas se lo asignaron
                     document.getElementById('toggle-estado').checked = true;
                     marcarConectadoUI();
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
                 } else {
-                    // Si ya iba en camino al negocio o al cliente
                     pedidoActivo = pedidoPendiente;
                     document.getElementById('toggle-estado').checked = true;
                     marcarConectadoUI();
@@ -136,10 +133,9 @@
                 }
                 suscribirseAPedidos();
             } else {
-                // Si no hay pedidos, revisamos si estaba conectado en la BD
                 if (perfil && perfil.esta_activo) {
                     document.getElementById('toggle-estado').checked = true;
-                    cambiarEstado(); // Esto reconecta GPS y estado automáticamente
+                    cambiarEstado(); 
                 } else {
                     cargarPedidosDisponibles();
                 }
@@ -147,7 +143,6 @@
             }
         }
 
-        // Pequeña función para no repetir código visual
         function marcarConectadoUI() {
             document.getElementById('estado-texto').innerText = 'Conectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
@@ -201,7 +196,6 @@
                 toggle.disabled = true;
 
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    // Sin restricción de distancia. Conexión libre.
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     marcarConectadoUI();
                     cargarPedidosDisponibles();
@@ -243,6 +237,7 @@
                 if (ahora - ultimaVezEnviado > 10000) { 
                     await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
 
+                    // EL GPS SOLO SE ENVÍA SI EL ESTADO ES 'en_camino'
                     if (pedidoActivo.estado === 'en_camino') {
                         await clienteSupabase.from('pedidos')
                             .update({ repartidor_lat: latitude, repartidor_lng: longitude })
@@ -257,9 +252,9 @@
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
             const { data } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio)')
+                .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('estado', 'asignado')
-                .eq('repartidor_id', usuarioId) // SOLO MIS PEDIDOS ASIGNADOS
+                .eq('repartidor_id', usuarioId)
                 .order('created_at', { ascending: false });
             
             const contenedor = document.getElementById('contenedor-pedidos');
@@ -276,13 +271,17 @@
                     </div>
                     <p class="text-xs text-tm-azul uppercase font-bold mb-1">De: ${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
                     <p class="font-bold text-gray-800 text-lg mb-1">Para: ${p.cliente_nombre}</p>
-                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.cliente_direccion}</p>
+                    <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.anuncios ? p.anuncios.direccion : 'Revisa en la app'}</p>
                     
                     <div class="border-t border-dashed pt-3 flex justify-between items-center">
                         <p class="text-xs text-gray-400">Total a cobrar:</p>
                         <span class="font-black text-xl text-tm-azul">$${p.total}</span>
                     </div>
-                    <button onclick="aceptarPedido('${p.id}')" class="mt-4 w-full bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow">Aceptar Mi Viaje</button>
+                    
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="rechazarPedido('${p.id}')" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-lg transition shadow-sm text-sm">Rechazar</button>
+                        <button onclick="aceptarPedido('${p.id}')" class="w-2/3 bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow">Aceptar Viaje</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -305,17 +304,36 @@
 
         function suscribirseAPedidos() {
             clienteSupabase.channel('pedidos-nuevos')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, payload => {
                     const nuevo = payload.new;
                     
+                    // Asegurarnos de recargar la lista de pedidos de fondo
+                    if(!pedidoActivo) cargarPedidosDisponibles(); 
+
                     if (nuevo && nuevo.estado === 'asignado' && nuevo.repartidor_id === usuarioId) {
                         if (navigator.vibrate) navigator.vibrate([500, 200, 500]); 
                         reproducirBeep(); 
-                        alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
+                        
+                        // Retrasamos el alert 500ms para que la tarjeta se dibuje primero en pantalla
+                        setTimeout(() => {
+                            alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
+                        }, 500);
                     }
-
-                    if(!pedidoActivo) cargarPedidosDisponibles(); 
                 }).subscribe();
+        }
+
+        // NUEVO: Función para rechazar el pedido
+        async function rechazarPedido(id_pedido) {
+            if(!confirm("¿Estás seguro de rechazar este viaje? El vendedor tendrá que asignar a otro repartidor.")) return;
+            
+            // Regresamos el estado para que el vendedor pueda reasignar
+            const { error } = await clienteSupabase.from('pedidos')
+                .update({ estado: 'esperando_activacion', repartidor_id: null })
+                .eq('id', id_pedido);
+
+            if(error) return alert("Hubo un error al rechazar el pedido.");
+            
+            cargarPedidosDisponibles();
         }
 
         async function aceptarPedido(id_pedido) {
@@ -405,6 +423,7 @@
         }
 
         function abrirRutaMaps() {
+            // Fase 1 = Va al negocio, Fase 2 = Va al cliente
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
             const direccionCodificada = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
             window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
