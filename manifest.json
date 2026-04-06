@@ -1,8 +1,8 @@
 {
   "name": "Vive Tres Marías - Directorio",
-  "short_name": "Tres Marías",
+  "short_name": "V3M",
   "description": "Directorio comercial y de servicios para tu fraccionamiento.",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f9fafb",
   "theme_color": "#22527b",
