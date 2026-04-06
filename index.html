@@ -7,11 +7,12 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#22527b">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tres Marías">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,6 +68,11 @@
                 <a href="admin.html" id="btn-admin" class="hidden text-white bg-red-600 hover:bg-red-700 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shrink-0 shadow-sm">
                     <span class="text-sm sm:text-base">⚙️</span> <span class="hidden sm:inline">Admin</span>
                 </a>
+
+                <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shadow-sm shrink-0">
+                    <span class="text-sm sm:text-base">📱</span> 
+                    <span class="hidden sm:inline">Descargar App</span>
+                </button>
 
                 <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 hover:underline flex items-center gap-1 transition shrink-0">
                     <span class="text-sm sm:text-lg">👤</span> <span class="hidden sm:inline">Mi Perfil</span>
@@ -454,6 +460,7 @@
     </script>
     
     <script>
+        // 1. Registro del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -461,6 +468,33 @@
                     .catch(err => console.error('Error al registrar PWA:', err));
             });
         }
+
+        // 2. Lógica del Botón de Instalación
+        let eventoInstalacion;
+        const btnInstalar = document.getElementById('btn-instalar');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // Previene el mini-banner predeterminado
+            eventoInstalacion = e;
+            btnInstalar.classList.remove('hidden'); // Muestra nuestro botón
+        });
+
+        btnInstalar.addEventListener('click', async () => {
+            if (!eventoInstalacion) return;
+            eventoInstalacion.prompt(); // Muestra el diálogo nativo
+            
+            const { outcome } = await eventoInstalacion.userChoice;
+            if (outcome === 'accepted') {
+                console.log('El usuario aceptó instalar la app');
+                btnInstalar.classList.add('hidden');
+            }
+            eventoInstalacion = null;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            btnInstalar.classList.add('hidden'); // Ocultar si ya se instaló
+            console.log('PWA instalada correctamente');
+        });
     </script>
 </body>
 </html>
