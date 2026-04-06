@@ -102,34 +102,61 @@
         const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
         const RADIO_PERMITIDO_METROS = 5000; 
 
+        // 1. MODIFICADO: Recuperación inteligente tras F5
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
             
             usuarioId = session.user.id;
             
-            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).maybeSingle();
+            // Traemos también 'esta_activo' para saber si estaba en línea antes de recargar
+            const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre, esta_activo').eq('id', usuarioId).maybeSingle();
             if (perfil && perfil.nombre) {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             }
 
+            // Buscamos si hay pedido pendiente, y ahora INCLUIMOS 'asignado'
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('repartidor_id', usuarioId)
-                .in('estado', ['aceptado', 'en_camino'])
+                .in('estado', ['asignado', 'aceptado', 'en_camino'])
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
 
             if (pedidoPendiente) {
-                pedidoActivo = pedidoPendiente;
-                document.getElementById('toggle-estado').checked = true;
-                iniciarRastreoInteligente();
-                mostrarPantallaActivo();
+                if (pedidoPendiente.estado === 'asignado') {
+                    // Si recargó y apenas se lo asignaron
+                    document.getElementById('toggle-estado').checked = true;
+                    marcarConectadoUI();
+                    cargarPedidosDisponibles();
+                    iniciarRastreoInteligente();
+                } else {
+                    // Si ya iba en camino al negocio o al cliente
+                    pedidoActivo = pedidoPendiente;
+                    document.getElementById('toggle-estado').checked = true;
+                    marcarConectadoUI();
+                    iniciarRastreoInteligente();
+                    mostrarPantallaActivo();
+                }
+                suscribirseAPedidos();
             } else {
-                cargarPedidosDisponibles();
+                // Si no hay pedidos, revisamos si estaba conectado en la BD
+                if (perfil && perfil.esta_activo) {
+                    document.getElementById('toggle-estado').checked = true;
+                    cambiarEstado(); // Esto reconecta GPS y estado automáticamente
+                } else {
+                    cargarPedidosDisponibles();
+                }
                 suscribirseAPedidos();
             }
+        }
+
+        // Pequeña función para no repetir código visual
+        function marcarConectadoUI() {
+            document.getElementById('estado-texto').innerText = 'Conectado';
+            document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
+            document.getElementById('toggle-estado').disabled = false;
         }
 
         async function abrirPerfil() {
@@ -186,20 +213,13 @@
 
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
-                    
-                    // 👇 DESACTIVADO PARA PRUEBAS: Quita los /* y */ para volver a activar la restricción
-                    /* if (distancia > RADIO_PERMITIDO_METROS) {
+                    if (distancia > RADIO_PERMITIDO_METROS) {
                         alert("Estás fuera de la zona. Acércate para trabajar.");
                         forzarDesconexion();
                         return;
                     }
-                    */ 
-                    // 👆 FIN DEL BLOQUE
-
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
-                    textoEstado.innerText = 'Conectado';
-                    textoEstado.className = 'font-bold text-sm text-green-400';
-                    toggle.disabled = false;
+                    marcarConectadoUI();
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
                 }, () => {
@@ -283,19 +303,45 @@
             `).join('');
         }
 
+        // 2. MODIFICADO: Generar sonido y alerta cuando el vendedor asigne
+        function reproducirBeep() {
+            try {
+                // Sonido de alerta muy simple generado por JS puro sin necesidad de MP3
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.value = 880; // Tono alto
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+                osc.start();
+                osc.stop(ctx.currentTime + 1);
+            } catch(e) { console.log(e); }
+        }
+
         function suscribirseAPedidos() {
             clienteSupabase.channel('pedidos-nuevos')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
+                    const nuevo = payload.new;
+                    
+                    // Si el vendedor actualizó el pedido a 'asignado' y el ID es el mío
+                    if (nuevo && nuevo.estado === 'asignado' && nuevo.repartidor_id === usuarioId) {
+                        if (navigator.vibrate) navigator.vibrate([500, 200, 500]); // Vibrar si el celular lo soporta
+                        reproducirBeep(); // Sonar beep
+                        // La alerta pausa el navegador, garantizando que el repartidor la vea
+                        alert("¡🔔 NUEVO VIAJE ASIGNADO! Revisa tu pantalla.");
+                    }
+
                     if(!pedidoActivo) cargarPedidosDisponibles(); 
                 }).subscribe();
         }
 
         async function aceptarPedido(id_pedido) {
-            // Validamos que siga asignado a nosotros
             const { data: check } = await clienteSupabase.from('pedidos').select('estado, repartidor_id').eq('id', id_pedido).single();
             if(check.estado !== 'asignado' || check.repartidor_id !== usuarioId) return alert("Este pedido ya no está disponible.");
 
-            // Lo pasamos a 'aceptado'
             const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'aceptado' })
                 .eq('id', id_pedido)
@@ -381,7 +427,7 @@
         function abrirRutaMaps() {
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
             const direccionCodificada = encodeURIComponent(`${direccion}, Tres Marias, Morelia, Michoacan`);
-            window.open(`https://maps.google.com/?q=$${direccionCodificada}`, '_blank');
+            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
         }
 
         async function finalizarPedido() {
@@ -391,8 +437,7 @@
             
             alert("¡Excelente trabajo! Pedido finalizado.");
             pedidoActivo = null;
-            document.getElementById('estado-texto').innerText = 'Conectado';
-            document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
+            marcarConectadoUI();
             
             document.getElementById('vista-activo').classList.add('hidden');
             document.getElementById('vista-pendientes').classList.remove('hidden');
