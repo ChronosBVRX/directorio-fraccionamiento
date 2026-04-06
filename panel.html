@@ -52,7 +52,7 @@
             </div>
             <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"></div>
 
-            <div class="border-t border-gray-200 pt-12 mb-10">
+            <div id="seccion-crear-negocio" class="border-t border-gray-200 pt-12 mb-10 hidden">
                 <div class="text-center mb-10 px-2">
                     <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Negocio</h2>
                     <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas de venta.</p>
@@ -232,8 +232,14 @@
             const success = urlParams.get('success');
             const canceled = urlParams.get('canceled');
             
-            if (view === 'negocio') document.getElementById('seccion-perfil').classList.add('hidden');
-            else document.getElementById('seccion-perfil').classList.remove('hidden');
+            // Lógica para detectar si mostrar "Perfil" o "Crear Negocio" basado en la URL
+            if (view === 'negocio') {
+                document.getElementById('seccion-perfil').classList.add('hidden');
+                document.getElementById('seccion-crear-negocio').classList.remove('hidden');
+            } else {
+                document.getElementById('seccion-perfil').classList.remove('hidden');
+                document.getElementById('seccion-crear-negocio').classList.add('hidden');
+            }
 
             if (success) {
                 mostrarNotificacion("¡Pago exitoso! Tu plan se actualizará en breve.", "exito");
@@ -313,7 +319,7 @@
             const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             const contenedor = document.getElementById('contenedor-mis-negocios');
             if (!data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500">Aún no tienes anuncios. Elige un plan abajo para empezar.</div>`;
+                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500">Aún no tienes anuncios. Si estás en Modo Vender, crea uno nuevo abajo.</div>`;
                 return;
             }
             contenedor.innerHTML = data.map(n => `
@@ -358,6 +364,7 @@
 
             configurarPermisos(nivelDeseado); 
             document.getElementById('seccion-lista-negocios').classList.add('hidden');
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
             document.getElementById('seccion-admin-negocio').classList.remove('hidden');
             actualizarPreview();
             cambiarPestana('basico');
@@ -389,6 +396,7 @@
             if(nivel >= 2) cargarProductosMenu(n.id);
             
             document.getElementById('seccion-lista-negocios').classList.add('hidden');
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
             document.getElementById('seccion-admin-negocio').classList.remove('hidden');
             actualizarPreview();
             cambiarPestana('basico');
@@ -397,6 +405,7 @@
         function cerrarAdminNegocio() {
             document.getElementById('seccion-admin-negocio').classList.add('hidden');
             document.getElementById('seccion-lista-negocios').classList.remove('hidden');
+            document.getElementById('seccion-crear-negocio').classList.remove('hidden');
             cargarMisNegocios();
         }
 
