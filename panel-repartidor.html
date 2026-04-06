@@ -49,21 +49,12 @@
         <div id="vista-activo" class="hidden h-full flex flex-col">
             <div class="bg-white rounded-2xl shadow-xl border-t-4 border-tm-azul overflow-hidden flex-grow flex flex-col">
                 <div class="p-6 bg-blue-50 border-b text-center">
-                    <span class="bg-tm-azul text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse">En Tránsito</span>
-                    <h2 class="text-2xl font-black text-tm-azul mt-3">Detalle del Pedido</h2>
+                    <span id="badge-fase" class="bg-tm-azul text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse">En Tránsito</span>
+                    <h2 class="text-2xl font-black text-tm-azul mt-3">Detalle del Viaje</h2>
                 </div>
                 
-                <div class="p-6 space-y-4 flex-grow" id="info-pedido-activo">
+                <div class="p-6 space-y-4 flex-grow flex flex-col justify-center" id="info-pedido-activo">
                     </div>
-
-                <div class="p-4 bg-gray-50 grid gap-3">
-                    <button onclick="abrirRutaMaps()" class="w-full bg-blue-100 text-tm-azul font-bold py-3 rounded-lg flex justify-center items-center gap-2 hover:bg-blue-200 transition">
-                        📍 Navegar con Google Maps
-                    </button>
-                    <button onclick="finalizarPedido()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-lg shadow-md transition text-lg">
-                        ✅ Marcar como Entregado
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -76,7 +67,7 @@
                         <input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp de Contacto</label>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label>
                         <input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
                     <div>
@@ -99,48 +90,42 @@
     </main>
 
     <script>
-        // Configuración de Supabase
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Variables de Estado
         let usuarioId = null;
         let watchId = null;
         let ultimaVezEnviado = 0;
         let pedidoActivo = null;
 
-        // Coordenadas aprox del centro de Tres Marías y Radio de 5km
+        // Coordenadas Tres Marías aprox
         const CENTRO_TRES_MARIAS = { lat: 19.6942, lng: -101.1278 }; 
         const RADIO_PERMITIDO_METROS = 5000; 
 
-        // ================= INICIALIZACIÓN =================
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             if (!session) return window.location.href = 'login-repartidor.html';
             
             usuarioId = session.user.id;
             
-            // Cargar nombre en el header
             const { data: perfil } = await clienteSupabase.from('repartidores').select('nombre').eq('id', usuarioId).maybeSingle();
             if (perfil && perfil.nombre) {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
-            } else {
-                document.getElementById('nombre-repartidor').innerText = 'Mi Perfil';
             }
 
-            // VERIFICAR SI HAY UN PEDIDO A MEDIAS
+            // Buscar si hay pedidos aceptados o en camino para este repartidor
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
-                .select('*')
+                .select('*, anuncios(nombre_negocio, direccion)')
                 .eq('repartidor_id', usuarioId)
-                .eq('estado', 'aceptado')
+                .in('estado', ['aceptado', 'en_camino'])
+                .order('created_at', { ascending: false })
+                .limit(1)
                 .maybeSingle();
 
             if (pedidoPendiente) {
                 pedidoActivo = pedidoPendiente;
                 document.getElementById('toggle-estado').checked = true;
-                document.getElementById('estado-texto').innerText = 'En Ruta';
-                document.getElementById('estado-texto').className = 'font-bold text-sm text-tm-dorado';
                 iniciarRastreoInteligente();
                 mostrarPantallaActivo();
             } else {
@@ -149,15 +134,11 @@
             }
         }
 
-        // ================= GESTIÓN DE PERFIL (NUEVO) =================
         async function abrirPerfil() {
-            if (pedidoActivo) return alert("No puedes editar tu perfil mientras tienes un pedido en tránsito.");
-
-            // Ocultar la pantalla de pedidos y mostrar la del perfil
+            if (pedidoActivo) return alert("No puedes editar tu perfil mientras tienes un pedido en curso.");
             document.getElementById('vista-pendientes').classList.add('hidden');
             document.getElementById('vista-perfil').classList.remove('hidden');
 
-            // Descargar los datos más recientes del usuario desde Supabase
             const { data } = await clienteSupabase.from('repartidores').select('*').eq('id', usuarioId).single();
             if (data) {
                 document.getElementById('edit-nombre').value = data.nombre || '';
@@ -171,44 +152,31 @@
             document.getElementById('vista-pendientes').classList.remove('hidden');
         }
 
-        // Procesar el formulario de guardado
         document.getElementById('form-editar-perfil').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-guardar-perfil');
-            btn.innerText = "Guardando...";
-            btn.disabled = true;
+            btn.innerText = "Guardando..."; btn.disabled = true;
 
             const nombre = document.getElementById('edit-nombre').value;
             const telefono = document.getElementById('edit-telefono').value;
             const vehiculo = document.getElementById('edit-vehiculo').value;
 
-            // Enviar actualización a Supabase
-            const { error } = await clienteSupabase.from('repartidores')
-                .update({ nombre: nombre, telefono: telefono, vehiculo: vehiculo })
-                .eq('id', usuarioId);
+            const { error } = await clienteSupabase.from('repartidores').update({ nombre, telefono, vehiculo }).eq('id', usuarioId);
+            btn.innerText = "Guardar Datos"; btn.disabled = false;
 
-            btn.innerText = "Guardar Datos";
-            btn.disabled = false;
-
-            if (error) {
-                alert("Error al actualizar: " + error.message);
-            } else {
-                alert("Tus datos han sido actualizados exitosamente.");
-                // Actualizar el nombre en la cabecera en tiempo real
+            if (error) alert("Error: " + error.message);
+            else {
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${nombre.split(' ')[0]}`;
                 cerrarPerfil();
             }
         });
 
-
-        // ================= UTILIDADES =================
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371e3; const rad = Math.PI / 180;
             const a = Math.sin((lat2 - lat1)*rad/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin((lon2 - lon1)*rad/2)**2;
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
         }
 
-        // ================= ESTADO Y GEOLOCALIZACIÓN =================
         async function cambiarEstado() {
             const toggle = document.getElementById('toggle-estado');
             const textoEstado = document.getElementById('estado-texto');
@@ -220,29 +188,24 @@
 
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     const distancia = calcularDistancia(pos.coords.latitude, pos.coords.longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng);
-
                     if (distancia > RADIO_PERMITIDO_METROS) {
-                        alert("Estás fuera de la zona de Tres Marías. Acércate para trabajar.");
+                        alert("Estás fuera de la zona. Acércate para trabajar.");
                         forzarDesconexion();
                         return;
                     }
-
                     await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                     textoEstado.innerText = 'Conectado';
                     textoEstado.className = 'font-bold text-sm text-green-400';
                     toggle.disabled = false;
-                    
                     cargarPedidosDisponibles();
                     iniciarRastreoInteligente();
-
-                }, (error) => {
-                    alert("GPS obligatorio. Activa tu ubicación y dale permisos al navegador.");
+                }, () => {
+                    alert("GPS obligatorio. Activa tu ubicación.");
                     forzarDesconexion();
                 }, { enableHighAccuracy: true });
-
             } else {
                 if(pedidoActivo) {
-                    alert("No puedes desconectarte mientras tienes un pedido en curso.");
+                    alert("Termina tu pedido actual antes de desconectarte.");
                     toggle.checked = true;
                     return;
                 }
@@ -250,7 +213,7 @@
             }
         }
 
-        function forzarDesconexion(esManual = false) {
+        function forzarDesconexion() {
             document.getElementById('toggle-estado').checked = false;
             document.getElementById('toggle-estado').disabled = false;
             document.getElementById('estado-texto').innerText = 'Desconectado';
@@ -261,35 +224,39 @@
             if(usuarioId) clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
         }
 
+        // --- RASTREO CONDICIONAL ---
         function iniciarRastreoInteligente() {
             if (watchId) navigator.geolocation.clearWatch(watchId);
 
             watchId = navigator.geolocation.watchPosition(async (pos) => {
                 const { latitude, longitude } = pos.coords;
                 
-                if (!pedidoActivo) {
-                    if (calcularDistancia(latitude, longitude, CENTRO_TRES_MARIAS.lat, CENTRO_TRES_MARIAS.lng) > RADIO_PERMITIDO_METROS) {
-                        forzarDesconexion();
-                        alert("Desconectado por salir de la zona.");
-                    }
-                    return;
-                }
+                if (!pedidoActivo) return; // Si no hay pedido, no gasta internet enviando
 
                 const ahora = Date.now();
-                if (ahora - ultimaVezEnviado > 10000) {
+                if (ahora - ultimaVezEnviado > 10000) { // Actualizar cada 10 segs
                     await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
+
+                    // Si ya recogió la comida, mandar coordenadas a la tabla PEDIDOS para el cliente
+                    if (pedidoActivo.estado === 'en_camino') {
+                        await clienteSupabase.from('pedidos')
+                            .update({ repartidor_lat: latitude, repartidor_lng: longitude })
+                            .eq('id', pedidoActivo.id);
+                    }
                     ultimaVezEnviado = ahora;
                 }
             }, console.error, { enableHighAccuracy: true });
         }
 
-        // ================= LOGICA DE PEDIDOS =================
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
-            const { data } = await clienteSupabase.from('pedidos').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
-            const contenedor = document.getElementById('contenedor-pedidos');
+            const { data } = await clienteSupabase.from('pedidos')
+                .select('*, anuncios(nombre_negocio)')
+                .eq('estado', 'pendiente')
+                .order('created_at', { ascending: false });
             
+            const contenedor = document.getElementById('contenedor-pedidos');
             if(!data || data.length === 0) {
                 contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">Buscando pedidos cercanos...</p>';
                 return;
@@ -298,10 +265,11 @@
             contenedor.innerHTML = data.map(p => `
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-tm-dorado transition hover:shadow-md">
                     <div class="flex justify-between items-start mb-2">
-                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">Pendiente</span>
-                        <span class="text-gray-400 text-xs font-mono">ID: ${p.id.substring(0,6)}</span>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">Nuevo</span>
+                        <span class="text-gray-400 text-xs font-mono">Folio: ${p.folio}</span>
                     </div>
-                    <p class="font-bold text-gray-800 text-lg mb-1">👤 ${p.cliente_nombre}</p>
+                    <p class="text-xs text-tm-azul uppercase font-bold mb-1">De: ${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
+                    <p class="font-bold text-gray-800 text-lg mb-1">Para: ${p.cliente_nombre}</p>
                     <p class="text-sm text-gray-500 leading-tight mb-4">📍 ${p.cliente_direccion}</p>
                     
                     <div class="border-t border-dashed pt-3 flex justify-between items-center">
@@ -321,53 +289,99 @@
         }
 
         async function aceptarPedido(id_pedido) {
-            const { data: pedidoComprobacion } = await clienteSupabase.from('pedidos').select('estado').eq('id', id_pedido).single();
-            if(pedidoComprobacion.estado !== 'pendiente') return alert("Alguien más ya tomó este pedido.");
+            const { data: check } = await clienteSupabase.from('pedidos').select('estado').eq('id', id_pedido).single();
+            if(check.estado !== 'pendiente') return alert("Alguien más ya tomó este pedido.");
 
             const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'aceptado', repartidor_id: usuarioId })
                 .eq('id', id_pedido)
-                .select().single();
+                .select('*, anuncios(nombre_negocio, direccion)').single();
             
             if(error) return alert("Error al aceptar.");
             
             pedidoActivo = pedido;
-            document.getElementById('estado-texto').innerText = 'En Ruta';
-            document.getElementById('estado-texto').className = 'font-bold text-sm text-tm-dorado';
-            
             mostrarPantallaActivo();
         }
 
-        // ================= INTERFAZ PEDIDO ACTIVO =================
+        async function iniciarEntrega() {
+            const { data: pedido, error } = await clienteSupabase.from('pedidos')
+                .update({ estado: 'en_camino' })
+                .eq('id', pedidoActivo.id)
+                .select('*, anuncios(nombre_negocio, direccion)').single();
+
+            if(error) return alert("Error al iniciar entrega.");
+
+            pedidoActivo = pedido;
+            alert("¡GPS Activado!\nEl cliente ya puede rastrear tu ubicación en el mapa.");
+            mostrarPantallaActivo();
+        }
+
         function mostrarPantallaActivo() {
             document.getElementById('vista-pendientes').classList.add('hidden');
-            document.getElementById('vista-perfil').classList.add('hidden'); // Aseguramos que el perfil se cierre
+            document.getElementById('vista-perfil').classList.add('hidden');
             document.getElementById('vista-activo').classList.remove('hidden');
 
-            document.getElementById('info-pedido-activo').innerHTML = `
-                <div class="bg-gray-50 p-4 rounded-lg border">
-                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Cliente</p>
-                    <p class="font-bold text-lg text-gray-800">${pedidoActivo.cliente_nombre}</p>
-                    <a href="tel:${pedidoActivo.cliente_telefono || ''}" class="text-tm-azul text-sm font-bold mt-1 inline-block hover:underline">📞 Llamar al cliente</a>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg border">
-                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Dirección de Entrega</p>
-                    <p class="text-gray-700">${pedidoActivo.cliente_direccion}</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg border flex justify-between items-center">
-                    <p class="text-sm text-gray-500 font-bold uppercase">Monto Exacto:</p>
-                    <p class="text-3xl font-black text-green-600">$${pedidoActivo.total}</p>
-                </div>
-            `;
+            const infoContainer = document.getElementById('info-pedido-activo');
+            const estadoTexto = document.getElementById('estado-texto');
+            const badgeFase = document.getElementById('badge-fase');
+
+            if (pedidoActivo.estado === 'aceptado') {
+                estadoTexto.innerText = 'Voy al Negocio';
+                estadoTexto.className = 'font-bold text-sm text-yellow-500';
+                badgeFase.innerText = "Fase 1: Recolección";
+                badgeFase.className = "bg-yellow-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse";
+
+                infoContainer.innerHTML = `
+                    <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 shadow-sm">
+                        <p class="text-xs text-yellow-600 uppercase font-black tracking-wider mb-2">Recoger Pedido en:</p>
+                        <p class="font-bold text-xl text-yellow-900">${pedidoActivo.anuncios ? pedidoActivo.anuncios.nombre_negocio : 'El negocio'}</p>
+                        <p class="text-sm text-yellow-700 mt-1">📍 ${pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : 'Revisa la dirección con el cliente'}</p>
+                        <p class="text-xs text-yellow-600 mt-4 font-mono font-bold bg-yellow-200 inline-block px-2 py-1 rounded">Folio: ${pedidoActivo.folio}</p>
+                    </div>
+                    
+                    <button onclick="iniciarEntrega()" class="w-full mt-auto bg-tm-dorado hover:bg-yellow-600 text-white font-black py-4 rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
+                        <span>📦</span> Ya tengo el pedido
+                    </button>
+                `;
+            } else if (pedidoActivo.estado === 'en_camino') {
+                estadoTexto.innerText = 'En Ruta al Cliente';
+                estadoTexto.className = 'font-bold text-sm text-green-500';
+                badgeFase.innerText = "Fase 2: Entrega GPS Activo";
+                badgeFase.className = "bg-green-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full animate-pulse";
+
+                infoContainer.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
+                        <p class="text-xs text-gray-500 uppercase font-black tracking-wider mb-1">Entregar a</p>
+                        <p class="font-bold text-xl text-gray-800">${pedidoActivo.cliente_nombre}</p>
+                        <p class="text-sm text-gray-600 mt-1">📍 ${pedidoActivo.cliente_direccion}</p>
+                        <a href="tel:${pedidoActivo.cliente_telefono || ''}" class="bg-white border border-tm-azul text-tm-azul px-3 py-1.5 rounded-lg text-sm font-bold mt-3 inline-block hover:bg-blue-50">📞 Llamar</a>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-lg border shadow-sm flex justify-between items-center mt-3">
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Cobrar al entregar:</p>
+                        <p class="text-3xl font-black text-green-600">$${pedidoActivo.total}</p>
+                    </div>
+                    
+                    <div class="mt-auto grid gap-3 pt-4">
+                        <button onclick="abrirRutaMaps()" class="w-full bg-blue-100 text-tm-azul font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 hover:bg-blue-200 transition">
+                            📍 Abrir en Google Maps
+                        </button>
+                        <button onclick="finalizarPedido()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
+                            <span>✅</span> Pedido Entregado
+                        </button>
+                    </div>
+                `;
+            }
         }
 
         function abrirRutaMaps() {
-            const direccionCodificada = encodeURIComponent(`${pedidoActivo.cliente_direccion}, Tres Marias, Morelia`);
-            window.open(`https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`, '_blank');
+            let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
+            const direccionCodificada = encodeURIComponent(`${direccion}, Tres Marias, Morelia, Michoacan`);
+            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
         }
 
         async function finalizarPedido() {
-            if(!confirm("¿Confirmas que ya entregaste el pedido y cobraste?")) return;
+            if(!confirm("¿Confirmas que ya entregaste el pedido y recibiste el dinero?")) return;
 
             await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', pedidoActivo.id);
             
@@ -382,13 +396,12 @@
         }
 
         async function cerrarSesion() {
-            if(pedidoActivo) return alert("No puedes cerrar sesión a mitad de un pedido.");
+            if(pedidoActivo) return alert("Termina el pedido actual antes de salir.");
             forzarDesconexion(true);
             await clienteSupabase.auth.signOut();
             window.location.reload();
         }
 
-        // Arrancar
         init();
     </script>
 </body>
