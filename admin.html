@@ -44,7 +44,7 @@
                 <button class="w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition">
                     🏢 Negocios Registrados
                 </button>
-                </nav>
+            </nav>
             <div class="p-4 border-t border-white/10">
                 <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-100 px-4 py-2 rounded-lg text-sm font-bold transition">
                     Salir del Panel
@@ -52,7 +52,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8 relative">
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2>
@@ -80,8 +80,55 @@
         </main>
     </div>
 
+    <div id="modal-editar" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-2xl transform transition-all">
+            <button onclick="cerrarModalEditar()" class="absolute top-4 right-4 text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
+            <h2 class="text-xl font-black text-tm-azul-oscuro mb-4">Editar Negocio</h2>
+            
+            <form id="form-editar" onsubmit="event.preventDefault(); guardarEdicion();" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Nombre del Negocio</label>
+                    <input type="text" id="edit-nombre" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Categoría</label>
+                        <select id="edit-categoria" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Servicios">Servicios</option>
+                            <option value="Salud">Salud</option>
+                            <option value="Hogar">Hogar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp</label>
+                        <input type="number" id="edit-wa" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Nivel de Pago (Plan)</label>
+                    <select id="edit-nivel" class="w-full p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-dorado font-bold text-tm-azul-oscuro">
+                        <option value="0">0 - Básico (Gratis)</option>
+                        <option value="1">1 - Pro (Imágenes/Catálogo)</option>
+                        <option value="2">2 - Elite (Menú Interactivo)</option>
+                    </select>
+                    <p class="text-[10px] text-gray-400 mt-1">Cambiar el nivel aquí le otorgará las funciones al cliente inmediatamente.</p>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100">
+                    <button type="submit" id="btn-guardar-edicion" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg font-bold transition shadow-md">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Pega aquí tus credenciales de Supabase
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -99,7 +146,6 @@
             setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 5000);
         }
 
-        // 1. Verificación de Seguridad al Cargar
         document.addEventListener("DOMContentLoaded", async () => {
             const { data: { session } } = await clienteSupabase.auth.getSession();
             
@@ -110,7 +156,6 @@
 
             usuarioAdmin = session.user;
 
-            // Verificar si es administrador en la tabla perfiles
             const { data: perfil, error } = await clienteSupabase
                 .from('perfiles')
                 .select('es_admin')
@@ -122,7 +167,6 @@
                 return;
             }
 
-            // Si llega aquí, ES ADMIN. Mostrar panel.
             concederAcceso();
         });
 
@@ -139,7 +183,6 @@
             cargarTodosLosNegocios();
         }
 
-        // 2. Funciones del Panel de Administración
         async function cargarTodosLosNegocios() {
             const tbody = document.getElementById('tabla-negocios');
             tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">Cargando negocios...</td></tr>';
@@ -167,6 +210,9 @@
                 if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro (N1)'; }
                 if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite (N2)'; }
 
+                // Codificamos el objeto del negocio para poder pasarlo a la función de editar
+                const negocioCodificado = encodeURIComponent(JSON.stringify(n));
+
                 return `
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-4">
@@ -187,8 +233,11 @@
                         <td class="p-4 text-center text-sm">
                             ${n.enlace_whatsapp ? `<a href="https://wa.me/${n.enlace_whatsapp}" target="_blank" class="text-[#25D366] font-bold hover:underline">${n.enlace_whatsapp}</a>` : '-'}
                         </td>
-                        <td class="p-4 text-right space-x-2">
-                            <button onclick="eliminarNegocio(${n.id})" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs font-bold transition border border-transparent hover:border-red-200">
+                        <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                            <button onclick="abrirModalEditar('${negocioCodificado}')" class="text-tm-azul hover:bg-blue-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-blue-200">
+                                Editar
+                            </button>
+                            <button onclick="eliminarNegocio(${n.id})" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-red-200">
                                 Eliminar
                             </button>
                         </td>
@@ -197,22 +246,67 @@
             }).join('');
         }
 
+        // --- FUNCIONES DE EDICIÓN ---
+        function abrirModalEditar(negocioStr) {
+            const n = JSON.parse(decodeURIComponent(negocioStr));
+            
+            document.getElementById('edit-id').value = n.id;
+            document.getElementById('edit-nombre').value = n.nombre_negocio || '';
+            document.getElementById('edit-categoria').value = n.categoria || 'Servicios';
+            document.getElementById('edit-wa').value = n.enlace_whatsapp || '';
+            document.getElementById('edit-nivel').value = n.nivel_pago || 0;
+            
+            document.getElementById('modal-editar').classList.remove('hidden');
+        }
+
+        function cerrarModalEditar() {
+            document.getElementById('modal-editar').classList.add('hidden');
+        }
+
+        async function guardarEdicion() {
+            const id = document.getElementById('edit-id').value;
+            const btn = document.getElementById('btn-guardar-edicion');
+            
+            btn.innerText = "Guardando..."; 
+            btn.disabled = true;
+
+            const payload = {
+                nombre_negocio: document.getElementById('edit-nombre').value,
+                categoria: document.getElementById('edit-categoria').value,
+                enlace_whatsapp: document.getElementById('edit-wa').value,
+                nivel_pago: parseInt(document.getElementById('edit-nivel').value)
+            };
+
+            try {
+                const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
+                if (error) throw error;
+                
+                mostrarNotificacion("¡Negocio actualizado exitosamente!", "exito");
+                cerrarModalEditar();
+                cargarTodosLosNegocios(); // Recarga la tabla para ver los cambios
+                
+            } catch (error) {
+                mostrarNotificacion("Error al actualizar: " + error.message, "error");
+            } finally {
+                btn.innerText = "Guardar Cambios"; 
+                btn.disabled = false;
+            }
+        }
+        // ----------------------------
+
         async function eliminarNegocio(id) {
             if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo? Esta acción no se puede deshacer y borrará sus productos asociados.")) {
                 return;
             }
 
             try {
-                // 1. Borrar productos asociados primero (para evitar errores de clave foránea)
                 await clienteSupabase.from('productos').delete().eq('anuncio_id', id);
-                
-                // 2. Borrar el negocio
                 const { error } = await clienteSupabase.from('anuncios').delete().eq('id', id);
                 
                 if (error) throw error;
 
                 mostrarNotificacion("Negocio eliminado correctamente.", "exito");
-                cargarTodosLosNegocios(); // Recargar la tabla
+                cargarTodosLosNegocios(); 
                 
             } catch (error) {
                 mostrarNotificacion("Error al eliminar: " + error.message, "error");
@@ -221,7 +315,7 @@
 
         async function cerrarSesion() {
             await clienteSupabase.auth.signOut();
-            window.location.href = "index.html"; // Redirige a tu página de inicio o login
+            window.location.href = "index.html"; 
         }
     </script>
 </body>
