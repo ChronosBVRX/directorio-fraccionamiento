@@ -110,9 +110,8 @@
                 document.getElementById('nombre-repartidor').innerText = `Hola, ${perfil.nombre.split(' ')[0]}`;
             }
 
-            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
             const { data: pedidoPendiente } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio, direccion)')
+                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
                 .eq('repartidor_id', usuarioId)
                 .in('estado', ['asignado', 'aceptado', 'en_camino'])
                 .order('creado_en', { ascending: false })
@@ -251,9 +250,9 @@
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
-            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
+            // Agregamos 'enlace_whatsapp' a la consulta para poder mandarle msj al negocio si rechazamos
             const { data } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio, direccion)')
+                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
                 .eq('estado', 'asignado')
                 .eq('repartidor_id', usuarioId) 
                 .order('creado_en', { ascending: false });
@@ -280,7 +279,7 @@
                     </div>
                     
                     <div class="flex gap-2 mt-4">
-                        <button onclick="rechazarPedido('${p.id}')" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-lg transition shadow-sm text-sm">Rechazar</button>
+                        <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${p.anuncios ? p.anuncios.enlace_whatsapp : ''}')" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-lg transition shadow-sm text-sm">Rechazar</button>
                         <button onclick="aceptarPedido('${p.id}')" class="w-2/3 bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition shadow">Aceptar Viaje</button>
                     </div>
                 </div>
@@ -321,15 +320,26 @@
                 }).subscribe();
         }
 
-        async function rechazarPedido(id_pedido) {
-            if(!confirm("¿Estás seguro de rechazar este viaje? El vendedor tendrá que asignar a otro repartidor.")) return;
+        // NUEVO: Función para rechazar el pedido con WhatsApp
+        async function rechazarPedido(id_pedido, folio, whatsappNegocio) {
+            if(!confirm("¿Estás seguro de rechazar este viaje? Se le avisará al vendedor para que asigne a otro repartidor.")) return;
             
+            // 1. Lo regresamos al estado 'esperando_activacion' y le quitamos el ID de este repartidor
             const { error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'esperando_activacion', repartidor_id: null })
                 .eq('id', id_pedido);
 
-            if(error) return alert("Hubo un error al rechazar el pedido.");
+            if(error) return alert("Hubo un error al rechazar el pedido: " + error.message);
             
+            // 2. Si el negocio tiene un número registrado, abrimos WhatsApp
+            if (whatsappNegocio) {
+                let numero = whatsappNegocio.replace(/\D/g, '');
+                let mensaje = `Hola, por el momento no puedo aceptar el pedido con Folio: *${folio}*. Por favor, vuelve a abrir tu enlace de activación y asígnalo a otro repartidor disponible.`;
+                window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            } else {
+                alert("Pedido rechazado. (El negocio no tiene un WhatsApp registrado para notificarle automáticamente).");
+            }
+
             cargarPedidosDisponibles();
         }
 
@@ -340,9 +350,9 @@
             const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'aceptado' })
                 .eq('id', id_pedido)
-                .select('*, anuncios(nombre_negocio, direccion)').single();
+                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)').single();
             
-            if(error) return alert("Error al aceptar.");
+            if(error) return alert("Error al aceptar: " + error.message);
             
             pedidoActivo = pedido;
             mostrarPantallaActivo();
@@ -352,7 +362,7 @@
             const { data: pedido, error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'en_camino' })
                 .eq('id', pedidoActivo.id)
-                .select('*, anuncios(nombre_negocio, direccion)').single();
+                .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)').single();
 
             if(error) return alert("Error al iniciar entrega.");
 
