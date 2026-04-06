@@ -52,6 +52,10 @@
                     </span>
                 </div>
 
+                <a href="admin.html" id="btn-admin" class="hidden text-white bg-red-600 hover:bg-red-700 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1 transition shrink-0 shadow-sm">
+                    <span class="text-sm sm:text-base">⚙️</span> <span class="hidden sm:inline">Admin</span>
+                </a>
+
                 <button onclick="abrirPerfil()" id="btn-perfil" class="hidden text-tm-azul font-bold text-[10px] sm:text-sm px-1.5 sm:px-2 py-1.5 hover:underline flex items-center gap-1 transition shrink-0">
                     <span class="text-sm sm:text-lg">👤</span> <span class="hidden sm:inline">Mi Perfil</span>
                 </button>
@@ -139,6 +143,25 @@
         let carritoActual = {}; 
         let negocioActualPedido = null;
 
+        // NUEVO: Función para verificar si el usuario es administrador
+        async function verificarRolAdmin(userId) {
+            try {
+                const { data, error } = await clienteSupabase
+                    .from('perfiles')
+                    .select('es_admin')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (data && data.es_admin === true) {
+                    document.getElementById('btn-admin').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Error al verificar rol de admin:", err);
+            }
+        }
+
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             
@@ -150,9 +173,13 @@
                 cargarDatos(); 
                 const isVendedor = document.getElementById('toggle-modo').checked;
                 document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
+                
+                // Disparamos la verificación de administrador
+                verificarRolAdmin(usuarioActual.id);
             } else {
                 document.getElementById('toggle-modo').checked = false;
                 document.getElementById('btn-perfil').classList.add('hidden');
+                document.getElementById('btn-admin').classList.add('hidden'); // Ocultar si se cierra sesión
                 cambiarModoPlataforma();
             }
         });
