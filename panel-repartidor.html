@@ -237,6 +237,7 @@
                 if (ahora - ultimaVezEnviado > 10000) { 
                     await clienteSupabase.from('repartidores').update({ latitud: latitude, longitud: longitude }).eq('id', usuarioId);
 
+                    // EL GPS SOLO SE ENVÍA SI EL ESTADO ES 'en_camino'
                     if (pedidoActivo.estado === 'en_camino') {
                         await clienteSupabase.from('pedidos')
                             .update({ repartidor_lat: latitude, repartidor_lng: longitude })
@@ -250,7 +251,6 @@
         async function cargarPedidosDisponibles() {
             if(!document.getElementById('toggle-estado').checked || pedidoActivo) return;
 
-            // Agregamos 'enlace_whatsapp' a la consulta para poder mandarle msj al negocio si rechazamos
             const { data } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
                 .eq('estado', 'asignado')
@@ -320,21 +320,23 @@
                 }).subscribe();
         }
 
-        // NUEVO: Función para rechazar el pedido con WhatsApp
         async function rechazarPedido(id_pedido, folio, whatsappNegocio) {
             if(!confirm("¿Estás seguro de rechazar este viaje? Se le avisará al vendedor para que asigne a otro repartidor.")) return;
             
-            // 1. Lo regresamos al estado 'esperando_activacion' y le quitamos el ID de este repartidor
             const { error } = await clienteSupabase.from('pedidos')
                 .update({ estado: 'esperando_activacion', repartidor_id: null })
                 .eq('id', id_pedido);
 
             if(error) return alert("Hubo un error al rechazar el pedido: " + error.message);
             
-            // 2. Si el negocio tiene un número registrado, abrimos WhatsApp
             if (whatsappNegocio) {
                 let numero = whatsappNegocio.replace(/\D/g, '');
-                let mensaje = `Hola, por el momento no puedo aceptar el pedido con Folio: *${folio}*. Por favor, vuelve a abrir tu enlace de activación y asígnalo a otro repartidor disponible.`;
+                
+                const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folio}`;
+                
+                let mensaje = `Hola, por el momento no puedo aceptar el pedido con Folio: *${folio}*.\n\nPor favor, vuelve a asignarlo a otro repartidor dando clic en este enlace directo:\n${linkActivacion}`;
+                
                 window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
                 alert("Pedido rechazado. (El negocio no tiene un WhatsApp registrado para notificarle automáticamente).");
@@ -432,7 +434,7 @@
         function abrirRutaMaps() {
             let direccion = pedidoActivo.estado === 'aceptado' ? (pedidoActivo.anuncios ? pedidoActivo.anuncios.direccion : '') : pedidoActivo.cliente_direccion;
             const direccionCodificada = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
-            window.open(`https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`, '_blank');
+            window.open(`https://maps.google.com/?q=${direccionCodificada}`, '_blank');
         }
 
         async function finalizarPedido() {
