@@ -74,6 +74,7 @@
                         </ul>
                         <button class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-lg mt-auto hover:bg-gray-200 transition">Crear Gratis</button>
                     </div>
+
                     <div onclick="abrirAdminNuevo(1)" class="bg-white rounded-2xl border border-blue-400 p-6 shadow-lg flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:-translate-y-1 hover:ring-2 ring-blue-300">
                         <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
                         <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/mes</span></p>
@@ -83,6 +84,7 @@
                         </ul>
                         <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-auto hover:bg-blue-700 transition shadow">Elegir Pro</button>
                     </div>
+
                     <div onclick="abrirAdminNuevo(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 shadow-xl flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:scale-105 z-10 hover:ring-2 ring-yellow-300">
                         <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
                         <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
@@ -193,7 +195,22 @@
     </div>
 
     <div id="modal-suscripcion" class="hidden fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md relative">
+            <button onclick="document.getElementById('modal-suscripcion').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-black font-bold text-2xl leading-none">×</button>
+            <h2 class="text-xl font-black text-tm-azul-oscuro mb-4">Elige tu Plan</h2>
+            <input type="hidden" id="sub-anuncio-id">
+            <div class="space-y-4">
+                <button onclick="iniciarPagoStripe(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="w-full border-2 border-blue-400 rounded-xl p-4 text-left hover:bg-blue-50 transition flex justify-between items-center">
+                    <div><h3 class="font-bold text-blue-600 text-lg">Pro (Nivel 1)</h3><p class="text-sm text-gray-500">Imágenes y catálogo</p></div>
+                    <span class="font-black text-xl text-tm-azul-oscuro">$150<span class="text-xs font-normal">/mes</span></span>
+                </button>
+                <button onclick="iniciarPagoStripe(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="w-full border-2 border-tm-dorado rounded-xl p-4 text-left hover:bg-yellow-50 transition flex justify-between items-center">
+                    <div><h3 class="font-bold text-tm-dorado text-lg">Elite (Nivel 2)</h3><p class="text-sm text-gray-500">Menú interactivo</p></div>
+                    <span class="font-black text-xl text-tm-azul-oscuro">$300<span class="text-xs font-normal">/mes</span></span>
+                </button>
+            </div>
         </div>
+    </div>
 
     <script>
         const stripe = Stripe('pk_live_51TIbWAGtW4zuRQv9BoUbQxHh1hHUdLMysM1q5aglozGBNkdBXV2EFiyTPYDZf0gKRM2JjFy2bHLEsJHlvT8nlNfT004EDyUyWi');
@@ -258,10 +275,9 @@
                 if(data.latitud && data.longitud) { lat = data.latitud; lng = data.longitud; }
             }
             inicializarMapa(lat, lng);
-            cargarMisPedidos(); // <--- Llama a cargar el historial de pedidos
+            cargarMisPedidos();
         }
 
-        // --- NUEVA FUNCIÓN PARA MOSTRAR HISTORIAL DE PEDIDOS ---
         async function cargarMisPedidos() {
             const { data, error } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio)')
@@ -343,9 +359,281 @@
             mostrarNotificacion("¡Perfil guardado!", "exito");
         }
 
-        /* ----- AQUÍ CONTINÚA TU CÓDIGO NORMAL DE LOS NEGOCIOS Y PRODUCTOS ----- */
-        // (Dejé solo lo esencial por espacio, pero mantienes intactas tus funciones 
-        // cargarMisNegocios(), abrirAdminNuevo(), abrirAdminEdit(), etc.)
+        async function cargarMisNegocios() {
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
+            const contenedor = document.getElementById('contenedor-mis-negocios');
+            if (!data || data.length === 0) {
+                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500">Aún no tienes anuncios. Si estás en Modo Vender, crea uno nuevo abajo.</div>`;
+                return;
+            }
+            contenedor.innerHTML = data.map(n => `
+                <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:shadow-md transition">
+                    <div class="w-full text-center sm:text-left">
+                        <h3 class="font-bold text-lg text-tm-azul-oscuro leading-tight">${n.nombre_negocio}</h3>
+                        <span class="${n.nivel_pago > 0 ? (n.nivel_pago == 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700') : 'bg-gray-100 text-gray-600'} text-[10px] uppercase px-2 py-1 rounded font-bold inline-block mt-1">
+                            ${n.nivel_pago == 2 ? 'Elite (Nivel 2)' : (n.nivel_pago == 1 ? 'Pro (Nivel 1)' : 'Básico')}
+                        </span>
+                    </div>
+                    <button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow transition whitespace-nowrap">Editar Panel</button>
+                </div>
+            `).join('');
+        }
+
+        function abrirAdminNuevo(nivelDeseado) {
+            document.getElementById('seccion-perfil').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            document.getElementById('admin-titulo').innerText = "Creando Nuevo Negocio";
+            document.getElementById('admin-negocio-id').value = '';
+            document.getElementById('admin-nivel-intencion').value = nivelDeseado;
+            
+            document.getElementById('admin-nombre').value = '';
+            document.getElementById('admin-desc').value = '';
+            document.getElementById('admin-wa').value = '';
+            document.getElementById('admin-imagen-url').value = '';
+            document.getElementById('estado-subida').innerText = '';
+
+            const btnGuardar = document.getElementById('btn-guardar-admin');
+            if (nivelDeseado > 0) {
+                document.getElementById('admin-nivel-badge').innerText = "Creando: " + (nivelDeseado===1 ? "Pro" : "Elite");
+                btnGuardar.innerText = "Continuar al Pago Seguro 🔒";
+                btnGuardar.classList.replace('bg-tm-dorado', 'bg-blue-600');
+                btnGuardar.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
+            } else {
+                document.getElementById('admin-nivel-badge').innerText = "Creando: Básico";
+                btnGuardar.innerText = "Crear Negocio Gratis";
+                btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado');
+                btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
+            }
+
+            configurarPermisos(nivelDeseado); 
+            document.getElementById('seccion-lista-negocios').classList.add('hidden');
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
+            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
+            actualizarPreview();
+            cambiarPestana('basico');
+        }
+
+        function abrirAdminEdit(n) {
+            document.getElementById('seccion-perfil').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
+            document.getElementById('admin-negocio-id').value = n.id;
+            document.getElementById('admin-nivel-intencion').value = '0';
+
+            document.getElementById('admin-nombre').value = n.nombre_negocio;
+            document.getElementById('admin-desc').value = n.descripcion || '';
+            document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
+            document.getElementById('admin-cat').value = n.categoria || 'Servicios';
+            document.getElementById('admin-imagen-url').value = n.imagen_url || '';
+            
+            const nivel = n.nivel_pago || 0;
+            document.getElementById('admin-nivel-badge').innerText = "Nivel Actual: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
+            
+            const btnGuardar = document.getElementById('btn-guardar-admin');
+            btnGuardar.innerText = "Guardar Cambios";
+            btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado');
+            btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
+
+            configurarPermisos(nivel);
+            if(nivel >= 2) cargarProductosMenu(n.id);
+            
+            document.getElementById('seccion-lista-negocios').classList.add('hidden');
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
+            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
+            actualizarPreview();
+            cambiarPestana('basico');
+        }
+
+        function cerrarAdminNegocio() {
+            document.getElementById('seccion-admin-negocio').classList.add('hidden');
+            document.getElementById('seccion-lista-negocios').classList.remove('hidden');
+            document.getElementById('seccion-crear-negocio').classList.remove('hidden');
+            cargarMisNegocios();
+        }
+
+        function cambiarPestana(tab) {
+            ['basico', 'diseno', 'menu'].forEach(t => {
+                document.getElementById('panel-'+t).classList.add('hidden');
+                document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
+                document.getElementById('tab-'+t).classList.add('text-gray-400');
+            });
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            document.getElementById('tab-'+tab).classList.remove('text-gray-400');
+            document.getElementById('tab-'+tab).classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
+        }
+
+        function configurarPermisos(nivel) {
+            if (nivel >= 1) {
+                document.getElementById('tab-diseno').innerText = "Diseño & Banner";
+                document.getElementById('bloqueo-diseno').classList.add('hidden');
+                document.getElementById('contenido-diseno').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-diseno').innerText = "Banner 🔒";
+                document.getElementById('bloqueo-diseno').classList.remove('hidden');
+                document.getElementById('contenido-diseno').classList.add('hidden');
+            }
+
+            if (nivel >= 2) {
+                document.getElementById('tab-menu').innerText = "Tu Menú Interactivo";
+                document.getElementById('bloqueo-menu').classList.add('hidden');
+                document.getElementById('contenido-menu').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-menu').innerText = "Menú 🔒";
+                document.getElementById('bloqueo-menu').classList.remove('hidden');
+                document.getElementById('contenido-menu').classList.add('hidden');
+            }
+        }
+
+        async function guardarNegocioAdmin() {
+            const btn = document.getElementById('btn-guardar-admin');
+            btn.disabled = true; 
+            const id = document.getElementById('admin-negocio-id').value;
+            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
+            
+            btn.innerText = nivelIntencion > 0 ? "Preparando pago..." : "Guardando...";
+
+            const payload = {
+                nombre_negocio: document.getElementById('admin-nombre').value,
+                descripcion: document.getElementById('admin-desc').value,
+                enlace_whatsapp: document.getElementById('admin-wa').value,
+                categoria: document.getElementById('admin-cat').value,
+                imagen_url: document.getElementById('admin-imagen-url').value
+            };
+
+            if(!payload.nombre_negocio || !payload.enlace_whatsapp) {
+                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error");
+                btn.disabled = false; btn.innerText = nivelIntencion > 0 ? "Continuar al Pago Seguro 🔒" : "Guardar Cambios";
+                return;
+            }
+
+            try {
+                let idParaPago = id;
+                if (id) {
+                    await clienteSupabase.from('anuncios').update(payload).eq('id', id);
+                } else {
+                    payload.user_id = usuarioActual.id;
+                    payload.nivel_pago = 0; 
+                    const { data, error } = await clienteSupabase.from('anuncios').insert([payload]).select().single();
+                    if(error) throw error;
+                    idParaPago = data.id;
+                    document.getElementById('admin-negocio-id').value = idParaPago;
+                }
+
+                if (nivelIntencion > 0 && !id) {
+                    btn.innerText = "Redirigiendo a Stripe...";
+                    const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
+                    await iniciarFlujoStripeInterno(nivelIntencion, priceId, idParaPago);
+                } else {
+                    mostrarNotificacion("¡Datos guardados!", "exito");
+                    cerrarAdminNegocio();
+                }
+            } catch (error) {
+                mostrarNotificacion("Error: " + error.message, "error");
+            } finally {
+                btn.disabled = false;
+                if(btn.innerText === "Guardando..." || btn.innerText === "Preparando pago...") btn.innerText = "Guardar Cambios";
+            }
+        }
+
+        async function procesarSubidaBanner(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            if(file.size > 2 * 1024 * 1024) { mostrarNotificacion("Máximo 2MB", "error"); return; }
+            document.getElementById('estado-subida').innerText = "Subiendo... ⏳";
+            
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${usuarioActual.id}_${Date.now()}.${fileExt}`;
+            
+            try {
+                const { error } = await clienteSupabase.storage.from('negocios').upload(fileName, file);
+                if (error) throw error;
+                const { data: { publicUrl } } = clienteSupabase.storage.from('negocios').getPublicUrl(fileName);
+                document.getElementById('admin-imagen-url').value = publicUrl;
+                document.getElementById('estado-subida').innerText = "¡Imagen guardada! ✅";
+                actualizarPreview();
+            } catch (error) {
+                document.getElementById('estado-subida').innerText = "Error.";
+                mostrarNotificacion("Crea el bucket 'negocios' en Supabase primero.", "error");
+            }
+        }
+
+        function actualizarPreview() {
+            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre Negocio';
+            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Escribe tu descripción...';
+            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría';
+
+            const imgUrl = document.getElementById('admin-imagen-url').value;
+            const bannerCont = document.getElementById('preview-banner-container');
+            const nivelFingido = parseInt(document.getElementById('admin-nivel-intencion').value);
+            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            
+            const nivel = Math.max(nivelFingido, nivelReal);
+
+            if (imgUrl && nivel >= 1) {
+                document.getElementById('preview-banner').src = imgUrl;
+                bannerCont.classList.remove('hidden');
+            } else {
+                bannerCont.classList.add('hidden');
+            }
+
+            if (nivel >= 2) document.getElementById('preview-btn-menu').classList.remove('hidden');
+            else document.getElementById('preview-btn-menu').classList.add('hidden');
+        }
+
+        async function cargarProductosMenu(anuncioId) {
+            const { data, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId);
+            const lista = document.getElementById('lista-productos');
+            if (!data || data.length === 0) { lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`; return; }
+            lista.innerHTML = data.map(p => `
+                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                    <div>
+                        <p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p>
+                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
+                    </div>
+                    <button onclick="eliminarProducto('${p.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded transition">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        async function agregarProductoDB() {
+            const anuncioId = document.getElementById('admin-negocio-id').value;
+            if(!anuncioId) { mostrarNotificacion("Guarda los datos básicos primero", "error"); return; }
+            const nombre = document.getElementById('prod-nombre').value;
+            const precio = document.getElementById('prod-precio').value;
+            if(!nombre || !precio) { mostrarNotificacion("Nombre y precio obligatorios", "error"); return; }
+            try {
+                const { error } = await clienteSupabase.from('productos').insert([{ anuncio_id: anuncioId, nombre, precio, descripcion: document.getElementById('prod-desc').value }]);
+                if (error) throw error;
+                document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = '';
+                cargarProductosMenu(anuncioId);
+            } catch (e) { mostrarNotificacion("Debes crear la tabla 'productos' en Supabase", "error"); }
+        }
+
+        async function eliminarProducto(prodId) {
+            if(confirm("¿Eliminar producto?")) {
+                await clienteSupabase.from('productos').delete().eq('id', prodId);
+                cargarProductosMenu(document.getElementById('admin-negocio-id').value);
+            }
+        }
+
+        function iniciarMejoraDirecta(nivel, priceId) {
+            const anuncioId = document.getElementById('admin-negocio-id').value;
+            if(!anuncioId) { mostrarNotificacion("Guarda el negocio primero en la pestaña Básicos", "error"); return; }
+            iniciarFlujoStripeInterno(nivel, priceId, anuncioId);
+        }
+
+        async function iniciarFlujoStripeInterno(nivel, priceId, anuncioId) {
+            try {
+                const response = await fetch(URL_EDGE_FUNCTION, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ anuncioId, nivel, priceId, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href.split('?')[0] })
+                });
+                const session = await response.json();
+                if (session.url) window.location.href = session.url;
+            } catch (error) { mostrarNotificacion("Error con Stripe", "error"); }
+        }
     </script>
 </body>
 </html>
