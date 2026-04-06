@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activar y Asignar Pedido</title>
+    <title>Activar y Asignar Pedido - Vive Tres Marías</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
@@ -25,25 +25,25 @@
                 <div class="grid grid-cols-2 gap-2">
                     <label class="cursor-pointer">
                         <input type="radio" name="pago" value="false" checked class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-xs font-bold peer-checked:border-red-500 peer-checked:bg-red-50 text-gray-500 peer-checked:text-red-600 transition-all">
-                            ❌ COBRAR EFECTIVO
+                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-red-500 peer-checked:bg-red-50 text-gray-400 peer-checked:text-red-600 transition-all uppercase leading-tight">
+                            ❌ Cobrar<br>Efectivo
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="pago" value="true" class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-xs font-bold peer-checked:border-green-500 peer-checked:bg-green-50 text-gray-500 peer-checked:text-green-600 transition-all">
-                            ✅ YA PAGADO
+                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-green-500 peer-checked:bg-green-50 text-gray-400 peer-checked:text-green-600 transition-all uppercase leading-tight">
+                            ✅ Ya está<br>Pagado
                         </div>
                     </label>
                 </div>
             </div>
 
             <label class="block text-sm font-bold text-gray-700 mb-2">Selecciona Repartidor:</label>
-            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6">
-            </select>
+            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6 font-bold text-sm">
+                </select>
 
-            <button onclick="asignarPedido()" id="btn-assign" class="w-full bg-[#22527b] text-white font-bold px-4 py-3 rounded-lg hover:bg-[#143653] shadow-md transition">
-                Asignar y Activar Pedido
+            <button onclick="asignarPedido()" id="btn-asignar" class="w-full bg-[#22527b] text-white font-bold py-4 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
+                Confirmar y Activar
             </button>
         </div>
 
@@ -53,7 +53,7 @@
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_SUPABASE_KEY'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let folioActual = null;
@@ -61,49 +61,75 @@
         async function inicializar() {
             const urlParams = new URLSearchParams(window.location.search);
             folioActual = urlParams.get('folio');
-            if (!folioActual) return;
-            document.getElementById('folio-display').innerText = `Folio: ${folioActual}`;
+            const loader = document.getElementById('loader');
+            const zonaAsignacion = document.getElementById('zona-asignacion');
+            const mensajeFinal = document.getElementById('mensaje-final');
+            const folioDisplay = document.getElementById('folio-display');
 
-            const { data: pedido } = await clienteSupabase.from('pedidos').select('estado').eq('folio', folioActual).single();
-            if (pedido?.estado !== 'esperando_activacion') {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('mensaje-final').innerHTML = `<span class="text-yellow-600 font-bold">Este pedido ya fue procesado.</span>`;
-                document.getElementById('mensaje-final').classList.remove('hidden');
+            if (!folioActual) {
+                loader.classList.add('hidden');
+                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">Error: Folio no detectado.</span>`;
+                mensajeFinal.classList.remove('hidden');
+                return;
+            }
+
+            folioDisplay.innerText = `Folio: ${folioActual}`;
+
+            const { data: pedido, error: errorPedido } = await clienteSupabase.from('pedidos').select('estado').eq('folio', folioActual).single();
+
+            if (errorPedido || !pedido) {
+                loader.classList.add('hidden');
+                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">El pedido no existe.</span>`;
+                mensajeFinal.classList.remove('hidden');
+                return;
+            }
+
+            if (pedido.estado !== 'esperando_activacion') {
+                loader.classList.add('hidden');
+                mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya fue activado.</span><br><span class="text-sm">Estado: ${pedido.estado}</span>`;
+                mensajeFinal.classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
                 return;
             }
 
             const { data: repartidores } = await clienteSupabase.from('repartidores').select('id, nombre, vehiculo').eq('esta_activo', true);
-            document.getElementById('loader').classList.add('hidden');
+            loader.classList.add('hidden');
 
             if (!repartidores || repartidores.length === 0) {
-                document.getElementById('mensaje-final').innerHTML = `<span class="text-red-500 font-bold">No hay repartidores conectados.</span>`;
-                document.getElementById('mensaje-final').classList.remove('hidden');
+                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores en línea.</span><br><span class="text-xs mt-2 block">Pídeles que abran su app y se conecten.</span>`;
+                mensajeFinal.classList.remove('hidden');
                 return;
             }
 
             const select = document.getElementById('select-repartidor');
             select.innerHTML = repartidores.map(r => `<option value="${r.id}">🛵 ${r.nombre} (${r.vehiculo})</option>`).join('');
-            document.getElementById('zona-asignacion').classList.remove('hidden');
+            zonaAsignacion.classList.remove('hidden');
         }
 
         async function asignarPedido() {
             const repartidorId = document.getElementById('select-repartidor').value;
-            const yaPagado = document.querySelector('input[name="pago"]:checked').value === "true";
-            
+            const esPagado = document.querySelector('input[name="pago"]:checked').value === "true";
+            const btn = document.getElementById('btn-asignar');
+
+            btn.innerText = "Procesando..."; btn.disabled = true;
+
             const { error } = await clienteSupabase.from('pedidos').update({ 
                 estado: 'asignado',
                 repartidor_id: repartidorId,
-                pago_confirmado: yaPagado
+                pago_confirmado: esPagado
             }).eq('folio', folioActual);
 
-            if (!error) {
+            if (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "Confirmar y Activar"; btn.disabled = false;
+            } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
-                document.getElementById('mensaje-final').innerHTML = `<span class="text-green-600 font-black text-2xl">¡Éxito! ✅</span><br>Pedido asignado correctamente.`;
+                document.getElementById('mensaje-final').innerHTML = `<span class="text-green-600 font-black text-2xl">¡Activado! ✅</span><br><span class="font-normal text-sm">El repartidor ha recibido la alerta.</span>`;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
             }
         }
+
         inicializar();
     </script>
 </body>
