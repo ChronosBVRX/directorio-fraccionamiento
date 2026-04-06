@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreo de Pedido - Vive Tres Marías</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col">
+
+    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md z-10">
+        <a href="index.html" class="font-bold text-sm hover:text-gray-200">← Volver al Directorio</a>
+        <h1 class="font-black text-lg">Rastreo GPS</h1>
+    </header>
+
+    <div id="pantalla-busqueda" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
+            <span class="text-4xl mb-4 block">🛵</span>
+            <h2 class="text-xl font-black text-tm-azul mb-2">Sigue tu Pedido</h2>
+            <p class="text-sm text-gray-500 mb-6">Ingresa el código que te enviamos al generar tu orden (Ej. VTM-A1B2C3)</p>
+            
+            <input type="text" id="input-folio" placeholder="VTM-XXXXXX" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg text-lg font-bold uppercase outline-none focus:border-tm-azul transition mb-4">
+            
+            <button onclick="buscarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white font-bold py-3 rounded-lg shadow-md transition">Buscar Pedido</button>
+            <p id="msg-error" class="text-red-500 text-sm font-bold mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <div id="pantalla-mapa" class="hidden flex-grow flex flex-col relative h-full">
+        <div id="mapa-rastreo" class="w-full flex-grow z-0"></div>
+        
+        <div class="bg-white rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.1)] p-5 pb-8 sm:p-6 absolute bottom-0 left-0 w-full z-10 max-h-[40vh] overflow-y-auto">
+            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            
+            <div class="flex justify-between items-start border-b pb-3">
+                <div>
+                    <p id="info-estado" class="text-tm-azul font-black text-lg uppercase tracking-wide">Buscando info...</p>
+                    <p id="info-desc" class="text-sm text-gray-500">Espera un momento.</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] uppercase text-gray-400 font-bold">Total</p>
+                    <p id="info-total" class="text-xl font-black text-green-600">$0.00</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex items-center gap-4 bg-blue-50 p-3 rounded-xl border border-blue-100">
+                <div class="text-4xl">🧑‍🚀</div>
+                <div>
+                    <p class="text-xs uppercase text-tm-azul font-bold">Repartidor Asignado</p>
+                    <p id="info-repartidor" class="font-bold text-gray-800">Esperando asignación</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let mapa = null;
+        let marcadorMoto = null;
+        let suscripcionGPS = null;
+
+        // Ícono personalizado para la moto
+        const iconoMoto = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', // Icono moto genérico
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        async function buscarPedido() {
+            let folio = document.getElementById('input-folio').value.trim().toUpperCase();
+            const msgError = document.getElementById('msg-error');
+            
+            if(!folio) {
+                msgError.innerText = "Ingresa un folio válido.";
+                msgError.classList.remove('hidden');
+                return;
+            }
+
+            msgError.classList.add('hidden');
+            
+            const { data, error } = await clienteSupabase.from('pedidos')
+                .select('*, repartidores(nombre)')
+                .eq('folio', folio).single();
+
+            if (error || !data) {
+                msgError.innerText = "No se encontró el folio. Verifica que sea correcto.";
+                msgError.classList.remove('hidden');
+                return;
+            }
+
+            // Ocultar búsqueda y mostrar mapa
+            document.getElementById('pantalla-busqueda').classList.add('hidden');
+            document.getElementById('pantalla-mapa').classList.remove('hidden');
+            
+            inicializarMapa();
+            actualizarInterfazPedido(data);
+            escucharActualizacionesEnVivo(folio);
+        }
+
+        function inicializarMapa() {
+            // Centro de Tres Marías por defecto
+            mapa = L.map('mapa-rastreo', { zoomControl: false }).setView([19.6942, -101.1278], 14);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mapa);
+        }
+
+        function actualizarInterfazPedido(pedido) {
+            const elEstado = document.getElementById('info-estado');
+            const elDesc = document.getElementById('info-desc');
+            
+            document.getElementById('info-total').innerText = `$${pedido.total}`;
+            document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Aún buscando...";
+
+            if (pedido.estado === 'esperando_activacion') {
+                elEstado.innerText = "Pendiente de Pago"; elEstado.className = "text-yellow-600 font-black text-lg uppercase";
+                elDesc.innerText = "El vendedor aún no aprueba el pedido.";
+            } else if (pedido.estado === 'pendiente') {
+                elEstado.innerText = "Buscando Repartidor"; elEstado.className = "text-tm-azul font-black text-lg uppercase";
+                elDesc.innerText = "Estamos asignando tu pedido al repartidor más cercano.";
+            } else if (pedido.estado === 'aceptado') {
+                elEstado.innerText = "Preparando"; elEstado.className = "text-orange-500 font-black text-lg uppercase";
+                elDesc.innerText = "El repartidor va camino al negocio a recoger tus productos.";
+            } else if (pedido.estado === 'en_camino') {
+                elEstado.innerText = "En Camino"; elEstado.className = "text-green-500 font-black text-lg uppercase";
+                elDesc.innerText = "¡Tu pedido va hacia tu domicilio! Síguelo en el mapa.";
+                
+                // Si el repartidor ya tiene GPS activo en DB
+                if(pedido.repartidor_lat && pedido.repartidor_lng) {
+                    actualizarPosicionMoto(pedido.repartidor_lat, pedido.repartidor_lng);
+                }
+            } else if (pedido.estado === 'entregado') {
+                elEstado.innerText = "Entregado"; elEstado.className = "text-gray-500 font-black text-lg uppercase";
+                elDesc.innerText = "¡Disfruta tu pedido! Gracias por usar Vive Tres Marías.";
+            }
+        }
+
+        function actualizarPosicionMoto(lat, lng) {
+            if(!mapa) return;
+            const nuevaPos = [lat, lng];
+            
+            if(!marcadorMoto) {
+                marcadorMoto = L.marker(nuevaPos, {icon: iconoMoto}).addTo(mapa);
+                mapa.setView(nuevaPos, 16); // Hacer zoom cuando aparece
+            } else {
+                marcadorMoto.setLatLng(nuevaPos);
+                // Si quieres que la cámara siga a la moto siempre, descomenta esto:
+                // mapa.setView(nuevaPos); 
+            }
+        }
+
+        function escucharActualizacionesEnVivo(folio) {
+            suscripcionGPS = clienteSupabase.channel('rastreo-cliente')
+                .on('postgres_changes', { 
+                    event: 'UPDATE', 
+                    schema: 'public', 
+                    table: 'pedidos', 
+                    filter: `folio=eq.${folio}` 
+                }, async (payload) => {
+                    const datosNuevos = payload.new;
+                    
+                    // Si no teníamos el nombre del repartidor y ya se asignó, volvemos a consultar
+                    if(!datosNuevos.repartidores) {
+                        const { data } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('id', datosNuevos.id).single();
+                        if(data) actualizarInterfazPedido(data);
+                    } else {
+                        actualizarInterfazPedido(datosNuevos);
+                    }
+
+                    // Si está en camino y hay GPS
+                    if (datosNuevos.estado === 'en_camino' && datosNuevos.repartidor_lat) {
+                        actualizarPosicionMoto(datosNuevos.repartidor_lat, datosNuevos.repartidor_lng);
+                    }
+                }).subscribe();
+        }
+    </script>
+</body>
+</html>
