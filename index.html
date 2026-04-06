@@ -241,13 +241,13 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                const recibePedidos = a.nivel_pago === 3; // Supongo que nivel 3 es élite. Si élite es 2, ajusta esto.
+                const recibePedidos = a.nivel_pago === 3;
                 
                 let botones = '';
-                if(tieneMenu) { // Asumiendo que desde Nivel 2 ya pueden recibir pedidos
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
+                if(tieneMenu) {
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
                 } else if(a.nivel_pago === 1) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
                     let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
                     botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
@@ -274,7 +274,6 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // CARGAR PRODUCTOS DESDE LA TABLA 'productos' (Mejor que usar la columna JSON 'menu')
         async function abrirMenu(negocio, permitePedidos) {
             negocioActualPedido = negocio;
             carritoActual = {};
@@ -284,7 +283,6 @@
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
             
-            // Consultar a la tabla productos
             const { data: productosLista, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id);
             
             if(!productosLista || productosLista.length === 0) {
@@ -293,7 +291,6 @@
                 return;
             }
 
-            // Guardamos los productos en el objeto negocio para usarlos luego
             negocioActualPedido.productosArr = productosLista;
 
             contenedorLista.innerHTML = productosLista.map((item, index) => `
@@ -342,7 +339,6 @@
             document.getElementById('menu-total').innerText = `$${total.toFixed(2)}`;
         }
         
-        // --- FUNCIÓN ACTUALIZADA CON WHATSAPP Y GPS FLOW ---
         async function procesarPedido() {
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
@@ -375,13 +371,12 @@
             const textoOriginal = btn.innerHTML;
             btn.innerHTML = 'Generando folio...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // Generar folio único
             const folioVenta = 'VTM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-            // Guardar en Supabase como 'esperando_activacion'
             const { error } = await clienteSupabase.from('pedidos').insert([{
                 folio: folioVenta,
                 negocio_id: negocioActualPedido.id, 
+                cliente_id: usuarioActual ? usuarioActual.id : null, 
                 cliente_nombre: nombre, 
                 cliente_telefono: telefono,
                 cliente_direccion: direccion, 
@@ -399,11 +394,9 @@
                 textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
                 textoPedido += `*Folio:* ${folioVenta}\n\n`;
                 
-                // Link para el vendedor. Utiliza el origen actual (tu dominio real)
                 const linkActivacion = `${window.location.origin}/activar_pedido.html?folio=${folioVenta}`;
                 textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
 
-                // Abrir WhatsApp al negocio
                 let numeroVendedor = negocioActualPedido.enlace_whatsapp;
                 numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
                 
