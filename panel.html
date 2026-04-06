@@ -8,18 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        tailwind.config = {
-          theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
-        }
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
     </script>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
@@ -27,7 +23,6 @@
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
-        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
         <p class="text-gray-500 mb-6">Inicia sesión o crea una cuenta para administrar tu perfil y negocios.</p>
         <a href="login.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
@@ -40,25 +35,13 @@
             <p class="text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y ubica tu domicilio.</p>
             <form onsubmit="event.preventDefault(); guardarPerfil();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
-                        <input type="text" id="perfil-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold uppercase text-gray-500">Teléfono</label>
-                        <input type="tel" id="perfil-telefono" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold uppercase text-gray-500">Dirección</label>
-                        <textarea id="perfil-direccion" required rows="3" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></textarea>
-                    </div>
+                    <div><label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label><input type="text" id="perfil-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
+                    <div><label class="text-xs font-bold uppercase text-gray-500">Teléfono</label><input type="tel" id="perfil-telefono" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
+                    <div><label class="text-xs font-bold uppercase text-gray-500">Dirección</label><textarea id="perfil-direccion" required rows="3" class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></textarea></div>
                     <input type="hidden" id="perfil-lat"><input type="hidden" id="perfil-lng">
                     <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg font-bold transition shadow-md">Guardar Perfil</button>
                 </div>
-                <div class="flex flex-col">
-                    <label class="text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio 📍</label>
-                    <div id="mapa-perfil" class="w-full h-64 lg:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div>
-                </div>
+                <div class="flex flex-col"><label class="text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio 📍</label><div id="mapa-perfil" class="w-full h-64 lg:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div></div>
             </form>
         </div>
 
@@ -67,79 +50,47 @@
                 <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Mis Negocios</h2>
                 <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus anuncios activos en el directorio.</p>
             </div>
-
-            <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
-                </div>
+            <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"></div>
 
             <div class="border-t border-gray-200 pt-12 mb-10">
                 <div class="text-center mb-10 px-2">
                     <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Negocio</h2>
                     <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas de venta.</p>
                 </div>
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                    
                     <div onclick="abrirAdminNuevo(0)" class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                        <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico</h3>
-                        <p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
-                        <div class="mt-4 mb-5 bg-gray-50 border border-gray-200 rounded-lg p-3 select-none pointer-events-none">
-                            <div class="w-12 h-3 bg-blue-100 rounded mb-2"></div>
-                            <div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div>
-                            <div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div>
-                            <div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">WhatsApp</div>
-                        </div>
+                        <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
+                        <div class="mt-4 mb-5 bg-gray-50 border border-gray-200 rounded-lg p-3 select-none pointer-events-none"><div class="w-12 h-3 bg-blue-100 rounded mb-2"></div><div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div><div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div><div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">WhatsApp</div></div>
                         <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Nombre y descripción</span></li>
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Botón a tu WhatsApp</span></li>
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Dirección y horarios</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Nombre y descripción</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Botón a tu WhatsApp</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Dirección y horarios</span></li>
                         </ul>
                         <button class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-lg mt-auto hover:bg-gray-200 transition">Crear Gratis</button>
                     </div>
 
                     <div onclick="abrirAdminNuevo(1)" class="bg-white rounded-2xl border border-blue-400 p-6 shadow-lg flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:-translate-y-1 hover:ring-2 ring-blue-300">
                         <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
-                        <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3>
-                        <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/mes</span></p>
-                        <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg overflow-hidden select-none pointer-events-none">
-                            <div class="w-full h-16 bg-blue-50 flex items-center justify-center text-xs text-blue-400">🌅 Imagen Portada</div>
-                            <div class="p-3">
-                                <div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div>
-                                <div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Catálogo</div>
-                            </div>
-                        </div>
+                        <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/mes</span></p>
+                        <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg overflow-hidden select-none pointer-events-none"><div class="w-full h-16 bg-blue-50 flex items-center justify-center text-xs text-blue-400">🌅 Imagen Portada</div><div class="p-3"><div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div><div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Catálogo</div></div></div>
                         <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico, más:</span></li>
-                            <li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo.</span></li>
-                            <li class="flex items-start gap-2"><span>📋</span> <span>Catálogo en PDF/Link.</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico, más:</span></li><li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo.</span></li><li class="flex items-start gap-2"><span>📋</span> <span>Catálogo en PDF/Link.</span></li>
                         </ul>
                         <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-auto hover:bg-blue-700 transition shadow">Elegir Pro</button>
                     </div>
 
                     <div onclick="abrirAdminNuevo(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 shadow-xl flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:scale-105 z-10 hover:ring-2 ring-yellow-300">
                         <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
-                        <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3>
-                        <p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
-                        <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg overflow-hidden select-none pointer-events-none">
-                            <div class="w-full h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Imagen Portada</div>
-                            <div class="p-3">
-                                <div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div>
-                                <div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div>
-                            </div>
-                        </div>
+                        <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
+                        <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg overflow-hidden select-none pointer-events-none"><div class="w-full h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Imagen Portada</div><div class="p-3"><div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div><div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div></div></div>
                         <ul class="text-sm space-y-3 flex-grow text-gray-800 mb-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1, más:</span></li>
-                            <li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú interactivo</b> propio.</span></li>
-                            <li class="flex items-start gap-2"><span>📱</span> <span>Pedidos directos a WhatsApp.</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1, más:</span></li><li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú interactivo</b> propio.</span></li><li class="flex items-start gap-2"><span>📱</span> <span>Pedidos directos a WhatsApp.</span></li>
                         </ul>
                         <button class="w-full bg-tm-dorado text-white font-bold py-3 rounded-lg mt-auto hover:bg-yellow-600 transition shadow">Elegir Elite</button>
                     </div>
-
                 </div>
             </div>
         </div>
 
         <div id="seccion-admin-negocio" class="hidden bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10">
-            
             <div class="bg-tm-azul-oscuro text-white p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black flex items-center gap-3">
@@ -152,32 +103,21 @@
             </div>
 
             <div class="flex flex-col lg:flex-row min-h-[600px]">
-                
                 <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50">
-                    <input type="hidden" id="admin-negocio-id">
-                    <input type="hidden" id="admin-nivel-intencion" value="0"> <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white">
+                    <input type="hidden" id="admin-negocio-id"><input type="hidden" id="admin-nivel-intencion" value="0">
+                    <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white">
                         <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos Básicos</button>
                         <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
                         <button onclick="cambiarPestana('menu')" id="tab-menu" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú 🔒</button>
                     </div>
 
                     <div class="p-5 sm:p-6 flex-grow">
-                        
                         <div id="panel-basico" class="space-y-4">
-                            <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio *</label>
-                            <input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                            
-                            <div><label class="text-xs font-bold text-gray-500">Descripción (Atrae clientes) *</label>
-                            <textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
-                            
+                            <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                            <div><label class="text-xs font-bold text-gray-500">Descripción *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label>
-                                <input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                                
-                                <div><label class="text-xs font-bold text-gray-500">Categoría *</label>
-                                <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                                    <option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option>
-                                </select></div>
+                                <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                                <div><label class="text-xs font-bold text-gray-500">Categoría *</label><select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"><option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option></select></div>
                             </div>
                         </div>
 
@@ -187,16 +127,12 @@
                                 <p class="text-sm text-blue-600 mb-4">Añade un banner atractivo para diferenciarte de la competencia.</p>
                                 <button onclick="iniciarMejoraDirecta(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-blue-700 transition">Mejorar a Pro ($150/mes)</button>
                             </div>
-                            
                             <div id="contenido-diseno" class="hidden">
                                 <label class="text-sm font-bold text-gray-700">Banner Principal</label>
                                 <p class="text-[11px] text-gray-500 mb-3 mt-1">Guía: Formato JPG o PNG. Medida ideal: 800x400px. Máximo 2MB.</p>
-                                
                                 <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-white hover:bg-gray-50 transition">
                                     <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaBanner(event)">
-                                    <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold block w-max mx-auto transition">
-                                        Subir Imagen
-                                    </label>
+                                    <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold block w-max mx-auto transition">Subir Imagen</label>
                                     <p id="estado-subida" class="text-xs text-tm-azul mt-3 font-bold"></p>
                                 </div>
                                 <input type="hidden" id="admin-imagen-url">
@@ -209,48 +145,36 @@
                                 <p class="text-sm text-yellow-700 mb-4">Crea tu propio menú, recibe pedidos al instante y vende sin comisiones.</p>
                                 <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
                             </div>
-                            
                             <div id="contenido-menu" class="hidden flex-grow flex flex-col">
                                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
                                     <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto</h4>
                                     <div class="grid grid-cols-2 gap-3 mb-3">
-                                        <input type="text" id="prod-nombre" placeholder="Nombre (Ej. Hamburguesa)" class="p-2 border border-gray-300 rounded text-sm outline-none">
+                                        <input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none">
                                         <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
                                     </div>
                                     <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
                                     <button onclick="agregarProductoDB()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
                                 </div>
-                                
                                 <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
-                                <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2">
-                                    <p class="text-xs text-gray-400">Aún no hay productos.</p>
-                                </div>
+                                <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
                 <div class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col items-center justify-center relative">
                     <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase tracking-widest font-bold">Vista Previa Real</div>
-                    
                     <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 transform transition-all duration-300 mx-auto mt-6">
-                        
                         <div class="bg-gray-100 p-3 flex justify-between items-center border-b border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-400">⬅ Volver</span>
-                            <span class="text-[10px] font-bold text-gray-400">Directorio</span>
+                            <span class="text-[10px] font-bold text-gray-400">⬅ Volver</span><span class="text-[10px] font-bold text-gray-400">Directorio</span>
                         </div>
-
                         <div id="preview-banner-container" class="w-full h-32 bg-gray-100 relative hidden">
-                            <img id="preview-banner" src="" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <img id="preview-banner" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         </div>
-                        
                         <div class="p-5 bg-white">
                             <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase tracking-widest bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
                             <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro leading-tight mt-2">Nombre del Negocio</h3>
                             <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-4 leading-relaxed">Escribe una descripción en la pestaña 'Datos Básicos' para ver cómo lucirá tu anuncio.</p>
-                            
                             <div class="mt-5 pt-4 border-t border-gray-100 flex gap-2">
                                 <button class="flex-1 bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold text-center shadow-sm">WhatsApp</button>
                                 <button id="preview-btn-menu" class="hidden flex-1 bg-tm-azul text-white py-2 rounded-lg text-xs font-bold text-center shadow-sm">Ver Menú</button>
@@ -258,10 +182,26 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
+    </div>
 
+    <div id="modal-suscripcion" class="hidden fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md relative">
+            <button onclick="document.getElementById('modal-suscripcion').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
+            <h2 class="text-xl font-black text-tm-azul-oscuro mb-4">Elige tu Plan</h2>
+            <input type="hidden" id="sub-anuncio-id">
+            <div class="space-y-4">
+                <button onclick="iniciarPagoStripe(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="w-full border-2 border-blue-400 rounded-xl p-4 text-left hover:bg-blue-50 transition flex justify-between items-center">
+                    <div><h3 class="font-bold text-blue-600 text-lg">Pro (Nivel 1)</h3><p class="text-sm text-gray-500">Imágenes y catálogo</p></div>
+                    <span class="font-black text-xl text-tm-azul-oscuro">$150<span class="text-xs font-normal">/mes</span></span>
+                </button>
+                <button onclick="iniciarPagoStripe(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="w-full border-2 border-tm-dorado rounded-xl p-4 text-left hover:bg-yellow-50 transition flex justify-between items-center">
+                    <div><h3 class="font-bold text-tm-dorado text-lg">Elite (Nivel 2)</h3><p class="text-sm text-gray-500">Menú interactivo</p></div>
+                    <span class="font-black text-xl text-tm-azul-oscuro">$300<span class="text-xs font-normal">/mes</span></span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -275,7 +215,6 @@
         let map = null;
         let marker = null;
 
-        // --- SISTEMA DE NOTIFICACIONES ---
         function mostrarNotificacion(mensaje, tipo = 'exito') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -287,18 +226,14 @@
             setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 5000);
         }
 
-        // --- LECTOR DE URL Y AUTH ---
         document.addEventListener("DOMContentLoaded", () => {
             const urlParams = new URLSearchParams(window.location.search);
             const view = urlParams.get('view') || 'perfil'; 
             const success = urlParams.get('success');
             const canceled = urlParams.get('canceled');
             
-            if (view === 'negocio') {
-                document.getElementById('seccion-perfil').classList.add('hidden');
-            } else {
-                document.getElementById('seccion-perfil').classList.remove('hidden');
-            }
+            if (view === 'negocio') document.getElementById('seccion-perfil').classList.add('hidden');
+            else document.getElementById('seccion-perfil').classList.remove('hidden');
 
             if (success) {
                 mostrarNotificacion("¡Pago exitoso! Tu plan se actualizará en breve.", "exito");
@@ -323,7 +258,6 @@
             }
         });
 
-        // --- PERFIL Y MAPA ---
         async function cargarPerfil() {
             const { data, error } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
             let lat = 19.7028; let lng = -101.1924;
@@ -375,7 +309,6 @@
             mostrarNotificacion("¡Perfil guardado!", "exito");
         }
 
-        // --- LISTA DE NEGOCIOS ---
         async function cargarMisNegocios() {
             const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             const contenedor = document.getElementById('contenedor-mis-negocios');
@@ -396,7 +329,6 @@
             `).join('');
         }
 
-        // --- FLUJO DEL ADMIN PANEL ---
         function abrirAdminNuevo(nivelDeseado) {
             document.getElementById('seccion-perfil').classList.add('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -405,7 +337,6 @@
             document.getElementById('admin-negocio-id').value = '';
             document.getElementById('admin-nivel-intencion').value = nivelDeseado;
             
-            // Limpiar
             document.getElementById('admin-nombre').value = '';
             document.getElementById('admin-desc').value = '';
             document.getElementById('admin-wa').value = '';
@@ -425,9 +356,7 @@
                 btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
             }
 
-            // Desbloquear pestañas temporalmente para que suba sus cosas ANTES de pagar
             configurarPermisos(nivelDeseado); 
-            
             document.getElementById('seccion-lista-negocios').classList.add('hidden');
             document.getElementById('seccion-admin-negocio').classList.remove('hidden');
             actualizarPreview();
@@ -440,7 +369,7 @@
             
             document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
             document.getElementById('admin-negocio-id').value = n.id;
-            document.getElementById('admin-nivel-intencion').value = '0'; // Ya existe, no forzamos pago al guardar
+            document.getElementById('admin-nivel-intencion').value = '0';
 
             document.getElementById('admin-nombre').value = n.nombre_negocio;
             document.getElementById('admin-desc').value = n.descripcion || '';
@@ -532,7 +461,7 @@
                     await clienteSupabase.from('anuncios').update(payload).eq('id', id);
                 } else {
                     payload.user_id = usuarioActual.id;
-                    payload.nivel_pago = 0; // Se crea en 0, el webhook lo sube a 1 o 2
+                    payload.nivel_pago = 0; 
                     const { data, error } = await clienteSupabase.from('anuncios').insert([payload]).select().single();
                     if(error) throw error;
                     idParaPago = data.id;
@@ -540,7 +469,6 @@
                 }
 
                 if (nivelIntencion > 0 && !id) {
-                    // Era un negocio nuevo y quería pagar
                     btn.innerText = "Redirigiendo a Stripe...";
                     const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
                     await iniciarFlujoStripeInterno(nivelIntencion, priceId, idParaPago);
@@ -552,11 +480,10 @@
                 mostrarNotificacion("Error: " + error.message, "error");
             } finally {
                 btn.disabled = false;
-                if(btn.innerText === "Guardando...") btn.innerText = "Guardar Cambios";
+                if(btn.innerText === "Guardando..." || btn.innerText === "Preparando pago...") btn.innerText = "Guardar Cambios";
             }
         }
 
-        // --- SUBIDA IMAGEN BUCKET ---
         async function procesarSubidaBanner(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -579,7 +506,6 @@
             }
         }
 
-        // --- VISTA PREVIA ---
         function actualizarPreview() {
             document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre Negocio';
             document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Escribe tu descripción...';
@@ -588,7 +514,7 @@
             const imgUrl = document.getElementById('admin-imagen-url').value;
             const bannerCont = document.getElementById('preview-banner-container');
             const nivelFingido = parseInt(document.getElementById('admin-nivel-intencion').value);
-            const nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
             
             const nivel = Math.max(nivelFingido, nivelReal);
 
@@ -603,7 +529,6 @@
             else document.getElementById('preview-btn-menu').classList.add('hidden');
         }
 
-        // --- CRUD MENÚ ---
         async function cargarProductosMenu(anuncioId) {
             const { data, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId);
             const lista = document.getElementById('lista-productos');
@@ -640,7 +565,6 @@
             }
         }
 
-        // --- STRIPE INTERNO ---
         function iniciarMejoraDirecta(nivel, priceId) {
             const anuncioId = document.getElementById('admin-negocio-id').value;
             if(!anuncioId) { mostrarNotificacion("Guarda el negocio primero en la pestaña Básicos", "error"); return; }
