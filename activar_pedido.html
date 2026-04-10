@@ -13,10 +13,18 @@
 
     <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
         <h1 class="text-2xl font-black text-[#143653] mb-2">Asignar Repartidor</h1>
-        <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Cargando...</p>
+        <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
         
         <div id="loader" class="my-6 flex justify-center">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22527b]"></div>
+        </div>
+
+        <div id="zona-login" class="hidden text-center my-6">
+            <span class="text-4xl block mb-2">🔒</span>
+            <p class="text-gray-700 font-bold mb-4">Debes iniciar sesión con la cuenta de tu negocio para confirmar este pedido.</p>
+            <a href="login.html" class="inline-block w-full bg-[#22527b] text-white font-bold py-3 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
+                Ir a Iniciar Sesión
+            </a>
         </div>
 
         <div id="zona-asignacion" class="hidden text-left">
@@ -57,14 +65,34 @@
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let folioActual = null;
+        let usuarioActual = null;
+
+        // 1. Escuchar el estado de la sesión antes de hacer nada
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
+            usuarioActual = session ? session.user : null;
+            if (usuarioActual) {
+                // Si hay sesión, procedemos a cargar los datos
+                inicializar();
+            } else {
+                // Si no hay sesión, mostramos la pantalla de login
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('zona-asignacion').classList.add('hidden');
+                document.getElementById('zona-login').classList.remove('hidden');
+                document.getElementById('folio-display').innerText = 'Acceso Denegado';
+            }
+        });
 
         async function inicializar() {
             const urlParams = new URLSearchParams(window.location.search);
             folioActual = urlParams.get('folio');
             const loader = document.getElementById('loader');
             const zonaAsignacion = document.getElementById('zona-asignacion');
+            const zonaLogin = document.getElementById('zona-login');
             const mensajeFinal = document.getElementById('mensaje-final');
             const folioDisplay = document.getElementById('folio-display');
+
+            zonaLogin.classList.add('hidden');
+            loader.classList.remove('hidden');
 
             if (!folioActual) {
                 loader.classList.add('hidden');
@@ -111,17 +139,26 @@
             const esPagado = document.querySelector('input[name="pago"]:checked').value === "true";
             const btn = document.getElementById('btn-asignar');
 
-            btn.innerText = "Procesando..."; btn.disabled = true;
+            btn.innerText = "Procesando..."; 
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            const { error } = await clienteSupabase.from('pedidos').update({ 
-                estado: 'asignado',
-                repartidor_id: repartidorId,
-                pago_confirmado: esPagado
-            }).eq('folio', folioActual);
+            // 2. Llamada segura a tu Edge Function
+            const { data, error } = await clienteSupabase.functions.invoke('asignar-pedido', {
+                body: {
+                    folio: folioActual,
+                    repartidor_id: repartidorId,
+                    es_pagado: esPagado
+                }
+            });
 
-            if (error) {
-                alert("Error: " + error.message);
-                btn.innerText = "Confirmar y Activar"; btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            if (error || !data.success) {
+                // Si el backend rechaza la operación (ej. no es el dueño), muestra el error
+                alert("Error: " + (error?.message || data?.error));
+                btn.innerText = "Confirmar y Activar"; 
+                btn.disabled = false;
             } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
                 document.getElementById('mensaje-final').innerHTML = `<span class="text-green-600 font-black text-2xl">¡Activado! ✅</span><br><span class="font-normal text-sm">El repartidor ha recibido la alerta.</span>`;
@@ -129,8 +166,6 @@
                 document.getElementById('btn-cerrar').classList.remove('hidden');
             }
         }
-
-        inicializar();
     </script>
 </body>
 </html>
