@@ -80,7 +80,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Si ya está logueado, lo mandamos al index para que vea su panel
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             if (session) window.location.href = 'index.html';
         });
@@ -126,7 +125,6 @@
                     if(error.message.includes("Invalid login credentials")) throw new Error("Correo o contraseña incorrectos.");
                     throw error;
                 }
-                // Si es exitoso, el onAuthStateChange lo redirigirá automáticamente
             } catch (err) {
                 mostrarMensaje(err.message, true);
                 btn.disabled = false; btn.innerText = "Entrar a mi cuenta";
@@ -143,32 +141,22 @@
             btn.disabled = true; btn.innerText = "Creando cuenta...";
 
             try {
-                // 1. Crear el usuario en auth.users
-                const { data, error } = await clienteSupabase.auth.signUp({
+                // Modificado: Ahora pasamos el nombre y el teléfono como "metadata"
+                // El Trigger SQL que creaste los leerá automáticamente y creará el perfil.
+                const { error } = await clienteSupabase.auth.signUp({
                     email: email,
-                    password: password
+                    password: password,
+                    options: {
+                        data: {
+                            nombre_completo: nombre,
+                            telefono: telefono
+                        }
+                    }
                 });
                 
                 if(error) throw error;
                 
-                // 2. Si se creó exitosamente, insertamos sus datos en la tabla perfiles
-                if (data.user) {
-                    const { error: errorPerfil } = await clienteSupabase.from('perfiles').insert([
-                        {
-                            user_id: data.user.id,
-                            nombre_completo: nombre,
-                            telefono: telefono
-                        }
-                    ]);
-
-                    if (errorPerfil) {
-                        console.error("Error al guardar el perfil público:", errorPerfil.message);
-                        // Puedes decidir si lanzar un error o dejarlo pasar (por ahora lo dejamos pasar porque la cuenta sí se creó)
-                    }
-                }
-                
                 mostrarMensaje("¡Cuenta creada exitosamente! Entrando...", false);
-                // Si es exitoso, el onAuthStateChange lo redirigirá automáticamente
             } catch (err) {
                 mostrarMensaje("Error: " + err.message, true);
                 btn.disabled = false; btn.innerText = "Comenzar Ahora";
