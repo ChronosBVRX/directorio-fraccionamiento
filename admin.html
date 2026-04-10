@@ -210,7 +210,6 @@
                 if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro (N1)'; }
                 if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite (N2)'; }
 
-                // Codificamos el objeto del negocio para poder pasarlo a la función de editar
                 const negocioCodificado = encodeURIComponent(JSON.stringify(n));
 
                 return `
@@ -246,7 +245,6 @@
             }).join('');
         }
 
-        // --- FUNCIONES DE EDICIÓN ---
         function abrirModalEditar(negocioStr) {
             const n = JSON.parse(decodeURIComponent(negocioStr));
             
@@ -263,6 +261,7 @@
             document.getElementById('modal-editar').classList.add('hidden');
         }
 
+        // --- ACTUALIZACIÓN SEGURA ---
         async function guardarEdicion() {
             const id = document.getElementById('edit-id').value;
             const btn = document.getElementById('btn-guardar-edicion');
@@ -270,46 +269,51 @@
             btn.innerText = "Guardando..."; 
             btn.disabled = true;
 
-            const payload = {
+            const payloadDatos = {
                 nombre_negocio: document.getElementById('edit-nombre').value,
                 categoria: document.getElementById('edit-categoria').value,
                 enlace_whatsapp: document.getElementById('edit-wa').value,
                 nivel_pago: parseInt(document.getElementById('edit-nivel').value)
             };
 
-            try {
-                const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-                if (error) throw error;
-                
+            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', {
+                body: {
+                    accion: 'editar',
+                    id_negocio: id,
+                    payload: payloadDatos
+                }
+            });
+
+            btn.innerText = "Guardar Cambios"; 
+            btn.disabled = false;
+
+            if (error || !data.success) {
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+            } else {
                 mostrarNotificacion("¡Negocio actualizado exitosamente!", "exito");
                 cerrarModalEditar();
-                cargarTodosLosNegocios(); // Recarga la tabla para ver los cambios
-                
-            } catch (error) {
-                mostrarNotificacion("Error al actualizar: " + error.message, "error");
-            } finally {
-                btn.innerText = "Guardar Cambios"; 
-                btn.disabled = false;
+                cargarTodosLosNegocios();
             }
         }
-        // ----------------------------
 
+        // --- ELIMINACIÓN SEGURA ---
         async function eliminarNegocio(id) {
             if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo? Esta acción no se puede deshacer y borrará sus productos asociados.")) {
                 return;
             }
 
-            try {
-                await clienteSupabase.from('productos').delete().eq('anuncio_id', id);
-                const { error } = await clienteSupabase.from('anuncios').delete().eq('id', id);
-                
-                if (error) throw error;
+            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', {
+                body: {
+                    accion: 'eliminar',
+                    id_negocio: id
+                }
+            });
 
+            if (error || !data.success) {
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+            } else {
                 mostrarNotificacion("Negocio eliminado correctamente.", "exito");
                 cargarTodosLosNegocios(); 
-                
-            } catch (error) {
-                mostrarNotificacion("Error al eliminar: " + error.message, "error");
             }
         }
 
