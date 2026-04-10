@@ -34,7 +34,7 @@
             <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
             <p class="text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y revisa tus pedidos.</p>
             
-            <form onsubmit="event.preventDefault(); guardarPerfil();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <form onsubmit="event.preventDefault(); guardarPerfilSeguro();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <div><label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label><input type="text" id="perfil-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
                     <div><label class="text-xs font-bold uppercase text-gray-500">Teléfono</label><input type="tel" id="perfil-telefono" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
@@ -107,7 +107,7 @@
                     </h2>
                     <p id="admin-nivel-badge" class="text-xs font-bold text-tm-azul-oscuro bg-white px-2 py-1 rounded inline-block mt-2">Nivel Actual: Cargando...</p>
                 </div>
-                <button onclick="guardarNegocioAdmin()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Cambios</button>
+                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Cambios</button>
             </div>
 
             <div class="flex flex-col lg:flex-row min-h-[600px]">
@@ -161,7 +161,7 @@
                                         <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
                                     </div>
                                     <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
-                                    <button onclick="agregarProductoDB()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
+                                    <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
                                 </div>
                                 <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
                                 <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
@@ -193,9 +193,6 @@
             </div>
         </div>
     </div>
-
-    <div id="modal-suscripcion" class="hidden fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-4">
-        </div>
 
     <script>
         const stripe = Stripe('pk_live_51TIbWAGtW4zuRQv9BoUbQxHh1hHUdLMysM1q5aglozGBNkdBXV2EFiyTPYDZf0gKRM2JjFy2bHLEsJHlvT8nlNfT004EDyUyWi');
@@ -250,6 +247,7 @@
             }
         });
 
+        // ================= LECTURAS (SE MANTIENEN EN JS) =================
         async function cargarPerfil() {
             const { data, error } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
             let lat = 19.7028; let lng = -101.1924;
@@ -264,7 +262,6 @@
         }
 
         async function cargarMisPedidos() {
-            // CORRECCIÓN: Usamos 'creado_en' en lugar de 'created_at'
             const { data, error } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio)')
                 .eq('cliente_id', usuarioActual.id)
@@ -272,7 +269,6 @@
                 .limit(5);
 
             const contenedor = document.getElementById('contenedor-mis-pedidos');
-            
             if (error || !data || data.length === 0) {
                 contenedor.innerHTML = '<p class="text-sm text-gray-500">Aún no tienes pedidos registrados con esta cuenta.</p>';
                 return;
@@ -281,7 +277,6 @@
             contenedor.innerHTML = data.map(p => {
                 let colorEstado = 'bg-gray-100 text-gray-600';
                 let textoEstado = p.estado;
-                
                 if(p.estado === 'esperando_activacion') { colorEstado = 'bg-yellow-100 text-yellow-700'; textoEstado = 'Pendiente de Pago'; }
                 if(p.estado === 'asignado') { colorEstado = 'bg-orange-100 text-orange-700'; textoEstado = 'Asignando Repartidor'; }
                 if(p.estado === 'pendiente') { colorEstado = 'bg-blue-100 text-blue-700'; textoEstado = 'Buscando Repartidor'; }
@@ -297,53 +292,12 @@
                         <p class="font-bold text-tm-azul-oscuro">${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
                         <p class="text-sm text-tm-dorado font-black">$${p.total}</p>
                     </div>
-                    
                     ${p.estado !== 'entregado' ? 
-                        `<a href="rastreo.html?folio=${p.folio}" target="_parent" class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition shadow">Rastrear 📍</a>` 
-                        : 
+                        `<a href="rastreo.html?folio=${p.folio}" target="_parent" class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition shadow">Rastrear 📍</a>` : 
                         `<span class="text-xs text-gray-400 font-bold bg-gray-200 px-3 py-1 rounded-lg">Entregado ✅</span>`
                     }
                 </div>`;
             }).join('');
-        }
-
-        function inicializarMapa(lat, lng) {
-            document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
-            setTimeout(() => {
-                if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    marker.on('dragend', function (e) {
-                        const posicion = marker.getLatLng();
-                        document.getElementById('perfil-lat').value = posicion.lat; document.getElementById('perfil-lng').value = posicion.lng;
-                    });
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                        document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng;
-                    });
-                } else {
-                    map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); 
-                }
-            }, 300);
-        }
-
-        async function guardarPerfil() {
-            const btn = document.getElementById('btn-guardar-perfil');
-            btn.innerText = "Guardando..."; btn.disabled = true;
-            const payload = {
-                user_id: usuarioActual.id,
-                nombre_completo: document.getElementById('perfil-nombre').value,
-                telefono: document.getElementById('perfil-telefono').value,
-                direccion: document.getElementById('perfil-direccion').value,
-                latitud: document.getElementById('perfil-lat').value,
-                longitud: document.getElementById('perfil-lng').value
-            };
-            const { data: existe } = await clienteSupabase.from('perfiles').select('id').eq('user_id', usuarioActual.id).single();
-            if (existe) await clienteSupabase.from('perfiles').update(payload).eq('user_id', usuarioActual.id);
-            else await clienteSupabase.from('perfiles').insert([payload]);
-            btn.innerText = "Guardar Perfil"; btn.disabled = false;
-            mostrarNotificacion("¡Perfil guardado!", "exito");
         }
 
         async function cargarMisNegocios() {
@@ -364,6 +318,157 @@
                     <button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow transition whitespace-nowrap">Editar Panel</button>
                 </div>
             `).join('');
+        }
+
+        async function cargarProductosMenu(anuncioId) {
+            const { data, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId);
+            const lista = document.getElementById('lista-productos');
+            if (!data || data.length === 0) { lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`; return; }
+            lista.innerHTML = data.map(p => `
+                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                    <div>
+                        <p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p>
+                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
+                    </div>
+                    <button onclick="eliminarProductoSeguro('${p.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded transition">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ================= ESCRITURAS SEGURAS (INVOCANDO EDGE FUNCTION) =================
+        async function guardarPerfilSeguro() {
+            const btn = document.getElementById('btn-guardar-perfil');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
+            const payload = {
+                nombre_completo: document.getElementById('perfil-nombre').value,
+                telefono: document.getElementById('perfil-telefono').value,
+                direccion: document.getElementById('perfil-direccion').value,
+                latitud: document.getElementById('perfil-lat').value,
+                longitud: document.getElementById('perfil-lng').value
+            };
+
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
+                body: { accion: 'guardar_perfil', payload: payload }
+            });
+
+            btn.innerText = "Guardar Perfil"; btn.disabled = false;
+            
+            if (error || !data.success) mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+            else mostrarNotificacion("¡Perfil guardado!", "exito");
+        }
+
+        async function guardarNegocioSeguro() {
+            const btn = document.getElementById('btn-guardar-admin');
+            btn.disabled = true; 
+            const id = document.getElementById('admin-negocio-id').value;
+            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
+            
+            btn.innerText = nivelIntencion > 0 ? "Preparando pago..." : "Guardando...";
+
+            const payloadDatos = {
+                nombre_negocio: document.getElementById('admin-nombre').value,
+                descripcion: document.getElementById('admin-desc').value,
+                enlace_whatsapp: document.getElementById('admin-wa').value,
+                categoria: document.getElementById('admin-cat').value,
+                imagen_url: document.getElementById('admin-imagen-url').value
+            };
+
+            if(!payloadDatos.nombre_negocio || !payloadDatos.enlace_whatsapp) {
+                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error");
+                btn.disabled = false; btn.innerText = nivelIntencion > 0 ? "Continuar al Pago Seguro 🔒" : "Guardar Cambios";
+                return;
+            }
+
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
+                body: { accion: 'guardar_negocio', id_negocio: id, payload: payloadDatos }
+            });
+
+            if (error || !data.success) {
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+                btn.disabled = false;
+                btn.innerText = "Guardar Cambios";
+                return;
+            }
+
+            const idGenerado = data.id_negocio;
+            document.getElementById('admin-negocio-id').value = idGenerado;
+
+            if (nivelIntencion > 0 && !id) {
+                btn.innerText = "Redirigiendo a Stripe...";
+                const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
+                await iniciarFlujoStripeInterno(nivelIntencion, priceId, idGenerado);
+            } else {
+                mostrarNotificacion("¡Datos guardados!", "exito");
+                btn.disabled = false;
+                btn.innerText = "Guardar Cambios";
+                cerrarAdminNegocio();
+            }
+        }
+
+        async function agregarProductoSeguro() {
+            const anuncioId = document.getElementById('admin-negocio-id').value;
+            if(!anuncioId) { mostrarNotificacion("Guarda los datos básicos primero", "error"); return; }
+            
+            const nombre = document.getElementById('prod-nombre').value;
+            const precio = document.getElementById('prod-precio').value;
+            if(!nombre || !precio) { mostrarNotificacion("Nombre y precio obligatorios", "error"); return; }
+
+            const payloadDatos = {
+                anuncio_id: anuncioId,
+                nombre: nombre,
+                precio: precio,
+                descripcion: document.getElementById('prod-desc').value
+            };
+
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
+                body: { accion: 'agregar_producto', payload: payloadDatos }
+            });
+
+            if (error || !data.success) {
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+            } else {
+                document.getElementById('prod-nombre').value = ''; 
+                document.getElementById('prod-precio').value = ''; 
+                document.getElementById('prod-desc').value = '';
+                cargarProductosMenu(anuncioId);
+            }
+        }
+
+        async function eliminarProductoSeguro(prodId) {
+            if(!confirm("¿Eliminar producto?")) return;
+
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
+                body: { accion: 'eliminar_producto', producto_id: prodId }
+            });
+
+            if (error || !data.success) {
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+            } else {
+                cargarProductosMenu(document.getElementById('admin-negocio-id').value);
+            }
+        }
+
+        // ================= UI y OTROS (STORAGE, STRIPE, MAPA) =================
+        function inicializarMapa(lat, lng) {
+            document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
+            setTimeout(() => {
+                if (!map) {
+                    map = L.map('mapa-perfil').setView([lat, lng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+                    marker.on('dragend', function (e) {
+                        const posicion = marker.getLatLng();
+                        document.getElementById('perfil-lat').value = posicion.lat; document.getElementById('perfil-lng').value = posicion.lng;
+                    });
+                    map.on('click', function(e) {
+                        marker.setLatLng(e.latlng);
+                        document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng;
+                    });
+                } else {
+                    map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); 
+                }
+            }, 300);
         }
 
         function abrirAdminNuevo(nivelDeseado) {
@@ -473,57 +578,6 @@
             }
         }
 
-        async function guardarNegocioAdmin() {
-            const btn = document.getElementById('btn-guardar-admin');
-            btn.disabled = true; 
-            const id = document.getElementById('admin-negocio-id').value;
-            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
-            
-            btn.innerText = nivelIntencion > 0 ? "Preparando pago..." : "Guardando...";
-
-            const payload = {
-                nombre_negocio: document.getElementById('admin-nombre').value,
-                descripcion: document.getElementById('admin-desc').value,
-                enlace_whatsapp: document.getElementById('admin-wa').value,
-                categoria: document.getElementById('admin-cat').value,
-                imagen_url: document.getElementById('admin-imagen-url').value
-            };
-
-            if(!payload.nombre_negocio || !payload.enlace_whatsapp) {
-                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error");
-                btn.disabled = false; btn.innerText = nivelIntencion > 0 ? "Continuar al Pago Seguro 🔒" : "Guardar Cambios";
-                return;
-            }
-
-            try {
-                let idParaPago = id;
-                if (id) {
-                    await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-                } else {
-                    payload.user_id = usuarioActual.id;
-                    payload.nivel_pago = 0; 
-                    const { data, error } = await clienteSupabase.from('anuncios').insert([payload]).select().single();
-                    if(error) throw error;
-                    idParaPago = data.id;
-                    document.getElementById('admin-negocio-id').value = idParaPago;
-                }
-
-                if (nivelIntencion > 0 && !id) {
-                    btn.innerText = "Redirigiendo a Stripe...";
-                    const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
-                    await iniciarFlujoStripeInterno(nivelIntencion, priceId, idParaPago);
-                } else {
-                    mostrarNotificacion("¡Datos guardados!", "exito");
-                    cerrarAdminNegocio();
-                }
-            } catch (error) {
-                mostrarNotificacion("Error: " + error.message, "error");
-            } finally {
-                btn.disabled = false;
-                if(btn.innerText === "Guardando..." || btn.innerText === "Preparando pago...") btn.innerText = "Guardar Cambios";
-            }
-        }
-
         async function procesarSubidaBanner(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -567,42 +621,6 @@
 
             if (nivel >= 2) document.getElementById('preview-btn-menu').classList.remove('hidden');
             else document.getElementById('preview-btn-menu').classList.add('hidden');
-        }
-
-        async function cargarProductosMenu(anuncioId) {
-            const { data, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId);
-            const lista = document.getElementById('lista-productos');
-            if (!data || data.length === 0) { lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`; return; }
-            lista.innerHTML = data.map(p => `
-                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                    <div>
-                        <p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p>
-                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
-                    </div>
-                    <button onclick="eliminarProducto('${p.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded transition">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        async function agregarProductoDB() {
-            const anuncioId = document.getElementById('admin-negocio-id').value;
-            if(!anuncioId) { mostrarNotificacion("Guarda los datos básicos primero", "error"); return; }
-            const nombre = document.getElementById('prod-nombre').value;
-            const precio = document.getElementById('prod-precio').value;
-            if(!nombre || !precio) { mostrarNotificacion("Nombre y precio obligatorios", "error"); return; }
-            try {
-                const { error } = await clienteSupabase.from('productos').insert([{ anuncio_id: anuncioId, nombre, precio, descripcion: document.getElementById('prod-desc').value }]);
-                if (error) throw error;
-                document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = '';
-                cargarProductosMenu(anuncioId);
-            } catch (e) { mostrarNotificacion("Debes crear la tabla 'productos' en Supabase", "error"); }
-        }
-
-        async function eliminarProducto(prodId) {
-            if(confirm("¿Eliminar producto?")) {
-                await clienteSupabase.from('productos').delete().eq('id', prodId);
-                cargarProductosMenu(document.getElementById('admin-negocio-id').value);
-            }
         }
 
         function iniciarMejoraDirecta(nivel, priceId) {
