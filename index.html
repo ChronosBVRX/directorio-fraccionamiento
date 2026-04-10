@@ -427,49 +427,59 @@
 
             const btn = document.getElementById('btn-confirmar-pedido');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Generando folio...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = 'Procesando pedido...'; 
+            btn.disabled = true; 
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            const folioVenta = 'VTM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-            const { error } = await clienteSupabase.from('pedidos').insert([{
-                folio: folioVenta,
-                negocio_id: negocioActualPedido.id, 
-                cliente_id: usuarioActual ? usuarioActual.id : null, 
-                cliente_nombre: nombre, 
-                cliente_telefono: telefono,
-                cliente_direccion: direccion, 
-                detalles_pedido: detallesPedido, 
-                total: total, 
-                estado: 'esperando_activacion'
-            }]);
-
-            btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
-
-            if (error) {
-                console.error(error);
-                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
-            } else {
-                textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
-                textoPedido += `*Folio:* ${folioVenta}\n\n`;
-                
-                const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
-                
-                textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
-
-                let numeroVendedor = negocioActualPedido.enlace_whatsapp;
-                numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
-                
-                if(numeroVendedor) {
-                    const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
-                    window.open(urlWa, '_blank');
-                } else {
-                    alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            // -------------------------------------------------------------
+            // LLAMADA A LA EDGE FUNCTION DE SUPABASE
+            // -------------------------------------------------------------
+            const { data, error } = await clienteSupabase.functions.invoke('procesar-pedido', {
+                body: {
+                    negocio_id: negocioActualPedido.id,
+                    cliente_id: usuarioActual ? usuarioActual.id : null,
+                    nombre: nombre,
+                    telefono: telefono,
+                    direccion: direccion,
+                    carrito: detallesPedido,
+                    total: total
                 }
+            });
 
-                alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
-                cerrarMenu();
+            btn.innerHTML = textoOriginal; 
+            btn.disabled = false; 
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            if (error || !data.success) {
+                console.error("Error desde el servidor:", error || data?.error);
+                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
+                return; 
             }
+
+            // Extraemos el folio que generó tu función oculta de forma segura
+            const folioVenta = data.folio;
+            // -------------------------------------------------------------
+
+            textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
+            textoPedido += `*Folio:* ${folioVenta}\n\n`;
+            
+            const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+            
+            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
+
+            let numeroVendedor = negocioActualPedido.enlace_whatsapp;
+            numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
+            
+            if(numeroVendedor) {
+                const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
+                window.open(urlWa, '_blank');
+            } else {
+                alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            }
+
+            alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
+            cerrarMenu();
         }
 
         async function cerrarSesion() { 
