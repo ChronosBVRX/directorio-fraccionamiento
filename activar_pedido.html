@@ -22,7 +22,7 @@
         <div id="zona-login" class="hidden text-center my-6">
             <span class="text-4xl block mb-2">🔒</span>
             <p class="text-gray-700 font-bold mb-4">Debes iniciar sesión con la cuenta de tu negocio para confirmar este pedido.</p>
-            <a href="login.html" class="inline-block w-full bg-[#22527b] text-white font-bold py-3 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
+            <a href="login.html" id="btn-ir-login" class="inline-block w-full bg-[#22527b] text-white font-bold py-3 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
                 Ir a Iniciar Sesión
             </a>
         </div>
@@ -67,18 +67,26 @@
         let folioActual = null;
         let usuarioActual = null;
 
-        // 1. Escuchar el estado de la sesión antes de hacer nada
+        // Escuchar el estado de la sesión y crear la ruta de regreso
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             if (usuarioActual) {
-                // Si hay sesión, procedemos a cargar los datos
                 inicializar();
             } else {
-                // Si no hay sesión, mostramos la pantalla de login
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('zona-asignacion').classList.add('hidden');
                 document.getElementById('zona-login').classList.remove('hidden');
                 document.getElementById('folio-display').innerText = 'Acceso Denegado';
+                
+                // Extraer folio y generar ruta de regreso para el login
+                const urlParams = new URLSearchParams(window.location.search);
+                const folioParam = urlParams.get('folio');
+                if (folioParam) {
+                    const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioParam}`);
+                    document.getElementById('btn-ir-login').href = `login.html?returnTo=${rutaRegreso}`;
+                } else {
+                    document.getElementById('btn-ir-login').href = 'login.html';
+                }
             }
         });
 
@@ -142,8 +150,9 @@
             btn.innerText = "Procesando..."; 
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            document.getElementById('mensaje-final').classList.add('hidden');
 
-            // 2. Llamada segura a tu Edge Function
             const { data, error } = await clienteSupabase.functions.invoke('asignar-pedido', {
                 body: {
                     folio: folioActual,
@@ -155,13 +164,26 @@
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             if (error || !data.success) {
-                // Si el backend rechaza la operación (ej. no es el dueño), muestra el error
-                alert("Error: " + (error?.message || data?.error));
+                const mensajeError = error?.message || data?.error || "Error desconocido al procesar la solicitud.";
+                
+                document.getElementById('mensaje-final').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-left mt-4 animate-pulse">
+                        <span class="text-red-600 font-black text-lg block mb-1">⚠️ Acceso Denegado</span>
+                        <span class="font-bold text-sm text-red-500">${mensajeError}</span>
+                    </div>
+                `;
+                document.getElementById('mensaje-final').classList.remove('hidden');
+                
                 btn.innerText = "Confirmar y Activar"; 
                 btn.disabled = false;
             } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
-                document.getElementById('mensaje-final').innerHTML = `<span class="text-green-600 font-black text-2xl">¡Activado! ✅</span><br><span class="font-normal text-sm">El repartidor ha recibido la alerta.</span>`;
+                document.getElementById('mensaje-final').innerHTML = `
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl mt-4">
+                        <span class="text-green-600 font-black text-2xl block mb-1">¡Activado! ✅</span>
+                        <span class="font-bold text-sm text-green-700">El repartidor ha recibido la alerta.</span>
+                    </div>
+                `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
             }
