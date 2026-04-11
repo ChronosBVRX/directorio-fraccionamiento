@@ -80,8 +80,18 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Lector de rutas de regreso
         clienteSupabase.auth.onAuthStateChange((event, session) => {
-            if (session) window.location.href = 'index.html';
+            if (session) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const rutaRegreso = urlParams.get('returnTo');
+                
+                if (rutaRegreso) {
+                    window.location.href = decodeURIComponent(rutaRegreso);
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
         });
 
         function cambiarPestaña(vista) {
@@ -141,8 +151,6 @@
             btn.disabled = true; btn.innerText = "Creando cuenta...";
 
             try {
-                // Modificado: Ahora pasamos el nombre y el teléfono como "metadata"
-                // El Trigger SQL que creaste los leerá automáticamente y creará el perfil.
                 const { error } = await clienteSupabase.auth.signUp({
                     email: email,
                     password: password,
