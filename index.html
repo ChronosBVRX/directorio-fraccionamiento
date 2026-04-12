@@ -89,6 +89,11 @@
         </div>
     </header>
 
+    <div id="banner-airbnb" class="hidden bg-tm-dorado text-white text-xs sm:text-sm font-bold text-center py-2 px-4 shadow-md w-full z-30 relative">
+        📍 Entregando en: <span id="nombre-airbnb-banner" class="font-black">...</span>
+        <button onclick="limpiarModoAirbnb()" class="ml-3 underline text-[10px] font-normal hover:text-gray-100">Cambiar a manual</button>
+    </div>
+
     <div id="vista-directorio" class="block flex-grow">
         <nav class="max-w-7xl mx-auto mt-4 sm:mt-6 px-2 sm:px-4 flex gap-2 sm:gap-3 overflow-x-auto pb-4 pt-2 border-b border-gray-200 hide-scrollbar snap-x">
             <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
@@ -359,19 +364,34 @@
             carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
-
-            // Limpiamos las notas cada vez que se abre el menú
             document.getElementById('cliente-notas').value = '';
 
-            if (perfilUsuarioActual) {
-                document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
-                document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
-                document.getElementById('cliente-direccion').value = perfilUsuarioActual.direccion || '';
+            // --- LÓGICA DE DIRECCIÓN (AIRBNB, PERFIL O INVITADO) ---
+            const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
+            const inputDireccion = document.getElementById('cliente-direccion');
+
+            if (airbnbDir) {
+                inputDireccion.value = airbnbDir;
+                inputDireccion.setAttribute('readonly', 'true');
+                inputDireccion.classList.add('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
+                
+                document.getElementById('cliente-nombre').value = perfilUsuarioActual ? (perfilUsuarioActual.nombre_completo || '') : '';
+                document.getElementById('cliente-telefono').value = perfilUsuarioActual ? (perfilUsuarioActual.telefono || '') : '';
             } else {
-                document.getElementById('cliente-nombre').value = '';
-                document.getElementById('cliente-telefono').value = '';
-                document.getElementById('cliente-direccion').value = '';
+                inputDireccion.removeAttribute('readonly');
+                inputDireccion.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
+                
+                if (perfilUsuarioActual) {
+                    document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
+                    document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
+                    inputDireccion.value = perfilUsuarioActual.direccion || '';
+                } else {
+                    document.getElementById('cliente-nombre').value = '';
+                    document.getElementById('cliente-telefono').value = '';
+                    inputDireccion.value = '';
+                }
             }
+            // --------------------------------------------------------
             
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
@@ -486,7 +506,6 @@
             btn.disabled = true; 
             btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // --- LLAMADA A LA EDGE FUNCTION ---
             const { data, error } = await clienteSupabase.functions.invoke('procesar-pedido', {
                 body: {
                     negocio_id: negocioActualPedido.id,
@@ -496,7 +515,7 @@
                     direccion: direccion,
                     carrito: detallesPedido,
                     total: total,
-                    notas: notas // SE ENVÍAN LAS NOTAS AL SERVIDOR
+                    notas: notas
                 }
             });
 
@@ -538,6 +557,29 @@
             await clienteSupabase.auth.signOut(); 
             window.location.reload(); 
         }
+
+        // --- INICIALIZACIÓN AIRBNB AL CARGAR LA PÁGINA ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
+            if (airbnbNombre) {
+                document.getElementById('banner-airbnb').classList.remove('hidden');
+                document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
+            }
+        });
+
+        function limpiarModoAirbnb() {
+            localStorage.removeItem('tm_airbnb_direccion');
+            localStorage.removeItem('tm_airbnb_nombre');
+            document.getElementById('banner-airbnb').classList.add('hidden');
+            
+            const inputDireccion = document.getElementById('cliente-direccion');
+            if(inputDireccion) {
+                inputDireccion.value = '';
+                inputDireccion.removeAttribute('readonly');
+                inputDireccion.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
+            }
+        }
+        // --------------------------------------------------
     </script>
     
     <script>
