@@ -178,7 +178,7 @@
                                     <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
                                     <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
                                 </div>
-                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos (Oculta los agotados)</h4>
+                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
                                 <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
                             </div>
                         </div>
@@ -311,6 +311,7 @@
                         </div>
                         <p class="font-bold text-tm-azul-oscuro">${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
                         <p class="text-sm text-tm-dorado font-black">$${p.total}</p>
+                        ${p.notas ? `<p class="text-[10px] text-gray-500 italic mt-1 leading-tight border-l-2 border-yellow-300 pl-2">Nota: ${p.notas}</p>` : ''}
                     </div>
                     ${p.estado !== 'entregado' ? 
                         `<a href="rastreo.html?folio=${p.folio}" target="_parent" class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition shadow">Rastrear 📍</a>` : 
@@ -401,8 +402,8 @@
                 enlace_whatsapp: document.getElementById('admin-wa').value,
                 categoria: document.getElementById('admin-cat').value,
                 imagen_url: document.getElementById('admin-imagen-url').value,
-                horarios: document.getElementById('admin-horarios').value, // NUEVO
-                esta_abierto: document.getElementById('admin-estado-apertura').checked // NUEVO
+                horarios: document.getElementById('admin-horarios').value, 
+                esta_abierto: document.getElementById('admin-estado-apertura').checked 
             };
 
             if(!payloadDatos.nombre_negocio || !payloadDatos.enlace_whatsapp) {
@@ -473,14 +474,13 @@
             else cargarProductosMenu(document.getElementById('admin-negocio-id').value);
         }
 
-        // NUEVO: Toggle de producto
         async function toggleProductoSeguro(prodId, estaDisponible) {
             const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
                 body: { accion: 'toggle_producto', producto_id: prodId, disponible: estaDisponible }
             });
             if (error || !data.success) {
                 mostrarNotificacion("Error al actualizar producto.", "error");
-                cargarProductosMenu(document.getElementById('admin-negocio-id').value); // Recargar para deshacer el cambio visual
+                cargarProductosMenu(document.getElementById('admin-negocio-id').value); 
             }
         }
 
@@ -559,8 +559,7 @@
             document.getElementById('admin-imagen-url').value = n.imagen_url || '';
             document.getElementById('admin-horarios').value = n.horarios || '';
             
-            // Toggle de Abierto
-            const estaAbierto = n.esta_abierto !== false; // Si es null o true, está abierto
+            const estaAbierto = n.esta_abierto !== false; 
             document.getElementById('admin-estado-apertura').checked = estaAbierto;
             document.getElementById('label-estado-apertura').innerText = estaAbierto ? "Abierto" : "Cerrado";
             
