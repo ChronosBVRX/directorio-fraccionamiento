@@ -2,65 +2,80 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Airbnb - Vive Tres Marías</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 flex flex-col items-center">
+<body class="bg-gray-50 min-h-screen p-4 flex flex-col items-center font-sans">
 
-    <div class="max-w-xl w-full bg-white p-6 rounded-2xl shadow-md border-t-8 border-[#22527b]">
-        <h1 class="text-2xl font-black text-[#143653] mb-4 text-center">Configura tu Airbnb</h1>
+    <div class="max-w-xl w-full bg-white p-6 rounded-2xl shadow-md border-t-8 border-[#22527b] mt-10">
+        <h1 class="text-2xl font-black text-[#143653] mb-4 text-center">Panel de Anfitriones</h1>
         <form id="form-airbnb" onsubmit="guardarAirbnb(event)" class="space-y-4">
-            <input type="hidden" id="airbnb-id">
-            <input type="text" id="airbnb-nombre" placeholder="Nombre de tu Alojamiento" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#d4af37]" required>
-            <textarea id="airbnb-direccion" placeholder="Dirección completa para repartidores" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#d4af37]" rows="3" required></textarea>
-            <button type="submit" id="btn-guardar" class="w-full bg-[#22527b] text-white font-bold py-3 rounded-lg shadow">Guardar y Generar Póster</button>
+            <input type="text" id="airbnb-nombre" placeholder="Nombre del Airbnb (Ej: Depto 2A)" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#d4af37]" required>
+            <textarea id="airbnb-direccion" placeholder="Dirección completa exacta" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#d4af37]" rows="3" required></textarea>
+            <button type="submit" id="btn-guardar" class="w-full bg-[#22527b] text-white font-bold py-3 rounded-lg shadow transition hover:bg-blue-900">Guardar y Generar</button>
         </form>
 
         <div id="seccion-pdf" class="hidden mt-6 text-center border-t pt-6">
-            <p class="text-sm text-tm-gris mb-4">¡Todo listo! Descarga tu póster inteligente para imprimir.</p>
-            <button onclick="generarPosterPDF()" class="w-full bg-[#d4af37] text-white font-black py-4 rounded-xl shadow-lg">🖨️ Descargar Póster PDF</button>
+            <p class="text-sm text-gray-500 mb-4">¡Listo! Descarga e imprime tu póster inteligente.</p>
+            <button onclick="generarPosterPDF()" class="w-full bg-[#d4af37] text-white font-black py-4 rounded-xl shadow-lg hover:scale-105 transition duration-300">🖨️ Descargar Póster PDF</button>
         </div>
     </div>
 
-    <div style="position: absolute; top: 0; left: -9999px; z-index: -1;">
-        <div id="plantilla-poster" class="bg-white w-[800px] h-[1130px] flex flex-col items-center justify-center text-center p-12 border-[15px] border-[#22527b]">
-            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 300px; margin-bottom: 50px;">
-            <h1 style="color: #143653; font-size: 50px; font-weight: 900; margin-bottom: 20px;">Pide a tu puerta</h1>
-            <div style="background: #f3f4f6; border-radius: 20px; padding: 25px 45px; margin-bottom: 50px;">
-                <p style="color: #4b5563; font-size: 28px; font-weight: 600;">📍 Estás en: <br><span id="poster-nombre-airbnb" style="color: #22527b; font-weight: 900; font-size: 36px;">...</span></p>
+    <div style="position: absolute; left: -9999px; top: 0;">
+        <div id="plantilla-poster" style="width: 800px; height: 1130px; background: white; border: 25px solid #22527b; padding: 60px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif;">
+            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 350px; margin-bottom: 50px;">
+            <h1 style="font-size: 55px; color: #143653; font-weight: 900; margin-bottom: 10px;">Pide a tu puerta</h1>
+            <div style="background: #f3f4f6; border-radius: 20px; padding: 30px; width: 90%; margin-bottom: 50px;">
+                <p style="font-size: 28px; color: #4b5563; font-weight: 600; margin: 0;">📍 Estás en: <br> <strong id="pdf-nombre" style="font-size: 40px; color: #22527b;"></strong></p>
             </div>
-            <div id="qr-container" style="background: white; padding: 25px; border-radius: 25px; border: 4px solid #e5e7eb; margin-bottom: 60px;"></div>
-            <p style="font-size: 24px; color: #4b5563;">Escanea, elige tu comida y nosotros ya sabemos dónde entregártela.</p>
+            <div id="qr-container" style="background: white; padding: 30px; border-radius: 25px; border: 5px solid #e5e7eb; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 50px;"></div>
+            <div style="text-align: left; background: #fff8eb; border-left: 10px solid #d4af37; padding: 30px; border-radius: 0 20px 20px 0; width: 85%;">
+                <h3 style="font-size: 32px; color: #d4af37; font-weight: 900; margin-top:0; margin-bottom: 20px;">Instrucciones:</h3>
+                <p style="font-size: 24px; color: #4b5563; margin-bottom: 10px;">📱 1. Escanea el código con tu celular.</p>
+                <p style="font-size: 24px; color: #4b5563; margin-bottom: 10px;">🍔 2. Elige tu comida o servicio favorito.</p>
+                <p style="font-size: 24px; color: #22527b; font-weight: 800; margin-bottom: 0;">✨ 3. ¡Pide fácil! Tu ubicación ya está registrada.</p>
+            </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function guardarAirbnb(e) {
             e.preventDefault();
+            const btn = document.getElementById('btn-guardar');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
             const nombre = document.getElementById('airbnb-nombre').value;
             const direccion = document.getElementById('airbnb-direccion').value;
-            const { data } = await clienteSupabase.from('airbnbs').insert([{ nombre_alojamiento: nombre, direccion_completa: direccion }]).select().single();
+
+            const { data, error } = await clienteSupabase.from('airbnbs').insert([{ nombre_alojamiento: nombre, direccion_completa: direccion }]).select().single();
+            
             if (data) {
-                document.getElementById('poster-nombre-airbnb').innerText = data.nombre_alojamiento;
-                const url = window.location.href.replace('airbnb-host.html', `bienvenida.html?id=${data.id}`);
-                new QRCode(document.getElementById("qr-container"), { text: url, width: 400, height: 400 });
+                document.getElementById('pdf-nombre').innerText = data.nombre_alojamiento;
+                const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+                const urlMagica = `${baseUrl}/bienvenida.html?id=${data.id}`;
+                
+                const qrCont = document.getElementById('qr-container');
+                qrCont.innerHTML = "";
+                new QRCode(qrCont, { text: urlMagica, width: 350, height: 350, colorDark: "#143653" });
+                
                 document.getElementById('seccion-pdf').classList.remove('hidden');
-            }
+                alert("Configuración guardada.");
+            } else { alert("Error al guardar."); }
+            btn.innerText = "Guardar y Generar"; btn.disabled = false;
         }
 
         function generarPosterPDF() {
             const el = document.getElementById('plantilla-poster');
             const opt = {
-                filename: 'Poster_Airbnb.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
+                filename: 'Poster_Airbnb_ViveTresMarias.pdf',
+                image: { type: 'jpeg', quality: 1 },
                 html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
                 jsPDF: { unit: 'px', format: [800, 1130], orientation: 'portrait' }
             };
