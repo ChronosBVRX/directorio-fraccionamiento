@@ -290,23 +290,39 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
+                // Verificamos si está abierto (si es null asume que sí está abierto por defecto)
+                const estaAbierto = a.esta_abierto !== false; 
                 
                 let botones = '';
+                
+                // --- GENERACIÓN DE BOTONES DEPENDIENDO DEL ESTADO ---
                 if(tieneMenu) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
+                    if (estaAbierto) {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
+                    } else {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                    }
                 } else if(a.nivel_pago === 1) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "'")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
                     let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
-                    botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
+                    if (estaAbierto) {
+                        botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
+                    } else {
+                        botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                    }
                 }
 
+                const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-2 whitespace-nowrap">Cerrado</span>` : '';
+
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition">
-                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
+                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80' : ''}">
+                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100 ${!estaAbierto ? 'grayscale' : ''}">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
-                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight">${a.nombre_negocio}</h3>
+                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap">
+                                ${a.nombre_negocio} ${badgeCerrado}
+                            </h3>
                             <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
                             ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 flex items-start sm:items-center gap-1">📍 <span>${a.direccion}</span></p>` : ''}
                             ${a.horarios ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start sm:items-center gap-1">🕒 <span>${a.horarios}</span></p>` : ''}
@@ -341,7 +357,7 @@
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
             
-            const { data: productosLista, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id);
+            const { data: productosLista, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id).order('id', { ascending: true });
             
             if(!productosLista || productosLista.length === 0) {
                 contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-10 text-sm">Este negocio aún no ha agregado productos.</p>`;
@@ -351,21 +367,36 @@
 
             negocioActualPedido.productosArr = productosLista;
 
-            contenedorLista.innerHTML = productosLista.map((item, index) => `
-                <div class="border-b pb-3 flex justify-between items-center gap-2">
+            let htmlLista = '';
+            
+            // Si el negocio está cerrado, mostrar una alerta al inicio del menú
+            if (negocio.esta_abierto === false) {
+                htmlLista += `<div class="bg-red-50 text-red-600 border border-red-200 p-3 rounded-lg text-sm font-bold text-center mb-4">El negocio está cerrado en este momento. No se aceptan pedidos.</div>`;
+            }
+
+            htmlLista += productosLista.map((item, index) => {
+                const estaDisponible = item.disponible !== false;
+                
+                return `
+                <div class="border-b pb-3 flex justify-between items-center gap-2 ${!estaDisponible ? 'opacity-50' : ''}">
                     <div class="flex-grow">
-                        <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro">${item.nombre}</h4>
+                        <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro flex flex-wrap items-center gap-2">
+                            ${item.nombre}
+                            ${!estaDisponible ? '<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase whitespace-nowrap">Agotado</span>' : ''}
+                        </h4>
                         <p class="text-[11px] sm:text-xs text-tm-gris line-clamp-2">${item.descripcion || ''}</p>
                         <p class="text-tm-dorado font-bold mt-1 text-sm sm:text-base">$${item.precio}</p>
                     </div>
-                    ${permitePedidos ? `
+                    ${(permitePedidos && estaDisponible) ? `
                     <div class="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1 shadow-inner shrink-0">
                         <button onclick="cambiarCantidad(${index}, -1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-red-500 font-bold hover:bg-gray-50 flex items-center justify-center">-</button>
                         <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
                         <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
                     </div>` : ''}
                 </div>
-            `).join('');
+            `}).join('');
+
+            contenedorLista.innerHTML = htmlLista;
 
             const divCarrito = document.getElementById('menu-carrito');
             if(permitePedidos && productosLista.length > 0) {
@@ -431,9 +462,6 @@
             btn.disabled = true; 
             btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // -------------------------------------------------------------
-            // LLAMADA A LA EDGE FUNCTION DE SUPABASE
-            // -------------------------------------------------------------
             const { data, error } = await clienteSupabase.functions.invoke('procesar-pedido', {
                 body: {
                     negocio_id: negocioActualPedido.id,
@@ -456,9 +484,7 @@
                 return; 
             }
 
-            // Extraemos el folio que generó tu función oculta de forma segura
             const folioVenta = data.folio;
-            // -------------------------------------------------------------
 
             textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
             textoPedido += `*Folio:* ${folioVenta}\n\n`;
@@ -489,7 +515,6 @@
     </script>
     
     <script>
-        // 1. Registro del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -498,7 +523,6 @@
             });
         }
 
-        // 2. Lógica del Botón de Instalación
         let eventoInstalacion;
         const btnInstalar = document.getElementById('btn-instalar');
 
