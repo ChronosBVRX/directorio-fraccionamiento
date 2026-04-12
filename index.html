@@ -40,6 +40,7 @@
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul relative">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2">
+            
             <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0">
                 <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-14 w-auto object-contain">
             </a>
@@ -54,9 +55,11 @@
             </div>
 
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                
                 <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 shadow-sm transition">
                     <span class="text-sm sm:text-base">📱</span> <span class="hidden sm:inline">Descargar</span>
                 </button>
+
                 <button onclick="toggleMenuPrincipal()" class="bg-gray-100 text-tm-azul p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm border border-gray-200">
                     <span class="text-lg sm:text-xl leading-none">☰</span>
                 </button>
@@ -64,21 +67,50 @@
         </div>
 
         <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
-            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition"><span class="text-lg">📍</span> Seguir Pedido</a>
-            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition"><span class="text-lg">🔑</span> Entrar</a>
-            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition"><span class="text-lg">👤</span> Mi Perfil</button>
-            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition"><span class="text-lg">⚙️</span> Admin</a>
-            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition"><span class="text-lg">🚪</span> Salir</button>
+            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">📍</span> Seguir Pedido
+            </a>
+            
+            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🔑</span> Entrar
+            </a>
+
+            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">👤</span> Mi Perfil
+            </button>
+            
+            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                <span class="text-lg">⚙️</span> Admin
+            </a>
+            
+            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🚪</span> Salir
+            </button>
         </div>
     </header>
 
     <div id="vista-directorio" class="block flex-grow">
         <nav class="max-w-7xl mx-auto mt-4 sm:mt-6 px-2 sm:px-4 flex gap-2 sm:gap-3 overflow-x-auto pb-4 pt-2 border-b border-gray-200 hide-scrollbar snap-x">
-            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span></button>
-            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span></button>
-            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span></button>
-            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span></button>
-            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span></button>
+            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span>
+            </button>
+            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span>
+            </button>
+            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span>
+            </button>
+            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span>
+            </button>
+            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span>
+            </button>
         </nav>
 
         <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
@@ -107,7 +139,8 @@
                     <input type="text" id="cliente-nombre" placeholder="Tu Nombre Completo" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
                     <input type="tel" id="cliente-telefono" placeholder="Tu Teléfono" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
                     <textarea id="cliente-direccion" placeholder="Calle, Número, Coto (Ej. Coto Encinos #12)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" rows="2" required></textarea>
-                    <textarea id="cliente-notas" placeholder="Notas (Ej. Sin cebolla, extra aderezo...)" class="w-full px-3 py-2 border border-yellow-300 bg-yellow-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-dorado" rows="2"></textarea>
+                    
+                    <textarea id="cliente-notas" placeholder="Notas para el negocio (Ej. Sin cebolla, extra aderezo...)" class="w-full px-3 py-2 border border-yellow-300 bg-yellow-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-dorado" rows="2"></textarea>
                 </div>
 
                 <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition">
@@ -119,7 +152,9 @@
 
     <a href="login-repartidor.html" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-tm-azul-oscuro text-white p-2.5 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 border-2 border-tm-dorado group cursor-pointer">
         <span class="text-xl sm:text-3xl drop-shadow-md">🛵</span>
-        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-[11px] sm:text-base tracking-wide">Soy Repartidor</span>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-[11px] sm:text-base tracking-wide">
+            Soy Repartidor
+        </span>
     </a>
 
     <script>
@@ -133,25 +168,42 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        function toggleMenuPrincipal() { document.getElementById('dropdown-principal').classList.toggle('hidden'); }
+        function toggleMenuPrincipal() {
+            const menu = document.getElementById('dropdown-principal');
+            menu.classList.toggle('hidden');
+        }
 
         document.addEventListener('click', (event) => {
             const menu = document.getElementById('dropdown-principal');
             const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]');
-            if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) menu.classList.add('hidden');
+            
+            if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
         });
 
         async function verificarRolAdmin(userId) {
             try {
-                const { data } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', userId).single();
-                if (data && data.es_admin) document.getElementById('btn-admin').classList.remove('hidden');
+                const { data, error } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', userId).single();
+                if (data && data.es_admin === true) {
+                    document.getElementById('btn-admin').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin').classList.add('hidden');
+                }
             } catch (err) {}
         }
 
         async function cargarPerfilUsuario() {
             if (!usuarioActual) return;
-            const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle(); 
-            if (data) perfilUsuarioActual = data;
+            const { data, error } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .maybeSingle(); 
+            
+            if (data) {
+                perfilUsuarioActual = data;
+            }
         }
 
         clienteSupabase.auth.onAuthStateChange((event, session) => {
@@ -177,23 +229,28 @@
 
         function cambiarModoPlataforma() {
             const isVendedor = document.getElementById('toggle-modo').checked;
+            const labelComprar = document.getElementById('label-modo-comprar');
+            const labelVender = document.getElementById('label-modo-vender');
+            const btnPerfil = document.getElementById('btn-perfil');
             const iframe = document.getElementById('panel-iframe');
+
             if(isVendedor) {
                 iframe.src = "panel.html?view=negocio";
                 mostrarVista('panel');
-                document.getElementById('label-modo-comprar').classList.replace('text-tm-azul', 'text-gray-400');
-                document.getElementById('label-modo-vender').classList.replace('text-gray-400', 'text-tm-dorado');
-                if(document.getElementById('btn-perfil')) document.getElementById('btn-perfil').classList.add('hidden');
+                if(btnPerfil) btnPerfil.classList.add('hidden');
+                labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
+                labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
             } else {
                 mostrarVista('directorio');
-                document.getElementById('label-modo-comprar').classList.replace('text-gray-400', 'text-tm-azul');
-                document.getElementById('label-modo-vender').classList.replace('text-tm-dorado', 'text-gray-400');
-                if(usuarioActual) document.getElementById('btn-perfil').classList.remove('hidden');
+                if(btnPerfil && usuarioActual) btnPerfil.classList.remove('hidden');
+                labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
+                labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
             }
         }
 
         function abrirPerfil() {
-            document.getElementById('panel-iframe').src = "panel.html?view=perfil";
+            const iframe = document.getElementById('panel-iframe');
+            iframe.src = "panel.html?view=perfil";
             mostrarVista('panel');
         }
 
@@ -209,11 +266,15 @@
         }
 
         async function cargarDatos() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             todosLosAnuncios = data || [];
+            
             if(!document.getElementById('vista-directorio').classList.contains('hidden')) {
                 const navBtn = document.querySelector('.active-filter');
-                if (navBtn) filtrar(navBtn.id.replace('btn-', ''));
+                if (navBtn) {
+                    const filtroActivo = navBtn.id.replace('btn-', '');
+                    filtrar(filtroActivo);
+                }
             }
         }
 
@@ -231,7 +292,7 @@
                 const tieneMenu = a.nivel_pago >= 2;
                 const estaAbierto = a.esta_abierto !== false; 
                 
-                // Lógica de Antigüedad
+                // --- LÓGICA DE BADGES ---
                 let badgeAntiguedad = '';
                 if (a.created_at) {
                     const fechaCreacion = new Date(a.created_at);
@@ -239,34 +300,45 @@
                     const mesesDif = (ahora.getFullYear() - fechaCreacion.getFullYear()) * 12 + (ahora.getMonth() - fechaCreacion.getMonth());
                     
                     if (mesesDif >= 3) {
-                        badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="Desde ${fechaCreacion.getFullYear()}">⭐ ${mesesDif} MESES</span>`;
+                        badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="Generando confianza desde ${fechaCreacion.getFullYear()}">⭐ ${mesesDif} MESES AQUÍ</span>`;
                     } else if (mesesDif < 1) {
                         badgeAntiguedad = `<span class="bg-blue-100 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">NUEVO</span>`;
                     }
                 }
 
+                let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
+                const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado</span>` : '';
+                // ------------------------
+
                 let botones = '';
+                
                 if(tieneMenu) {
-                    if (estaAbierto) botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
-                    else botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                    if (estaAbierto) {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
+                    } else {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                    }
                 } else if(a.nivel_pago === 1) {
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, false)' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
                     let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
-                    if (estaAbierto) botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
-                    else botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                    if (estaAbierto) {
+                        botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition">Contactar</a>`;
+                    } else {
+                        botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                    }
                 }
-
-                const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado</span>` : '';
 
                 contenedor.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80' : ''}">
                         ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100 ${!estaAbierto ? 'grayscale' : ''}">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
-                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap gap-1">
-                                ${a.nombre_negocio} ${badgeCerrado} ${badgeAntiguedad}
+                            
+                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap">
+                                ${a.nombre_negocio} ${badgeVerificado} ${badgeCerrado} ${badgeAntiguedad}
                             </h3>
+                            
                             <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
                             ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 flex items-start sm:items-center gap-1">📍 <span>${a.direccion}</span></p>` : ''}
                             ${a.horarios ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start sm:items-center gap-1">🕒 <span>${a.horarios}</span></p>` : ''}
@@ -287,12 +359,18 @@
             carritoActual = {};
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
+
+            // Limpiamos las notas cada vez que se abre el menú
             document.getElementById('cliente-notas').value = '';
 
             if (perfilUsuarioActual) {
                 document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
                 document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
                 document.getElementById('cliente-direccion').value = perfilUsuarioActual.direccion || '';
+            } else {
+                document.getElementById('cliente-nombre').value = '';
+                document.getElementById('cliente-telefono').value = '';
+                document.getElementById('cliente-direccion').value = '';
             }
             
             const contenedorLista = document.getElementById('menu-lista');
@@ -307,6 +385,7 @@
             }
 
             negocioActualPedido.productosArr = productosLista;
+
             let htmlLista = '';
             
             if (negocio.esta_abierto === false) {
@@ -315,11 +394,13 @@
 
             htmlLista += productosLista.map((item, index) => {
                 const estaDisponible = item.disponible !== false;
+                
                 return `
                 <div class="border-b pb-3 flex justify-between items-center gap-2 ${!estaDisponible ? 'opacity-50' : ''}">
                     <div class="flex-grow">
                         <h4 class="font-bold text-sm sm:text-base text-tm-azul-oscuro flex flex-wrap items-center gap-2">
-                            ${item.nombre} ${!estaDisponible ? '<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase whitespace-nowrap">Agotado</span>' : ''}
+                            ${item.nombre}
+                            ${!estaDisponible ? '<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase whitespace-nowrap">Agotado</span>' : ''}
                         </h4>
                         <p class="text-[11px] sm:text-xs text-tm-gris line-clamp-2">${item.descripcion || ''}</p>
                         <p class="text-tm-dorado font-bold mt-1 text-sm sm:text-base">$${item.precio}</p>
@@ -346,6 +427,10 @@
 
         function cerrarMenu() { 
             document.getElementById('modal-menu').classList.add('hidden'); 
+            document.getElementById('cliente-nombre').value = '';
+            document.getElementById('cliente-telefono').value = '';
+            document.getElementById('cliente-direccion').value = '';
+            document.getElementById('cliente-notas').value = '';
         }
         
         function cambiarCantidad(index, cambio) {
@@ -375,7 +460,10 @@
             const prodList = negocioActualPedido.productosArr;
             
             let textoPedido = `*NUEVO PEDIDO DE VIVE TRES MARÍAS* 🚀\n\n`;
-            textoPedido += `*Cliente:* ${nombre}\n*Teléfono:* ${telefono}\n*Dirección:* ${direccion}\n\n*Detalle:*\n`;
+            textoPedido += `*Cliente:* ${nombre}\n`;
+            textoPedido += `*Teléfono:* ${telefono}\n`;
+            textoPedido += `*Dirección:* ${direccion}\n\n`;
+            textoPedido += `*Detalle:*\n`;
             
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
@@ -387,13 +475,18 @@
             }
 
             if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
-            if (notas) textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
+
+            if (notas) {
+                textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
+            }
 
             const btn = document.getElementById('btn-confirmar-pedido');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Procesando pedido...'; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = 'Procesando pedido...'; 
+            btn.disabled = true; 
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // --- LLAMADA A LA FUNCIÓN SEGURA ---
+            // --- LLAMADA A LA EDGE FUNCTION ---
             const { data, error } = await clienteSupabase.functions.invoke('procesar-pedido', {
                 body: {
                     negocio_id: negocioActualPedido.id,
@@ -403,45 +496,85 @@
                     direccion: direccion,
                     carrito: detallesPedido,
                     total: total,
-                    notas: notas
+                    notas: notas // SE ENVÍAN LAS NOTAS AL SERVIDOR
                 }
             });
 
-            btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = textoOriginal; 
+            btn.disabled = false; 
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-            if (error || !data.success) return alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
+            if (error || !data.success) {
+                console.error("Error desde el servidor:", error || data?.error);
+                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
+                return; 
+            }
 
             const folioVenta = data.folio;
-            textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n*Folio:* ${folioVenta}\n\n`;
+
+            textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
+            textoPedido += `*Folio:* ${folioVenta}\n\n`;
             
             const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+            const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+            
+            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
 
-            let numeroVendedor = negocioActualPedido.enlace_whatsapp ? negocioActualPedido.enlace_whatsapp.replace(/\D/g,'') : '';
-            if(numeroVendedor) window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`, '_blank');
-            else alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            let numeroVendedor = negocioActualPedido.enlace_whatsapp;
+            numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
+            
+            if(numeroVendedor) {
+                const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
+                window.open(urlWa, '_blank');
+            } else {
+                alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            }
 
             alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
             cerrarMenu();
         }
 
-        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.reload(); }
-
-        // Service Worker PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(err => {}));
+        async function cerrarSesion() { 
+            await clienteSupabase.auth.signOut(); 
+            window.location.reload(); 
         }
+    </script>
+    
+    <script>
+        // PWA Config
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('PWA Lista: Service Worker registrado.', reg.scope))
+                    .catch(err => console.error('Error al registrar PWA:', err));
+            });
+        }
+
         let eventoInstalacion;
         const btnInstalar = document.getElementById('btn-instalar');
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); eventoInstalacion = e; btnInstalar.classList.remove('hidden'); });
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            eventoInstalacion = e;
+            btnInstalar.classList.remove('hidden'); 
+        });
+
         btnInstalar.addEventListener('click', async () => {
             if (!eventoInstalacion) return;
             eventoInstalacion.prompt(); 
+            
             const { outcome } = await eventoInstalacion.userChoice;
-            if (outcome === 'accepted') btnInstalar.classList.add('hidden');
+            if (outcome === 'accepted') {
+                console.log('El usuario aceptó instalar la app');
+                btnInstalar.classList.add('hidden');
+            }
             eventoInstalacion = null;
         });
-        window.addEventListener('appinstalled', () => btnInstalar.classList.add('hidden'));
+
+        window.addEventListener('appinstalled', () => {
+            btnInstalar.classList.add('hidden'); 
+            console.log('PWA instalada correctamente');
+        });
     </script>
 </body>
 </html>
