@@ -55,7 +55,6 @@
             </div>
 
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                
                 <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 shadow-sm transition">
                     <span class="text-sm sm:text-base">📱</span> <span class="hidden sm:inline">Descargar</span>
                 </button>
@@ -301,7 +300,6 @@
                 const tieneMenu = a.nivel_pago >= 2;
                 const estaAbierto = a.esta_abierto !== false; 
                 
-                // --- LÓGICA DE BADGES ---
                 let badgeAntiguedad = '';
                 if (a.created_at) {
                     const fechaCreacion = new Date(a.created_at);
@@ -317,10 +315,8 @@
 
                 let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado</span>` : '';
-                // ------------------------
 
                 let botones = '';
-                
                 if(tieneMenu) {
                     if (estaAbierto) {
                         botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
@@ -343,11 +339,9 @@
                         ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100 ${!estaAbierto ? 'grayscale' : ''}">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
                             <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
-                            
                             <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap">
                                 ${a.nombre_negocio} ${badgeVerificado} ${badgeCerrado} ${badgeAntiguedad}
                             </h3>
-                            
                             <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
                             ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 flex items-start sm:items-center gap-1">📍 <span>${a.direccion}</span></p>` : ''}
                             ${a.horarios ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start sm:items-center gap-1">🕒 <span>${a.horarios}</span></p>` : ''}
@@ -370,7 +364,6 @@
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
             document.getElementById('cliente-notas').value = '';
 
-            // --- LÓGICA DE DIRECCIÓN (AIRBNB, PERFIL O INVITADO) ---
             const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
             const inputDireccion = document.getElementById('cliente-direccion');
 
@@ -378,13 +371,11 @@
                 inputDireccion.value = airbnbDir;
                 inputDireccion.setAttribute('readonly', 'true');
                 inputDireccion.classList.add('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
-                
                 document.getElementById('cliente-nombre').value = perfilUsuarioActual ? (perfilUsuarioActual.nombre_completo || '') : '';
                 document.getElementById('cliente-telefono').value = perfilUsuarioActual ? (perfilUsuarioActual.telefono || '') : '';
             } else {
                 inputDireccion.removeAttribute('readonly');
                 inputDireccion.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
-                
                 if (perfilUsuarioActual) {
                     document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
                     document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
@@ -395,11 +386,9 @@
                     inputDireccion.value = '';
                 }
             }
-            // --------------------------------------------------------
             
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
-            
             const { data: productosLista } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id).order('id', { ascending: true });
             
             if(!productosLista || productosLista.length === 0) {
@@ -409,16 +398,13 @@
             }
 
             negocioActualPedido.productosArr = productosLista;
-
             let htmlLista = '';
-            
             if (negocio.esta_abierto === false) {
                 htmlLista += `<div class="bg-red-50 text-red-600 border border-red-200 p-3 rounded-lg text-sm font-bold text-center mb-4">El negocio está cerrado en este momento. No se aceptan pedidos.</div>`;
             }
 
             htmlLista += productosLista.map((item, index) => {
                 const estaDisponible = item.disponible !== false;
-                
                 return `
                 <div class="border-b pb-3 flex justify-between items-center gap-2 ${!estaDisponible ? 'opacity-50' : ''}">
                     <div class="flex-grow">
@@ -435,11 +421,10 @@
                         <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
                         <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
                     </div>` : ''}
-                </div>
-            `}).join('');
+                </div>`;
+            }).join('');
 
             contenedorLista.innerHTML = htmlLista;
-
             const divCarrito = document.getElementById('menu-carrito');
             if(permitePedidos && productosLista.length > 0 && negocio.esta_abierto !== false) {
                 divCarrito.classList.remove('hidden');
@@ -451,10 +436,6 @@
 
         function cerrarMenu() { 
             document.getElementById('modal-menu').classList.add('hidden'); 
-            document.getElementById('cliente-nombre').value = '';
-            document.getElementById('cliente-telefono').value = '';
-            document.getElementById('cliente-direccion').value = '';
-            document.getElementById('cliente-notas').value = '';
         }
         
         function cambiarCantidad(index, cambio) {
@@ -487,7 +468,6 @@
             textoPedido += `*Cliente:* ${nombre}\n`;
             textoPedido += `*Teléfono:* ${telefono}\n`;
             textoPedido += `*Dirección:* ${direccion}\n\n`;
-            textoPedido += `*Detalle:*\n`;
             
             for (let i in carritoActual) {
                 if(carritoActual[i] > 0) {
@@ -499,61 +479,26 @@
             }
 
             if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
-
-            if (notas) {
-                textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
-            }
+            if (notas) textoPedido += `\n*Anotaciones:* ${notas}\n`;
 
             const btn = document.getElementById('btn-confirmar-pedido');
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Procesando pedido...'; 
+            btn.innerHTML = 'Procesando...'; 
             btn.disabled = true; 
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
 
             const { data, error } = await clienteSupabase.functions.invoke('procesar-pedido', {
-                body: {
-                    negocio_id: negocioActualPedido.id,
-                    cliente_id: usuarioActual ? usuarioActual.id : null,
-                    nombre: nombre,
-                    telefono: telefono,
-                    direccion: direccion,
-                    carrito: detallesPedido,
-                    total: total,
-                    notas: notas
-                }
+                body: { negocio_id: negocioActualPedido.id, cliente_id: usuarioActual ? usuarioActual.id : null, nombre, telefono, direccion, carrito: detallesPedido, total, notas }
             });
 
-            btn.innerHTML = textoOriginal; 
+            btn.innerHTML = 'Confirmar Pedido'; 
             btn.disabled = false; 
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-            if (error || !data.success) {
-                console.error("Error desde el servidor:", error || data?.error);
-                alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
-                return; 
-            }
+            if (error || !data.success) return alert("Error al generar pedido.");
 
             const folioVenta = data.folio;
-
-            textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n`;
-            textoPedido += `*Folio:* ${folioVenta}\n\n`;
-            
-            const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const linkActivacion = `${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
-            
-            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${linkActivacion}`;
-
-            let numeroVendedor = negocioActualPedido.enlace_whatsapp;
-            numeroVendedor = numeroVendedor ? numeroVendedor.replace(/\D/g,'') : '';
-            
-            if(numeroVendedor) {
-                const urlWa = `https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`;
-                window.open(urlWa, '_blank');
-            } else {
-                alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
-            }
-
-            alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
+            textoPedido += `\n*TOTAL: $${total.toFixed(2)}*\n*Folio:* ${folioVenta}\n\n`;
+            const urlWa = `https://wa.me/${negocioActualPedido.enlace_whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(textoPedido)}`;
+            window.open(urlWa, '_blank');
+            alert(`¡Pedido generado! Folio: ${folioVenta}`);
             cerrarMenu();
         }
 
@@ -562,65 +507,20 @@
             window.location.reload(); 
         }
 
-        // --- INICIALIZACIÓN AIRBNB AL CARGAR LA PÁGINA ---
         window.addEventListener('DOMContentLoaded', () => {
             const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
             if (airbnbNombre) {
                 document.getElementById('banner-airbnb').classList.remove('hidden');
                 document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
             }
+            cargarDatos();
         });
 
         function limpiarModoAirbnb() {
             localStorage.removeItem('tm_airbnb_direccion');
             localStorage.removeItem('tm_airbnb_nombre');
-            document.getElementById('banner-airbnb').classList.add('hidden');
-            
-            const inputDireccion = document.getElementById('cliente-direccion');
-            if(inputDireccion) {
-                inputDireccion.value = '';
-                inputDireccion.removeAttribute('readonly');
-                inputDireccion.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
-            }
+            location.reload();
         }
-        // --------------------------------------------------
-    </script>
-    
-    <script>
-        // PWA Config
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('PWA Lista: Service Worker registrado.', reg.scope))
-                    .catch(err => console.error('Error al registrar PWA:', err));
-            });
-        }
-
-        let eventoInstalacion;
-        const btnInstalar = document.getElementById('btn-instalar');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); 
-            eventoInstalacion = e;
-            btnInstalar.classList.remove('hidden'); 
-        });
-
-        btnInstalar.addEventListener('click', async () => {
-            if (!eventoInstalacion) return;
-            eventoInstalacion.prompt(); 
-            
-            const { outcome } = await eventoInstalacion.userChoice;
-            if (outcome === 'accepted') {
-                console.log('El usuario aceptó instalar la app');
-                btnInstalar.classList.add('hidden');
-            }
-            eventoInstalacion = null;
-        });
-
-        window.addEventListener('appinstalled', () => {
-            btnInstalar.classList.add('hidden'); 
-            console.log('PWA instalada correctamente');
-        });
     </script>
 </body>
 </html>
