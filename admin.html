@@ -56,7 +56,7 @@
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2>
-                    <p class="text-sm text-gray-500 mt-1">Gestiona todos los anuncios de la plataforma.</p>
+                    <p class="text-sm text-gray-500 mt-1">Gestiona todos los anuncios y otorga insignias de confianza.</p>
                 </div>
             </div>
 
@@ -117,6 +117,17 @@
                         <option value="2">2 - Elite (Menú Interactivo)</option>
                     </select>
                     <p class="text-[10px] text-gray-400 mt-1">Cambiar el nivel aquí le otorgará las funciones al cliente inmediatamente.</p>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div>
+                        <label class="text-xs font-bold text-blue-800 uppercase">Badge de Verificado ✅</label>
+                        <p class="text-[10px] text-blue-600">Márcalo para dar confianza extra al vecino.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="edit-verificado" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
                 </div>
 
                 <div class="pt-4 border-t border-gray-100">
@@ -187,6 +198,7 @@
             const tbody = document.getElementById('tabla-negocios');
             tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">Cargando negocios...</td></tr>';
 
+            // Incluimos es_verificado en la lectura
             const { data: negocios, error } = await clienteSupabase
                 .from('anuncios')
                 .select('*')
@@ -210,6 +222,7 @@
                 if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro (N1)'; }
                 if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite (N2)'; }
 
+                const badgeVerificado = n.es_verificado ? '<span class="text-blue-500" title="Verificado">☑️</span>' : '';
                 const negocioCodificado = encodeURIComponent(JSON.stringify(n));
 
                 return `
@@ -218,7 +231,7 @@
                             <div class="flex items-center gap-3">
                                 ${n.imagen_url ? `<img src="${n.imagen_url}" class="w-10 h-10 rounded object-cover">` : `<div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sin Img</div>`}
                                 <div>
-                                    <p class="font-bold text-tm-azul-oscuro">${n.nombre_negocio}</p>
+                                    <p class="font-bold text-tm-azul-oscuro flex items-center gap-1">${n.nombre_negocio} ${badgeVerificado}</p>
                                     <p class="text-[10px] text-gray-400">ID: ${n.id}</p>
                                 </div>
                             </div>
@@ -254,6 +267,9 @@
             document.getElementById('edit-wa').value = n.enlace_whatsapp || '';
             document.getElementById('edit-nivel').value = n.nivel_pago || 0;
             
+            // NUEVO: Marcamos el toggle si es_verificado es true
+            document.getElementById('edit-verificado').checked = n.es_verificado || false;
+            
             document.getElementById('modal-editar').classList.remove('hidden');
         }
 
@@ -261,7 +277,7 @@
             document.getElementById('modal-editar').classList.add('hidden');
         }
 
-        // --- ACTUALIZACIÓN SEGURA ---
+        // --- ACTUALIZACIÓN SEGURA MEDIANTE EDGE FUNCTION ---
         async function guardarEdicion() {
             const id = document.getElementById('edit-id').value;
             const btn = document.getElementById('btn-guardar-edicion');
@@ -273,7 +289,8 @@
                 nombre_negocio: document.getElementById('edit-nombre').value,
                 categoria: document.getElementById('edit-categoria').value,
                 enlace_whatsapp: document.getElementById('edit-wa').value,
-                nivel_pago: parseInt(document.getElementById('edit-nivel').value)
+                nivel_pago: parseInt(document.getElementById('edit-nivel').value),
+                es_verificado: document.getElementById('edit-verificado').checked // NUEVO
             };
 
             const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', {
@@ -296,7 +313,7 @@
             }
         }
 
-        // --- ELIMINACIÓN SEGURA ---
+        // --- ELIMINACIÓN SEGURA MEDIANTE EDGE FUNCTION ---
         async function eliminarNegocio(id) {
             if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo? Esta acción no se puede deshacer y borrará sus productos asociados.")) {
                 return;
