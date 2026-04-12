@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel para Anfitriones Airbnb - Vive Tres Marías</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
+        }
+    </script>
+    <style> body { font-family: 'Montserrat', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b-4 border-tm-azul py-3 px-6 flex justify-between items-center">
+        <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 object-contain">
+        <a href="index.html" class="text-sm font-bold text-tm-gris hover:text-tm-azul flex items-center gap-1 transition">
+            ⬅ Volver al inicio
+        </a>
+    </header>
+
+    <div id="pantalla-carga" class="flex-grow flex flex-col items-center justify-center">
+        <div class="animate-spin text-4xl mb-4">🔄</div>
+        <p class="text-tm-gris font-bold">Verificando sesión...</p>
+    </div>
+
+    <main id="contenido-principal" class="hidden flex-grow max-w-3xl mx-auto w-full px-4 py-8">
+        
+        <div class="mb-8 text-center sm:text-left">
+            <h1 class="text-3xl font-black text-tm-azul-oscuro">Portal para Anfitriones 🏠</h1>
+            <p class="text-tm-gris mt-2">Facilita la estancia de tus huéspedes. Genera tu código QR para que pidan a domicilio sin fricciones.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-tm-azul"></div>
+            <h2 class="font-bold text-xl text-tm-azul mb-4">1. Datos de tu Alojamiento</h2>
+            
+            <form id="form-airbnb" onsubmit="guardarAirbnb(event)" class="space-y-5">
+                <input type="hidden" id="airbnb-id">
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Nombre Público del Alojamiento</label>
+                    <input type="text" id="airbnb-nombre" placeholder="Ej: Loft Vista Campo de Golf" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tm-dorado focus:border-tm-dorado outline-none transition" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Dirección Exacta para Entregas</label>
+                    <textarea id="airbnb-direccion" placeholder="Calle, Número, Coto. (Ej: Coto Encinos #12. Tocar timbre 3)" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tm-dorado focus:border-tm-dorado outline-none transition" rows="3" required></textarea>
+                    <p class="text-xs text-gray-400 mt-2">⚠️ Esta dirección se inyectará automáticamente en el carrito de compras de tus huéspedes.</p>
+                </div>
+
+                <button type="submit" id="btn-guardar-airbnb" class="w-full sm:w-auto bg-tm-azul hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl transition shadow-md">
+                    Guardar Domicilio
+                </button>
+            </form>
+        </div>
+
+        <div id="seccion-generar-qr" class="hidden bg-[#fff8eb] p-6 rounded-2xl shadow-sm border border-tm-dorado ring-1 ring-tm-dorado/30 text-center">
+            <h2 class="font-black text-2xl text-tm-azul-oscuro mb-2">¡Todo Listo! 🎉</h2>
+            <p class="text-tm-gris mb-6">Tu domicilio está configurado. Descarga tu póster inteligente, imprímelo y déjalo a la vista en tu Airbnb.</p>
+            
+            <button onclick="generarPosterPDF()" id="btn-descargar-pdf" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-black text-lg py-4 px-8 rounded-xl transition shadow-lg w-full sm:w-auto hover:scale-105 duration-300">
+                <span class="text-2xl">🖨️</span> Descargar Póster PDF
+            </button>
+        </div>
+
+    </main>
+
+    <div class="hidden">
+        <div id="plantilla-poster" class="bg-white w-[800px] h-[1130px] flex flex-col items-center justify-center text-center relative font-sans border-[12px] border-[#22527b] box-border p-12">
+            
+            <div class="absolute top-0 left-0 w-full h-6 bg-[#d4af37]"></div>
+            
+            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Vive Tres Marías" style="width: 280px; margin-bottom: 50px;">
+            
+            <h1 style="color: #143653; font-size: 50px; font-weight: 900; margin-bottom: 15px; line-height: 1.1;">
+                Pide lo que necesites<br>directo a tu puerta
+            </h1>
+            
+            <div style="background-color: #f3f4f6; border-radius: 20px; padding: 20px 40px; margin-bottom: 60px; border: 2px dashed #d1d5db;">
+                <p style="color: #4b5563; font-size: 26px; font-weight: 600; margin: 0;">
+                    📍 Entregando en:<br>
+                    <span id="poster-nombre-airbnb" style="color: #22527b; font-size: 32px; font-weight: 900; display: inline-block; margin-top: 10px;">Cargando...</span>
+                </p>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 3px solid #e5e7eb; margin-bottom: 60px;">
+                <div id="qr-container"></div>
+            </div>
+
+            <div style="text-align: left; background: #fff8eb; border-left: 8px solid #d4af37; padding: 35px; border-radius: 0 20px 20px 0; width: 85%;">
+                <h3 style="color: #d4af37; font-size: 32px; font-weight: 900; margin-top: 0; margin-bottom: 25px;">Instrucciones rápidas:</h3>
+                <p style="font-size: 24px; color: #4b5563; margin-bottom: 18px; font-weight: 600;">📱 1. Escanea este código con tu celular.</p>
+                <p style="font-size: 24px; color: #4b5563; margin-bottom: 18px; font-weight: 600;">🍔 2. Explora el directorio de restaurantes.</p>
+                <p style="font-size: 24px; color: #22527b; margin-bottom: 0; font-weight: 800;">✨ 3. ¡Pide fácil! Tu dirección ya está registrada.</p>
+            </div>
+
+            <div class="absolute bottom-12 text-gray-400 font-bold tracking-[0.3em] uppercase text-xl">
+                vivetresmarias.com
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Credenciales de Supabase
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioActual = null;
+        let qrCodeObj = null;
+
+        // 1. EL GUARDIA: Verificar si hay sesión activa al entrar
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session }, error } = await clienteSupabase.auth.getSession();
+            
+            if (error || !session) {
+                // No hay sesión -> Mandar al login
+                window.location.href = 'login.html';
+            } else {
+                // Hay sesión -> Dejar pasar y cargar datos
+                usuarioActual = session.user;
+                document.getElementById('pantalla-carga').classList.add('hidden');
+                document.getElementById('contenido-principal').classList.remove('hidden');
+                cargarDatosAirbnb();
+            }
+        });
+
+        // 2. Cargar datos si el usuario ya configuró un Airbnb antes
+        async function cargarDatosAirbnb() {
+            try {
+                const { data, error } = await clienteSupabase
+                    .from('airbnbs')
+                    .select('*')
+                    .eq('host_id', usuarioActual.id)
+                    .maybeSingle();
+
+                if (data) {
+                    document.getElementById('airbnb-id').value = data.id;
+                    document.getElementById('airbnb-nombre').value = data.nombre_alojamiento;
+                    document.getElementById('airbnb-direccion').value = data.direccion_completa;
+                    
+                    document.getElementById('btn-guardar-airbnb').innerText = "Actualizar Datos";
+                    
+                    prepararPlantillaPoster(data.id, data.nombre_alojamiento);
+                    document.getElementById('seccion-generar-qr').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+            }
+        }
+
+        // 3. Guardar o actualizar la base de datos
+        async function guardarAirbnb(event) {
+            event.preventDefault();
+            const idActual = document.getElementById('airbnb-id').value;
+            const nombre = document.getElementById('airbnb-nombre').value.trim();
+            const direccion = document.getElementById('airbnb-direccion').value.trim();
+            const btn = document.getElementById('btn-guardar-airbnb');
+            
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            try {
+                let result;
+                if (idActual) {
+                    result = await clienteSupabase.from('airbnbs').update({ nombre_alojamiento: nombre, direccion_completa: direccion }).eq('id', idActual).select();
+                } else {
+                    result = await clienteSupabase.from('airbnbs').insert([{ host_id: usuarioActual.id, nombre_alojamiento: nombre, direccion_completa: direccion }]).select();
+                }
+
+                if (result.error) throw result.error;
+
+                const dataGuardada = result.data[0];
+                document.getElementById('airbnb-id').value = dataGuardada.id;
+                
+                prepararPlantillaPoster(dataGuardada.id, dataGuardada.nombre_alojamiento);
+                document.getElementById('seccion-generar-qr').classList.remove('hidden');
+                
+                alert("¡Domicilio guardado correctamente!");
+                btn.innerText = "Actualizar Datos";
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Ocurrió un error. Intenta nuevamente.");
+                btn.innerText = "Guardar Domicilio";
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // 4. Preparar el QR visualmente en la plantilla
+        function prepararPlantillaPoster(id, nombreAlojamiento) {
+            document.getElementById('poster-nombre-airbnb').innerText = nombreAlojamiento;
+            
+            const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            const urlMagica = `${rutaBase}/bienvenida.html?id=${id}`;
+
+            const qrContainer = document.getElementById("qr-container");
+            qrContainer.innerHTML = ""; // Limpiar anterior
+
+            qrCodeObj = new QRCode(qrContainer, {
+                text: urlMagica,
+                width: 400,
+                height: 400,
+                colorDark : "#143653",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // 5. Generar PDF
+        function generarPosterPDF() {
+            const elementoHTML = document.getElementById('plantilla-poster');
+            const nombre = document.getElementById('airbnb-nombre').value.trim();
+            const btn = document.getElementById('btn-descargar-pdf');
+            
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Generando archivo...";
+            btn.disabled = true;
+
+            const opciones = {
+                margin:       0,
+                filename:     `Poster_Airbnb_${nombre.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opciones).from(elementoHTML).save().then(() => {
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
