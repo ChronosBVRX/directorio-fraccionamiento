@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Tres Marías</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Montserrat', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-t-4 border-[#22527b]">
+        <div class="text-5xl mb-4">👋</div>
+        <h1 class="text-2xl font-black text-[#143653] mb-2">¡Bienvenido!</h1>
+        
+        <div id="loading" class="text-gray-500 text-sm">Configurando tu ubicación...</div>
+        
+        <div id="success-content" class="hidden">
+            <p class="text-gray-600 text-sm mb-4">Hemos configurado tu dirección de entrega para:</p>
+            <div class="bg-blue-50 text-[#22527b] font-bold p-3 rounded-lg mb-6 border border-blue-100">
+                📍 <span id="nombre-airbnb">Cargando...</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-6">Al pedir comida, no tendrás que escribir tu dirección, ¡nosotros nos encargamos!</p>
+            <a href="index.html" class="block w-full bg-[#d4af37] hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-xl transition shadow-md">
+                Ver Restaurantes y Pedir
+            </a>
+        </div>
+
+        <div id="error-content" class="hidden">
+            <p class="text-red-500 text-sm mb-6">No pudimos encontrar la información de este alojamiento. Enlace no válido.</p>
+            <a href="index.html" class="block w-full bg-[#22527b] hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl transition">
+                Ir al directorio
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function inicializarAirbnb() {
+            const params = new URLSearchParams(window.location.search);
+            const airbnbId = params.get('id');
+
+            if (!airbnbId) {
+                mostrarError();
+                return;
+            }
+
+            // Nota: Debes crear la tabla 'airbnbs' en Supabase con columnas: id, nombre_alojamiento, direccion_completa
+            const { data, error } = await supabase
+                .from('airbnbs')
+                .select('nombre_alojamiento, direccion_completa')
+                .eq('id', airbnbId)
+                .single();
+
+            if (error || !data) {
+                console.error(error);
+                mostrarError();
+            } else {
+                localStorage.setItem('tm_airbnb_nombre', data.nombre_alojamiento);
+                localStorage.setItem('tm_airbnb_direccion', data.direccion_completa);
+                
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('success-content').classList.remove('hidden');
+                document.getElementById('nombre-airbnb').innerText = data.nombre_alojamiento;
+            }
+        }
+
+        function mostrarError() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error-content').classList.remove('hidden');
+        }
+
+        window.onload = inicializarAirbnb;
+    </script>
+</body>
+</html>
