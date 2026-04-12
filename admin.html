@@ -28,7 +28,7 @@
         <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border-t-4 border-red-500">
             <span class="text-5xl mb-4 block">🚫</span>
             <h2 class="text-2xl font-black text-tm-azul-oscuro mb-2">Acceso Restringido</h2>
-            <p class="text-gray-500 mb-6">Esta área es exclusiva para administradores del sistema. Tu cuenta no tiene los permisos necesarios.</p>
+            <p class="text-gray-500 mb-6">Esta área es exclusiva para administradores del sistema.</p>
             <a href="index.html" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition block w-full">Volver al Inicio</a>
         </div>
     </div>
@@ -41,42 +41,67 @@
                 <p class="text-xs text-white/50 uppercase tracking-widest mt-1">Super Admin</p>
             </div>
             <nav class="flex-1 p-4 space-y-2">
-                <button class="w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition">
+                <button onclick="cambiarVistaAdmin('directorio')" id="nav-directorio" class="w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition">
                     🏢 Negocios Registrados
+                </button>
+                <button onclick="cambiarVistaAdmin('solicitudes')" id="nav-solicitudes" class="w-full flex items-center gap-3 hover:bg-white/5 text-gray-300 hover:text-white px-4 py-3 rounded-lg font-bold transition">
+                    🛡️ Solicitudes Verificación
                 </button>
             </nav>
             <div class="p-4 border-t border-white/10">
-                <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-100 px-4 py-2 rounded-lg text-sm font-bold transition">
-                    Salir del Panel
-                </button>
+                <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-100 px-4 py-2 rounded-lg text-sm font-bold transition">Salir del Panel</button>
             </div>
         </aside>
 
         <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8 relative">
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2>
-                    <p class="text-sm text-gray-500 mt-1">Gestiona todos los anuncios y otorga insignias de confianza.</p>
+            
+            <div id="vista-directorio" class="block">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2>
+                        <p class="text-sm text-gray-500 mt-1">Gestiona todos los anuncios y otorga insignias de confianza manualmente.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                                    <th class="p-4 font-bold">Negocio</th>
+                                    <th class="p-4 font-bold">Categoría</th>
+                                    <th class="p-4 font-bold text-center">Plan</th>
+                                    <th class="p-4 font-bold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-negocios" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
-                                <th class="p-4 font-bold">Negocio</th>
-                                <th class="p-4 font-bold">Categoría</th>
-                                <th class="p-4 font-bold text-center">Plan</th>
-                                <th class="p-4 font-bold text-center">WhatsApp</th>
-                                <th class="p-4 font-bold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-negocios" class="divide-y divide-gray-100">
-                            </tbody>
-                    </table>
+            <div id="vista-solicitudes" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-tm-azul-oscuro">Verificaciones Pendientes</h2>
+                        <p class="text-sm text-gray-500 mt-1">Revisa los documentos de identidad (INE) enviados por los vendedores.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-50 border-b border-blue-100 text-xs uppercase tracking-wider text-blue-800">
+                                    <th class="p-4 font-bold">Negocio</th>
+                                    <th class="p-4 font-bold">Responsable Declarado</th>
+                                    <th class="p-4 font-bold text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-solicitudes" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </main>
     </div>
 
@@ -87,55 +112,55 @@
             
             <form id="form-editar" onsubmit="event.preventDefault(); guardarEdicion();" class="space-y-4">
                 <input type="hidden" id="edit-id">
-                
-                <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase">Nombre del Negocio</label>
-                    <input type="text" id="edit-nombre" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                </div>
-                
+                <div><label class="text-xs font-bold text-gray-500 uppercase">Nombre del Negocio</label><input type="text" id="edit-nombre" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Categoría</label>
-                        <select id="edit-categoria" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                            <option value="Alimentos">Alimentos</option>
-                            <option value="Servicios">Servicios</option>
-                            <option value="Salud">Salud</option>
-                            <option value="Hogar">Hogar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp</label>
-                        <input type="number" id="edit-wa" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                    </div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Categoría</label><select id="edit-categoria" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none"><option value="Alimentos">Alimentos</option><option value="Servicios">Servicios</option><option value="Salud">Salud</option><option value="Hogar">Hogar</option></select></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">WhatsApp</label><input type="number" id="edit-wa" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none"></div>
                 </div>
-
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Nivel de Pago (Plan)</label>
-                    <select id="edit-nivel" class="w-full p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-dorado font-bold text-tm-azul-oscuro">
-                        <option value="0">0 - Básico (Gratis)</option>
-                        <option value="1">1 - Pro (Imágenes/Catálogo)</option>
-                        <option value="2">2 - Elite (Menú Interactivo)</option>
-                    </select>
-                    <p class="text-[10px] text-gray-400 mt-1">Cambiar el nivel aquí le otorgará las funciones al cliente inmediatamente.</p>
+                    <select id="edit-nivel" class="w-full p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg mt-1 outline-none font-bold text-tm-azul-oscuro"><option value="0">0 - Básico (Gratis)</option><option value="1">1 - Pro (Imágenes/Catálogo)</option><option value="2">2 - Elite (Menú Interactivo)</option></select>
                 </div>
-
                 <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <div>
-                        <label class="text-xs font-bold text-blue-800 uppercase">Badge de Verificado ✅</label>
-                        <p class="text-[10px] text-blue-600">Márcalo para dar confianza extra al vecino.</p>
-                    </div>
+                    <div><label class="text-xs font-bold text-blue-800 uppercase">Badge de Verificado ✅</label><p class="text-[10px] text-blue-600">Actívalo manualmente si confías en el negocio.</p></div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="edit-verificado" class="sr-only peer">
                         <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                 </div>
-
-                <div class="pt-4 border-t border-gray-100">
-                    <button type="submit" id="btn-guardar-edicion" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg font-bold transition shadow-md">
-                        Guardar Cambios
-                    </button>
-                </div>
+                <div class="pt-4 border-t border-gray-100"><button type="submit" id="btn-guardar-edicion" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-lg font-bold transition shadow-md">Guardar Cambios</button></div>
             </form>
+        </div>
+    </div>
+
+    <div id="modal-revision" class="hidden fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-4xl relative shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col">
+            <button onclick="cerrarModalRevision()" class="absolute top-4 right-4 text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
+            <h2 class="text-xl font-black text-tm-azul-oscuro mb-2">Revisión de Identidad</h2>
+            
+            <div class="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
+                <p class="text-sm"><strong>Negocio:</strong> <span id="rev-negocio" class="text-tm-azul font-bold"></span></p>
+                <p class="text-sm"><strong>Responsable (según formulario):</strong> <span id="rev-nombre" class="font-bold"></span></p>
+                <p class="text-xs text-gray-500 mt-1">Revisa que el nombre coincida con las identificaciones adjuntas.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow mb-6">
+                <div>
+                    <h4 class="font-bold text-gray-600 mb-2 text-center text-sm">Frente del INE</h4>
+                    <img id="rev-img-frente" src="" class="w-full rounded-lg shadow-sm border border-gray-200 object-contain max-h-[40vh] bg-gray-100 min-h-[200px]">
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-600 mb-2 text-center text-sm">Reverso del INE</h4>
+                    <img id="rev-img-reverso" src="" class="w-full rounded-lg shadow-sm border border-gray-200 object-contain max-h-[40vh] bg-gray-100 min-h-[200px]">
+                </div>
+            </div>
+
+            <input type="hidden" id="rev-id">
+
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                <button onclick="resolverSolicitud('rechazado')" class="bg-red-100 text-red-600 hover:bg-red-200 py-3 rounded-lg font-bold transition">❌ Rechazar Solicitud</button>
+                <button onclick="resolverSolicitud('aprobado')" class="bg-green-600 text-white hover:bg-green-700 py-3 rounded-lg font-bold transition shadow-md">✅ Aprobar y Verificar</button>
+            </div>
         </div>
     </div>
 
@@ -159,99 +184,71 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             const { data: { session } } = await clienteSupabase.auth.getSession();
-            
-            if (!session) {
-                bloquearAcceso();
-                return;
-            }
-
+            if (!session) { bloquearAcceso(); return; }
             usuarioAdmin = session.user;
-
-            const { data: perfil, error } = await clienteSupabase
-                .from('perfiles')
-                .select('es_admin')
-                .eq('user_id', usuarioAdmin.id)
-                .single();
-
-            if (error || !perfil || perfil.es_admin !== true) {
-                bloquearAcceso();
-                return;
-            }
-
+            const { data: perfil } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', usuarioAdmin.id).single();
+            if (!perfil || perfil.es_admin !== true) { bloquearAcceso(); return; }
             concederAcceso();
         });
 
         function bloquearAcceso() {
             document.getElementById('pantalla-carga').classList.add('hidden');
             document.getElementById('pantalla-denegado').classList.remove('hidden');
-            document.getElementById('panel-admin').classList.add('hidden');
         }
 
         function concederAcceso() {
             document.getElementById('pantalla-carga').classList.add('hidden');
-            document.getElementById('pantalla-denegado').classList.add('hidden');
             document.getElementById('panel-admin').classList.remove('hidden');
             cargarTodosLosNegocios();
         }
 
+        function cambiarVistaAdmin(vista) {
+            document.getElementById('vista-directorio').classList.add('hidden');
+            document.getElementById('vista-solicitudes').classList.add('hidden');
+            
+            document.getElementById('nav-directorio').className = "w-full flex items-center gap-3 hover:bg-white/5 text-gray-300 hover:text-white px-4 py-3 rounded-lg font-bold transition";
+            document.getElementById('nav-solicitudes').className = "w-full flex items-center gap-3 hover:bg-white/5 text-gray-300 hover:text-white px-4 py-3 rounded-lg font-bold transition";
+
+            if(vista === 'directorio') {
+                document.getElementById('vista-directorio').classList.remove('hidden');
+                document.getElementById('nav-directorio').className = "w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition";
+                cargarTodosLosNegocios();
+            } else {
+                document.getElementById('vista-solicitudes').classList.remove('hidden');
+                document.getElementById('nav-solicitudes').className = "w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition";
+                cargarSolicitudesPendientes();
+            }
+        }
+
+        // ================= VISTA 1: DIRECTORIO =================
         async function cargarTodosLosNegocios() {
             const tbody = document.getElementById('tabla-negocios');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">Cargando negocios...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">Cargando negocios...</td></tr>';
 
-            // Incluimos es_verificado en la lectura
-            const { data: negocios, error } = await clienteSupabase
-                .from('anuncios')
-                .select('*')
-                .order('id', { ascending: false });
-
-            if (error) {
-                mostrarNotificacion("Error al cargar negocios: " + error.message, "error");
-                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-400">Error al conectar con la base de datos.</td></tr>';
-                return;
-            }
-
-            if (!negocios || negocios.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">No hay negocios registrados en la plataforma.</td></tr>';
-                return;
-            }
+            const { data: negocios } = await clienteSupabase.from('anuncios').select('*').order('id', { ascending: false });
+            if (!negocios || negocios.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">No hay negocios registrados.</td></tr>'; return; }
 
             tbody.innerHTML = negocios.map(n => {
-                let badgeClase = 'bg-gray-100 text-gray-600';
-                let badgeTexto = 'Básico';
-                
-                if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro (N1)'; }
-                if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite (N2)'; }
+                let badgeClase = 'bg-gray-100 text-gray-600'; let badgeTexto = 'Básico';
+                if (n.nivel_pago == 1) { badgeClase = 'bg-blue-100 text-blue-700'; badgeTexto = 'Pro'; }
+                if (n.nivel_pago == 2) { badgeClase = 'bg-yellow-100 text-yellow-700'; badgeTexto = 'Elite'; }
 
                 const badgeVerificado = n.es_verificado ? '<span class="text-blue-500" title="Verificado">☑️</span>' : '';
                 const negocioCodificado = encodeURIComponent(JSON.stringify(n));
 
                 return `
-                    <tr class="hover:bg-gray-50 transition">
+                    <tr class="hover:bg-gray-50 transition border-b border-gray-100">
                         <td class="p-4">
                             <div class="flex items-center gap-3">
-                                ${n.imagen_url ? `<img src="${n.imagen_url}" class="w-10 h-10 rounded object-cover">` : `<div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sin Img</div>`}
-                                <div>
-                                    <p class="font-bold text-tm-azul-oscuro flex items-center gap-1">${n.nombre_negocio} ${badgeVerificado}</p>
-                                    <p class="text-[10px] text-gray-400">ID: ${n.id}</p>
-                                </div>
+                                ${n.imagen_url ? `<img src="${n.imagen_url}" class="w-8 h-8 rounded object-cover">` : `<div class="w-8 h-8 rounded bg-gray-200"></div>`}
+                                <div><p class="font-bold text-tm-azul-oscuro flex items-center gap-1">${n.nombre_negocio} ${badgeVerificado}</p></div>
                             </div>
                         </td>
-                        <td class="p-4 text-sm text-gray-600">${n.categoria || 'Sin categoría'}</td>
-                        <td class="p-4 text-center">
-                            <span class="${badgeClase} text-[10px] uppercase px-2 py-1 rounded font-bold whitespace-nowrap">
-                                ${badgeTexto}
-                            </span>
-                        </td>
-                        <td class="p-4 text-center text-sm">
-                            ${n.enlace_whatsapp ? `<a href="https://wa.me/${n.enlace_whatsapp}" target="_blank" class="text-[#25D366] font-bold hover:underline">${n.enlace_whatsapp}</a>` : '-'}
-                        </td>
+                        <td class="p-4 text-sm text-gray-600">${n.categoria || '-'}</td>
+                        <td class="p-4 text-center"><span class="${badgeClase} text-[10px] uppercase px-2 py-1 rounded font-bold">${badgeTexto}</span></td>
                         <td class="p-4 text-right space-x-2 whitespace-nowrap">
-                            <button onclick="abrirModalEditar('${negocioCodificado}')" class="text-tm-azul hover:bg-blue-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-blue-200">
-                                Editar
-                            </button>
-                            <button onclick="eliminarNegocio(${n.id})" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-red-200">
-                                Eliminar
-                            </button>
+                            <button onclick="abrirModalEditar('${negocioCodificado}')" class="text-tm-azul hover:bg-blue-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-blue-200">Editar</button>
+                            <button onclick="eliminarNegocio(${n.id})" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded text-xs font-bold transition border border-transparent hover:border-red-200">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -260,84 +257,105 @@
 
         function abrirModalEditar(negocioStr) {
             const n = JSON.parse(decodeURIComponent(negocioStr));
-            
             document.getElementById('edit-id').value = n.id;
             document.getElementById('edit-nombre').value = n.nombre_negocio || '';
             document.getElementById('edit-categoria').value = n.categoria || 'Servicios';
             document.getElementById('edit-wa').value = n.enlace_whatsapp || '';
             document.getElementById('edit-nivel').value = n.nivel_pago || 0;
-            
-            // NUEVO: Marcamos el toggle si es_verificado es true
             document.getElementById('edit-verificado').checked = n.es_verificado || false;
-            
             document.getElementById('modal-editar').classList.remove('hidden');
         }
 
-        function cerrarModalEditar() {
-            document.getElementById('modal-editar').classList.add('hidden');
-        }
+        function cerrarModalEditar() { document.getElementById('modal-editar').classList.add('hidden'); }
 
-        // --- ACTUALIZACIÓN SEGURA MEDIANTE EDGE FUNCTION ---
         async function guardarEdicion() {
             const id = document.getElementById('edit-id').value;
             const btn = document.getElementById('btn-guardar-edicion');
-            
-            btn.innerText = "Guardando..."; 
-            btn.disabled = true;
+            btn.innerText = "Guardando..."; btn.disabled = true;
 
             const payloadDatos = {
-                nombre_negocio: document.getElementById('edit-nombre').value,
-                categoria: document.getElementById('edit-categoria').value,
-                enlace_whatsapp: document.getElementById('edit-wa').value,
-                nivel_pago: parseInt(document.getElementById('edit-nivel').value),
-                es_verificado: document.getElementById('edit-verificado').checked // NUEVO
+                nombre_negocio: document.getElementById('edit-nombre').value, categoria: document.getElementById('edit-categoria').value,
+                enlace_whatsapp: document.getElementById('edit-wa').value, nivel_pago: parseInt(document.getElementById('edit-nivel').value),
+                es_verificado: document.getElementById('edit-verificado').checked
             };
 
-            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', {
-                body: {
-                    accion: 'editar',
-                    id_negocio: id,
-                    payload: payloadDatos
-                }
-            });
+            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', { body: { accion: 'editar', id_negocio: id, payload: payloadDatos } });
+            btn.innerText = "Guardar Cambios"; btn.disabled = false;
 
-            btn.innerText = "Guardar Cambios"; 
-            btn.disabled = false;
-
-            if (error || !data.success) {
-                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
-            } else {
-                mostrarNotificacion("¡Negocio actualizado exitosamente!", "exito");
-                cerrarModalEditar();
-                cargarTodosLosNegocios();
-            }
+            if (error || !data.success) mostrarNotificacion("Error al guardar", "error");
+            else { mostrarNotificacion("Actualizado exitosamente", "exito"); cerrarModalEditar(); cargarTodosLosNegocios(); }
         }
 
-        // --- ELIMINACIÓN SEGURA MEDIANTE EDGE FUNCTION ---
         async function eliminarNegocio(id) {
-            if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo? Esta acción no se puede deshacer y borrará sus productos asociados.")) {
-                return;
-            }
+            if(!confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR este negocio por completo?")) return;
+            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', { body: { accion: 'eliminar', id_negocio: id } });
+            if (error || !data.success) mostrarNotificacion("Error al eliminar", "error"); else { mostrarNotificacion("Eliminado", "exito"); cargarTodosLosNegocios(); }
+        }
 
-            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', {
-                body: {
-                    accion: 'eliminar',
-                    id_negocio: id
-                }
+        // ================= VISTA 2: SOLICITUDES =================
+        async function cargarSolicitudesPendientes() {
+            const tbody = document.getElementById('tabla-solicitudes');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Buscando solicitudes...</td></tr>';
+
+            const { data: solicitudes } = await clienteSupabase.from('anuncios').select('id, nombre_negocio, responsable_nombre, ine_frente_url, ine_reverso_url').eq('estado_verificacion', 'pendiente');
+            
+            if (!solicitudes || solicitudes.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">No hay verificaciones pendientes en este momento.</td></tr>'; return; }
+
+            tbody.innerHTML = solicitudes.map(s => {
+                const sCoded = encodeURIComponent(JSON.stringify(s));
+                return `
+                    <tr class="hover:bg-blue-50/50 transition border-b border-gray-100">
+                        <td class="p-4 font-bold text-tm-azul-oscuro">${s.nombre_negocio}</td>
+                        <td class="p-4 text-sm text-gray-600">${s.responsable_nombre}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="abrirModalRevision('${sCoded}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-4 py-2 rounded-lg text-xs font-bold transition">Revisar Documentos</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function abrirModalRevision(solicitudStr) {
+            const s = JSON.parse(decodeURIComponent(solicitudStr));
+            document.getElementById('rev-id').value = s.id;
+            document.getElementById('rev-negocio').innerText = s.nombre_negocio;
+            document.getElementById('rev-nombre').innerText = s.responsable_nombre;
+            
+            document.getElementById('rev-img-frente').src = '';
+            document.getElementById('rev-img-reverso').src = '';
+            document.getElementById('modal-revision').classList.remove('hidden');
+
+            try {
+                const { data: dataFrente } = await clienteSupabase.storage.from('verificaciones').createSignedUrl(s.ine_frente_url, 60);
+                const { data: dataReverso } = await clienteSupabase.storage.from('verificaciones').createSignedUrl(s.ine_reverso_url, 60);
+
+                if (dataFrente) document.getElementById('rev-img-frente').src = dataFrente.signedUrl;
+                if (dataReverso) document.getElementById('rev-img-reverso').src = dataReverso.signedUrl;
+            } catch (err) {
+                mostrarNotificacion("Error al obtener las imágenes seguras.", "error");
+            }
+        }
+
+        function cerrarModalRevision() { document.getElementById('modal-revision').classList.add('hidden'); }
+
+        async function resolverSolicitud(estado) {
+            const id = document.getElementById('rev-id').value;
+            if(!confirm(`¿Estás seguro de que deseas marcar esta solicitud como ${estado.toUpperCase()}?`)) return;
+
+            const { data, error } = await clienteSupabase.functions.invoke('admin-gestionar', { 
+                body: { accion: 'resolver_verificacion', id_negocio: id, payload: { estado: estado } } 
             });
 
             if (error || !data.success) {
-                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
+                mostrarNotificacion("Error al procesar la solicitud", "error");
             } else {
-                mostrarNotificacion("Negocio eliminado correctamente.", "exito");
-                cargarTodosLosNegocios(); 
+                mostrarNotificacion(`Solicitud ${estado} correctamente`, "exito");
+                cerrarModalRevision();
+                cargarSolicitudesPendientes();
             }
         }
 
-        async function cerrarSesion() {
-            await clienteSupabase.auth.signOut();
-            window.location.href = "index.html"; 
-        }
+        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.href = "index.html"; }
     </script>
 </body>
 </html>
