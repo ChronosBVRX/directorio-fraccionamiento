@@ -16,41 +16,30 @@
         <h1 class="text-2xl font-black text-[#143653] mb-2">¡Bienvenido!</h1>
         <div id="loading" class="text-gray-500 text-sm">Configurando tu ubicación...</div>
         
-        <div id="success-content" class="hidden text-center">
-            <p class="text-gray-600 text-sm mb-4">Hemos configurado tu dirección de entrega para:</p>
-            <div class="bg-blue-50 text-[#22527b] font-bold p-3 rounded-lg mb-6 border border-blue-100">
-                📍 <span id="nombre-airbnb">Cargando...</span>
-            </div>
-            <a href="index.html" class="block w-full bg-[#d4af37] text-white font-bold py-3 rounded-xl transition shadow-md">
-                Ver Restaurantes y Pedir
-            </a>
+        <div id="success-content" class="hidden">
+            <p class="text-gray-600 text-sm mb-4">Dirección de entrega lista para:</p>
+            <div class="bg-blue-50 text-[#22527b] font-bold p-3 rounded-lg mb-6 border border-blue-100" id="nombre-airbnb">Cargando...</div>
+            <a href="index.html" class="block w-full bg-[#d4af37] text-white font-bold py-3 px-4 rounded-xl transition shadow-md">Ver Restaurantes</a>
         </div>
 
         <div id="error-content" class="hidden">
-            <p id="mensaje-error" class="text-red-500 text-xs mb-6 font-bold">No pudimos encontrar el alojamiento.</p>
-            <a href="index.html" class="block w-full bg-[#22527b] text-white font-bold py-3 rounded-xl transition">Ir al directorio</a>
+            <p id="mensaje-error" class="text-red-500 text-xs mb-6 font-bold">Error al cargar datos.</p>
+            <a href="index.html" class="block w-full bg-[#22527b] text-white font-bold py-3 px-4 rounded-xl transition">Ir al directorio</a>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
-        
-        // CORRECCIÓN: Nombre de variable único
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function inicializarAirbnb() {
             try {
                 const params = new URLSearchParams(window.location.search);
                 const airbnbId = params.get('id');
-                if (!airbnbId) throw new Error("ID no encontrado.");
+                if (!airbnbId) throw new Error("QR no válido.");
 
-                const { data, error } = await clienteSupabase
-                    .from('airbnbs')
-                    .select('nombre_alojamiento, direccion_completa')
-                    .eq('id', airbnbId)
-                    .single();
-
+                const { data, error } = await clienteSupabase.from('airbnbs').select('*').eq('id', airbnbId).single();
                 if (error || !data) throw new Error("Alojamiento no encontrado.");
 
                 localStorage.setItem('tm_airbnb_nombre', data.nombre_alojamiento);
