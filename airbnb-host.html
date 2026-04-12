@@ -17,16 +17,16 @@
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
 
-    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul p-3">
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul p-3 relative">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" class="h-10">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" class="h-10 sm:h-12">
             </a>
-            <button onclick="document.getElementById('dropdown').classList.toggle('hidden')" class="p-2 bg-gray-100 rounded-lg text-tm-azul">☰</button>
+            <button onclick="document.getElementById('dropdown').classList.toggle('hidden')" class="p-2 bg-gray-100 rounded-lg text-tm-azul hover:bg-gray-200 transition">☰</button>
         </div>
         <div id="dropdown" class="hidden absolute right-3 mt-2 w-48 bg-white shadow-xl rounded-xl border z-50 overflow-hidden">
-            <a href="index.html" class="block p-3 border-b hover:bg-gray-50 text-sm">Directorio</a>
-            <a href="rastreo.html" class="block p-3 hover:bg-gray-50 text-sm font-bold">📍 Rastrear Pedido</a>
+            <a href="index.html" class="block p-3 border-b hover:bg-gray-50 text-sm">🏪 Directorio</a>
+            <a href="rastreo.html" class="block p-3 hover:bg-gray-50 text-sm">📍 Rastrear Pedido</a>
         </div>
     </header>
 
@@ -51,37 +51,37 @@
             <div id="seccion-pdf" class="hidden mt-8 text-center border-t pt-8">
                 <p class="text-sm text-gray-500 mb-4 font-bold">¡Configuración guardada!</p>
                 <button onclick="generarPosterPDF()" class="w-full bg-gradient-to-r from-tm-dorado to-yellow-600 text-white font-black py-5 rounded-2xl shadow-xl hover:scale-105 transition-all">
-                    🖨️ Descargar Póster (Carta)
+                    🖨️ Descargar Póster (1 Hoja)
                 </button>
             </div>
         </div>
     </main>
 
-    <div style="position: absolute; left: -9999px; top: 0;">
-        <div id="plantilla-poster" style="width: 800px; height: 1100px; background: white; border: 30px solid #22527b; padding: 50px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
+    <div style="position: fixed; right: 200%; top: 0;">
+        <div id="plantilla-poster" style="width: 800px; height: 1050px; background: white; border: 30px solid #22527b; padding: 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
             
-            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 350px; margin-bottom: 40px;">
+            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 350px; margin-bottom: 30px;">
             
-            <h1 style="font-size: 55px; color: #143653; font-weight: 900; margin: 0; line-height: 1.1;">Pide a domicilio</h1>
+            <h1 style="font-size: 55px; color: #143653; font-weight: 900; margin: 0; line-height: 1.1; text-align: center;">Pide a domicilio</h1>
             
-            <div style="background: #f3f4f6; border-radius: 20px; padding: 30px; width: 90%; margin: 40px 0; border: 2px dashed #999;">
+            <div style="background: #f3f4f6; border-radius: 20px; padding: 25px; width: 90%; margin: 30px 0; border: 2px dashed #999; text-align: center;">
                 <p style="font-size: 26px; color: #4b5563; font-weight: 600; margin: 0;">📍 Estás en: <br> 
                     <span id="pdf-nombre" style="font-size: 40px; color: #22527b; font-weight: 900; display: block; margin-top: 10px;"></span>
                 </p>
             </div>
 
-            <div style="background: white; padding: 20px; border-radius: 25px; border: 5px solid #e5e7eb; display: inline-block; margin-bottom: 40px;">
+            <div style="background: white; padding: 20px; border-radius: 25px; border: 5px solid #e5e7eb; display: inline-block; margin-bottom: 30px;">
                 <div id="qr-container"></div>
             </div>
 
-            <div style="text-align: left; background: #fff8eb; border-left: 12px solid #d4af37; padding: 30px; border-radius: 0 20px 20px 0; width: 85%;">
+            <div style="background: #fff8eb; border-left: 12px solid #d4af37; padding: 30px; border-radius: 0 20px 20px 0; width: 85%;">
                 <h3 style="font-size: 32px; color: #d4af37; font-weight: 900; margin: 0 0 15px 0;">Instrucciones:</h3>
-                <p style="font-size: 22px; color: #4b5563; margin: 0 0 10px 0;">📱 1. Escanea el código con tu celular.</p>
-                <p style="font-size: 22px; color: #4b5563; margin: 0 0 10px 0;">🍔 2. Elige tu comida favorita.</p>
-                <p style="font-size: 22px; color: #22527b; font-weight: 800; margin: 0;">✨ 3. ¡Pide fácil! Tu dirección ya está cargada.</p>
+                <p style="font-size: 22px; color: #4b5563; margin: 0 0 10px 0; font-weight: bold;">📱 1. Escanea el código con tu celular.</p>
+                <p style="font-size: 22px; color: #4b5563; margin: 0 0 10px 0; font-weight: bold;">🍔 2. Elige tu comida favorita.</p>
+                <p style="font-size: 22px; color: #22527b; margin: 0; font-weight: 900;">✨ 3. ¡Pide fácil! Tu dirección ya está cargada.</p>
             </div>
 
-            <p style="margin-top: 40px; color: #999; font-weight: bold; letter-spacing: 3px; font-size: 16px;">VIVETRESMARIAS.COM</p>
+            <p style="margin-top: 30px; color: #999; font-weight: bold; letter-spacing: 3px; font-size: 16px;">VIVETRESMARIAS.COM</p>
         </div>
     </div>
 
@@ -103,35 +103,38 @@
             if (data) {
                 document.getElementById('pdf-nombre').innerText = data.nombre_alojamiento;
                 
-                // Construir URL de bienvenida
                 const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
                 const urlMagica = `${baseUrl}/bienvenida.html?id=${data.id}`;
                 
-                // Limpiar y generar QR nuevo
                 const qrCont = document.getElementById('qr-container');
                 qrCont.innerHTML = "";
-                new QRCode(qrCont, { text: urlMagica, width: 300, height: 300, colorDark: "#143653" });
+                new QRCode(qrCont, { text: urlMagica, width: 280, height: 280, colorDark: "#143653" });
                 
                 document.getElementById('seccion-pdf').classList.remove('hidden');
                 alert("¡Guardado! Ya puedes descargar tu póster.");
-            } else { alert("Error al guardar en la base de datos."); }
+            } else { 
+                alert("Error al guardar en la base de datos."); 
+            }
             btn.innerText = "Guardar y Crear Póster"; btn.disabled = false;
         }
 
         function generarPosterPDF() {
             const element = document.getElementById('plantilla-poster');
+            const nombreLimpio = document.getElementById('airbnb-nombre').value.replace(/[^a-z0-9]/gi, '_');
+            
             const opt = {
                 margin: 0,
-                filename: 'Poster_Airbnb_ViveTresMarias.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
+                filename: `Poster_Airbnb_${nombreLimpio}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
                 html2canvas: { 
                     scale: 2, 
                     useCORS: true, 
-                    width: 800,       // Forzamos el ancho del lienzo de captura
-                    windowWidth: 800  // Forzamos al navegador a creer que la ventana mide 800px
+                    windowWidth: 800
                 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                // AQUÍ ESTÁ LA MAGIA: Obligamos a que el PDF sea EXACTAMENTE de 800x1050 px, sin hacer "auto-ajustes".
+                jsPDF: { unit: 'px', format: [800, 1050], orientation: 'portrait' }
             };
+            
             html2pdf().set(opt).from(element).save();
         }
     </script>
