@@ -19,7 +19,7 @@
     </script>
     <style> body { font-family: 'Montserrat', sans-serif; } </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col overflow-x-hidden">
 
     <header class="bg-white shadow-sm border-b-4 border-tm-azul py-3 px-6 flex justify-between items-center">
         <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 object-contain">
@@ -75,7 +75,7 @@
 
     </main>
 
-    <div class="hidden">
+    <div style="position: absolute; top: 0; left: -9999px; z-index: -1;">
         <div id="plantilla-poster" class="bg-white w-[800px] h-[1130px] flex flex-col items-center justify-center text-center relative font-sans border-[12px] border-[#22527b] box-border p-12">
             
             <div class="absolute top-0 left-0 w-full h-6 bg-[#d4af37]"></div>
@@ -124,10 +124,8 @@
             const { data: { session }, error } = await clienteSupabase.auth.getSession();
             
             if (error || !session) {
-                // No hay sesión -> Mandar al login
                 window.location.href = 'login.html';
             } else {
-                // Hay sesión -> Dejar pasar y cargar datos
                 usuarioActual = session.user;
                 document.getElementById('pantalla-carga').classList.add('hidden');
                 document.getElementById('contenido-principal').classList.remove('hidden');
@@ -208,7 +206,7 @@
             const urlMagica = `${rutaBase}/bienvenida.html?id=${id}`;
 
             const qrContainer = document.getElementById("qr-container");
-            qrContainer.innerHTML = ""; // Limpiar anterior
+            qrContainer.innerHTML = ""; 
 
             qrCodeObj = new QRCode(qrContainer, {
                 text: urlMagica,
@@ -220,7 +218,7 @@
             });
         }
 
-        // 5. Generar PDF
+        // 5. Generar PDF (ACTUALIZADO para forzar medidas y evitar cortes)
         function generarPosterPDF() {
             const elementoHTML = document.getElementById('plantilla-poster');
             const nombre = document.getElementById('airbnb-nombre').value.trim();
@@ -233,9 +231,11 @@
             const opciones = {
                 margin:       0,
                 filename:     `Poster_Airbnb_${nombre.replace(/\s+/g, '_')}.pdf`,
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                image:        { type: 'jpeg', quality: 0.98 },
+                // Forzar html2canvas a tomar un ancho de ventana virtual
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+                // Forzar el tamaño del PDF para que corresponda exactamente al póster
+                jsPDF:        { unit: 'px', format: [800, 1130], orientation: 'portrait' }
             };
 
             html2pdf().set(opciones).from(elementoHTML).save().then(() => {
