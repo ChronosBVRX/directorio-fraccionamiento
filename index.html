@@ -139,6 +139,8 @@
                     <input type="text" id="cliente-nombre" placeholder="Tu Nombre Completo" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
                     <input type="tel" id="cliente-telefono" placeholder="Tu Teléfono" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" required>
                     <textarea id="cliente-direccion" placeholder="Calle, Número, Coto (Ej. Coto Encinos #12)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-azul" rows="2" required></textarea>
+                    
+                    <textarea id="cliente-notas" placeholder="Notas para el negocio (Ej. Sin cebolla, extra aderezo...)" class="w-full px-3 py-2 border border-yellow-300 bg-yellow-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-dorado" rows="2"></textarea>
                 </div>
 
                 <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition">
@@ -166,7 +168,6 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        // Lógica del menú hamburguesa
         function toggleMenuPrincipal() {
             const menu = document.getElementById('dropdown-principal');
             menu.classList.toggle('hidden');
@@ -290,12 +291,10 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                // Verificamos si está abierto (si es null asume que sí está abierto por defecto)
                 const estaAbierto = a.esta_abierto !== false; 
                 
                 let botones = '';
                 
-                // --- GENERACIÓN DE BOTONES DEPENDIENDO DEL ESTADO ---
                 if(tieneMenu) {
                     if (estaAbierto) {
                         botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")}, true)' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition">Menú y Pedir</button>`;
@@ -344,6 +343,9 @@
             document.getElementById('modal-menu').classList.remove('hidden');
             document.getElementById('menu-titulo').innerText = negocio.nombre_negocio;
 
+            // Limpiamos las notas cada vez que se abre el menú
+            document.getElementById('cliente-notas').value = '';
+
             if (perfilUsuarioActual) {
                 document.getElementById('cliente-nombre').value = perfilUsuarioActual.nombre_completo || '';
                 document.getElementById('cliente-telefono').value = perfilUsuarioActual.telefono || '';
@@ -369,7 +371,6 @@
 
             let htmlLista = '';
             
-            // Si el negocio está cerrado, mostrar una alerta al inicio del menú
             if (negocio.esta_abierto === false) {
                 htmlLista += `<div class="bg-red-50 text-red-600 border border-red-200 p-3 rounded-lg text-sm font-bold text-center mb-4">El negocio está cerrado en este momento. No se aceptan pedidos.</div>`;
             }
@@ -412,6 +413,7 @@
             document.getElementById('cliente-nombre').value = '';
             document.getElementById('cliente-telefono').value = '';
             document.getElementById('cliente-direccion').value = '';
+            document.getElementById('cliente-notas').value = '';
         }
         
         function cambiarCantidad(index, cambio) {
@@ -432,6 +434,9 @@
             const nombre = document.getElementById('cliente-nombre').value.trim();
             const telefono = document.getElementById('cliente-telefono').value.trim();
             const direccion = document.getElementById('cliente-direccion').value.trim();
+            
+            // NUEVO: Capturamos las notas
+            const notas = document.getElementById('cliente-notas').value.trim();
 
             if (!nombre || !telefono || !direccion) return alert("Por favor, llena todos tus datos de envío.");
 
@@ -456,6 +461,11 @@
 
             if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
 
+            // NUEVO: Agregamos las notas al mensaje de WhatsApp si el cliente escribió algo
+            if (notas) {
+                textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
+            }
+
             const btn = document.getElementById('btn-confirmar-pedido');
             const textoOriginal = btn.innerHTML;
             btn.innerHTML = 'Procesando pedido...'; 
@@ -470,7 +480,8 @@
                     telefono: telefono,
                     direccion: direccion,
                     carrito: detallesPedido,
-                    total: total
+                    total: total,
+                    notas: notas // Enviamos las notas a la base de datos
                 }
             });
 
