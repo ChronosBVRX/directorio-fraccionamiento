@@ -35,7 +35,7 @@
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
         <p class="text-gray-500 mb-6">Inicia sesión para administrar tu consultorio.</p>
-        <a href="login.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
+        <a href="index.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
     </div>
 
     <div id="si-auth" class="hidden max-w-7xl mx-auto">
@@ -44,7 +44,14 @@
                 <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
                 <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus servicios, agenda y pacientes.</p>
             </div>
-            <a href="dashboard.html" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold shadow hover:bg-gray-300 transition text-center">← Volver al Perfil</a>
+            <div class="flex items-center gap-2">
+                <a href="index.html" target="_parent" class="bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition text-center text-sm">
+                    🏠 Inicio
+                </a>
+                <a href="panel.html" target="_parent" class="bg-tm-azul text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition text-center text-sm">
+                    👤 Mi Perfil
+                </a>
+            </div>
         </div>
 
         <div id="seccion-admin-negocio" class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10 flex flex-col">
@@ -330,12 +337,10 @@
             }
         }
 
-        // --- SERVICIOS ---
         async function cargarServicios(anuncioId) { const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id'); const l = document.getElementById('lista-servicios'); if (!data || data.length===0) return l.innerHTML=`<p class="text-xs text-gray-400">Sin servicios.</p>`; l.innerHTML = data.map(p => `<div class="bg-gray-50 p-3 rounded-lg border text-sm font-bold flex justify-between"><span>${p.nombre} <span class="text-gray-500 font-normal">(${p.duracion_minutos}m)</span></span> <button onclick="eliminarServicio('${p.id}')" class="text-red-500 text-xs">Borrar</button></div>`).join(''); }
         async function agregarServicioSeguro() { const aId = document.getElementById('admin-negocio-id').value; const p = { anuncio_id: aId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value }; const { error } = await clienteSupabase.from('servicios').insert([p]); if (!error) { document.getElementById('serv-nombre').value=''; cargarServicios(aId); } }
         async function eliminarServicio(id) { if(confirm("¿Eliminar servicio?")) { await clienteSupabase.from('servicios').delete().eq('id', id); cargarServicios(document.getElementById('admin-negocio-id').value); } }
 
-        // --- AGENDA Y CALENDARIO ---
         async function cargarAgendaYCalendario(anuncioId) {
             const { data } = await clienteSupabase.from('citas').select('*, perfiles(nombre_completo, telefono), servicios(nombre)').eq('anuncio_id', anuncioId).neq('estado', 'cancelada').order('fecha_cita');
             
