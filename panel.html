@@ -17,6 +17,11 @@
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
     </script>
+    
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
 
@@ -32,7 +37,7 @@
         
         <div id="seccion-perfil" class="hidden bg-white rounded-2xl border border-gray-200 p-5 sm:p-8 shadow-sm mb-10">
             <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
-            <p class="text-sm text-gray-500 mb-6">Actualiza tus datos de contacto y revisa tus pedidos.</p>
+            <p class="text-sm text-gray-500 mb-6">Actualiza tus datos de contacto, revisa tus pedidos y próximas citas.</p>
             
             <form onsubmit="event.preventDefault(); guardarPerfilSeguro();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
@@ -45,10 +50,18 @@
                 <div class="flex flex-col"><label class="text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio 📍</label><div id="mapa-perfil" class="w-full h-64 lg:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div></div>
             </form>
 
-            <div class="mt-10 border-t border-gray-200 pt-8">
-                <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Pedidos Recientes 🛵</h3>
-                <div id="contenedor-mis-pedidos" class="space-y-3">
-                    <p class="text-sm text-gray-400">Cargando tus pedidos...</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10 border-t border-gray-200 pt-8">
+                <div>
+                    <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Pedidos Recientes 🛵</h3>
+                    <div id="contenedor-mis-pedidos" class="space-y-3">
+                        <p class="text-sm text-gray-400">Cargando tus pedidos...</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Próximas Citas 📅</h3>
+                    <div id="contenedor-mis-citas" class="space-y-3">
+                        <p class="text-sm text-gray-400">Cargando tus citas...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,13 +76,12 @@
             <div id="seccion-crear-negocio" class="border-t border-gray-200 pt-12 mb-10 hidden">
                 <div class="text-center mb-10 px-2">
                     <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Negocio</h2>
-                    <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas de venta.</p>
+                    <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     <div onclick="abrirAdminNuevo(0)" class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
                         <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
-                        <div class="mt-4 mb-5 bg-gray-50 border border-gray-200 rounded-lg p-3 select-none pointer-events-none"><div class="w-12 h-3 bg-blue-100 rounded mb-2"></div><div class="w-3/4 h-3 bg-gray-300 rounded mb-1"></div><div class="w-1/2 h-2 bg-gray-200 rounded mb-3"></div><div class="w-full h-7 bg-[#25D366] rounded flex items-center justify-center text-[10px] text-white font-bold">WhatsApp</div></div>
-                        <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
+                        <ul class="text-sm space-y-3 flex-grow text-gray-600 my-6">
                             <li class="flex items-start gap-2"><span>✔️</span> <span>Nombre y descripción</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Botón a tu WhatsApp</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Dirección y horarios</span></li>
                         </ul>
                         <button class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-lg mt-auto hover:bg-gray-200 transition">Crear Gratis</button>
@@ -78,9 +90,8 @@
                     <div onclick="abrirAdminNuevo(1)" class="bg-white rounded-2xl border border-blue-400 p-6 shadow-lg flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:-translate-y-1 hover:ring-2 ring-blue-300">
                         <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
                         <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/mes</span></p>
-                        <div class="mt-4 mb-5 bg-white border border-blue-400 rounded-lg overflow-hidden select-none pointer-events-none"><div class="w-full h-16 bg-blue-50 flex items-center justify-center text-xs text-blue-400">🌅 Imagen Portada</div><div class="p-3"><div class="w-3/4 h-3 bg-gray-300 rounded mb-3"></div><div class="w-full h-7 border-2 border-tm-azul rounded flex items-center justify-center text-[10px] text-tm-azul font-bold">Ver Catálogo</div></div></div>
-                        <ul class="text-sm space-y-3 flex-grow text-gray-600 mb-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico, más:</span></li><li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo.</span></li><li class="flex items-start gap-2"><span>📋</span> <span>Catálogo en PDF/Link.</span></li>
+                        <ul class="text-sm space-y-3 flex-grow text-gray-600 my-6">
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico.</span></li><li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo.</span></li><li class="flex items-start gap-2"><span>📋</span> <span>Catálogo en PDF/Link.</span></li>
                         </ul>
                         <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-auto hover:bg-blue-700 transition shadow">Elegir Pro</button>
                     </div>
@@ -88,9 +99,10 @@
                     <div onclick="abrirAdminNuevo(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 shadow-xl flex flex-col relative cursor-pointer hover:shadow-2xl transition transform hover:scale-105 z-10 hover:ring-2 ring-yellow-300">
                         <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[11px] font-black py-1 uppercase tracking-widest">El Más Completo</div>
                         <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
-                        <div class="mt-4 mb-5 bg-white border border-tm-dorado ring-1 ring-tm-dorado/30 rounded-lg overflow-hidden select-none pointer-events-none"><div class="w-full h-16 bg-yellow-100 flex items-center justify-center text-xs text-yellow-600">🌅 Imagen Portada</div><div class="p-3"><div class="w-3/4 h-3 bg-gray-800 rounded mb-3"></div><div class="w-full h-7 bg-tm-dorado rounded flex items-center justify-center text-[10px] text-white font-bold">🛒 Menú y Pedir</div></div></div>
-                        <ul class="text-sm space-y-3 flex-grow text-gray-800 mb-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1, más:</span></li><li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú interactivo</b> propio.</span></li><li class="flex items-start gap-2"><span>📱</span> <span>Pedidos directos a WhatsApp.</span></li>
+                        <ul class="text-sm space-y-3 flex-grow text-gray-800 my-6">
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1.</span></li>
+                            <li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú Interactivo</b> para pedidos.</span></li>
+                            <li class="flex items-start gap-2"><span>📅</span> <span><b>Agenda Inteligente</b> para profesionales.</span></li>
                         </ul>
                         <button class="w-full bg-tm-dorado text-white font-bold py-3 rounded-lg mt-auto hover:bg-yellow-600 transition shadow">Elegir Elite</button>
                     </div>
@@ -102,21 +114,24 @@
             <div class="bg-tm-azul-oscuro text-white p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black flex items-center gap-3">
-                        <button onclick="cerrarAdminNegocio()" class="bg-white/10 hover:bg-white/20 p-2 rounded transition">←</button>
+                        <button onclick="cerrarAdminNegocio()" class="bg-white/10 hover:bg-white/20 p-2 rounded transition">← Volver</button>
                         <span id="admin-titulo">Panel del Negocio</span>
                     </h2>
                     <p id="admin-nivel-badge" class="text-xs font-bold text-tm-azul-oscuro bg-white px-2 py-1 rounded inline-block mt-2">Nivel Actual: Cargando...</p>
                 </div>
-                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Cambios</button>
+                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Cambios Básicos</button>
             </div>
 
             <div class="flex flex-col lg:flex-row min-h-[600px]">
                 <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50">
                     <input type="hidden" id="admin-negocio-id"><input type="hidden" id="admin-nivel-intencion" value="0">
-                    <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white">
+                    
+                    <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
                         <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos & Horarios</button>
                         <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
-                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú 🔒</button>
+                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú Comida 🔒</button>
+                        <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
+                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Agenda 🔒</button>
                         <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
                     </div>
 
@@ -125,7 +140,7 @@
                             <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
                                 <div>
                                     <h4 class="font-bold text-sm text-red-600">Botón de Emergencia</h4>
-                                    <p class="text-[11px] text-gray-500">Cierra tu negocio manualmente por hoy, ignorando los horarios.</p>
+                                    <p class="text-[11px] text-gray-500">Cierra tu negocio o consultorio manualmente por hoy.</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                     <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
@@ -134,16 +149,18 @@
                                 </label>
                             </div>
 
-                            <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                            <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio / Consultorio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
                             
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2" id="contenedor-horarios">
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Días y Horarios de Atención</h4>
-                                </div>
+                                <p class="text-[10px] text-gray-400 leading-tight mb-2">Importante: Si usas la función de "Agenda", el sistema calculará las citas basándose estrictamente en estos horarios.</p>
+                                <div id="contenedor-horarios"></div>
+                            </div>
 
                             <div><label class="text-xs font-bold text-gray-500">Descripción *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                                <div><label class="text-xs font-bold text-gray-500">Categoría *</label><select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"><option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option></select></div>
+                                <div><label class="text-xs font-bold text-gray-500">Categoría *</label><select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"><option>Alimentos</option><option>Servicios</option><option>Salud Mental</option><option>Medicina</option><option>Belleza</option><option>Hogar</option></select></div>
                             </div>
                         </div>
 
@@ -163,14 +180,15 @@
                             </div>
                         </div>
 
-                        <div id="panel-menu" class="hidden space-y-4 flex flex-col h-full">
+                        <div id="panel-menu" class="hidden space-y-4 flex-col h-full">
                             <div id="bloqueo-menu" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
-                                <h3 class="font-bold text-yellow-800 mb-2">Desbloquea tu Catálogo Elite</h3>
+                                <h3 class="font-bold text-yellow-800 mb-2">Desbloquea Funciones Elite</h3>
+                                <p class="text-xs text-yellow-700 mb-4">Activa el carrito de compras o la agenda en línea.</p>
                                 <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
                             </div>
-                            <div id="contenido-menu" class="hidden flex-grow flex flex-col">
+                            <div id="contenido-menu" class="hidden flex-grow flex-col">
                                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto</h4>
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto (Comida/Artículos)</h4>
                                     <div class="grid grid-cols-2 gap-3 mb-3">
                                         <input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none">
                                         <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
@@ -178,29 +196,51 @@
                                     <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
                                     <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
                                 </div>
-                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos (Apaga los agotados)</h4>
+                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
                                 <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
+                            </div>
+                        </div>
+
+                        <div id="panel-servicios" class="hidden space-y-4 flex-col h-full">
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
+                                <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Servicio (Para Agendas)</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                    <input type="text" id="serv-nombre" placeholder="Nombre (Ej. Terapia)" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
+                                    <input type="number" id="serv-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
+                                    <input type="number" id="serv-duracion" placeholder="Duración (Minutos)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
+                                </div>
+                                <textarea id="serv-desc" placeholder="Descripción corta" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
+                                <button onclick="agregarServicioSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir Servicio</button>
+                            </div>
+                            <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Servicios Activos</h4>
+                            <div id="lista-servicios" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
+                        </div>
+
+                        <div id="panel-agenda" class="hidden space-y-4">
+                            <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 mb-4">
+                                <h3 class="font-bold text-yellow-800 mb-1">Próximos Pacientes / Clientes</h3>
+                                <p class="text-xs text-yellow-700">Aquí aparecerán las citas agendadas a través del directorio.</p>
+                            </div>
+                            <div id="lista-citas-negocio" class="space-y-3">
+                                <p class="text-sm text-gray-400">Sin citas pendientes por ahora.</p>
                             </div>
                         </div>
 
                         <div id="panel-verif" class="hidden space-y-4">
                             <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mb-4">
                                 <h3 class="font-black text-blue-800 mb-1 flex items-center gap-2"><span class="text-xl">🛡️</span> Sello de Confianza</h3>
-                                <p class="text-sm text-blue-700">Verifica tu negocio subiendo una identificación oficial. Los clientes confían más en negocios verificados.</p>
+                                <p class="text-sm text-blue-700">Sube una identificación oficial para ganar el sello verificado.</p>
                             </div>
                             <div id="estado-verif-pendiente" class="hidden bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
                                 <span class="text-4xl block mb-2">⏳</span>
                                 <h3 class="font-bold text-yellow-800">Documentos en Revisión</h3>
-                                <p class="text-sm text-yellow-700">Estamos validando tu información. Este proceso toma de 24 a 48 horas.</p>
                             </div>
                             <div id="estado-verif-aprobado" class="hidden bg-green-50 p-6 rounded-xl border border-green-200 text-center">
                                 <span class="text-4xl block mb-2">✅</span>
                                 <h3 class="font-bold text-green-800">¡Negocio Verificado!</h3>
-                                <p class="text-sm text-green-700">Tu anuncio ya cuenta con la insignia de confianza en el directorio público.</p>
                             </div>
                             <form id="form-verif" class="hidden space-y-4 bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
                                 <div><label class="text-xs font-bold text-gray-500">Nombre Completo del Responsable *</label><input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none"></div>
-                                <p class="text-xs text-gray-500 mb-1 mt-4 font-bold">Tu dirección y WhatsApp se tomarán de la pestaña de 'Datos Básicos'.</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center bg-gray-50">
                                         <p class="text-xs font-bold text-gray-600 mb-2">INE (Frente) *</p>
@@ -217,11 +257,10 @@
                                         <input type="hidden" id="url-ine-reverso">
                                     </div>
                                 </div>
-                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition shadow-md mt-4">
-                                    Enviar Documentos
-                                </button>
+                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition shadow-md mt-4">Enviar Documentos</button>
                             </form>
                         </div>
+
                     </div>
                 </div>
 
@@ -237,15 +276,48 @@
                         <div class="p-5 bg-white">
                             <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase tracking-widest bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
                             <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro leading-tight mt-2">Nombre del Negocio</h3>
-                            <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-4 leading-relaxed">Escribe una descripción en la pestaña 'Datos Básicos' para ver cómo lucirá tu anuncio.</p>
+                            <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-4 leading-relaxed">Escribe una descripción en la pestaña 'Datos Básicos'.</p>
+                            
                             <div class="mt-5 pt-4 border-t border-gray-100 flex gap-2">
                                 <button class="flex-1 bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold text-center shadow-sm">WhatsApp</button>
-                                <button id="preview-btn-menu" class="hidden flex-1 bg-tm-azul text-white py-2 rounded-lg text-xs font-bold text-center shadow-sm">Ver Menú</button>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <button id="preview-btn-menu" class="hidden flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm">🛒 Ver Menú / Comprar</button>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <button id="preview-btn-agenda" class="hidden flex-1 bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm">📅 Agendar Cita</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-agendar" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform transition-transform">
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Agendar Cita 📅</h3>
+            <p class="text-xs text-gray-500 mb-5" id="modal-agendar-negocio">Consultorio</p>
+            <input type="hidden" id="reserva-negocio-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold uppercase text-gray-500">1. Servicio</label>
+                    <select id="reserva-servicio" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none text-sm font-semibold text-gray-700">
+                        <option value="">Cargando servicios...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold uppercase text-gray-500">2. Día</label>
+                    <input type="date" id="reserva-fecha" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none text-sm font-semibold text-gray-700">
+                </div>
+                <div class="border-t border-gray-100 pt-4">
+                    <label class="text-xs font-bold uppercase text-gray-500 mb-2 block">3. Horarios Disponibles</label>
+                    <div id="contenedor-horarios-libres" class="grid grid-cols-3 gap-2 min-h-[60px]">
+                        <p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modal-agendar').classList.add('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold mt-6 transition">Cancelar</button>
         </div>
     </div>
 
@@ -257,23 +329,22 @@
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioActual = null;
-        let map = null;
-        let marker = null;
+        let map = null; let marker = null;
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
-        // ------------------ FUNCIONES GLOBALES ------------------
+        // ------------------ FUNCIONES GLOBALES / UI ------------------
         function mostrarNotificacion(mensaje, tipo = 'exito') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 pointer-events-auto max-w-sm`;
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 max-w-sm`;
             toast.innerHTML = `<span class="text-sm font-bold leading-tight">${mensaje}</span><button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-lg">×</button>`;
             container.appendChild(toast);
-            setTimeout(() => { toast.classList.remove('translate-y-[-100%]', 'opacity-0'); }, 10);
-            setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 5000);
+            setTimeout(() => toast.classList.remove('translate-y-[-100%]', 'opacity-0'), 10);
+            setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 4000);
         }
 
-        // ------------------ HORARIOS UI ------------------
+        // Horarios UI Compartida
         function renderizarUIHorarios() {
             const cont = document.getElementById('contenedor-horarios');
             cont.innerHTML = Object.keys(DIAS).map(d => `
@@ -290,30 +361,19 @@
                 </div>
             `).join('');
         }
-
         function toggleInputsHorario(checkbox) {
             const row = checkbox.closest('div[data-dia]');
             const inputs = row.querySelectorAll('input[type="time"]');
-            inputs.forEach(inp => {
-                inp.disabled = !checkbox.checked;
-                inp.classList.toggle('opacity-50', !checkbox.checked);
-                inp.classList.toggle('bg-gray-100', !checkbox.checked);
-            });
+            inputs.forEach(inp => { inp.disabled = !checkbox.checked; inp.classList.toggle('opacity-50', !checkbox.checked); inp.classList.toggle('bg-gray-100', !checkbox.checked); });
         }
-
         function obtenerHorariosDeUI() {
             let horarios = {};
             [1, 2, 3, 4, 5, 6, 0].forEach(dia => {
                 const row = document.querySelector(`div[data-dia="${dia}"]`);
-                horarios[dia] = {
-                    abierto: row.querySelector('.dia-abierto').checked,
-                    abre: row.querySelector('.hora-abre').value,
-                    cierra: row.querySelector('.hora-cierra').value
-                };
+                horarios[dia] = { abierto: row.querySelector('.dia-abierto').checked, abre: row.querySelector('.hora-abre').value, cierra: row.querySelector('.hora-cierra').value };
             });
             return horarios;
         }
-
         function setearHorariosUI(horariosJSON) {
             [1, 2, 3, 4, 5, 6, 0].forEach(dia => {
                 const row = document.querySelector(`div[data-dia="${dia}"]`);
@@ -323,51 +383,37 @@
                     row.querySelector('.hora-abre').value = horariosJSON[dia].abre || '09:00';
                     row.querySelector('.hora-cierra').value = horariosJSON[dia].cierra || '18:00';
                 } else {
-                    cb.checked = (dia !== 0); // Cerrado en domingo por defecto
-                    row.querySelector('.hora-abre').value = '09:00';
-                    row.querySelector('.hora-cierra').value = '18:00';
+                    cb.checked = (dia !== 0); 
+                    row.querySelector('.hora-abre').value = '09:00'; row.querySelector('.hora-cierra').value = '18:00';
                 }
                 toggleInputsHorario(cb);
             });
         }
 
-        // ------------------ INICIALIZACIÓN ------------------
-        document.getElementById('admin-estado-apertura').addEventListener('change', function(e) {
-            document.getElementById('label-estado-apertura').innerText = e.target.checked ? "Abierto" : "Cerrado";
-        });
-
+        // INIT
+        document.getElementById('admin-estado-apertura').addEventListener('change', function(e) { document.getElementById('label-estado-apertura').innerText = e.target.checked ? "Abierto" : "Cerrado"; });
         document.addEventListener("DOMContentLoaded", () => {
             renderizarUIHorarios();
-            const urlParams = new URLSearchParams(window.location.search);
-            const view = urlParams.get('view') || 'perfil'; 
-            
-            if (view === 'negocio') {
-                document.getElementById('seccion-perfil').classList.add('hidden');
-                document.getElementById('seccion-crear-negocio').classList.remove('hidden');
-            } else {
-                document.getElementById('seccion-perfil').classList.remove('hidden');
-                document.getElementById('seccion-crear-negocio').classList.add('hidden');
-            }
+            const view = new URLSearchParams(window.location.search).get('view') || 'perfil'; 
+            if (view === 'negocio') { document.getElementById('seccion-perfil').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.remove('hidden'); }
+            else { document.getElementById('seccion-perfil').classList.remove('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden'); }
         });
 
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             if(usuarioActual) {
-                document.getElementById('no-auth').classList.add('hidden');
-                document.getElementById('si-auth').classList.remove('hidden');
-                cargarMisNegocios();
-                cargarPerfil();
+                document.getElementById('no-auth').classList.add('hidden'); document.getElementById('si-auth').classList.remove('hidden');
+                cargarMisNegocios(); cargarPerfil();
             } else {
-                document.getElementById('no-auth').classList.remove('hidden');
-                document.getElementById('si-auth').classList.add('hidden');
+                document.getElementById('no-auth').classList.remove('hidden'); document.getElementById('si-auth').classList.add('hidden');
             }
         });
 
-        // ------------------ LECTURAS BDD ------------------
+        // ------------------ PERFIL, PEDIDOS Y CITAS ------------------
         async function cargarPerfil() {
-            const { data, error } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
+            const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
             let lat = 19.7028; let lng = -101.1924;
-            if (data && !error) {
+            if (data) {
                 document.getElementById('perfil-nombre').value = data.nombre_completo || '';
                 document.getElementById('perfil-telefono').value = data.telefono || '';
                 document.getElementById('perfil-direccion').value = data.direccion || '';
@@ -375,262 +421,313 @@
             }
             inicializarMapa(lat, lng);
             cargarMisPedidos();
+            cargarMisCitas();
+        }
+
+        async function guardarPerfilSeguro() {
+            const btn = document.getElementById('btn-guardar-perfil'); btn.innerText = "Guardando..."; btn.disabled = true;
+            const payload = { nombre_completo: document.getElementById('perfil-nombre').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value, latitud: document.getElementById('perfil-lat').value, longitud: document.getElementById('perfil-lng').value };
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_perfil', payload: payload } });
+            btn.innerText = "Guardar Perfil"; btn.disabled = false;
+            if (error || !data.success) mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); else mostrarNotificacion("¡Perfil guardado!");
         }
 
         async function cargarMisPedidos() {
-            const { data, error } = await clienteSupabase.from('pedidos')
-                .select('*, anuncios(nombre_negocio)')
-                .eq('cliente_id', usuarioActual.id)
-                .order('creado_en', { ascending: false })
-                .limit(5);
-
+            const { data } = await clienteSupabase.from('pedidos').select('*, anuncios(nombre_negocio)').eq('cliente_id', usuarioActual.id).order('creado_en', { ascending: false }).limit(5);
             const contenedor = document.getElementById('contenedor-mis-pedidos');
-            if (error || !data || data.length === 0) {
-                contenedor.innerHTML = '<p class="text-sm text-gray-500">Aún no tienes pedidos registrados.</p>';
-                return;
-            }
-
+            if (!data || data.length === 0) return contenedor.innerHTML = '<p class="text-sm text-gray-500">Sin pedidos recientes.</p>';
             contenedor.innerHTML = data.map(p => {
-                let colorEstado = 'bg-gray-100 text-gray-600';
-                let textoEstado = p.estado;
+                let colorEstado = 'bg-gray-100 text-gray-600'; let textoEstado = p.estado;
                 if(p.estado === 'esperando_activacion') { colorEstado = 'bg-yellow-100 text-yellow-700'; textoEstado = 'Pendiente de Pago'; }
-                if(p.estado === 'asignado') { colorEstado = 'bg-orange-100 text-orange-700'; textoEstado = 'Asignando Repartidor'; }
-                if(p.estado === 'pendiente') { colorEstado = 'bg-blue-100 text-blue-700'; textoEstado = 'Buscando Repartidor'; }
                 if(p.estado === 'aceptado' || p.estado === 'en_camino') { colorEstado = 'bg-green-100 text-green-700'; textoEstado = 'En Ruta'; }
-
                 return `
-                <div class="bg-gray-50 border border-gray-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-bold uppercase ${colorEstado} px-2 py-0.5 rounded">${textoEstado}</span>
-                            <span class="text-xs text-gray-400 font-mono">${p.folio}</span>
-                        </div>
-                        <p class="font-bold text-tm-azul-oscuro">${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
-                        <p class="text-sm text-tm-dorado font-black">$${p.total}</p>
-                        ${p.notas ? `<p class="text-[10px] text-gray-500 italic mt-1 leading-tight border-l-2 border-yellow-300 pl-2">Nota: ${p.notas}</p>` : ''}
-                    </div>
-                    ${p.estado !== 'entregado' ? 
-                        `<a href="rastreo.html?folio=${p.folio}" target="_parent" class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition shadow">Rastrear 📍</a>` : 
-                        `<span class="text-xs text-gray-400 font-bold bg-gray-200 px-3 py-1 rounded-lg">Entregado ✅</span>`
-                    }
+                <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl">
+                    <span class="text-[10px] font-bold uppercase ${colorEstado} px-2 py-0.5 rounded">${textoEstado}</span>
+                    <p class="font-bold text-tm-azul-oscuro text-sm mt-1">${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
+                    <p class="text-xs text-tm-dorado font-black">$${p.total}</p>
                 </div>`;
             }).join('');
         }
 
+        async function cargarMisCitas() {
+            const { data } = await clienteSupabase.from('citas').select('*, anuncios(nombre_negocio), servicios(nombre, duracion_minutos)').eq('cliente_id', usuarioActual.id).order('fecha_cita', { ascending: true }).limit(5);
+            const cont = document.getElementById('contenedor-mis-citas');
+            if (!data || data.length === 0) return cont.innerHTML = '<p class="text-sm text-gray-500">No tienes citas programadas.</p>';
+            cont.innerHTML = data.map(c => `
+                <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex flex-col">
+                    <span class="text-[10px] font-bold uppercase text-blue-600 self-start bg-white px-2 py-0.5 rounded shadow-sm">${c.estado}</span>
+                    <p class="font-bold text-tm-azul-oscuro mt-1 text-sm">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)}</p>
+                    <p class="text-xs text-gray-600 font-semibold">${c.anuncios?.nombre_negocio || 'Consultorio'}</p>
+                    <p class="text-[10px] text-gray-400 mt-1">${c.servicios?.nombre}</p>
+                </div>
+            `).join('');
+        }
+
+        // ------------------ FUNCIONES DEL DIRECTORIO / NEGOCIOS ------------------
         async function cargarMisNegocios() {
-            const { data, error } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
+            const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             const contenedor = document.getElementById('contenedor-mis-negocios');
-            if (!data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500">Aún no tienes anuncios. Si estás en Modo Vender, crea uno nuevo abajo.</div>`;
-                return;
-            }
+            if (!data || data.length === 0) return contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500 col-span-2">Aún no tienes negocios. Selecciona un plan abajo.</div>`;
             contenedor.innerHTML = data.map(n => `
                 <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:shadow-md transition">
                     <div class="w-full text-center sm:text-left">
                         <div class="flex items-center justify-center sm:justify-start gap-2">
                             <h3 class="font-bold text-lg text-tm-azul-oscuro leading-tight">${n.nombre_negocio}</h3>
                             ${n.es_verificado ? '<span title="Verificado">☑️</span>' : ''}
-                            ${n.esta_abierto === false ? '<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase">Cerrado Emergencia</span>' : ''}
                         </div>
                         <span class="${n.nivel_pago > 0 ? (n.nivel_pago == 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700') : 'bg-gray-100 text-gray-600'} text-[10px] uppercase px-2 py-1 rounded font-bold inline-block mt-1">
                             ${n.nivel_pago == 2 ? 'Elite (Nivel 2)' : (n.nivel_pago == 1 ? 'Pro (Nivel 1)' : 'Básico')}
                         </span>
                     </div>
-                    <button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow transition whitespace-nowrap">Editar Panel</button>
+                    <button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow whitespace-nowrap">Editar Panel</button>
                 </div>
             `).join('');
         }
 
-        async function cargarProductosMenu(anuncioId) {
-            const { data, error } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id', { ascending: true });
-            const lista = document.getElementById('lista-productos');
-            if (!data || data.length === 0) { lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`; return; }
-            lista.innerHTML = data.map(p => `
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200 gap-3">
-                    <div class="flex-grow">
-                        <p class="text-sm font-bold ${p.disponible ? 'text-tm-azul-oscuro' : 'text-gray-400 line-through'}">${p.nombre}</p>
-                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
-                    </div>
-                    <div class="flex items-center gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-200">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" ${p.disponible !== false ? 'checked' : ''} onchange="toggleProductoSeguro('${p.id}', this.checked)">
-                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                            <span class="ml-2 text-[10px] font-bold text-gray-500 w-12">${p.disponible !== false ? 'Disponible' : 'Agotado'}</span>
-                        </label>
-                        <button onclick="eliminarProductoSeguro('${p.id}')" class="text-gray-400 hover:text-red-500 transition" title="Eliminar">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
+        function abrirAdminNuevo(nivelDeseado) {
+            document.getElementById('seccion-perfil').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('admin-titulo').innerText = "Creando Nuevo Negocio";
+            document.getElementById('admin-negocio-id').value = ''; document.getElementById('admin-nivel-intencion').value = nivelDeseado;
+            ['admin-nombre', 'admin-desc', 'admin-wa', 'admin-imagen-url', 'url-ine-frente', 'url-ine-reverso', 'verif-nombre'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('admin-estado-apertura').checked = true; document.getElementById('label-estado-apertura').innerText = "Abierto";
+            setearHorariosUI(null);
+
+            const btnGuardar = document.getElementById('btn-guardar-admin');
+            if (nivelDeseado > 0) {
+                document.getElementById('admin-nivel-badge').innerText = "Creando: " + (nivelDeseado===1 ? "Pro" : "Elite");
+                btnGuardar.innerText = "Continuar al Pago Seguro 🔒"; btnGuardar.classList.replace('bg-tm-dorado', 'bg-blue-600'); btnGuardar.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
+            } else {
+                document.getElementById('admin-nivel-badge').innerText = "Creando: Básico";
+                btnGuardar.innerText = "Crear Negocio Gratis"; btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado'); btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
+            }
+
+            configurarPermisos(nivelDeseado); configurarPestanaVerificacion('no_solicitado');
+            document.getElementById('seccion-lista-negocios').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden');
+            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
+            actualizarPreview(); cambiarPestana('basico');
         }
 
-        // ------------------ ESCRITURAS SEGURAS (EDGE FUNCTIONS) ------------------
-        async function guardarPerfilSeguro() {
-            const btn = document.getElementById('btn-guardar-perfil');
-            btn.innerText = "Guardando..."; btn.disabled = true;
+        function abrirAdminEdit(n) {
+            document.getElementById('seccion-perfil').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
+            document.getElementById('admin-negocio-id').value = n.id; document.getElementById('admin-nivel-intencion').value = '0';
+            document.getElementById('admin-nombre').value = n.nombre_negocio; document.getElementById('admin-desc').value = n.descripcion || '';
+            document.getElementById('admin-wa').value = n.enlace_whatsapp || ''; document.getElementById('admin-cat').value = n.categoria || 'Servicios';
+            document.getElementById('admin-imagen-url').value = n.imagen_url || '';
+            const estaAbierto = n.esta_abierto !== false; 
+            document.getElementById('admin-estado-apertura').checked = estaAbierto; document.getElementById('label-estado-apertura').innerText = estaAbierto ? "Abierto" : "Cerrado";
+            setearHorariosUI(n.horarios);
+            
+            const nivel = n.nivel_pago || 0;
+            document.getElementById('admin-nivel-badge').innerText = "Nivel Actual: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
+            const btnGuardar = document.getElementById('btn-guardar-admin');
+            btnGuardar.innerText = "Guardar Cambios Básicos"; btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado'); btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
 
-            const payload = {
-                nombre_completo: document.getElementById('perfil-nombre').value,
-                telefono: document.getElementById('perfil-telefono').value,
-                direccion: document.getElementById('perfil-direccion').value,
-                latitud: document.getElementById('perfil-lat').value,
-                longitud: document.getElementById('perfil-lng').value
-            };
-
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_perfil', payload: payload } });
-
-            btn.innerText = "Guardar Perfil"; btn.disabled = false;
-            if (error || !data.success) mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
-            else mostrarNotificacion("¡Perfil guardado!", "exito");
+            configurarPermisos(nivel); configurarPestanaVerificacion(n.estado_verificacion);
+            
+            // Cargar datos especiales según el nivel
+            if(nivel >= 2) {
+                document.getElementById('lista-productos').innerHTML = ''; cargarProductosMenu(n.id);
+                document.getElementById('lista-servicios').innerHTML = ''; cargarServicios(n.id);
+                document.getElementById('lista-citas-negocio').innerHTML = ''; cargarAgendaNegocio(n.id);
+            }
+            
+            document.getElementById('seccion-lista-negocios').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden');
+            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
+            actualizarPreview(); cambiarPestana('basico');
         }
 
+        function cerrarAdminNegocio() {
+            document.getElementById('seccion-admin-negocio').classList.add('hidden');
+            document.getElementById('seccion-lista-negocios').classList.remove('hidden');
+            document.getElementById('seccion-crear-negocio').classList.remove('hidden');
+            document.getElementById('seccion-perfil').classList.remove('hidden'); // Restaurar perfil
+            cargarMisNegocios();
+        }
+
+        function cambiarPestana(tab) {
+            ['basico', 'diseno', 'menu', 'servicios', 'agenda', 'verif'].forEach(t => {
+                let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
+                let btn = document.getElementById('tab-'+t);
+                if(btn) {
+                    if(btn.classList.contains('text-blue-500')) { btn.classList.remove('border-b-2', 'border-blue-500'); } 
+                    else { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
+                }
+            });
+            let targetPanel = document.getElementById('panel-'+tab); if(targetPanel) targetPanel.classList.remove('hidden');
+            let activeBtn = document.getElementById('tab-'+tab);
+            if(activeBtn) {
+                if(tab === 'verif') { activeBtn.classList.add('border-b-2', 'border-blue-500'); activeBtn.classList.remove('text-gray-400'); } 
+                else { activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
+            }
+        }
+
+        function configurarPermisos(nivel) {
+            if (nivel >= 1) {
+                document.getElementById('tab-diseno').innerText = "Diseño & Banner";
+                document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-diseno').innerText = "Banner 🔒";
+                document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden');
+            }
+
+            if (nivel >= 2) {
+                document.getElementById('tab-menu').innerText = "Menú Comida";
+                document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden');
+                document.getElementById('tab-servicios').innerText = "Servicios";
+                document.getElementById('panel-servicios').querySelector('.bg-white').classList.remove('hidden'); // Mostrar form servicios
+                document.getElementById('tab-agenda').innerText = "Mi Agenda";
+            } else {
+                document.getElementById('tab-menu').innerText = "Menú Comida 🔒";
+                document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden');
+                document.getElementById('tab-servicios').innerText = "Servicios 🔒";
+                document.getElementById('tab-agenda').innerText = "Mi Agenda 🔒";
+            }
+        }
+
+        function actualizarPreview() {
+            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre del Negocio';
+            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Escribe tu descripción...';
+            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría';
+
+            const imgUrl = document.getElementById('admin-imagen-url').value;
+            const bannerCont = document.getElementById('preview-banner-container');
+            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
+
+            if (imgUrl && nivel >= 1) { document.getElementById('preview-banner').src = imgUrl; bannerCont.classList.remove('hidden'); } 
+            else { bannerCont.classList.add('hidden'); }
+
+            if (nivel >= 2) {
+                document.getElementById('preview-btn-menu').classList.remove('hidden');
+                document.getElementById('preview-btn-agenda').classList.remove('hidden');
+            } else {
+                document.getElementById('preview-btn-menu').classList.add('hidden');
+                document.getElementById('preview-btn-agenda').classList.add('hidden');
+            }
+        }
+
+        // ------------------ CRUD ESCRITURAS NEGOCIO BÁSICO ------------------
         async function guardarNegocioSeguro() {
-            const btn = document.getElementById('btn-guardar-admin');
-            btn.disabled = true; 
+            const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; 
             const id = document.getElementById('admin-negocio-id').value;
             const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
             
             btn.innerText = nivelIntencion > 0 ? "Preparando pago..." : "Guardando...";
-
             const payloadDatos = {
-                nombre_negocio: document.getElementById('admin-nombre').value,
-                descripcion: document.getElementById('admin-desc').value,
-                enlace_whatsapp: document.getElementById('admin-wa').value,
-                categoria: document.getElementById('admin-cat').value,
-                imagen_url: document.getElementById('admin-imagen-url').value,
-                horarios: obtenerHorariosDeUI(),
+                nombre_negocio: document.getElementById('admin-nombre').value, descripcion: document.getElementById('admin-desc').value,
+                enlace_whatsapp: document.getElementById('admin-wa').value, categoria: document.getElementById('admin-cat').value,
+                imagen_url: document.getElementById('admin-imagen-url').value, horarios: obtenerHorariosDeUI(),
                 esta_abierto: document.getElementById('admin-estado-apertura').checked 
             };
 
             if(!payloadDatos.nombre_negocio || !payloadDatos.enlace_whatsapp) {
-                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error");
-                btn.disabled = false; btn.innerText = nivelIntencion > 0 ? "Continuar al Pago Seguro 🔒" : "Guardar Cambios";
-                return;
+                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return;
             }
 
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
-                body: { accion: 'guardar_negocio', id_negocio: id, payload: payloadDatos }
-            });
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payloadDatos } });
 
             if (error || !data.success) {
-                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
-                btn.disabled = false; btn.innerText = "Guardar Cambios";
-                return;
+                mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return;
             }
 
-            const idGenerado = data.id_negocio;
-            document.getElementById('admin-negocio-id').value = idGenerado;
+            const idGenerado = data.id_negocio; document.getElementById('admin-negocio-id').value = idGenerado;
 
             if (nivelIntencion > 0 && !id) {
                 btn.innerText = "Redirigiendo a Stripe...";
                 const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
                 await iniciarFlujoStripeInterno(nivelIntencion, priceId, idGenerado);
             } else {
-                mostrarNotificacion("¡Datos guardados!", "exito");
-                btn.disabled = false; btn.innerText = "Guardar Cambios";
-                cerrarAdminNegocio();
+                mostrarNotificacion("¡Datos guardados!"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos";
             }
         }
 
+        // ------------------ CRUD PRODUCTOS (RESTAURANTE/TIENDA) ------------------
+        async function cargarProductosMenu(anuncioId) {
+            const { data } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id');
+            const lista = document.getElementById('lista-productos');
+            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`;
+            lista.innerHTML = data.map(p => `
+                <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <div>
+                        <p class="text-sm font-bold ${p.disponible ? 'text-tm-azul-oscuro' : 'text-gray-400 line-through'}">${p.nombre}</p>
+                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" ${p.disponible !== false ? 'checked' : ''} onchange="toggleProductoSeguro('${p.id}', this.checked)"><div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div></label>
+                        <button onclick="eliminarProductoSeguro('${p.id}')" class="text-gray-400 hover:text-red-500 transition">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
         async function agregarProductoSeguro() {
             const anuncioId = document.getElementById('admin-negocio-id').value;
-            if(!anuncioId) { mostrarNotificacion("Guarda los datos básicos primero", "error"); return; }
-            
-            const nombre = document.getElementById('prod-nombre').value;
-            const precio = document.getElementById('prod-precio').value;
-            if(!nombre || !precio) { mostrarNotificacion("Nombre y precio obligatorios", "error"); return; }
-
-            const payloadDatos = {
-                anuncio_id: anuncioId,
-                nombre: nombre,
-                precio: precio,
-                descripcion: document.getElementById('prod-desc').value
-            };
-
+            if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
+            const payloadDatos = { anuncio_id: anuncioId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value };
             const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: payloadDatos } });
-
-            if (error || !data.success) {
-                mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
-            } else {
-                document.getElementById('prod-nombre').value = ''; 
-                document.getElementById('prod-precio').value = ''; 
-                document.getElementById('prod-desc').value = '';
-                cargarProductosMenu(anuncioId);
-            }
+            if (error || !data.success) mostrarNotificacion("Error", "error"); 
+            else { document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = ''; cargarProductosMenu(anuncioId); }
         }
-
         async function eliminarProductoSeguro(prodId) {
             if(!confirm("¿Eliminar producto?")) return;
             const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: prodId } });
-            if (error || !data.success) mostrarNotificacion("Error: " + (error?.message || data?.error), "error");
-            else cargarProductosMenu(document.getElementById('admin-negocio-id').value);
+            if(!error) cargarProductosMenu(document.getElementById('admin-negocio-id').value);
         }
-
         async function toggleProductoSeguro(prodId, estaDisponible) {
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'toggle_producto', producto_id: prodId, disponible: estaDisponible } });
-            if (error || !data.success) {
-                mostrarNotificacion("Error al actualizar producto.", "error");
-                cargarProductosMenu(document.getElementById('admin-negocio-id').value); 
-            }
+            const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'toggle_producto', producto_id: prodId, disponible: estaDisponible } });
+            if (error) cargarProductosMenu(document.getElementById('admin-negocio-id').value); 
         }
 
-        async function solicitarVerificacion() {
-            const idNegocio = document.getElementById('admin-negocio-id').value;
-            if(!idNegocio) return mostrarNotificacion("Guarda los datos básicos del negocio primero.", "error");
-
-            const responsable = document.getElementById('verif-nombre').value;
-            const urlFrente = document.getElementById('url-ine-frente').value;
-            const urlReverso = document.getElementById('url-ine-reverso').value;
-
-            if(!urlFrente || !urlReverso) return mostrarNotificacion("Debes subir las dos fotos del INE.", "error");
-
-            const btn = document.getElementById('btn-enviar-verif');
-            btn.disabled = true; btn.innerText = "Enviando...";
-
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
-                body: { accion: 'solicitar_verificacion', id_negocio: idNegocio, responsable_nombre: responsable, ine_frente_url: urlFrente, ine_reverso_url: urlReverso }
-            });
-
-            if (error || !data.success) {
-                mostrarNotificacion("Error al enviar solicitud.", "error");
-                btn.disabled = false; btn.innerText = "Enviar Documentos";
-            } else {
-                mostrarNotificacion("¡Solicitud enviada exitosamente!", "exito");
-                cerrarAdminNegocio();
-            }
+        // ------------------ CRUD SERVICIOS Y AGENDA (PROFESIONALES) ------------------
+        async function cargarServicios(anuncioId) {
+            const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id');
+            const lista = document.getElementById('lista-servicios');
+            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin servicios.</p>`;
+            lista.innerHTML = data.map(p => `
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between">
+                    <div><p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p><p class="text-xs text-gray-500">${p.duracion_minutos} min - $${p.precio}</p></div>
+                </div>
+            `).join('');
+        }
+        async function agregarServicioSeguro() {
+            const anuncioId = document.getElementById('admin-negocio-id').value;
+            if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
+            const payload = { anuncio_id: anuncioId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value };
+            const { error } = await clienteSupabase.from('servicios').insert([payload]); // Insert directo para agilizar
+            if (!error) { mostrarNotificacion("Servicio guardado"); cargarServicios(anuncioId); document.getElementById('serv-nombre').value=''; } else { mostrarNotificacion("Error al guardar", "error"); }
+        }
+        async function cargarAgendaNegocio(anuncioId) {
+            const { data } = await clienteSupabase.from('citas').select('*, perfiles(nombre_completo, telefono), servicios(nombre)').eq('anuncio_id', anuncioId).order('fecha_cita', { ascending: true });
+            const lista = document.getElementById('lista-citas-negocio');
+            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin citas próximas.</p>`;
+            lista.innerHTML = data.map(c => `
+                <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-tm-azul">
+                    <p class="text-xs font-bold text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)} a ${c.hora_fin.substring(0,5)}</p>
+                    <p class="font-black text-tm-azul-oscuro text-lg">${c.perfiles?.nombre_completo || 'Paciente'}</p>
+                    <p class="text-sm text-gray-600">${c.servicios?.nombre}</p>
+                </div>
+            `).join('');
         }
 
-        // ------------------ IMÁGENES SEGURAS ------------------
-        async function procesarSubidaImagen(event, bucketName, inputId, labelId, actualizaPreview) {
-            const file = event.target.files[0];
-            if(!file) return;
-            if(file.size > 2 * 1024 * 1024) return mostrarNotificacion("Máximo 2MB", "error");
-            
-            document.getElementById(labelId).innerText = "Subiendo... ⏳";
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${usuarioActual.id}_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-            
-            try {
-                const { error } = await clienteSupabase.storage.from(bucketName).upload(fileName, file);
-                if (error) throw error;
-
-                let rutaParaGuardar = '';
-                if (bucketName === 'verificaciones') {
-                    rutaParaGuardar = fileName; // En bucket privado solo guardamos nombre
-                } else {
-                    const { data: { publicUrl } } = clienteSupabase.storage.from(bucketName).getPublicUrl(fileName);
-                    rutaParaGuardar = publicUrl;
-                }
-
-                document.getElementById(inputId).value = rutaParaGuardar;
-                document.getElementById(labelId).innerText = "¡Guardada! ✅";
-                if(actualizaPreview) actualizarPreview();
-            } catch (error) {
-                document.getElementById(labelId).innerText = "Error al subir.";
-                mostrarNotificacion("Error al guardar en " + bucketName, "error");
-            }
+        // ------------------ FUNCIONES MODAL RESERVA ------------------
+        async function buscarHorarios() {
+            const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value };
+            if(!p.servicio_id || !p.fecha) return;
+            const cont = document.getElementById('contenedor-horarios-libres');
+            cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } });
+            if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3">Error.</p>';
+            if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Sin horarios libres ❌</p>';
+            cont.innerHTML = data.disponibles.map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white">${h}</button>`).join('');
+        }
+        async function confirmarCita(hora) {
+            const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, cliente_id: usuarioActual.id, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, hora_inicio: hora };
+            if(!confirm(`¿Agendar cita el ${p.fecha} a las ${hora}?`)) return;
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: p } });
+            if (error || !data?.success) { mostrarNotificacion("Horario ocupado", "error"); buscarHorarios(); } else { mostrarNotificacion("¡Cita agendada!"); document.getElementById('modal-agendar').classList.add('hidden'); cargarMisCitas(); }
         }
 
-        // ------------------ NAVEGACIÓN Y UI GENERAL ------------------
+        // ------------------ UTILIDADES (VERIFICACIÓN / IMAGEN / MAPA) ------------------
         function inicializarMapa(lat, lng) {
             document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
             setTimeout(() => {
@@ -638,185 +735,33 @@
                     map = L.map('mapa-perfil').setView([lat, lng], 13);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    marker.on('dragend', function () { 
-                        document.getElementById('perfil-lat').value = marker.getLatLng().lat; 
-                        document.getElementById('perfil-lng').value = marker.getLatLng().lng; 
-                    });
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                        document.getElementById('perfil-lat').value = e.latlng.lat; 
-                        document.getElementById('perfil-lng').value = e.latlng.lng;
-                    });
-                } else {
-                    map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); 
-                }
+                    marker.on('dragend', function () { document.getElementById('perfil-lat').value = marker.getLatLng().lat; document.getElementById('perfil-lng').value = marker.getLatLng().lng; });
+                    map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng; });
+                } else { map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); }
             }, 300);
         }
-
-        function abrirAdminNuevo(nivelDeseado) {
-            document.getElementById('seccion-perfil').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            document.getElementById('admin-titulo').innerText = "Creando Nuevo Negocio";
-            document.getElementById('admin-negocio-id').value = '';
-            document.getElementById('admin-nivel-intencion').value = nivelDeseado;
-            
-            ['admin-nombre', 'admin-desc', 'admin-wa', 'admin-imagen-url', 'url-ine-frente', 'url-ine-reverso', 'verif-nombre'].forEach(id => document.getElementById(id).value = '');
-            ['estado-subida', 'estado-frente', 'estado-reverso'].forEach(id => document.getElementById(id).innerText = '');
-            
-            document.getElementById('admin-estado-apertura').checked = true;
-            document.getElementById('label-estado-apertura').innerText = "Abierto";
-            setearHorariosUI(null);
-
-            const btnGuardar = document.getElementById('btn-guardar-admin');
-            if (nivelDeseado > 0) {
-                document.getElementById('admin-nivel-badge').innerText = "Creando: " + (nivelDeseado===1 ? "Pro" : "Elite");
-                btnGuardar.innerText = "Continuar al Pago Seguro 🔒";
-                btnGuardar.classList.replace('bg-tm-dorado', 'bg-blue-600');
-                btnGuardar.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
-            } else {
-                document.getElementById('admin-nivel-badge').innerText = "Creando: Básico";
-                btnGuardar.innerText = "Crear Negocio Gratis";
-                btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado');
-                btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
-            }
-
-            configurarPermisos(nivelDeseado); 
-            configurarPestanaVerificacion('no_solicitado');
-            document.getElementById('seccion-lista-negocios').classList.add('hidden');
-            document.getElementById('seccion-crear-negocio').classList.add('hidden');
-            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
-            actualizarPreview();
-            cambiarPestana('basico');
-        }
-
-        function abrirAdminEdit(n) {
-            document.getElementById('seccion-perfil').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
-            document.getElementById('admin-negocio-id').value = n.id;
-            document.getElementById('admin-nivel-intencion').value = '0';
-
-            document.getElementById('admin-nombre').value = n.nombre_negocio;
-            document.getElementById('admin-desc').value = n.descripcion || '';
-            document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
-            document.getElementById('admin-cat').value = n.categoria || 'Servicios';
-            document.getElementById('admin-imagen-url').value = n.imagen_url || '';
-            
-            const estaAbierto = n.esta_abierto !== false; 
-            document.getElementById('admin-estado-apertura').checked = estaAbierto;
-            document.getElementById('label-estado-apertura').innerText = estaAbierto ? "Abierto" : "Cerrado";
-            setearHorariosUI(n.horarios);
-            
-            const nivel = n.nivel_pago || 0;
-            document.getElementById('admin-nivel-badge').innerText = "Nivel Actual: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
-            
-            const btnGuardar = document.getElementById('btn-guardar-admin');
-            btnGuardar.innerText = "Guardar Cambios";
-            btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado');
-            btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
-
-            configurarPermisos(nivel);
-            configurarPestanaVerificacion(n.estado_verificacion);
-            if(nivel >= 2) cargarProductosMenu(n.id);
-            
-            document.getElementById('seccion-lista-negocios').classList.add('hidden');
-            document.getElementById('seccion-crear-negocio').classList.add('hidden');
-            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
-            actualizarPreview();
-            cambiarPestana('basico');
-        }
-
-        function cerrarAdminNegocio() {
-            document.getElementById('seccion-admin-negocio').classList.add('hidden');
-            document.getElementById('seccion-lista-negocios').classList.remove('hidden');
-            document.getElementById('seccion-crear-negocio').classList.remove('hidden');
-            cargarMisNegocios();
-        }
-
-        function cambiarPestana(tab) {
-            ['basico', 'diseno', 'menu', 'verif'].forEach(t => {
-                document.getElementById('panel-'+t).classList.add('hidden');
-                let btn = document.getElementById('tab-'+t);
-                if(btn.classList.contains('text-blue-500')) { btn.classList.remove('border-b-2', 'border-blue-500'); } 
-                else { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
-            });
-            document.getElementById('panel-'+tab).classList.remove('hidden');
-            let activeBtn = document.getElementById('tab-'+tab);
-            if(tab === 'verif') { activeBtn.classList.add('border-b-2', 'border-blue-500'); } 
-            else { activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
-        }
-
-        function configurarPermisos(nivel) {
-            if (nivel >= 1) {
-                document.getElementById('tab-diseno').innerText = "Diseño & Banner";
-                document.getElementById('bloqueo-diseno').classList.add('hidden');
-                document.getElementById('contenido-diseno').classList.remove('hidden');
-            } else {
-                document.getElementById('tab-diseno').innerText = "Banner 🔒";
-                document.getElementById('bloqueo-diseno').classList.remove('hidden');
-                document.getElementById('contenido-diseno').classList.add('hidden');
-            }
-
-            if (nivel >= 2) {
-                document.getElementById('tab-menu').innerText = "Tu Menú Interactivo";
-                document.getElementById('bloqueo-menu').classList.add('hidden');
-                document.getElementById('contenido-menu').classList.remove('hidden');
-            } else {
-                document.getElementById('tab-menu').innerText = "Menú 🔒";
-                document.getElementById('bloqueo-menu').classList.remove('hidden');
-                document.getElementById('contenido-menu').classList.add('hidden');
-            }
-        }
-
         function configurarPestanaVerificacion(estado) {
-            document.getElementById('estado-verif-pendiente').classList.add('hidden');
-            document.getElementById('estado-verif-aprobado').classList.add('hidden');
-            document.getElementById('form-verif').classList.add('hidden');
-
-            if (estado === 'aprobado') { document.getElementById('estado-verif-aprobado').classList.remove('hidden'); } 
-            else if (estado === 'pendiente') { document.getElementById('estado-verif-pendiente').classList.remove('hidden'); } 
-            else { document.getElementById('form-verif').classList.remove('hidden'); }
+            document.getElementById('estado-verif-pendiente').classList.add('hidden'); document.getElementById('estado-verif-aprobado').classList.add('hidden'); document.getElementById('form-verif').classList.add('hidden');
+            if (estado === 'aprobado') { document.getElementById('estado-verif-aprobado').classList.remove('hidden'); } else if (estado === 'pendiente') { document.getElementById('estado-verif-pendiente').classList.remove('hidden'); } else { document.getElementById('form-verif').classList.remove('hidden'); }
         }
-
-        function actualizarPreview() {
-            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre Negocio';
-            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Escribe tu descripción...';
-            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría';
-
-            const imgUrl = document.getElementById('admin-imagen-url').value;
-            const bannerCont = document.getElementById('preview-banner-container');
-            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
-            
-            const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
-
-            if (imgUrl && nivel >= 1) {
-                document.getElementById('preview-banner').src = imgUrl;
-                bannerCont.classList.remove('hidden');
-            } else {
-                bannerCont.classList.add('hidden');
-            }
-
-            if (nivel >= 2) document.getElementById('preview-btn-menu').classList.remove('hidden');
-            else document.getElementById('preview-btn-menu').classList.add('hidden');
-        }
-
-        function iniciarMejoraDirecta(nivel, priceId) {
-            const anuncioId = document.getElementById('admin-negocio-id').value;
-            if(!anuncioId) { mostrarNotificacion("Guarda el negocio primero en la pestaña Básicos", "error"); return; }
-            iniciarFlujoStripeInterno(nivel, priceId, anuncioId);
-        }
-
-        async function iniciarFlujoStripeInterno(nivel, priceId, anuncioId) {
+        async function procesarSubidaImagen(event, bucketName, inputId, labelId, actualizaPreview) {
+            const file = event.target.files[0]; if(!file) return; if(file.size > 2 * 1024 * 1024) return mostrarNotificacion("Máximo 2MB", "error");
+            document.getElementById(labelId).innerText = "Subiendo... ⏳";
+            const fileExt = file.name.split('.').pop(); const fileName = `${usuarioActual.id}_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
             try {
-                const response = await fetch(URL_EDGE_FUNCTION, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ anuncioId, nivel, priceId, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href.split('?')[0] })
-                });
-                const session = await response.json();
-                if (session.url) window.location.href = session.url;
-            } catch (error) { mostrarNotificacion("Error con Stripe", "error"); }
+                const { error } = await clienteSupabase.storage.from(bucketName).upload(fileName, file); if (error) throw error;
+                let ruta = bucketName === 'verificaciones' ? fileName : clienteSupabase.storage.from(bucketName).getPublicUrl(fileName).data.publicUrl;
+                document.getElementById(inputId).value = ruta; document.getElementById(labelId).innerText = "¡Guardada! ✅"; if(actualizaPreview) actualizarPreview();
+            } catch (error) { document.getElementById(labelId).innerText = "Error"; mostrarNotificacion("Error al subir", "error"); }
+        }
+        async function solicitarVerificacion() {
+            const idNegocio = document.getElementById('admin-negocio-id').value; if(!idNegocio) return mostrarNotificacion("Guarda los datos básicos", "error");
+            const btn = document.getElementById('btn-enviar-verif'); btn.disabled = true; btn.innerText = "Enviando...";
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'solicitar_verificacion', id_negocio: idNegocio, responsable_nombre: document.getElementById('verif-nombre').value, ine_frente_url: document.getElementById('url-ine-frente').value, ine_reverso_url: document.getElementById('url-ine-reverso').value } });
+            if (error || !data.success) { mostrarNotificacion("Error", "error"); btn.disabled = false; btn.innerText = "Enviar Documentos"; } else { mostrarNotificacion("¡Solicitud enviada!"); cerrarAdminNegocio(); }
+        }
+        async function iniciarFlujoStripeInterno(nivel, priceId, anuncioId) {
+            try { const response = await fetch(URL_EDGE_FUNCTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ anuncioId, nivel, priceId, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href.split('?')[0] }) }); const session = await response.json(); if (session.url) window.location.href = session.url; } catch (error) { mostrarNotificacion("Error con Stripe", "error"); }
         }
     </script>
 </body>
