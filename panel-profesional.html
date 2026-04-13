@@ -19,10 +19,11 @@
     </script>
     <style>
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); min-height: 600px; }
-        .fc-event { cursor: pointer; border: none !important; padding: 2px 4px; border-radius: 4px; }
-        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; }
+        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1.5rem; padding: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); min-height: 650px; border: 1px solid #e5e7eb; }
+        .fc-event { cursor: pointer; border: none !important; padding: 4px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; text-transform: capitalize; border-radius: 10px; }
         .fc .fc-button-primary:hover { background-color: #143653 !important; }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: #f3f4f6 !important; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
@@ -32,103 +33,93 @@
     <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
             <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-            <p class="text-sm text-gray-500 mt-1">Administra tus servicios, agenda y pacientes de Vive Tres Marías.</p>
+            <p class="text-sm text-gray-500 mt-1">Administra tus servicios y agenda en <b>Vive Tres Marías</b>.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="index.html" class="bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition text-sm">🏠 Inicio</a>
-            <a href="panel.html" class="bg-tm-azul text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition text-sm">👤 Mi Perfil</a>
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold shadow-sm hover:bg-gray-50 transition text-sm flex items-center gap-2">🏠 Inicio</a>
+            <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-tm-azul-oscuro transition text-sm flex items-center gap-2">👤 Mi Perfil</a>
         </div>
     </div>
 
     <div id="si-auth" class="max-w-7xl mx-auto">
-        <div class="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
             
-            <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50/50">
-                <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
+            <div class="w-full lg:w-5/12 flex flex-col border-r border-gray-100 bg-gray-50/30">
+                <div class="flex gap-1 p-4 border-b border-gray-100 bg-white overflow-x-auto scrollbar-hide">
                     <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap">Datos</button>
-                    <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Banner</button>
                     <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Servicios</button>
                     <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Mi Calendario</button>
                 </div>
 
                 <div class="p-6 flex-grow overflow-y-auto">
-                    <div id="panel-basico" class="space-y-4">
+                    <div id="panel-basico" class="space-y-5">
                         <input type="hidden" id="admin-negocio-id">
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Nombre del Consultorio</label>
-                            <input type="text" id="admin-nombre" class="w-full p-3 bg-white border border-gray-300 rounded-xl mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                            <input type="text" id="admin-nombre" class="w-full p-4 bg-white border border-gray-200 rounded-2xl mt-1 focus:ring-2 focus:ring-tm-azul outline-none shadow-sm">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp de Atención</label>
-                            <input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-xl mt-1 outline-none">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Profesional</label>
+                            <input type="number" id="admin-wa" class="w-full p-4 bg-white border border-gray-200 rounded-2xl mt-1 outline-none shadow-sm">
                         </div>
-                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Horarios Semanales</h4>
-                            <div id="contenedor-horarios" class="space-y-2"></div>
+                        <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
+                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Horarios de Apertura</h4>
+                            <div id="contenedor-horarios" class="space-y-3"></div>
                         </div>
-                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado text-white py-4 rounded-xl font-black shadow-lg hover:bg-yellow-600 transition">GUARDAR CONFIGURACIÓN</button>
+                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado text-white py-5 rounded-2xl font-black shadow-xl hover:scale-[1.02] transition-transform active:scale-95">GUARDAR CAMBIOS</button>
                     </div>
 
-                    <div id="panel-diseno" class="hidden space-y-4">
-                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-white">
-                            <label class="text-sm font-bold text-gray-700 block mb-4">Imagen de Portada / Banner</label>
-                            <input type="file" id="admin-imagen-file" accept="image/*" class="hidden" onchange="subirBanner(event)">
-                            <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl font-bold inline-block hover:bg-tm-azul-oscuro">Seleccionar Imagen</label>
-                            <p id="estado-subida" class="text-xs mt-3 text-tm-azul font-bold"></p>
-                        </div>
-                    </div>
-
-                    <div id="panel-servicios" class="hidden space-y-4">
-                        <div class="bg-tm-azul-oscuro p-5 rounded-2xl text-white shadow-xl">
-                            <h4 class="font-bold mb-4 flex items-center gap-2">✨ Nuevo Servicio</h4>
+                    <div id="panel-servicios" class="hidden space-y-6">
+                        <div class="bg-tm-azul-oscuro p-6 rounded-[2rem] text-white shadow-2xl">
+                            <h4 class="font-bold mb-4 flex items-center gap-2 text-lg">✨ Crear Servicio</h4>
                             <div class="grid grid-cols-2 gap-3 mb-3">
-                                <input type="text" id="serv-nombre" placeholder="Ej: Consulta" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none">
-                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none">
+                                <input type="text" id="serv-nombre" placeholder="Nombre" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none placeholder:text-white/40">
+                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none placeholder:text-white/40">
                             </div>
-                            <input type="number" id="serv-duracion" placeholder="Minutos (Ej: 60)" class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-sm mb-3 outline-none">
-                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado text-tm-azul-oscuro py-3 rounded-xl font-black text-sm uppercase">Añadir a la lista</button>
+                            <input type="number" id="serv-duracion" placeholder="Duración en minutos (Ej: 60)" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-sm mb-4 outline-none placeholder:text-white/40">
+                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase tracking-wider">Añadir Servicio</button>
                         </div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase mt-6">Tus Servicios Activos</h4>
-                        <div id="lista-servicios" class="space-y-2"></div>
+                        <div id="lista-servicios" class="space-y-3"></div>
                     </div>
 
                     <div id="panel-agenda" class="hidden space-y-4">
-                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-4 rounded-2xl font-black shadow-lg flex items-center justify-center gap-2 hover:bg-red-600 transition">🛑 BLOQUEAR DÍA / CITA EXTERNA</button>
+                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg flex items-center justify-center gap-3 hover:bg-red-600 transition tracking-tight">
+                            🛑 BLOQUEAR DÍA / CONSULTA EXTERNA
+                        </button>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
                         <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="w-full lg:w-1/2 bg-gray-100 p-4 md:p-6 flex flex-col">
-                <div id="contenedor-calendario-full" class="flex-grow bg-white rounded-3xl shadow-inner p-4 overflow-hidden">
-                    <div id="calendar" class="h-full"></div>
-                </div>
+            <div class="w-full lg:w-7/12 bg-gray-50/50 p-4 md:p-8 flex flex-col">
+                <div id="calendar" class="h-full"></div>
             </div>
         </div>
     </div>
 
-    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Bloqueo Manual 🛑</h3>
-            <p class="text-sm text-gray-500 mb-6">Usa esto para cirugías, vacaciones o consultas agendadas fuera de la app.</p>
+    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl">
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Reserva Manual 🛑</h3>
+            <p class="text-xs text-gray-400 mb-6">El espacio quedará ocupado y nadie podrá agendar en esta hora.</p>
             <div class="space-y-4">
-                <input type="text" id="bloqueo-titulo" placeholder="Motivo (Ej: Paciente Juan Pérez)" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                <input type="text" id="bloqueo-titulo" placeholder="Nombre o Motivo" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 <input type="date" id="bloqueo-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] font-bold ml-2">INICIO</label><input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl"></div>
-                    <div><label class="text-[10px] font-bold ml-2">FIN</label><input type="time" id="bloqueo-fin" class="w-full p-4 bg-gray-50 border rounded-2xl"></div>
+                    <input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                    <input type="time" id="bloqueo-fin" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 </div>
             </div>
             <div class="flex gap-3 mt-8">
-                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-4 font-bold text-gray-400">Cancelar</button>
-                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-lg">Confirmar</button>
+                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-4 font-bold text-gray-400">Cerrar</button>
+                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-xl">Confirmar</button>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY_AQUI'; // Reemplazar con la real
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let calendar = null;
@@ -140,8 +131,12 @@
             clienteSupabase.auth.onAuthStateChange((event, session) => {
                 if (session) {
                     usuarioActual = session.user;
-                    const idNegocio = new URLSearchParams(window.location.search).get('id');
-                    if (idNegocio) cargarTodo(idNegocio);
+                    // Limpieza automática del ID de la URL
+                    let idUrl = new URLSearchParams(window.location.search).get('id');
+                    if (idUrl) {
+                        const idLimpio = idUrl.replace('eq.', '');
+                        cargarTodo(idLimpio);
+                    }
                 } else {
                     window.location.href = 'index.html';
                 }
@@ -150,26 +145,28 @@
 
         function renderizarUIHorarios() {
             document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
-                <div class="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
-                    <label class="flex items-center gap-2 w-24 cursor-pointer">
-                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" checked>
-                        <span class="text-xs font-bold text-gray-700">${DIAS[d]}</span>
+                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="flex items-center gap-2 w-28 cursor-pointer">
+                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded border-gray-300" checked>
+                        <span class="text-[11px] font-black text-tm-azul-oscuro uppercase tracking-tighter">${DIAS[d]}</span>
                     </label>
                     <div class="flex items-center gap-1 flex-grow">
-                        <input type="time" class="hora-abre p-1 border rounded text-xs w-full" value="09:00">
-                        <span class="text-gray-400">-</span>
-                        <input type="time" class="hora-cierra p-1 border rounded text-xs w-full" value="18:00">
+                        <input type="time" class="hora-abre p-1 border rounded-lg text-[10px] w-full" value="09:00">
+                        <span class="text-gray-300 text-[10px]">/</span>
+                        <input type="time" class="hora-cierra p-1 border rounded-lg text-[10px] w-full" value="18:00">
                     </div>
                 </div>
             `).join('');
         }
 
         async function cargarTodo(id) {
-            const { data: n } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            const { data: n, error } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            if (error) return console.error("Error Supabase:", error);
+            
             if (n) {
                 document.getElementById('admin-negocio-id').value = n.id;
-                document.getElementById('admin-nombre').value = n.nombre_negocio;
-                document.getElementById('admin-wa').value = n.enlace_whatsapp;
+                document.getElementById('admin-nombre').value = n.nombre_negocio || '';
+                document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 if (n.horarios) setearHorariosUI(n.horarios);
                 
                 cargarServicios(n.id);
@@ -181,9 +178,9 @@
             const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN);
             const l = document.getElementById('lista-servicios');
             l.innerHTML = (data || []).map(s => `
-                <div class="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                    <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400">${s.duracion_minutos} min | $${s.precio}</p></div>
-                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-xs bg-red-50 px-3 py-1 rounded-full">Borrar</button>
+                <div class="flex justify-between items-center p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p></div>
+                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 px-4 py-2 rounded-xl uppercase tracking-widest hover:bg-red-500 hover:text-white transition">Borrar</button>
                 </div>
             `).join('');
         }
@@ -198,7 +195,7 @@
             };
             const { error } = await clienteSupabase.from('servicios').insert([p]);
             if (!error) {
-                notificar("Servicio añadido");
+                notificar("¡Servicio Creado!");
                 cargarServicios(idN);
                 document.getElementById('serv-nombre').value = '';
                 document.getElementById('serv-precio').value = '';
@@ -206,7 +203,7 @@
         }
 
         async function eliminarServicio(id) {
-            if (confirm("¿Eliminar este servicio?")) {
+            if (confirm("¿Eliminar este servicio definitivamente?")) {
                 await clienteSupabase.from('servicios').delete().eq('id', id);
                 cargarServicios(document.getElementById('admin-negocio-id').value);
             }
@@ -224,12 +221,11 @@
                 start: `${c.fecha_cita}T${c.hora_inicio}`,
                 end: `${c.fecha_cita}T${c.hora_fin}`,
                 backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
-                extendedProps: { esBloqueo: c.estado === 'bloqueado' }
+                borderColor: 'transparent'
             }));
 
-            const calendarEl = document.getElementById('calendar');
             if (calendar) calendar.destroy();
-            calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 locale: 'es',
                 initialView: 'timeGridWeek',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
@@ -237,8 +233,9 @@
                 slotMinTime: '06:00:00',
                 slotMaxTime: '22:00:00',
                 allDaySlot: false,
+                height: 'auto',
                 eventClick: (info) => {
-                    if (confirm("¿Deseas cancelar/eliminar este registro?")) {
+                    if (confirm("¿Deseas eliminar este registro de la agenda?")) {
                         cancelarCitaOwner(info.event.id);
                     }
                 }
@@ -253,13 +250,13 @@
                 fecha: document.getElementById('bloqueo-fecha').value,
                 hora_inicio: document.getElementById('bloqueo-inicio').value,
                 hora_fin: document.getElementById('bloqueo-fin').value,
-                titulo: document.getElementById('bloqueo-titulo').value || 'Bloqueo Manual'
+                titulo: document.getElementById('bloqueo-titulo').value || 'Reserva Manual'
             };
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { 
+            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { 
                 body: { accion: 'bloquear_espacio', payload } 
             });
             if (!error) {
-                notificar("Espacio bloqueado");
+                notificar("Espacio reservado con éxito");
                 document.getElementById('modal-bloqueo').classList.add('hidden');
                 cargarAgendaYCalendario(idN);
             }
@@ -273,25 +270,24 @@
         }
 
         function cambiarPestana(tab) {
-            ['basico', 'diseno', 'servicios', 'agenda'].forEach(t => {
+            ['basico', 'servicios', 'agenda'].forEach(t => {
                 document.getElementById('panel-'+t).classList.add('hidden');
                 document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
                 document.getElementById('tab-'+t).classList.add('text-gray-400');
             });
             document.getElementById('panel-'+tab).classList.remove('hidden');
             document.getElementById('tab-'+tab).classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
-            if (tab === 'agenda' && calendar) setTimeout(() => calendar.updateSize(), 100);
+            if (calendar) setTimeout(() => calendar.updateSize(), 100);
         }
 
         function notificar(m) {
             const el = document.createElement('div');
-            el.className = "bg-tm-azul-oscuro text-white px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm animate-bounce";
+            el.className = "bg-tm-azul-oscuro text-white px-6 py-4 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-widest animate-bounce";
             el.innerText = m;
             document.getElementById('toast-container').appendChild(el);
             setTimeout(() => el.remove(), 3000);
         }
 
-        // Helpers Horarios
         function setearHorariosUI(hJSON) {
             [1,2,3,4,5,6,0].forEach((d, idx) => {
                 const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
@@ -324,7 +320,7 @@
                 horarios: obtenerHorariosUI()
             };
             const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-            if (!error) notificar("Configuración guardada ✅");
+            if (!error) notificar("¡Configuración Guardada! ✅");
         }
     </script>
 </body>
