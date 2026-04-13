@@ -15,7 +15,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
+<body class="bg-gray-50 min-h-screen font-sans relative">
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul p-3 relative">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -30,7 +30,7 @@
         </div>
     </header>
 
-    <main class="max-w-xl mx-auto p-4 mt-6">
+    <main class="max-w-xl mx-auto p-4 mt-6 relative z-10">
         <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-tm-azul-oscuro">
             <h1 class="text-2xl font-black text-tm-azul-oscuro mb-6 text-center">Panel Airbnb</h1>
             
@@ -57,7 +57,7 @@
         </div>
     </main>
 
-    <div style="position: fixed; right: 200%; top: 0;">
+    <div id="contenedor-poster" style="display: none;">
         <div id="plantilla-poster" style="width: 800px; height: 1050px; background: white; border: 30px solid #22527b; padding: 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
             
             <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 350px; margin-bottom: 30px;">
@@ -119,6 +119,22 @@
         }
 
         function generarPosterPDF() {
+            const btn = document.querySelector('#seccion-pdf button');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Creando archivo...";
+            btn.disabled = true;
+
+            // 1. MAGIA: Mostrarlo temporalmente en la posición 0,0 por detrás del contenido
+            const contenedor = document.getElementById('contenedor-poster');
+            contenedor.style.display = 'block';
+            contenedor.style.position = 'absolute';
+            contenedor.style.top = '0';
+            contenedor.style.left = '0';
+            contenedor.style.zIndex = '-9999';
+
+            // 2. MAGIA: Forzar al navegador a ir arriba del todo para que no recorte nada
+            window.scrollTo(0, 0);
+
             const element = document.getElementById('plantilla-poster');
             const nombreLimpio = document.getElementById('airbnb-nombre').value.replace(/[^a-z0-9]/gi, '_');
             
@@ -129,13 +145,20 @@
                 html2canvas: { 
                     scale: 2, 
                     useCORS: true, 
-                    windowWidth: 800
+                    scrollY: 0, // Clave para evitar el corte superior
+                    scrollX: 0,
+                    windowWidth: 800,
+                    windowHeight: 1050
                 },
-                // AQUÍ ESTÁ LA MAGIA: Obligamos a que el PDF sea EXACTAMENTE de 800x1050 px, sin hacer "auto-ajustes".
                 jsPDF: { unit: 'px', format: [800, 1050], orientation: 'portrait' }
             };
             
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set(opt).from(element).save().then(() => {
+                // 3. Volver a ocultarlo todo al terminar
+                contenedor.style.display = 'none';
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            });
         }
     </script>
 </body>
