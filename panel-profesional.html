@@ -4,177 +4,291 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Vive Tres Marías</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37' } } } }
-    </script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js'></script>
 
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+    </script>
     <style>
-        .fc { background: white; border-radius: 1.5rem; padding: 1rem; border: 1px solid #e5e7eb; min-height: 600px; }
-        .fc-event { cursor: pointer; border-radius: 6px; padding: 2px 4px; border: none !important; }
-        .fc .fc-button-primary { background-color: #22527b !important; border-radius: 8px; border: none; font-weight: bold; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1.5rem; padding: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); min-height: 650px; border: 1px solid #e5e7eb; }
+        .fc-event { cursor: pointer; border: none !important; padding: 4px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; text-transform: capitalize; border-radius: 10px; }
+        .fc .fc-button-primary:hover { background-color: #143653 !important; }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: #f3f4f6 !important; }
     </style>
 </head>
+<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
 
-<body class="bg-gray-50 p-4 md:p-8">
-    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2"></div>
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b pb-6">
+    <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
-            <h2 class="text-3xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-            <p class="text-sm text-gray-500">Gestión de agenda y bloqueos manuales.</p>
+            <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
+            <p class="text-sm text-gray-500 mt-1">Administra tus servicios y agenda en <b>Vive Tres Marías</b>.</p>
         </div>
-        <div class="flex gap-2">
-            <a href="index.html" class="bg-white border px-5 py-2.5 rounded-xl font-bold text-sm">🏠 Inicio</a>
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold shadow-sm hover:bg-gray-50 transition text-sm flex items-center gap-2">🏠 Inicio</a>
+            <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-tm-azul-oscuro transition text-sm flex items-center gap-2">👤 Mi Perfil</a>
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-4 space-y-6">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
-                <div class="flex gap-2 mb-6 border-b pb-4">
-                    <button onclick="switchTab('basico')" id="t-basico" class="flex-1 font-bold text-tm-azul border-b-2 border-tm-azul pb-2">Info</button>
-                    <button onclick="switchTab('agenda')" id="t-agenda" class="flex-1 font-bold text-gray-400 pb-2">Agenda</button>
+    <div id="si-auth" class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
+            
+            <div class="w-full lg:w-5/12 flex flex-col border-r border-gray-100 bg-gray-50/30">
+                <div class="flex gap-1 p-4 border-b border-gray-100 bg-white overflow-x-auto scrollbar-hide">
+                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap">Datos</button>
+                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Servicios</button>
+                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Mi Calendario</button>
                 </div>
 
-                <div id="p-basico" class="space-y-4">
-                    <input type="hidden" id="admin-negocio-id">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Consultorio</label>
-                        <input type="text" id="admin-nombre" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none focus:ring-2 focus:ring-tm-azul mt-1">
+                <div class="p-6 flex-grow overflow-y-auto">
+                    <div id="panel-basico" class="space-y-5">
+                        <input type="hidden" id="admin-negocio-id">
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                            <input type="text" id="admin-nombre" class="w-full p-4 bg-white border border-gray-200 rounded-2xl mt-1 focus:ring-2 focus:ring-tm-azul outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Profesional</label>
+                            <input type="number" id="admin-wa" class="w-full p-4 bg-white border border-gray-200 rounded-2xl mt-1 outline-none shadow-sm">
+                        </div>
+                        <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
+                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Horarios de Apertura</h4>
+                            <div id="contenedor-horarios" class="space-y-3"></div>
+                        </div>
+                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado text-white py-5 rounded-2xl font-black shadow-xl hover:scale-[1.02] transition-transform active:scale-95">GUARDAR CAMBIOS</button>
                     </div>
-                    <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-azul text-white py-4 rounded-2xl font-black shadow-lg">GUARDAR CAMBIOS</button>
-                </div>
 
-                <div id="p-agenda" class="hidden space-y-4">
-                    <button onclick="document.getElementById('modal-bloqueo').classList.remove('hidden')" class="w-full bg-red-500 text-white p-4 rounded-2xl font-black shadow-lg hover:bg-red-600 transition">
-                        🛑 NUEVO BLOQUEO / CITA EXT.
-                    </button>
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-[11px] text-blue-700">
-                        <b>Tip:</b> Los bloqueos aparecen en rojo y las citas de la plataforma en azul. Haz clic en un evento para eliminarlo.
+                    <div id="panel-servicios" class="hidden space-y-6">
+                        <div class="bg-tm-azul-oscuro p-6 rounded-[2rem] text-white shadow-2xl">
+                            <h4 class="font-bold mb-4 flex items-center gap-2 text-lg">✨ Crear Servicio</h4>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <input type="text" id="serv-nombre" placeholder="Nombre" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none placeholder:text-white/40">
+                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none placeholder:text-white/40">
+                            </div>
+                            <input type="number" id="serv-duracion" placeholder="Duración en minutos (Ej: 60)" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-sm mb-4 outline-none placeholder:text-white/40">
+                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase tracking-wider">Añadir Servicio</button>
+                        </div>
+                        <div id="lista-servicios" class="space-y-3"></div>
+                    </div>
+
+                    <div id="panel-agenda" class="hidden space-y-4">
+                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg flex items-center justify-center gap-3 hover:bg-red-600 transition tracking-tight">
+                            🛑 REGISTRAR CITA EXTERNA / BLOQUEO
+                        </button>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
+                        <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="lg:col-span-8">
-            <div id="calendar"></div>
+            <div class="w-full lg:w-7/12 bg-gray-50/50 p-4 md:p-8 flex flex-col">
+                <div id="calendar" class="h-full"></div>
+            </div>
         </div>
     </div>
 
-    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl">
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Bloqueo Manual 🛑</h3>
-            <div class="space-y-4 mt-4">
-                <input type="text" id="b-titulo" placeholder="Ej: Cita Externa: Juan Pérez" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
-                <input type="date" id="b-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Reserva Manual 🛑</h3>
+            <p class="text-xs text-gray-400 mb-6">El espacio quedará ocupado y nadie podrá agendar en esta hora.</p>
+            <div class="space-y-4">
+                <input type="text" id="bloqueo-titulo" placeholder="Nombre o Motivo" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                <input type="date" id="bloqueo-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Inicia</label>
-                        <input type="time" id="b-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Termina</label>
-                        <input type="time" id="b-fin" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
-                    </div>
+                    <input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                    <input type="time" id="bloqueo-fin" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 </div>
             </div>
             <div class="flex gap-3 mt-8">
                 <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-4 font-bold text-gray-400">Cerrar</button>
-                <button onclick="ejecutarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-xl">Confirmar</button>
+                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-xl">Confirmar</button>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY';
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_KEY = 'TU_ANON_KEY_AQUI'; 
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let calendar = null;
+        let usuarioActual = null;
+        const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
         document.addEventListener("DOMContentLoaded", () => {
-            sb.auth.onAuthStateChange((evt, session) => {
-                if(session) {
-                    const id = new URLSearchParams(window.location.search).get('id');
-                    if(id) initPanel(id.replace('eq.', ''));
+            renderizarUIHorarios();
+            clienteSupabase.auth.onAuthStateChange((event, session) => {
+                if (session) {
+                    usuarioActual = session.user;
+                    let idUrl = new URLSearchParams(window.location.search).get('id');
+                    if (idUrl) cargarTodo(idUrl.replace('eq.', ''));
                 } else { window.location.href = 'index.html'; }
             });
         });
 
-        async function initPanel(id) {
-            const { data: n } = await sb.from('anuncios').select('*').eq('id', id).single();
-            if(n) {
+        // CARGA INICIAL
+        async function cargarTodo(id) {
+            const { data: n } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            if (n) {
                 document.getElementById('admin-negocio-id').value = n.id;
-                document.getElementById('admin-nombre').value = n.nombre_negocio;
-                cargarCalendario(n.id);
+                document.getElementById('admin-nombre').value = n.nombre_negocio || '';
+                document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
+                if (n.horarios) setearHorariosUI(n.horarios);
+                cargarServicios(n.id);
+                cargarAgendaYCalendario(n.id);
             }
         }
 
-        async function cargarCalendario(idN) {
-            const { data: citas } = await sb.from('citas').select('*, perfiles:cliente_id(nombre_completo)').eq('anuncio_id', idN).neq('estado', 'cancelada');
-            
-            const events = (citas || []).map(c => ({
+        // GESTIÓN DE SERVICIOS (RECUPERADA)
+        async function cargarServicios(idN) {
+            const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN);
+            const l = document.getElementById('lista-servicios');
+            l.innerHTML = (data || []).map(s => `
+                <div class="flex justify-between items-center p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p></div>
+                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 px-4 py-2 rounded-xl uppercase tracking-widest hover:bg-red-500 hover:text-white transition">Borrar</button>
+                </div>
+            `).join('');
+        }
+
+        async function agregarServicio() {
+            const idN = document.getElementById('admin-negocio-id').value;
+            const p = {
+                anuncio_id: idN,
+                nombre: document.getElementById('serv-nombre').value,
+                precio: parseFloat(document.getElementById('serv-precio').value) || 0,
+                duracion_minutos: parseInt(document.getElementById('serv-duracion').value) || 60
+            };
+            const { error } = await clienteSupabase.from('servicios').insert([p]);
+            if (!error) { notificar("¡Servicio Creado!"); cargarServicios(idN); }
+        }
+
+        async function eliminarServicio(id) {
+            if (confirm("¿Eliminar este servicio?")) {
+                await clienteSupabase.from('servicios').delete().eq('id', id);
+                cargarServicios(document.getElementById('admin-negocio-id').value);
+            }
+        }
+
+        // AGENDA Y CALENDARIO
+        async function cargarAgendaYCalendario(idN) {
+            const { data } = await clienteSupabase.from('citas')
+                .select('*, perfiles:cliente_id(nombre_completo)')
+                .eq('anuncio_id', idN)
+                .neq('estado', 'cancelada');
+
+            const eventos = (data || []).map(c => ({
                 id: c.id,
-                title: c.estado === 'bloqueado' ? `🚫 ${c.notas}` : `✅ ${c.perfiles?.nombre_completo || 'Cita'}`,
+                title: c.estado === 'bloqueado' ? `🛑 ${c.notes || c.notas || 'Bloqueo'}` : `✅ ${c.perfiles?.nombre_completo || 'Cita'}`,
                 start: `${c.fecha_cita}T${c.hora_inicio}`,
                 end: `${c.fecha_cita}T${c.hora_fin}`,
-                backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b'
+                backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
+                borderColor: 'transparent'
             }));
 
-            if(calendar) calendar.destroy();
+            if (calendar) calendar.destroy();
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                locale: 'es', initialView: 'timeGridWeek', events,
-                slotMinTime: '07:00:00', slotMaxTime: '21:00:00', allDaySlot: false,
-                eventClick: (info) => {
-                    if(confirm("¿Eliminar este registro?")) eliminarRegistro(info.event.id);
-                }
+                locale: 'es', initialView: 'timeGridWeek', events: eventos,
+                slotMinTime: '06:00:00', slotMaxTime: '22:00:00', height: 'auto',
+                eventClick: (info) => { if (confirm("¿Eliminar registro?")) cancelarCitaOwner(info.event.id); }
             });
             calendar.render();
         }
 
-        async function ejecutarBloqueo() {
+        // FUNCIONES EDGE
+        async function guardarBloqueo() {
             const payload = {
                 anuncio_id: document.getElementById('admin-negocio-id').value,
-                fecha: document.getElementById('b-fecha').value,
-                hora_inicio: document.getElementById('b-inicio').value,
-                hora_fin: document.getElementById('b-fin').value,
-                titulo: document.getElementById('b-titulo').value
+                fecha: document.getElementById('bloqueo-fecha').value,
+                hora_inicio: document.getElementById('bloqueo-inicio').value,
+                hora_fin: document.getElementById('bloqueo-fin').value,
+                titulo: document.getElementById('bloqueo-titulo').value
             };
-
-            const { data, error } = await sb.functions.invoke('gestionar-agendas', { 
-                body: { accion: 'bloquear_espacio', payload } 
-            });
-
-            if(!error) {
+            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
+            if (!error) {
+                notificar("Bloqueo registrado");
                 document.getElementById('modal-bloqueo').classList.add('hidden');
-                cargarCalendario(payload.anuncio_id);
-                toast("Espacio Bloqueado");
+                cargarAgendaYCalendario(payload.anuncio_id);
             }
         }
 
-        async function eliminarRegistro(id) {
-            const { error } = await sb.functions.invoke('gestionar-agendas', { 
-                body: { accion: 'cancelar_cita', payload: { cita_id: id } } 
+        async function cancelarCitaOwner(id) {
+            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } });
+            if (!error) {
+                notificar("Registro eliminado");
+                cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value);
+            }
+        }
+
+        // HORARIOS Y UI
+        function renderizarUIHorarios() {
+            document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
+                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="flex items-center gap-2 w-28 cursor-pointer">
+                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded">
+                        <span class="text-[11px] font-black text-tm-azul-oscuro uppercase">${DIAS[d]}</span>
+                    </label>
+                    <div class="flex items-center gap-1">
+                        <input type="time" class="hora-abre p-1 border rounded-lg text-[10px]">
+                        <input type="time" class="hora-cierra p-1 border rounded-lg text-[10px]">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setearHorariosUI(hJSON) {
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
+                if (hJSON[d]) {
+                    r.querySelector('.dia-abierto').checked = hJSON[d].abierto;
+                    r.querySelector('.hora-abre').value = hJSON[d].abre;
+                    r.querySelector('.hora-cierra').value = hJSON[d].cierra;
+                }
             });
-            if(!error) cargarCalendario(document.getElementById('admin-negocio-id').value);
         }
 
-        function switchTab(t) {
-            document.getElementById('p-basico').classList.toggle('hidden', t !== 'basico');
-            document.getElementById('p-agenda').classList.toggle('hidden', t !== 'agenda');
-            document.getElementById('t-basico').className = t === 'basico' ? 'flex-1 font-bold text-tm-azul border-b-2 border-tm-azul pb-2' : 'flex-1 font-bold text-gray-400 pb-2';
-            document.getElementById('t-agenda').className = t === 'agenda' ? 'flex-1 font-bold text-tm-azul border-b-2 border-tm-azul pb-2' : 'flex-1 font-bold text-gray-400 pb-2';
-            if(calendar) setTimeout(() => calendar.updateSize(), 100);
+        function obtenerHorariosUI() {
+            let h = {};
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
+                h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value };
+            });
+            return h;
         }
 
-        function toast(m) {
+        async function guardarNegocioSeguro() {
+            const id = document.getElementById('admin-negocio-id').value;
+            const payload = { nombre_negocio: document.getElementById('admin-nombre').value, enlace_whatsapp: document.getElementById('admin-wa').value, horarios: obtenerHorariosUI() };
+            const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
+            if (!error) notificar("Configuración Guardada ✅");
+        }
+
+        function cambiarPestana(tab) {
+            ['basico', 'servicios', 'agenda'].forEach(t => {
+                document.getElementById('panel-'+t).classList.add('hidden');
+                document.getElementById('tab-'+t).className = "font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap";
+            });
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            document.getElementById('tab-'+tab).className = "font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap";
+            if (calendar) setTimeout(() => calendar.updateSize(), 100);
+        }
+
+        function abrirModalBloqueo() { document.getElementById('modal-bloqueo').classList.remove('hidden'); }
+
+        function notificar(m) {
             const el = document.createElement('div');
-            el.className = "bg-tm-azul-oscuro text-white px-6 py-3 rounded-xl shadow-xl font-bold text-xs";
+            el.className = "bg-tm-azul-oscuro text-white px-6 py-4 rounded-2xl shadow-2xl font-black text-xs uppercase animate-bounce";
             el.innerText = m;
             document.getElementById('toast-container').appendChild(el);
             setTimeout(() => el.remove(), 3000);
