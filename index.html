@@ -10,7 +10,7 @@
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tres Marías">
     
@@ -175,19 +175,19 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        // --- FUNCIONES UI BÁSICAS ---
         function toggleMenuPrincipal() { document.getElementById('dropdown-principal').classList.toggle('hidden'); }
         document.addEventListener('click', (event) => { const menu = document.getElementById('dropdown-principal'); const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]'); if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) menu.classList.add('hidden'); });
 
-        // --- INICIALIZACIÓN (AQUÍ CARGAMOS LOS DATOS) ---
+        // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
             const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
             if (airbnbNombre) {
                 document.getElementById('banner-airbnb').classList.remove('hidden');
                 document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
             }
-            // ¡ESTO ES CLAVE PARA QUE LOS NEGOCIOS CARGUEN SI NO ESTÁS LOGUEADO!
-            cargarDatos(); 
+            
+            // Forzamos la carga de datos del directorio, pase lo que pase con la sesión.
+            cambiarModoPlataforma(); 
         });
 
         function limpiarModoAirbnb() {
@@ -197,6 +197,7 @@
         }
 
         // --- GESTIÓN DE SESIÓN ---
+        // AHORA SOLO SE USA PARA BOTONES Y OBTENER EL PERFIL
         clienteSupabase.auth.onAuthStateChange(async (event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
@@ -210,7 +211,6 @@
                 document.getElementById('btn-perfil').classList.toggle('hidden', document.getElementById('toggle-modo').checked);
             } else {
                 perfilUsuarioActual = null;
-                cambiarModoPlataforma();
             }
         });
 
@@ -231,6 +231,8 @@
                 if(usuarioActual && document.getElementById('btn-perfil')) document.getElementById('btn-perfil').classList.remove('hidden');
                 document.getElementById('label-modo-comprar').classList.replace('text-gray-400', 'text-tm-azul');
                 document.getElementById('label-modo-vender').classList.replace('text-tm-dorado', 'text-gray-400');
+                
+                // CARGAMOS EL DIRECTORIO
                 cargarDatos();
             }
         }
@@ -250,15 +252,15 @@
 
         function estaAbiertoAhora(a) {
             try {
-                if (a.esta_abierto === false) return false; // Forzado a cerrado
-                if (!a.horarios || typeof a.horarios !== 'object' || Object.keys(a.horarios).length === 0) return true; // Abierto por defecto
+                if (a.esta_abierto === false) return false; 
+                if (!a.horarios || typeof a.horarios !== 'object' || Object.keys(a.horarios).length === 0) return true; 
 
                 const ahora = new Date();
                 const diaSemana = ahora.getDay(); 
                 const horaActual = ahora.getHours() * 60 + ahora.getMinutes(); 
 
                 const hoy = a.horarios[diaSemana];
-                if (!hoy) return true; // Si no hay datos del día específico, asume abierto
+                if (!hoy) return true; 
                 if (!hoy.abierto) return false; 
                 if (!hoy.abre || !hoy.cierra) return true; 
 
@@ -269,7 +271,7 @@
 
                 return horaActual >= minAbre && horaActual <= minCierra;
             } catch(e) {
-                return true; // En caso de cualquier error con los datos, asumimos abierto para no afectar las ventas
+                return true; 
             }
         }
 
@@ -357,7 +359,7 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // --- LÓGICA DEL MENÚ Y AIRBNB ---
+        // --- LÓGICA DEL MENÚ Y PEDIDOS ---
         async function abrirMenu(negocio) {
             negocioActualPedido = negocio;
             carritoActual = {};
@@ -368,7 +370,6 @@
             const permitePedidos = negocio.nivel_pago >= 2;
             const negocioAbierto = estaAbiertoAhora(negocio);
 
-            // --- AUTOCOMPLETADO AIRBNB Y PERFIL ---
             const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
             const inputDir = document.getElementById('cliente-direccion');
             const inputNombre = document.getElementById('cliente-nombre');
@@ -393,7 +394,6 @@
                     inputNombre.value = ''; inputTel.value = ''; inputDir.value = '';
                 }
             }
-            // ----------------------------------------
             
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
