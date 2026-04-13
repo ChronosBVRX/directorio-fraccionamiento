@@ -86,7 +86,7 @@
                         <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg flex items-center justify-center gap-3 hover:bg-red-600 transition tracking-tight">
                             🛑 REGISTRAR CITA EXTERNA / BLOQUEO
                         </button>
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Agenda de Hoy</h4>
                         <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
                 </div>
@@ -101,9 +101,9 @@
     <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl">
             <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Reserva Manual 🛑</h3>
-            <p class="text-xs text-gray-400 mb-6">El espacio quedará ocupado y nadie podrá agendar en esta hora.</p>
+            <p class="text-xs text-gray-400 mb-6">Usa esto para pacientes externos o tiempo personal.</p>
             <div class="space-y-4">
-                <input type="text" id="bloqueo-titulo" placeholder="Nombre o Motivo" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                <input type="text" id="bloqueo-titulo" placeholder="Nombre del Paciente o Motivo" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 <input type="date" id="bloqueo-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
                 <div class="grid grid-cols-2 gap-4">
                     <input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
@@ -119,7 +119,7 @@
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY_AQUI'; 
+        const SUPABASE_KEY = 'TU_KEY_AQUI'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let calendar = null;
@@ -133,13 +133,30 @@
                     usuarioActual = session.user;
                     let idUrl = new URLSearchParams(window.location.search).get('id');
                     if (idUrl) cargarTodo(idUrl.replace('eq.', ''));
-                } else { window.location.href = 'index.html'; }
+                } else {
+                    window.location.href = 'index.html';
+                }
             });
         });
 
-        // CARGA INICIAL
+        function renderizarUIHorarios() {
+            document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
+                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="flex items-center gap-2 w-28 cursor-pointer">
+                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded border-gray-300" checked>
+                        <span class="text-[11px] font-black text-tm-azul-oscuro uppercase tracking-tighter">${DIAS[d]}</span>
+                    </label>
+                    <div class="flex items-center gap-1 flex-grow">
+                        <input type="time" class="hora-abre p-1 border rounded-lg text-[10px] w-full" value="09:00">
+                        <span class="text-gray-300 text-[10px]">/</span>
+                        <input type="time" class="hora-cierra p-1 border rounded-lg text-[10px] w-full" value="18:00">
+                    </div>
+                </div>
+            `).join('');
+        }
+
         async function cargarTodo(id) {
-            const { data: n } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            const { data: n, error } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
             if (n) {
                 document.getElementById('admin-negocio-id').value = n.id;
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
@@ -150,7 +167,6 @@
             }
         }
 
-        // GESTIÓN DE SERVICIOS (RECUPERADA)
         async function cargarServicios(idN) {
             const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN);
             const l = document.getElementById('lista-servicios');
@@ -171,17 +187,21 @@
                 duracion_minutos: parseInt(document.getElementById('serv-duracion').value) || 60
             };
             const { error } = await clienteSupabase.from('servicios').insert([p]);
-            if (!error) { notificar("¡Servicio Creado!"); cargarServicios(idN); }
+            if (!error) {
+                notificar("¡Servicio Creado!");
+                cargarServicios(idN);
+                document.getElementById('serv-nombre').value = '';
+                document.getElementById('serv-precio').value = '';
+            }
         }
 
         async function eliminarServicio(id) {
-            if (confirm("¿Eliminar este servicio?")) {
+            if (confirm("¿Eliminar este servicio definitivamente?")) {
                 await clienteSupabase.from('servicios').delete().eq('id', id);
                 cargarServicios(document.getElementById('admin-negocio-id').value);
             }
         }
 
-        // AGENDA Y CALENDARIO
         async function cargarAgendaYCalendario(idN) {
             const { data } = await clienteSupabase.from('citas')
                 .select('*, perfiles:cliente_id(nombre_completo)')
@@ -190,7 +210,7 @@
 
             const eventos = (data || []).map(c => ({
                 id: c.id,
-                title: c.estado === 'bloqueado' ? `🛑 ${c.notes || c.notas || 'Bloqueo'}` : `✅ ${c.perfiles?.nombre_completo || 'Cita'}`,
+                title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Ocupado'}` : `✅ ${c.perfiles?.nombre_completo || 'Cita App'}`,
                 start: `${c.fecha_cita}T${c.hora_inicio}`,
                 end: `${c.fecha_cita}T${c.hora_fin}`,
                 backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
@@ -199,52 +219,82 @@
 
             if (calendar) calendar.destroy();
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                locale: 'es', initialView: 'timeGridWeek', events: eventos,
-                slotMinTime: '06:00:00', slotMaxTime: '22:00:00', height: 'auto',
-                eventClick: (info) => { if (confirm("¿Eliminar registro?")) cancelarCitaOwner(info.event.id); }
+                locale: 'es',
+                initialView: 'timeGridWeek',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
+                events: eventos,
+                slotMinTime: '06:00:00',
+                slotMaxTime: '22:00:00',
+                allDaySlot: false,
+                height: 'auto',
+                eventClick: (info) => {
+                    if (confirm("¿Deseas eliminar este registro de la agenda?")) {
+                        cancelarCitaOwner(info.event.id);
+                    }
+                }
             });
             calendar.render();
         }
 
-        // FUNCIONES EDGE
         async function guardarBloqueo() {
+            const idN = document.getElementById('admin-negocio-id').value;
             const payload = {
-                anuncio_id: document.getElementById('admin-negocio-id').value,
+                anuncio_id: idN,
                 fecha: document.getElementById('bloqueo-fecha').value,
                 hora_inicio: document.getElementById('bloqueo-inicio').value,
                 hora_fin: document.getElementById('bloqueo-fin').value,
-                titulo: document.getElementById('bloqueo-titulo').value
+                titulo: document.getElementById('bloqueo-titulo').value || 'Reserva Manual'
             };
-            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
+
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { 
+                body: { accion: 'bloquear_espacio', payload } 
+            });
+
             if (!error) {
-                notificar("Bloqueo registrado");
+                notificar("Registro exitoso ✅");
                 document.getElementById('modal-bloqueo').classList.add('hidden');
-                cargarAgendaYCalendario(payload.anuncio_id);
+                // Limpiar campos
+                document.getElementById('bloqueo-titulo').value = '';
+                document.getElementById('bloqueo-fecha').value = '';
+                document.getElementById('bloqueo-inicio').value = '';
+                document.getElementById('bloqueo-fin').value = '';
+                cargarAgendaYCalendario(idN);
+            } else {
+                alert("Error al guardar: " + error.message);
             }
         }
 
         async function cancelarCitaOwner(id) {
-            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } });
+            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { 
+                body: { accion: 'cancelar_cita', payload: { cita_id: id } } 
+            });
             if (!error) {
                 notificar("Registro eliminado");
                 cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value);
             }
         }
 
-        // HORARIOS Y UI
-        function renderizarUIHorarios() {
-            document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
-                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
-                    <label class="flex items-center gap-2 w-28 cursor-pointer">
-                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded">
-                        <span class="text-[11px] font-black text-tm-azul-oscuro uppercase">${DIAS[d]}</span>
-                    </label>
-                    <div class="flex items-center gap-1">
-                        <input type="time" class="hora-abre p-1 border rounded-lg text-[10px]">
-                        <input type="time" class="hora-cierra p-1 border rounded-lg text-[10px]">
-                    </div>
-                </div>
-            `).join('');
+        function cambiarPestana(tab) {
+            ['basico', 'servicios', 'agenda'].forEach(t => {
+                document.getElementById('panel-'+t).classList.add('hidden');
+                document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
+                document.getElementById('tab-'+t).classList.add('text-gray-400');
+            });
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            document.getElementById('tab-'+tab).classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
+            if (calendar) setTimeout(() => calendar.updateSize(), 100);
+        }
+
+        function abrirModalBloqueo() {
+            document.getElementById('modal-bloqueo').classList.remove('hidden');
+        }
+
+        function notificar(m) {
+            const el = document.createElement('div');
+            el.className = "bg-tm-azul-oscuro text-white px-6 py-4 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-widest animate-bounce";
+            el.innerText = m;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
 
         function setearHorariosUI(hJSON) {
@@ -257,41 +307,29 @@
                 }
             });
         }
-
+        
         function obtenerHorariosUI() {
             let h = {};
             [1,2,3,4,5,6,0].forEach((d, idx) => {
                 const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
-                h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value };
+                h[d] = {
+                    abierto: r.querySelector('.dia-abierto').checked,
+                    abre: r.querySelector('.hora-abre').value,
+                    cierra: r.querySelector('.hora-cierra').value
+                };
             });
             return h;
         }
 
         async function guardarNegocioSeguro() {
             const id = document.getElementById('admin-negocio-id').value;
-            const payload = { nombre_negocio: document.getElementById('admin-nombre').value, enlace_whatsapp: document.getElementById('admin-wa').value, horarios: obtenerHorariosUI() };
+            const payload = {
+                nombre_negocio: document.getElementById('admin-nombre').value,
+                enlace_whatsapp: document.getElementById('admin-wa').value,
+                horarios: obtenerHorariosUI()
+            };
             const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
-            if (!error) notificar("Configuración Guardada ✅");
-        }
-
-        function cambiarPestana(tab) {
-            ['basico', 'servicios', 'agenda'].forEach(t => {
-                document.getElementById('panel-'+t).classList.add('hidden');
-                document.getElementById('tab-'+t).className = "font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap";
-            });
-            document.getElementById('panel-'+tab).classList.remove('hidden');
-            document.getElementById('tab-'+tab).className = "font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap";
-            if (calendar) setTimeout(() => calendar.updateSize(), 100);
-        }
-
-        function abrirModalBloqueo() { document.getElementById('modal-bloqueo').classList.remove('hidden'); }
-
-        function notificar(m) {
-            const el = document.createElement('div');
-            el.className = "bg-tm-azul-oscuro text-white px-6 py-4 rounded-2xl shadow-2xl font-black text-xs uppercase animate-bounce";
-            el.innerText = m;
-            document.getElementById('toast-container').appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+            if (!error) notificar("¡Configuración Guardada! ✅");
         }
     </script>
 </body>
