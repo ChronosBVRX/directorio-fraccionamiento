@@ -47,20 +47,18 @@
             
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 
-                <div id="contenedor-switch" class="hidden items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
-                    <label class="relative flex items-center cursor-pointer select-none">
+                <div id="contenedor-switch" class="hidden shrink-0">
+                    <label class="relative flex items-center cursor-pointer select-none w-[130px] sm:w-[160px] h-8 sm:h-9 bg-gray-100 rounded-xl border border-gray-200 shadow-inner p-1">
                         <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
                         
-                        <div class="w-[120px] sm:w-[150px] h-7 sm:h-8 relative flex items-center rounded-lg">
-                            <div class="absolute left-0 top-0 bottom-0 w-1/2 bg-white rounded-md shadow-[0_1px_3px_rgba(0,0,0,0.1)] border border-gray-200 transition-transform duration-300 ease-out peer-checked:translate-x-full peer-checked:border-tm-dorado"></div>
-                            
-                            <div id="label-modo-comprar" class="z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-tm-azul transition-colors duration-300">
-                                <span class="text-xs sm:text-sm">🛍️</span> <span class="hidden sm:inline">Comprar</span>
-                            </div>
-                            
-                            <div id="label-modo-vender" class="z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-400 transition-colors duration-300">
-                                <span class="text-xs sm:text-sm">🏪</span> <span class="hidden sm:inline">Vender</span>
-                            </div>
+                        <div class="absolute left-1 top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm border border-gray-200 transition-transform duration-300 ease-in-out peer-checked:translate-x-full"></div>
+                        
+                        <div id="label-modo-comprar" class="relative z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-tm-azul transition-colors duration-300">
+                            <span class="text-xs sm:text-sm">🛍️</span> <span class="hidden sm:inline">Comprar</span>
+                        </div>
+                        
+                        <div id="label-modo-vender" class="relative z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-400 transition-colors duration-300">
+                            <span class="text-xs sm:text-sm">🏪</span> <span class="hidden sm:inline">Vender</span>
                         </div>
                     </label>
                 </div>
