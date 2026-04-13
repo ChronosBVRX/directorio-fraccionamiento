@@ -58,7 +58,7 @@
     </main>
 
     <div id="contenedor-poster" style="display: none;">
-        <div id="plantilla-poster" style="width: 800px; height: 1050px; background: white; border: 30px solid #22527b; padding: 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
+        <div id="plantilla-poster" style="width: 800px; height: 1130px; background: white; border: 30px solid #22527b; padding: 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
             
             <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 350px; margin-bottom: 30px;">
             
@@ -84,7 +84,6 @@
             <p style="margin-top: 30px; color: #999; font-weight: bold; letter-spacing: 3px; font-size: 16px;">VIVETRESMARIAS.COM</p>
         </div>
     </div>
-
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
@@ -124,38 +123,39 @@
             btn.innerHTML = "⏳ Creando archivo...";
             btn.disabled = true;
 
-            // 1. MAGIA: Mostrarlo temporalmente en la posición 0,0 por detrás del contenido
+            // Ocultamos el header temporalmente para que no estorbe arriba
+            const header = document.querySelector('header');
+            header.style.display = 'none';
+
+            // Posicionamos el contenedor de forma segura para la captura
             const contenedor = document.getElementById('contenedor-poster');
             contenedor.style.display = 'block';
             contenedor.style.position = 'absolute';
             contenedor.style.top = '0';
             contenedor.style.left = '0';
-            contenedor.style.zIndex = '-9999';
-
-            // 2. MAGIA: Forzar al navegador a ir arriba del todo para que no recorte nada
+            
+            // Forzamos el scroll al principio
             window.scrollTo(0, 0);
 
             const element = document.getElementById('plantilla-poster');
             const nombreLimpio = document.getElementById('airbnb-nombre').value.replace(/[^a-z0-9]/gi, '_');
             
+            // Configuración optimizada
             const opt = {
                 margin: 0,
                 filename: `Poster_Airbnb_${nombreLimpio}.pdf`,
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { 
                     scale: 2, 
-                    useCORS: true, 
-                    scrollY: 0, // Clave para evitar el corte superior
-                    scrollX: 0,
-                    windowWidth: 800,
-                    windowHeight: 1050
+                    useCORS: true 
                 },
-                jsPDF: { unit: 'px', format: [800, 1050], orientation: 'portrait' }
+                jsPDF: { unit: 'px', format: [800, 1130], orientation: 'portrait' }
             };
             
             html2pdf().set(opt).from(element).save().then(() => {
-                // 3. Volver a ocultarlo todo al terminar
+                // Restauramos la vista devolviendo todo a la normalidad
                 contenedor.style.display = 'none';
+                header.style.display = 'flex'; // Volvemos a mostrar el header con su estilo original
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
             });
