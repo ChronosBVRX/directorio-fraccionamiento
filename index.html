@@ -175,81 +175,103 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        // --- FUNCIONES UI BÁSICAS ---
-        function toggleMenuPrincipal() { document.getElementById('dropdown-principal').classList.toggle('hidden'); }
-        document.addEventListener('click', (event) => { const menu = document.getElementById('dropdown-principal'); const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]'); if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) menu.classList.add('hidden'); });
+        function toggleMenuPrincipal() {
+            const menu = document.getElementById('dropdown-principal');
+            menu.classList.toggle('hidden');
+        }
 
-        // --- INICIALIZACIÓN UI ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
-            if (airbnbNombre) {
-                document.getElementById('banner-airbnb').classList.remove('hidden');
-                document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
+        document.addEventListener('click', (event) => {
+            const menu = document.getElementById('dropdown-principal');
+            const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]');
+            
+            if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) {
+                menu.classList.add('hidden');
             }
         });
 
-        function limpiarModoAirbnb() {
-            localStorage.removeItem('tm_airbnb_direccion'); 
-            localStorage.removeItem('tm_airbnb_nombre'); 
-            location.reload(); 
+        async function verificarRolAdmin(userId) {
+            try {
+                const { data, error } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', userId).single();
+                if (data && data.es_admin === true) {
+                    document.getElementById('btn-admin').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin').classList.add('hidden');
+                }
+            } catch (err) {}
         }
 
-        // --- GESTIÓN DE SESIÓN ---
-        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN' && event !== 'SIGNED_OUT') return;
+        async function cargarPerfilUsuario() {
+            if (!usuarioActual) return;
+            const { data, error } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .maybeSingle(); 
+            
+            if (data) {
+                perfilUsuarioActual = data;
+            }
+        }
 
+        clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
             document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
             if(usuarioActual) {
-                const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle();
-                perfilUsuarioActual = data;
-                if (data && data.es_admin) document.getElementById('btn-admin').classList.remove('hidden');
-                document.getElementById('btn-perfil').classList.toggle('hidden', document.getElementById('toggle-modo').checked);
+                cargarPerfilUsuario();
+                const isVendedor = document.getElementById('toggle-modo').checked;
+                document.getElementById('btn-perfil').classList.toggle('hidden', isVendedor);
+                verificarRolAdmin(usuarioActual.id);
             } else {
                 perfilUsuarioActual = null;
+                document.getElementById('toggle-modo').checked = false;
+                document.getElementById('btn-perfil').classList.add('hidden');
+                document.getElementById('btn-admin').classList.add('hidden');
+                cambiarModoPlataforma();
             }
-
-            cambiarModoPlataforma();
         });
 
         function cambiarModoPlataforma() {
-            const toggle = document.getElementById('toggle-modo');
-            const isVendedor = toggle ? toggle.checked : false;
+            const isVendedor = document.getElementById('toggle-modo').checked;
+            const labelComprar = document.getElementById('label-modo-comprar');
+            const labelVender = document.getElementById('label-modo-vender');
+            const btnPerfil = document.getElementById('btn-perfil');
+            const iframe = document.getElementById('panel-iframe');
 
             if(isVendedor) {
-                document.getElementById('panel-iframe').src = "panel.html?view=negocio";
-                document.getElementById('vista-directorio').classList.add('hidden');
-                document.getElementById('vista-iframe-container').classList.remove('hidden');
-                if(document.getElementById('btn-perfil')) document.getElementById('btn-perfil').classList.add('hidden');
-                document.getElementById('label-modo-comprar').classList.replace('text-tm-azul', 'text-gray-400');
-                document.getElementById('label-modo-vender').classList.replace('text-gray-400', 'text-tm-dorado');
+                iframe.src = "panel.html?view=negocio";
+                mostrarVista('panel');
+                if(btnPerfil) btnPerfil.classList.add('hidden');
+                labelComprar.classList.replace('text-tm-azul', 'text-gray-400');
+                labelVender.classList.replace('text-gray-400', 'text-tm-dorado');
             } else {
-                document.getElementById('vista-directorio').classList.remove('hidden');
-                document.getElementById('vista-iframe-container').classList.add('hidden');
-                if(usuarioActual && document.getElementById('btn-perfil')) document.getElementById('btn-perfil').classList.remove('hidden');
-                document.getElementById('label-modo-comprar').classList.replace('text-gray-400', 'text-tm-azul');
-                document.getElementById('label-modo-vender').classList.replace('text-tm-dorado', 'text-gray-400');
-                
-                cargarDatos();
+                mostrarVista('directorio');
+                if(btnPerfil && usuarioActual) btnPerfil.classList.remove('hidden');
+                labelComprar.classList.replace('text-gray-400', 'text-tm-azul');
+                labelVender.classList.replace('text-tm-dorado', 'text-gray-400');
             }
         }
 
         function abrirPerfil() {
-            document.getElementById('panel-iframe').src = "panel.html?view=perfil";
-            document.getElementById('vista-directorio').classList.add('hidden');
-            document.getElementById('vista-iframe-container').classList.remove('hidden');
+            const iframe = document.getElementById('panel-iframe');
+            iframe.src = "panel.html?view=perfil";
+            mostrarVista('panel');
         }
 
-        // --- CARGA DE DATOS Y HORARIOS ---
-        async function cargarDatos() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
-            todosLosAnuncios = data || [];
-            filtrar(document.querySelector('.active-filter')?.id.replace('btn-', '') || 'Todos');
+        function mostrarVista(vista) {
+            if(vista === 'directorio') {
+                document.getElementById('vista-directorio').classList.remove('hidden');
+                document.getElementById('vista-iframe-container').classList.add('hidden');
+                cargarDatos();
+            } else {
+                document.getElementById('vista-directorio').classList.add('hidden');
+                document.getElementById('vista-iframe-container').classList.remove('hidden');
+            }
         }
 
+        // --- FUNCIONES AVANZADAS DE HORARIO (Nuevas) ---
         function estaAbiertoAhora(a) {
             try {
                 if (a.esta_abierto === false) return false; 
@@ -298,42 +320,68 @@
             }
         }
 
+        async function cargarDatos() {
+            const { data, error } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            todosLosAnuncios = data || [];
+            
+            if(!document.getElementById('vista-directorio').classList.contains('hidden')) {
+                const navBtn = document.querySelector('.active-filter');
+                if (navBtn) {
+                    const filtroActivo = navBtn.id.replace('btn-', '');
+                    filtrar(filtroActivo);
+                } else {
+                    filtrar('Todos');
+                }
+            }
+        }
+
         function renderizar(lista) {
             const contenedor = document.getElementById('contenedor-anuncios');
             contenedor.innerHTML = '';
             
-            if (lista.length === 0) { 
-                contenedor.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">No hay negocios en esta categoría.</p>`; 
-                return; 
+            if (lista.length === 0) {
+                contenedor.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">No hay negocios aquí.</p>`;
+                return;
             }
 
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                
-                const estaAbierto = estaAbiertoAhora(a);
+                const estaAbierto = estaAbiertoAhora(a); // Integración de cálculo avanzado
                 const textoHorario = stringHorarioHoy(a.horarios);
                 
                 let badgeAntiguedad = '';
                 if (a.created_at) {
-                    const meses = Math.floor((new Date() - new Date(a.created_at)) / (1000 * 60 * 60 * 24 * 30.44));
-                    if (meses >= 3) badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="${meses} meses en la app">⭐ ${meses} MESES</span>`;
-                    else if (meses < 1) badgeAntiguedad = `<span class="bg-blue-100 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">NUEVO</span>`;
+                    const fechaCreacion = new Date(a.created_at);
+                    const ahora = new Date();
+                    const mesesDif = (ahora.getFullYear() - fechaCreacion.getFullYear()) * 12 + (ahora.getMonth() - fechaCreacion.getMonth());
+                    
+                    if (mesesDif >= 3) {
+                        badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="Generando confianza desde ${fechaCreacion.getFullYear()}">⭐ ${mesesDif} MESES</span>`;
+                    } else if (mesesDif < 1) {
+                        badgeAntiguedad = `<span class="bg-blue-100 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">NUEVO</span>`;
+                    }
                 }
 
-                let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Verificado">☑️</span>` : '';
+                let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
                 let botones = '';
                 if(tieneMenu) {
-                    if (estaAbierto) botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`;
-                    else botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                    if (estaAbierto) {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`;
+                    } else {
+                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                    }
                 } else if(a.nivel_pago === 1) {
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Menú</button>`;
                 } else {
                     let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
-                    if (estaAbierto) botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`;
-                    else botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                    if (estaAbierto) {
+                        botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`;
+                    } else {
+                        botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                    }
                 }
 
                 contenedor.innerHTML += `
@@ -359,7 +407,6 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // --- LÓGICA DEL MENÚ Y PEDIDOS ---
         async function abrirMenu(negocio) {
             negocioActualPedido = negocio;
             carritoActual = {};
@@ -368,37 +415,35 @@
             document.getElementById('cliente-notas').value = '';
 
             const permitePedidos = negocio.nivel_pago >= 2;
-            const negocioAbierto = estaAbiertoAhora(negocio);
+            const negocioAbierto = estaAbiertoAhora(negocio); // Se evalúa en tiempo real
 
-            // --- AUTOCOMPLETADO AIRBNB Y PERFIL ---
             const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
-            const inputDir = document.getElementById('cliente-direccion');
+            const inputDireccion = document.getElementById('cliente-direccion');
             const inputNombre = document.getElementById('cliente-nombre');
             const inputTel = document.getElementById('cliente-telefono');
 
             if (airbnbDir) {
-                inputDir.value = airbnbDir;
-                inputDir.setAttribute('readonly', 'true');
-                inputDir.classList.add('bg-gray-100', 'cursor-not-allowed');
-                
+                inputDireccion.value = airbnbDir;
+                inputDireccion.setAttribute('readonly', 'true');
+                inputDireccion.classList.add('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
                 inputNombre.value = perfilUsuarioActual ? (perfilUsuarioActual.nombre_completo || '') : '';
                 inputTel.value = perfilUsuarioActual ? (perfilUsuarioActual.telefono || '') : '';
             } else {
-                inputDir.removeAttribute('readonly');
-                inputDir.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                
+                inputDireccion.removeAttribute('readonly');
+                inputDireccion.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
                 if (perfilUsuarioActual) {
                     inputNombre.value = perfilUsuarioActual.nombre_completo || '';
                     inputTel.value = perfilUsuarioActual.telefono || '';
-                    inputDir.value = perfilUsuarioActual.direccion || '';
+                    inputDireccion.value = perfilUsuarioActual.direccion || '';
                 } else {
-                    inputNombre.value = ''; inputTel.value = ''; inputDir.value = '';
+                    inputNombre.value = '';
+                    inputTel.value = '';
+                    inputDireccion.value = '';
                 }
             }
             
             const contenedorLista = document.getElementById('menu-lista');
             contenedorLista.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">Cargando menú...</p>`;
-            
             const { data: productosLista } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', negocio.id).order('id', { ascending: true });
             
             if(!productosLista || productosLista.length === 0) {
@@ -432,12 +477,12 @@
                         <span id="cant-${index}" class="font-bold w-4 sm:w-5 text-center text-sm sm:text-base">0</span>
                         <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded shadow-sm text-tm-azul font-bold hover:bg-gray-50 flex items-center justify-center">+</button>
                     </div>` : ''}
-                </div>
-            `}).join('');
+                </div>`;
+            }).join('');
 
             contenedorLista.innerHTML = htmlLista;
-
             const divCarrito = document.getElementById('menu-carrito');
+            
             if(permitePedidos && productosLista.length > 0 && negocioAbierto) {
                 divCarrito.classList.remove('hidden');
                 actualizarTotal();
@@ -446,7 +491,9 @@
             }
         }
 
-        function cerrarMenu() { document.getElementById('modal-menu').classList.add('hidden'); }
+        function cerrarMenu() { 
+            document.getElementById('modal-menu').classList.add('hidden'); 
+        }
         
         function cambiarCantidad(index, cambio) {
             if(!carritoActual[index]) carritoActual[index] = 0;
@@ -508,16 +555,39 @@
             textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
 
             let numeroVendedor = negocioActualPedido.enlace_whatsapp ? negocioActualPedido.enlace_whatsapp.replace(/\D/g,'') : '';
-            if(numeroVendedor) window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`, '_blank');
-            else alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            if(numeroVendedor) {
+                window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`, '_blank');
+            } else {
+                alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+            }
 
             alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
             cerrarMenu();
         }
 
-        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.reload(); }
+        async function cerrarSesion() { 
+            await clienteSupabase.auth.signOut(); 
+            window.location.reload(); 
+        }
 
-        // --- PWA SERVICE WORKER ---
+        // CARGA INICIAL ROBUSTA
+        window.addEventListener('DOMContentLoaded', () => {
+            const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
+            if (airbnbNombre) {
+                document.getElementById('banner-airbnb').classList.remove('hidden');
+                document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
+            }
+            // Disparar carga de datos inmediatamente, no esperar a Supabase Auth
+            cargarDatos();
+        });
+
+        function limpiarModoAirbnb() {
+            localStorage.removeItem('tm_airbnb_direccion');
+            localStorage.removeItem('tm_airbnb_nombre');
+            location.reload();
+        }
+
+        // --- PWA SERVICE WORKER (De la nueva versión) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(err => {}));
         }
