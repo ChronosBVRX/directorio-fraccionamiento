@@ -14,10 +14,9 @@
     <style>
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1.5rem; padding: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); min-height: 650px; border: 1px solid #e5e7eb; }
-        .fc-event { cursor: pointer; border: none !important; padding: 4px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s; }
-        .fc-event:hover { transform: scale(1.02); }
+        .fc-event { cursor: pointer; border: none !important; padding: 4px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; }
         .fc .fc-button-primary { background-color: #22527b !important; border: none; font-weight: bold; border-radius: 10px; }
-        .fc-non-business { background: rgba(239, 68, 68, 0.05) !important; }
+        .fc-highlight { background: rgba(34, 82, 123, 0.2) !important; } /* Color de seleccion mejorado */
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
@@ -74,9 +73,10 @@
                     </div>
 
                     <div id="panel-agenda" class="hidden space-y-4">
-                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg">
+                        <button onclick="document.getElementById('modal-bloqueo').classList.remove('hidden')" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg">
                             🛑 REGISTRAR CITA EXTERNA / BLOQUEO
                         </button>
+                        <p class="text-xs text-center text-gray-500 italic mt-2">💡 Tip: Puedes arrastrar directamente en el calendario para bloquear horarios de forma rápida.</p>
                         <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
                         <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <div class="flex gap-3 mt-8">
-                <button onclick="cerrarModalBloqueo()" class="flex-1 py-4 font-bold text-gray-400">Cerrar</button>
+                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-4 font-bold text-gray-400">Cerrar</button>
                 <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-xl">Confirmar</button>
             </div>
         </div>
@@ -113,7 +113,7 @@
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let calendar = null;
-        let horariosGlobales = {};
+        let horariosGlobal = {}; // Variable para guardar el estado de los horarios actual
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -133,7 +133,7 @@
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 if (n.horarios) {
-                    horariosGlobales = n.horarios;
+                    horariosGlobal = n.horarios;
                     setearHorariosUI(n.horarios);
                 }
                 cargarServicios(n.id);
@@ -151,18 +151,19 @@
             `).join('');
         }
 
-        async function eliminarServicio(idS) {
-            if(confirm("¿Eliminar servicio?")) {
-                await clienteSupabase.from('servicios').delete().eq('id', idS);
-                cargarServicios(document.getElementById('admin-negocio-id').value);
-            }
-        }
-
         async function agregarServicio() {
             const idN = document.getElementById('admin-negocio-id').value;
             const p = { anuncio_id: idN, nombre: document.getElementById('serv-nombre').value, precio: parseFloat(document.getElementById('serv-precio').value) || 0, duracion_minutos: parseInt(document.getElementById('serv-duracion').value) || 60 };
             const { error } = await clienteSupabase.from('servicios').insert([p]);
             if (!error) { notificar("Servicio Creado"); cargarServicios(idN); }
+        }
+        
+        async function eliminarServicio(id) {
+            if(confirm('¿Eliminar servicio?')) {
+                await clienteSupabase.from('servicios').delete().eq('id', id);
+                cargarServicios(document.getElementById('admin-negocio-id').value);
+                notificar("Servicio eliminado");
+            }
         }
 
         async function cargarAgendaYCalendario(idN) {
@@ -175,25 +176,75 @@
                 backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b'
             }));
 
-            let bh = [];
-            for (let d in horariosGlobales) {
-                if (horariosGlobales[d].abierto) {
-                    bh.push({ daysOfWeek: [parseInt(d)], startTime: horariosGlobales[d].abre, endTime: horariosGlobales[d].cierra });
+            // Calcular limites de hora dinámicos y días ocultos basados en los horarios guardados
+            let slotMin = '06:00:00';
+            let slotMax = '22:00:00';
+            let diasOcultos = [];
+
+            if (horariosGlobal && Object.keys(horariosGlobal).length > 0) {
+                let minMinutos = 24 * 60;
+                let maxMinutos = 0;
+                
+                [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                    if (horariosGlobal[d] && horariosGlobal[d].abierto) {
+                        let abreArr = horariosGlobal[d].abre.split(':');
+                        let cierraArr = horariosGlobal[d].cierra.split(':');
+                        let minsAbre = parseInt(abreArr[0]) * 60 + parseInt(abreArr[1]);
+                        let minsCierra = parseInt(cierraArr[0]) * 60 + parseInt(cierraArr[1]);
+                        
+                        if (minsAbre < minMinutos) minMinutos = minsAbre;
+                        if (minsCierra > maxMinutos) maxMinutos = minsCierra;
+                    } else {
+                        diasOcultos.push(d); // Si está cerrado, lo agregamos a diasOcultos
+                    }
+                });
+
+                if (minMinutos < 24 * 60) {
+                    slotMin = `${String(Math.floor(minMinutos/60)).padStart(2,'0')}:${String(minMinutos%60).padStart(2,'0')}:00`;
+                }
+                if (maxMinutos > 0) {
+                    slotMax = `${String(Math.floor(maxMinutos/60)).padStart(2,'0')}:${String(maxMinutos%60).padStart(2,'0')}:00`;
                 }
             }
 
             if (calendar) calendar.destroy();
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                locale: 'es', initialView: 'timeGridWeek', events: eventos,
-                businessHours: bh,
-                slotMinTime: '06:00:00', slotMaxTime: '22:00:00', height: 'auto',
+                locale: 'es', 
+                initialView: 'timeGridWeek', 
+                events: eventos,
+                slotMinTime: slotMin, 
+                slotMaxTime: slotMax, 
+                hiddenDays: diasOcultos, // Ocultar días que el negocio no abre
+                height: 'auto',
+                selectable: true, // Permitir selección arrastrando
+                selectMirror: true,
+                select: function(info) {
+                    abrirModalBloqueoDeCalendario(info.startStr, info.endStr);
+                    calendar.unselect();
+                },
                 eventClick: (info) => { if (confirm("¿Eliminar registro?")) cancelarCitaOwner(info.event.id); }
             });
             calendar.render();
         }
 
-        function abrirModalBloqueo() { document.getElementById('modal-bloqueo').classList.remove('hidden'); }
-        function cerrarModalBloqueo() { document.getElementById('modal-bloqueo').classList.add('hidden'); }
+        // Nueva función para pre-rellenar el formulario desde el click en el calendario
+        function abrirModalBloqueoDeCalendario(startStr, endStr) {
+            // startStr usualmente viene como "YYYY-MM-DDTHH:mm:ss"
+            const startParts = startStr.split('T');
+            const endParts = endStr.split('T');
+
+            document.getElementById('bloqueo-fecha').value = startParts[0];
+
+            if (startParts.length > 1) {
+                document.getElementById('bloqueo-inicio').value = startParts[1].substring(0, 5);
+            }
+            if (endParts.length > 1) {
+                document.getElementById('bloqueo-fin').value = endParts[1].substring(0, 5);
+            }
+            
+            document.getElementById('bloqueo-titulo').value = ''; // Limpiar el titulo anterior
+            document.getElementById('modal-bloqueo').classList.remove('hidden');
+        }
 
         async function guardarBloqueo() {
             const idN = document.getElementById('admin-negocio-id').value;
@@ -204,12 +255,12 @@
                 hora_fin: document.getElementById('bloqueo-fin').value,
                 titulo: document.getElementById('bloqueo-titulo').value || 'Reserva Manual'
             };
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
+            const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
             if (!error) {
                 notificar("Registrado ✅");
-                cerrarModalBloqueo();
+                document.getElementById('modal-bloqueo').classList.add('hidden');
                 cargarAgendaYCalendario(idN);
-            } else { alert("Error: " + error.message); }
+            } else { alert("Error: No se pudo guardar. Revisa que el cliente_id y servicio_id en tu DB permitan nulos."); }
         }
 
         async function cancelarCitaOwner(id) {
@@ -229,7 +280,7 @@
 
         function renderizarUIHorarios() {
             document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
-                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border" data-dia="${d}">
+                <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border">
                     <label class="flex items-center gap-2 w-28 cursor-pointer">
                         <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" checked>
                         <span class="text-[11px] font-black text-tm-azul-oscuro uppercase">${DIAS[d]}</span>
@@ -243,12 +294,12 @@
         }
 
         function setearHorariosUI(hJSON) {
-            document.querySelectorAll('#contenedor-horarios > div').forEach(div => {
-                const d = div.getAttribute('data-dia');
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
                 if (hJSON[d]) {
-                    div.querySelector('.dia-abierto').checked = hJSON[d].abierto;
-                    div.querySelector('.hora-abre').value = hJSON[d].abre;
-                    div.querySelector('.hora-cierra').value = hJSON[d].cierra;
+                    r.querySelector('.dia-abierto').checked = hJSON[d].abierto;
+                    r.querySelector('.hora-abre').value = hJSON[d].abre;
+                    r.querySelector('.hora-cierra').value = hJSON[d].cierra;
                 }
             });
         }
@@ -256,12 +307,17 @@
         async function guardarNegocioSeguro() {
             const id = document.getElementById('admin-negocio-id').value;
             let h = {};
-            document.querySelectorAll('#contenedor-horarios > div').forEach(div => {
-                const d = div.getAttribute('data-dia');
-                h[String(d)] = { abierto: div.querySelector('.dia-abierto').checked, abre: div.querySelector('.hora-abre').value, cierra: div.querySelector('.hora-cierra').value };
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
+                h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value };
             });
             const { error } = await clienteSupabase.from('anuncios').update({ nombre_negocio: document.getElementById('admin-nombre').value, enlace_whatsapp: document.getElementById('admin-wa').value, horarios: h }).eq('id', id);
-            if (!error) { horariosGlobales = h; notificar("Guardado ✅"); cargarAgendaYCalendario(id); }
+            
+            if (!error) { 
+                notificar("Guardado ✅");
+                horariosGlobal = h; // Actualizar variable global
+                cargarAgendaYCalendario(id); // Recargar calendario para aplicar las restricciones de dias/horas visuales
+            }
         }
 
         function notificar(m) {
