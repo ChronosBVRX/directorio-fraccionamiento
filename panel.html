@@ -224,8 +224,8 @@
 
                         <div id="panel-agenda" class="hidden space-y-4">
                             <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 mb-4">
-                                <h3 class="font-bold text-yellow-800 mb-1">Próximos Pacientes / Clientes</h3>
-                                <p class="text-xs text-yellow-700">Aquí aparecerán las citas agendadas a través del directorio.</p>
+                                <h3 class="font-bold text-yellow-800 mb-1">Agenda Activa</h3>
+                                <p class="text-xs text-yellow-700">Gestiona las citas de tus pacientes. Puedes reagendar o cancelar.</p>
                             </div>
                             <div id="lista-citas-negocio" class="space-y-3">
                                 <p class="text-sm text-gray-400">Sin citas pendientes por ahora.</p>
@@ -290,7 +290,7 @@
                                 <button id="preview-btn-menu" class="hidden flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm">🛒 Ver Menú / Comprar</button>
                             </div>
                             <div class="flex gap-2 mt-2">
-                                <button id="preview-btn-agenda" class="hidden flex-1 bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm">📅 Agendar Cita</button>
+                                <button id="preview-btn-agenda" onclick="abrirAgendaPreview()" class="hidden flex-1 bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm transition transform hover:scale-[1.02]">📅 Agendar Cita / Bloquear</button>
                             </div>
                         </div>
                     </div>
@@ -300,8 +300,9 @@
     </div>
 
     <div id="modal-agendar" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform transition-transform">
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Agendar Cita 📅</h3>
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform transition-transform relative">
+            <button onclick="cerrarModalAgendar()" class="absolute top-4 right-4 text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1" id="titulo-modal-agendar">Agendar Cita 📅</h3>
             <p class="text-xs text-gray-500 mb-5" id="modal-agendar-negocio">Consultorio</p>
             <input type="hidden" id="reserva-negocio-id">
             <div class="space-y-4">
@@ -322,7 +323,7 @@
                     </div>
                 </div>
             </div>
-            <button onclick="document.getElementById('modal-agendar').classList.add('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold mt-6 transition">Cancelar</button>
+            <button onclick="cerrarModalAgendar()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold mt-6 transition">Cancelar</button>
         </div>
     </div>
 
@@ -335,6 +336,8 @@
 
         let usuarioActual = null;
         let map = null; let marker = null;
+        let citaIdEditando = null; // VARIABLE GLOBAL PARA SABER SI ESTAMOS EDITANDO
+        
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
         // ------------------ FUNCIONES GLOBALES / UI ------------------
@@ -349,7 +352,6 @@
             setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 4000);
         }
 
-        // Horarios UI
         function renderizarUIHorarios() {
             const cont = document.getElementById('contenedor-horarios');
             cont.innerHTML = Object.keys(DIAS).map(d => `
@@ -395,7 +397,6 @@
             });
         }
 
-        // INIT
         document.getElementById('admin-estado-apertura').addEventListener('change', function(e) { document.getElementById('label-estado-apertura').innerText = e.target.checked ? "Abierto" : "Cerrado"; });
         document.addEventListener("DOMContentLoaded", () => {
             renderizarUIHorarios();
@@ -549,7 +550,6 @@
             cargarMisNegocios();
         }
 
-        // ================= TABS Y LÓGICA DE CATEGORÍAS =================
         function cambiarPestana(tab) {
             ['basico', 'diseno', 'menu', 'servicios', 'agenda', 'verif'].forEach(t => {
                 let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
@@ -575,7 +575,6 @@
             const usaComida = ['Alimentos', 'Hogar'].includes(categoria);
             const usaAgenda = ['Servicios', 'Salud Mental', 'Medicina', 'Belleza'].includes(categoria);
 
-            // Permisos Diseño
             if (nivel >= 1) {
                 document.getElementById('tab-diseno').innerText = "Diseño & Banner";
                 document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden');
@@ -584,12 +583,10 @@
                 document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden');
             }
 
-            // Ocultar pestañas dinámicas
             document.getElementById('tab-menu').classList.add('hidden');
             document.getElementById('tab-servicios').classList.add('hidden');
             document.getElementById('tab-agenda').classList.add('hidden');
 
-            // Mostrar según categoría
             if (usaComida) {
                 document.getElementById('tab-menu').classList.remove('hidden');
                 if (nivel >= 2) {
@@ -644,7 +641,6 @@
             }
         }
 
-        // ================= CRUD Y BASE DE DATOS =================
         async function guardarNegocioSeguro() {
             const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; 
             const id = document.getElementById('admin-negocio-id').value;
@@ -713,34 +709,160 @@
             const { error } = await clienteSupabase.from('servicios').insert([payload]); 
             if (!error) { mostrarNotificacion("Servicio guardado"); cargarServicios(anuncioId); document.getElementById('serv-nombre').value=''; } else { mostrarNotificacion("Error al guardar", "error"); }
         }
+        
         async function cargarAgendaNegocio(anuncioId) {
-            const { data } = await clienteSupabase.from('citas').select('*, perfiles(nombre_completo, telefono), servicios(nombre)').eq('anuncio_id', anuncioId).order('fecha_cita', { ascending: true });
+            const { data } = await clienteSupabase
+                .from('citas')
+                .select('*, perfiles(nombre_completo, telefono), servicios(nombre, id)')
+                .eq('anuncio_id', anuncioId)
+                .neq('estado', 'cancelada')
+                .order('fecha_cita', { ascending: true });
+
             const lista = document.getElementById('lista-citas-negocio');
             if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin citas próximas.</p>`;
+
             lista.innerHTML = data.map(c => `
-                <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-tm-azul">
-                    <p class="text-xs font-bold text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)} a ${c.hora_fin.substring(0,5)}</p>
-                    <p class="font-black text-tm-azul-oscuro text-lg">${c.perfiles?.nombre_completo || 'Paciente'}</p>
-                    <p class="text-sm text-gray-600">${c.servicios?.nombre}</p>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-tm-azul flex flex-col sm:flex-row justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)} a ${c.hora_fin.substring(0,5)}</p>
+                        <p class="font-black text-tm-azul-oscuro text-lg">${c.perfiles?.nombre_completo || 'Paciente'}</p>
+                        <p class="text-sm text-gray-600">${c.servicios?.nombre}</p>
+                        <p class="text-xs text-tm-azul font-bold mt-1">Tel: ${c.perfiles?.telefono || 'N/A'}</p>
+                    </div>
+                    <div class="flex sm:flex-col gap-2 justify-center shrink-0">
+                        <button onclick='prepararReagendar(${JSON.stringify(c).replace(/'/g, "&apos;")})' class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition">Reagendar</button>
+                        <button onclick="cancelarCitaOwner('${c.id}')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancelar</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // AGENDAR (CLIENTES)
-        async function buscarHorarios() {
-            const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value };
-            if(!p.servicio_id || !p.fecha) return;
-            const cont = document.getElementById('contenedor-horarios-libres'); cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } });
-            if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3">Error.</p>';
-            if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Sin horarios libres ❌</p>';
-            cont.innerHTML = data.disponibles.map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white">${h}</button>`).join('');
+        // ================= GESTIÓN DE CITAS (DUEÑO) =================
+        function cerrarModalAgendar() {
+            document.getElementById('modal-agendar').classList.add('hidden');
+            citaIdEditando = null; // Limpiamos la variable al cerrar
         }
+
+        async function abrirAgendaPreview() {
+            const idNegocio = document.getElementById('admin-negocio-id').value;
+            citaIdEditando = null; // Aseguramos que estamos en modo "Nueva Cita/Bloqueo"
+            
+            if (!idNegocio) {
+                mostrarNotificacion("Primero guarda tu negocio para poder probar la agenda.", "error"); return;
+            }
+
+            document.getElementById('modal-agendar').classList.remove('hidden');
+            document.getElementById('titulo-modal-agendar').innerText = "Bloquear Espacio / Agendar 📅";
+            document.getElementById('modal-agendar-negocio').innerText = document.getElementById('admin-nombre').value;
+            document.getElementById('reserva-negocio-id').value = idNegocio;
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('reserva-fecha').min = hoy;
+            document.getElementById('reserva-fecha').value = '';
+            document.getElementById('contenedor-horarios-libres').innerHTML = '<p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>';
+
+            await cargarServiciosSelect(idNegocio, null);
+        }
+
+        function prepararReagendar(cita) {
+            citaIdEditando = cita.id; // Activamos el modo "Edición"
+            
+            document.getElementById('modal-agendar').classList.remove('hidden');
+            document.getElementById('titulo-modal-agendar').innerText = "Reagendar Cita 📅";
+            document.getElementById('modal-agendar-negocio').innerText = "Paciente: " + (cita.perfiles?.nombre_completo || 'Desconocido');
+            document.getElementById('reserva-negocio-id').value = cita.anuncio_id;
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('reserva-fecha').min = hoy;
+            document.getElementById('reserva-fecha').value = cita.fecha_cita;
+            
+            // Cargar servicios y autoseleccionar el actual, luego buscar horarios
+            cargarServiciosSelect(cita.anuncio_id, cita.servicios?.id).then(() => {
+                buscarHorarios();
+            });
+        }
+
+        async function cargarServiciosSelect(idNegocio, servicioIdActivo) {
+            const selectServicio = document.getElementById('reserva-servicio');
+            selectServicio.innerHTML = '<option value="">Cargando servicios...</option>';
+            const { data, error } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idNegocio).order('id');
+            
+            if (error || !data || data.length === 0) {
+                selectServicio.innerHTML = '<option value="">Aún no has agregado servicios.</option>';
+            } else {
+                selectServicio.innerHTML = '<option value="">Selecciona un servicio...</option>' + 
+                    data.map(s => `<option value="${s.id}" ${s.id === servicioIdActivo ? 'selected' : ''}>${s.nombre} (${s.duracion_minutos} min) - $${s.precio}</option>`).join('');
+            }
+        }
+
+        async function buscarHorarios() {
+            const p = { 
+                anuncio_id: document.getElementById('reserva-negocio-id').value, 
+                servicio_id: document.getElementById('reserva-servicio').value, 
+                fecha: document.getElementById('reserva-fecha').value,
+                cita_id_excluir: citaIdEditando // Mandamos el ID para ignorar la cita actual al reagendar
+            };
+            
+            if(!p.servicio_id || !p.fecha) return;
+            
+            const cont = document.getElementById('contenedor-horarios-libres'); 
+            cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
+            
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } });
+            
+            if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3 text-center">Error al consultar horarios.</p>';
+            if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Sin horarios libres para este día ❌</p>';
+            
+            cont.innerHTML = data.disponibles.map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white transition shadow-sm">${h}</button>`).join('');
+        }
+
         async function confirmarCita(hora) {
-            const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, cliente_id: usuarioActual.id, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, hora_inicio: hora };
-            if(!confirm(`¿Agendar cita el ${p.fecha} a las ${hora}?`)) return;
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: p } });
-            if (error || !data?.success) { mostrarNotificacion("Horario ocupado", "error"); buscarHorarios(); } else { mostrarNotificacion("¡Cita agendada!"); document.getElementById('modal-agendar').classList.add('hidden'); cargarMisCitas(); }
+            const anuncioId = document.getElementById('reserva-negocio-id').value;
+            const fecha = document.getElementById('reserva-fecha').value;
+            const servicioId = document.getElementById('reserva-servicio').value;
+
+            const payload = { 
+                anuncio_id: anuncioId, 
+                cliente_id: usuarioActual.id, 
+                servicio_id: servicioId, 
+                fecha: fecha, 
+                hora_inicio: hora,
+                cita_id: citaIdEditando 
+            };
+            
+            const accion = citaIdEditando ? 'editar_cita' : 'crear_cita';
+            const msgConfirm = citaIdEditando ? `¿Reagendar para el ${fecha} a las ${hora}?` : `¿Bloquear espacio el ${fecha} a las ${hora}?`;
+            
+            if(!confirm(msgConfirm)) return;
+            
+            const cont = document.getElementById('contenedor-horarios-libres');
+            cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Procesando...</p>';
+
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: accion, payload: payload } });
+            
+            if (error || !data?.success) { 
+                mostrarNotificacion("Error en la operación, es posible que el horario se haya ocupado", "error"); 
+                buscarHorarios(); 
+            } else { 
+                mostrarNotificacion(citaIdEditando ? "Cita reagendada con éxito" : "Espacio bloqueado con éxito"); 
+                cerrarModalAgendar();
+                cargarAgendaNegocio(anuncioId); // Refrescar la lista de citas
+            }
+        }
+
+        async function cancelarCitaOwner(id) {
+            if(!confirm("¿Estás seguro de cancelar esta cita? El paciente perderá su lugar y el horario quedará libre.")) return;
+            
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
+                body: { accion: 'cancelar_cita', payload: { cita_id: id } }
+            });
+
+            if (error) {
+                mostrarNotificacion("Error al cancelar la cita", "error");
+            } else {
+                mostrarNotificacion("Cita cancelada correctamente");
+                cargarAgendaNegocio(document.getElementById('admin-negocio-id').value);
+            }
         }
 
         // ================= UTILIDADES =================
