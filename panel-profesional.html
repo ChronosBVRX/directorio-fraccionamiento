@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panel Profesional - Vive Tres Marías</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
@@ -14,9 +14,7 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Montserrat', 'sans-serif']
-                    },
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
                     colors: {
                         'tm-azul': '#22527b',
                         'tm-azul-oscuro': '#143653',
@@ -290,7 +288,7 @@
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const SUPABASE_KEY = 'PEGA_AQUI_TU_ANON_KEY_REAL';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let calendar = null;
@@ -420,15 +418,18 @@
 
         async function cargarTodo(id) {
             try {
+                console.log('Cargando anuncio con ID:', id);
+
                 const { data: n, error } = await clienteSupabase
                     .from('anuncios')
                     .select('*')
                     .eq('id', id)
-                    .single();
+                    .maybeSingle();
 
                 if (error) throw error;
+
                 if (!n) {
-                    notificar("No se encontró el consultorio");
+                    notificar("No se encontró el consultorio o no tienes permiso para verlo");
                     return;
                 }
 
@@ -448,7 +449,7 @@
                 await cargarAgendaYCalendario(n.id, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar("Error al cargar el panel");
+                notificar(err?.message || "Error al cargar el panel");
             }
         }
 
@@ -486,7 +487,7 @@
                 select.innerHTML = `
                     <option value="">Selecciona un servicio</option>
                     ${serviciosActuales.map(s => `
-                        <option value="${s.id}" data-duracion="${s.duracion_minutos}">
+                        <option value="${s.id}">
                             ${s.nombre} · ${s.duracion_minutos} min · $${s.precio}
                         </option>
                     `).join('')}
@@ -656,9 +657,7 @@
                 const horariosParaPintar = horariosOverride || horariosActuales || {};
                 const cfg = construirConfigCalendario(horariosParaPintar);
 
-                if (calendar) {
-                    calendar.destroy();
-                }
+                if (calendar) calendar.destroy();
 
                 calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                     locale: 'es',
@@ -735,7 +734,7 @@
 
         async function cancelarCitaOwner(id) {
             try {
-                const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
                     body: {
                         accion: 'cancelar_cita',
                         payload: { cita_id: id }
@@ -743,6 +742,7 @@
                 });
 
                 if (error) throw error;
+                if (data?.error) throw new Error(data.error);
 
                 notificar("Registro eliminado");
                 await cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value, horariosActuales);
@@ -761,9 +761,7 @@
             document.getElementById('panel-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).className = "font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap";
 
-            if (calendar) {
-                setTimeout(() => calendar.updateSize(), 120);
-            }
+            if (calendar) setTimeout(() => calendar.updateSize(), 120);
         }
 
         function renderizarUIHorarios() {
@@ -833,22 +831,25 @@
                     }
                 }
 
-                const updatePayload = {
+                const payload = {
+                    anuncio_id: id,
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
                     enlace_whatsapp: document.getElementById('admin-wa').value.trim(),
                     horarios
                 };
 
-                const { data, error } = await clienteSupabase
-                    .from('anuncios')
-                    .update(updatePayload)
-                    .eq('id', id)
-                    .select()
-                    .single();
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
+                    body: {
+                        accion: 'actualizar_negocio',
+                        payload
+                    }
+                });
 
                 if (error) throw error;
+                if (data?.error) throw new Error(data.error);
+                if (!data?.negocio) throw new Error("No se recibió el negocio actualizado");
 
-                horariosActuales = data?.horarios || horarios;
+                horariosActuales = data.negocio.horarios || horarios;
 
                 aplicarConfiguracionCalendario(horariosActuales);
                 await cargarAgendaYCalendario(id, horariosActuales);
@@ -856,7 +857,7 @@
                 notificar("Guardado ✅");
             } catch (err) {
                 console.error(err);
-                notificar("No se pudieron guardar los cambios");
+                notificar(err?.message || "No se pudieron guardar los cambios");
             }
         }
 
@@ -937,12 +938,10 @@
         function actualizarHoraFinManual() {
             const servicioId = document.getElementById('manual-servicio').value;
             const inicio = document.getElementById('manual-inicio').value;
-
             if (!inicio) return;
 
             const servicio = serviciosActuales.find(s => String(s.id) === String(servicioId));
             const duracion = servicio?.duracion_minutos || 60;
-
             document.getElementById('manual-fin').value = sumarMinutos(inicio, duracion);
         }
 
@@ -986,7 +985,7 @@
                 await cargarAgendaYCalendario(idN, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar(err.message || "No se pudo registrar el bloqueo");
+                notificar(err?.message || "No se pudo registrar el bloqueo");
             }
         }
 
@@ -1032,7 +1031,7 @@
                 await cargarAgendaYCalendario(idN, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar(err.message || "No se pudo registrar la cita manual");
+                notificar(err?.message || "No se pudo registrar la cita manual");
             }
         }
 
