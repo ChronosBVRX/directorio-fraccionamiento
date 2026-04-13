@@ -60,19 +60,12 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col">
-                <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>🛵</span> Mis Pedidos de Comida</h3>
-                <div id="contenedor-mis-pedidos" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2">
-                    <p class="text-sm text-gray-400">Cargando tus pedidos...</p>
-                </div>
-                <a href="index.html" class="mt-4 text-center text-sm font-bold text-tm-azul hover:underline">Pedir algo ahora →</a>
+                <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>🛵</span> Mis Pedidos</h3>
+                <div id="contenedor-mis-pedidos" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2"><p class="text-sm text-gray-400">Cargando...</p></div>
             </div>
-
             <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col">
-                <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>📅</span> Mis Próximas Citas</h3>
-                <div id="contenedor-mis-citas" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2">
-                    <p class="text-sm text-gray-400">Cargando tus citas...</p>
-                </div>
-                <a href="index.html" class="mt-4 text-center text-sm font-bold text-tm-azul hover:underline">Buscar un profesional →</a>
+                <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>📅</span> Mis Citas</h3>
+                <div id="contenedor-mis-citas" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2"><p class="text-sm text-gray-400">Cargando...</p></div>
             </div>
         </div>
 
@@ -86,73 +79,31 @@
                     </div>
                     <button onclick="iniciarCreacionEspacio()" class="bg-tm-dorado text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-yellow-600 transition whitespace-nowrap">+ Nuevo Espacio</button>
                 </div>
-
-                <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    </div>
+                <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
         <div id="modal-nuevo-espacio" class="hidden fixed inset-0 bg-black/80 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity">
             <div class="bg-white rounded-3xl w-full max-w-4xl p-6 sm:p-10 shadow-2xl relative max-h-[95vh] overflow-y-auto">
                 <button onclick="cerrarCreacionEspacio()" class="absolute top-4 right-5 text-4xl leading-none text-gray-400 hover:text-gray-800">&times;</button>
-                
                 <div id="paso-1-rubro">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2>
-                        <p class="text-sm text-gray-500 mt-2">Selecciona tu giro para personalizar tu panel de herramientas.</p>
-                    </div>
+                    <div class="text-center mb-8"><h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div onclick="mostrarPlanes('tienda')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-tm-dorado p-8 text-center cursor-pointer transition transform hover:-translate-y-1">
-                            <span class="text-6xl block mb-4">🛒</span>
-                            <h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Productos y Comida</h3>
-                            <p class="text-sm text-gray-500">Restaurantes, tiendas, ropa. Tendrás acceso a Menú Interactivo y Carrito.</p>
-                        </div>
-                        <div onclick="mostrarPlanes('servicio')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-blue-500 p-8 text-center cursor-pointer transition transform hover:-translate-y-1">
-                            <span class="text-6xl block mb-4">🩺</span>
-                            <h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Consultorios y Servicios</h3>
-                            <p class="text-sm text-gray-500">Médicos, terapeutas, belleza. Tendrás acceso a Agenda Inteligente y Calendario.</p>
-                        </div>
+                        <div onclick="mostrarPlanes('tienda')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-tm-dorado p-8 text-center cursor-pointer transition transform hover:-translate-y-1"><span class="text-6xl block mb-4">🛒</span><h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Productos y Comida</h3></div>
+                        <div onclick="mostrarPlanes('servicio')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-blue-500 p-8 text-center cursor-pointer transition transform hover:-translate-y-1"><span class="text-6xl block mb-4">🩺</span><h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Consultorios y Servicios</h3></div>
                     </div>
                 </div>
-
                 <div id="paso-2-planes" class="hidden">
-                    <div class="text-center mb-8 flex items-center justify-center gap-4">
-                        <button onclick="volverARubro()" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button>
-                        <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro" id="titulo-planes">Selecciona tu Plan</h2>
-                    </div>
-                    
+                    <div class="text-center mb-8 flex items-center justify-center gap-4"><button onclick="volverARubro()" class="bg-gray-100 px-3 py-1 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button><h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro" id="titulo-planes">Selecciona tu Plan</h2></div>
                     <input type="hidden" id="rubro-seleccionado-memoria">
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div onclick="irAlPanel(0)" class="bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col cursor-pointer hover:shadow-lg transition">
-                            <h3 class="font-bold text-gray-500 uppercase">Básico</h3><p class="text-2xl font-black text-tm-azul-oscuro mt-1">Gratis</p>
-                            <ul class="text-xs space-y-2 flex-grow text-gray-600 my-4">
-                                <li>✔️ Presencia en directorio</li><li>✔️ Botón a WhatsApp</li><li>✔️ Dirección y mapa</li>
-                            </ul>
-                            <button class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-auto hover:bg-gray-300">Empezar Gratis</button>
-                        </div>
-                        <div onclick="irAlPanel(1)" class="bg-white rounded-2xl border-2 border-blue-400 p-6 flex flex-col cursor-pointer hover:shadow-xl transition relative">
-                            <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">PRO</div>
-                            <h3 class="font-bold text-blue-600 uppercase">Nivel 1</h3><p class="text-2xl font-black text-tm-azul-oscuro mt-1">$150 <span class="text-xs font-normal">/mes</span></p>
-                            <ul class="text-xs space-y-2 flex-grow text-gray-600 my-4">
-                                <li>✔️ Todo lo Básico</li><li>🖼️ <b>Banner</b> llamativo</li><li>⭐ Prioridad en búsquedas</li>
-                            </ul>
-                            <button class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg mt-auto hover:bg-blue-700">Elegir Pro</button>
-                        </div>
-                        <div onclick="irAlPanel(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 flex flex-col cursor-pointer hover:shadow-xl transition relative transform hover:scale-105 z-10">
-                            <div class="absolute top-0 inset-x-0 bg-tm-dorado text-center text-white text-[10px] font-black py-0.5 tracking-widest">EL MÁS COMPLETO</div>
-                            <h3 class="font-bold text-tm-dorado uppercase mt-4">Nivel 2</h3><p class="text-2xl font-black text-tm-azul-oscuro mt-1">$300 <span class="text-xs font-normal">/mes</span></p>
-                            <ul class="text-xs space-y-2 flex-grow text-gray-800 my-4">
-                                <li>✔️ Todo lo Nivel 1</li>
-                                <li>🚀 <b id="feat-elite-dinamico">Herramientas Elite</b></li>
-                            </ul>
-                            <button class="w-full bg-tm-dorado text-white font-bold py-2 rounded-lg mt-auto hover:bg-yellow-600">Elegir Elite</button>
-                        </div>
+                        <div onclick="irAlPanel(0)" class="bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col cursor-pointer hover:shadow-lg transition"><h3 class="font-bold text-gray-500 uppercase">Básico</h3><p class="text-2xl font-black mt-1">Gratis</p><button class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-auto">Empezar</button></div>
+                        <div onclick="irAlPanel(1)" class="bg-white rounded-2xl border-2 border-blue-400 p-6 flex flex-col cursor-pointer hover:shadow-xl transition"><h3 class="font-bold text-blue-600 uppercase">Nivel 1</h3><p class="text-2xl font-black mt-1">$150 <span class="text-xs">/mes</span></p><button class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg mt-auto">Elegir Pro</button></div>
+                        <div onclick="irAlPanel(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 flex flex-col cursor-pointer hover:shadow-xl transition transform hover:scale-105"><h3 class="font-bold text-tm-dorado uppercase">Nivel 2</h3><p class="text-2xl font-black mt-1">$300 <span class="text-xs">/mes</span></p><button class="w-full bg-tm-dorado text-white font-bold py-2 rounded-lg mt-auto">Elegir Elite</button></div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -160,24 +111,15 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let usuarioActual = null;
-        let map = null; 
-        let marker = null;
-
-        // Las categorías de tienda. Si no está aquí, asumimos que es consultorio/servicio.
+        let usuarioActual = null; let map = null; let marker = null;
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
 
         function mostrarNotificacion(mensaje, tipo = 'exito') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
-            toast.innerText = mensaje;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+            const container = document.getElementById('toast-container'); const toast = document.createElement('div');
+            toast.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
+            toast.innerText = mensaje; container.appendChild(toast); setTimeout(() => toast.remove(), 4000);
         }
 
-        // ================= AUTENTICACIÓN =================
         clienteSupabase.auth.onAuthStateChange((event, session) => {
             usuarioActual = session ? session.user : null;
             if(usuarioActual) {
@@ -190,16 +132,12 @@
             }
         });
 
-        async function cerrarSesion() {
-            await clienteSupabase.auth.signOut();
-            window.location.href = 'index.html';
-        }
+        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.href = 'index.html'; }
 
-        // ================= CARGA DE DATOS DEL USUARIO =================
         async function cargarPerfilCompleto() {
-            // 1. Datos Personales y Mapa
-            const { data: perfil } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
-            let lat = 19.7028; let lng = -101.1924; // Default
+            // MAYBESINGLE evita errores si el perfil no existe aún
+            const { data: perfil } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle();
+            let lat = 19.7028; let lng = -101.1924; 
             
             if (perfil) {
                 document.getElementById('perfil-nombre').value = perfil.nombre_completo || '';
@@ -209,64 +147,22 @@
             }
             inicializarMapa(lat, lng);
 
-            // 2. Cargar Pedidos de Comida
             const { data: pedidos } = await clienteSupabase.from('pedidos').select('*, anuncios(nombre_negocio)').eq('cliente_id', usuarioActual.id).order('creado_en', { ascending: false }).limit(5);
-            const contPedidos = document.getElementById('contenedor-mis-pedidos');
-            if (!pedidos || pedidos.length === 0) {
-                contPedidos.innerHTML = '<p class="text-sm text-gray-400 italic">Aún no has hecho pedidos.</p>';
-            } else {
-                contPedidos.innerHTML = pedidos.map(p => `
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-tm-azul-oscuro text-sm">${p.anuncios?.nombre_negocio || 'Restaurante'}</p>
-                            <span class="text-[10px] font-bold uppercase ${p.estado === 'esperando_activacion' ? 'text-yellow-600' : 'text-green-600'}">${p.estado}</span>
-                        </div>
-                        <p class="text-sm text-tm-dorado font-black">$${p.total}</p>
-                    </div>
-                `).join('');
-            }
+            document.getElementById('contenedor-mis-pedidos').innerHTML = (!pedidos || pedidos.length === 0) ? '<p class="text-sm text-gray-400">Sin pedidos.</p>' : pedidos.map(p => `<div class="bg-gray-50 border p-3 rounded-xl flex justify-between"><div><p class="font-bold text-sm">${p.anuncios?.nombre_negocio||'Negocio'}</p><span class="text-[10px] uppercase text-green-600">${p.estado}</span></div><p class="font-black">$${p.total}</p></div>`).join('');
 
-            // 3. Cargar Próximas Citas
             const hoy = new Date().toISOString().split('T')[0];
             const { data: citas } = await clienteSupabase.from('citas').select('*, anuncios(nombre_negocio), servicios(nombre)').eq('cliente_id', usuarioActual.id).gte('fecha_cita', hoy).order('fecha_cita', { ascending: true }).limit(5);
-            const contCitas = document.getElementById('contenedor-mis-citas');
-            if (!citas || citas.length === 0) {
-                contCitas.innerHTML = '<p class="text-sm text-gray-400 italic">No tienes citas programadas próximamente.</p>';
-            } else {
-                contCitas.innerHTML = citas.map(c => `
-                    <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-tm-azul-oscuro text-sm">${c.fecha_cita}</p>
-                                <p class="text-xs text-gray-500 font-bold">${c.hora_inicio.substring(0,5)}</p>
-                            </div>
-                            <span class="text-[9px] font-black uppercase text-white bg-tm-azul px-2 py-0.5 rounded">${c.estado}</span>
-                        </div>
-                        <p class="text-sm text-gray-700 mt-2 font-bold">${c.anuncios?.nombre_negocio || 'Consultorio'}</p>
-                        <p class="text-[10px] text-gray-500">${c.servicios?.nombre}</p>
-                    </div>
-                `).join('');
-            }
+            document.getElementById('contenedor-mis-citas').innerHTML = (!citas || citas.length === 0) ? '<p class="text-sm text-gray-400">Sin citas próximas.</p>' : citas.map(c => `<div class="bg-blue-50 border p-3 rounded-xl"><div class="flex justify-between"><div><p class="font-bold text-sm">${c.fecha_cita}</p><p class="text-xs font-bold text-gray-500">${c.hora_inicio.substring(0,5)}</p></div><span class="text-[9px] text-white bg-tm-azul px-2 rounded">${c.estado}</span></div><p class="text-sm mt-2 font-bold">${c.anuncios?.nombre_negocio||'Consultorio'}</p><p class="text-[10px] text-gray-500">${c.servicios?.nombre}</p></div>`).join('');
 
-            // 4. Cargar Negocios del Usuario
             cargarMisNegocios();
         }
 
         async function guardarPerfilSeguro() {
             const btn = document.getElementById('btn-guardar-perfil'); btn.innerText = "Guardando..."; btn.disabled = true;
-            const payload = { 
-                nombre_completo: document.getElementById('perfil-nombre').value, 
-                telefono: document.getElementById('perfil-telefono').value, 
-                direccion: document.getElementById('perfil-direccion').value, 
-                latitud: document.getElementById('perfil-lat').value, 
-                longitud: document.getElementById('perfil-lng').value 
-            };
-            
+            const payload = { nombre_completo: document.getElementById('perfil-nombre').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value, latitud: document.getElementById('perfil-lat').value, longitud: document.getElementById('perfil-lng').value };
             const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_perfil', payload: payload } });
             btn.innerText = "Guardar Mis Datos"; btn.disabled = false;
-            
-            if (error || !data.success) mostrarNotificacion("Error al guardar", "error"); 
-            else mostrarNotificacion("¡Perfil guardado correctamente!");
+            if (error || !data.success) mostrarNotificacion("Error al guardar", "error"); else mostrarNotificacion("¡Perfil guardado!");
         }
 
         function inicializarMapa(lat, lng) {
@@ -278,92 +174,28 @@
                     marker = L.marker([lat, lng], {draggable: true}).addTo(map);
                     marker.on('dragend', function () { document.getElementById('perfil-lat').value = marker.getLatLng().lat; document.getElementById('perfil-lng').value = marker.getLatLng().lng; });
                     map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng; });
-                } else { 
-                    map.setView([lat, lng], 14); marker.setLatLng([lat, lng]); map.invalidateSize(); 
-                }
+                } else { map.setView([lat, lng], 14); marker.setLatLng([lat, lng]); }
+                // FORZAR RESIZE DEL MAPA PARA EVITAR CUADRO GRIS
+                setTimeout(() => { map.invalidateSize(); }, 200);
             }, 300);
         }
 
-        // ================= GESTIÓN DE ESPACIOS (SOCIOS) =================
         async function cargarMisNegocios() {
             const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             const contenedor = document.getElementById('contenedor-mis-negocios');
-            
-            if (!data || data.length === 0) {
-                contenedor.innerHTML = `<div class="bg-gray-700/50 p-6 rounded-2xl border border-gray-600 border-dashed text-center text-gray-400 col-span-full">Aún no administras ningún espacio. ¡Crea el primero!</div>`;
-                return;
-            }
-
+            if (!data || data.length === 0) return contenedor.innerHTML = `<div class="bg-gray-700/50 p-6 rounded-2xl border-gray-600 border-dashed text-center text-gray-400 col-span-full">Aún no administras ningún espacio.</div>`;
             contenedor.innerHTML = data.map(n => {
                 const esTienda = CATEGORIAS_TIENDA.includes(n.categoria);
-                // Determina a qué panel enviarlo
                 const enlacePanel = esTienda ? `panel-tienda.html?id=${n.id}` : `panel-profesional.html?id=${n.id}`;
-                const icono = esTienda ? '🛒' : '🩺';
-                
-                let badgeNivel = 'Básico'; let colorBadge = 'bg-gray-200 text-gray-700';
-                if(n.nivel_pago === 1) { badgeNivel = 'PRO'; colorBadge = 'bg-blue-500 text-white'; }
-                if(n.nivel_pago === 2) { badgeNivel = 'ELITE'; colorBadge = 'bg-tm-dorado text-white'; }
-
-                return `
-                <div class="bg-gray-700 rounded-2xl p-5 border border-gray-600 flex flex-col justify-between hover:bg-gray-600 transition">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">${icono}</span>
-                            <div>
-                                <h3 class="font-bold text-white text-lg leading-tight">${n.nombre_negocio}</h3>
-                                <p class="text-[10px] text-gray-400 uppercase">${n.categoria}</p>
-                            </div>
-                        </div>
-                        <span class="${colorBadge} text-[9px] font-black px-2 py-1 rounded shadow-sm">${badgeNivel}</span>
-                    </div>
-                    <a href="${enlacePanel}" class="w-full bg-white/10 hover:bg-white/20 text-white text-center py-2.5 rounded-xl text-sm font-bold transition border border-white/10">Gestionar Panel →</a>
-                </div>
-                `;
+                return `<div class="bg-gray-700 rounded-2xl p-5 border border-gray-600 flex flex-col justify-between hover:bg-gray-600"><div class="flex justify-between items-start mb-4"><div class="flex gap-3"><span class="text-2xl">${esTienda?'🛒':'🩺'}</span><div><h3 class="font-bold text-white text-lg">${n.nombre_negocio}</h3><p class="text-[10px] text-gray-400 uppercase">${n.categoria}</p></div></div><span class="bg-gray-200 text-gray-700 text-[9px] font-black px-2 py-1 rounded">ACTIVO</span></div><a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">Gestionar →</a></div>`;
             }).join('');
         }
 
-        // --- FLUJO DE CREACIÓN DE NUEVO NEGOCIO ---
-        function iniciarCreacionEspacio() {
-            document.getElementById('modal-nuevo-espacio').classList.remove('hidden');
-            document.getElementById('paso-1-rubro').classList.remove('hidden');
-            document.getElementById('paso-2-planes').classList.add('hidden');
-        }
-
-        function cerrarCreacionEspacio() {
-            document.getElementById('modal-nuevo-espacio').classList.add('hidden');
-        }
-
-        function volverARubro() {
-            document.getElementById('paso-2-planes').classList.add('hidden');
-            document.getElementById('paso-1-rubro').classList.remove('hidden');
-        }
-
-        function mostrarPlanes(rubro) {
-            document.getElementById('paso-1-rubro').classList.add('hidden');
-            document.getElementById('paso-2-planes').classList.remove('hidden');
-            document.getElementById('rubro-seleccionado-memoria').value = rubro;
-
-            const titulo = document.getElementById('titulo-planes');
-            const featElite = document.getElementById('feat-elite-dinamico');
-
-            if (rubro === 'tienda') {
-                titulo.innerText = "Planes para Tiendas";
-                featElite.innerText = "Tienda en línea con carrito";
-            } else {
-                titulo.innerText = "Planes para Consultorios";
-                featElite.innerText = "Agenda y Calendario web";
-            }
-        }
-
-        function irAlPanel(nivelIntencion) {
-            const rubro = document.getElementById('rubro-seleccionado-memoria').value;
-            // Dirigir al archivo correspondiente con el parámetro del plan
-            if (rubro === 'tienda') {
-                window.location.href = `panel-tienda.html?plan=${nivelIntencion}`;
-            } else {
-                window.location.href = `panel-profesional.html?plan=${nivelIntencion}`;
-            }
-        }
+        function iniciarCreacionEspacio() { document.getElementById('modal-nuevo-espacio').classList.remove('hidden'); document.getElementById('paso-1-rubro').classList.remove('hidden'); document.getElementById('paso-2-planes').classList.add('hidden'); }
+        function cerrarCreacionEspacio() { document.getElementById('modal-nuevo-espacio').classList.add('hidden'); }
+        function volverARubro() { document.getElementById('paso-2-planes').classList.add('hidden'); document.getElementById('paso-1-rubro').classList.remove('hidden'); }
+        function mostrarPlanes(rubro) { document.getElementById('paso-1-rubro').classList.add('hidden'); document.getElementById('paso-2-planes').classList.remove('hidden'); document.getElementById('rubro-seleccionado-memoria').value = rubro; document.getElementById('titulo-planes').innerText = rubro === 'tienda' ? "Planes para Tiendas" : "Planes para Consultorios"; }
+        function irAlPanel(nivel) { const r = document.getElementById('rubro-seleccionado-memoria').value; window.location.href = r === 'tienda' ? `panel-tienda.html?plan=${nivel}` : `panel-profesional.html?plan=${nivel}`; }
     </script>
 </body>
 </html>
