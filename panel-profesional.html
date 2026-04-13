@@ -4,374 +4,270 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Vive Tres Marías</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js'></script>
 
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                    colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37' } 
+                } 
+            } 
+        }
     </script>
     <style>
-        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1rem; padding: 1rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
-        .fc-theme-standard th { border-color: #f3f4f6; padding: 8px 0; color: #4b5563; }
-        .fc-theme-standard td { border-color: #f3f4f6; }
-        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; text-transform: capitalize; }
-        .fc .fc-button-primary:hover { background-color: #143653 !important; }
-        .fc-event { border: none !important; border-radius: 6px; padding: 2px 4px; cursor: pointer; }
+        .fc { background: white; border-radius: 1rem; padding: 1rem; min-height: 500px; }
+        .fc-event { cursor: pointer; transition: opacity 0.2s; }
+        .fc-event:hover { opacity: 0.8; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
+<body class="bg-gray-50 font-sans text-gray-700 p-4 md:p-8">
 
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
-        <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
-        <p class="text-gray-500 mb-6">Inicia sesión para administrar tu consultorio.</p>
-        <a href="index.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
-    </div>
-
-    <div id="si-auth" class="hidden max-w-7xl mx-auto">
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+    <div id="si-auth" class="max-w-7xl mx-auto">
+        <div class="mb-8 flex flex-col sm:row sm:items-center justify-between gap-4 border-b pb-6">
             <div>
-                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-                <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus servicios, agenda y pacientes.</p>
+                <h2 class="text-3xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
+                <p class="text-gray-500">Gestiona tus servicios y agenda en tiempo real.</p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="index.html" target="_parent" class="bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition text-center text-sm">
-                    🏠 Inicio
-                </a>
-                <a href="panel.html" target="_parent" class="bg-tm-azul text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition text-center text-sm">
-                    👤 Mi Perfil
-                </a>
-            </div>
+            <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="bg-tm-dorado hover:bg-yellow-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg">
+                Guardar Cambios
+            </button>
         </div>
 
-        <div id="seccion-admin-negocio" class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10 flex flex-col">
-            <div class="bg-tm-azul-oscuro text-white p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-black flex items-center gap-3">
-                        <span id="admin-titulo">Configuración Profesional</span>
-                    </h2>
-                    <p id="admin-nivel-badge" class="text-xs font-bold text-tm-azul-oscuro bg-white px-2 py-1 rounded inline-block mt-2">Nivel Actual: Cargando...</p>
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[700px]">
+            <div class="w-full lg:w-1/2 border-r border-gray-100 flex flex-col">
+                <div class="flex gap-1 p-4 border-b bg-gray-50 overflow-x-auto">
+                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="px-4 py-2 font-bold text-tm-azul border-b-2 border-tm-azul">Datos</button>
+                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="px-4 py-2 font-bold text-gray-400">Servicios</button>
+                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="px-4 py-2 font-bold text-gray-400">Calendario</button>
                 </div>
-                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Configuración</button>
+
+                <div class="p-6 flex-grow overflow-y-auto">
+                    <div id="panel-basico" class="space-y-4">
+                        <input type="hidden" id="admin-negocio-id">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Nombre del Consultorio</label>
+                            <input type="text" id="admin-nombre" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none focus:border-tm-azul">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp</label>
+                            <input type="number" id="admin-wa" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none">
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Horarios de Atención</h4>
+                            <div id="contenedor-horarios" class="space-y-2"></div>
+                        </div>
+                    </div>
+
+                    <div id="panel-servicios" class="hidden space-y-4">
+                        <div class="bg-tm-azul-oscuro p-4 rounded-2xl text-white">
+                            <h4 class="font-bold mb-3 text-sm">Añadir Nuevo Servicio</h4>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <input type="text" id="serv-nombre" placeholder="Nombre (Ej: Consulta)" class="p-2 rounded bg-white/10 border border-white/20 text-sm">
+                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-2 rounded bg-white/10 border border-white/20 text-sm">
+                            </div>
+                            <input type="number" id="serv-duracion" placeholder="Duración (minutos)" class="w-full p-2 rounded bg-white/10 border border-white/20 text-sm mb-2">
+                            <button onclick="agregarServicioSeguro()" class="w-full bg-tm-dorado py-2 rounded-xl font-bold text-sm">Insertar Servicio</button>
+                        </div>
+                        <div id="lista-servicios" class="space-y-2"></div>
+                    </div>
+
+                    <div id="panel-agenda" class="hidden space-y-4">
+                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            🛑 Bloquear Fecha / Consulta Externa
+                        </button>
+                        <div id="lista-citas-negocio" class="space-y-2"></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-col lg:flex-row flex-grow min-h-[650px]">
-                <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50">
-                    <input type="hidden" id="admin-negocio-id"><input type="hidden" id="admin-nivel-intencion" value="0">
-                    
-                    <div id="tabs-container" class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
-                        <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos</button>
-                        <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
-                        <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
-                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Calendario 🔒</button>
-                        <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
-                    </div>
-
-                    <div class="p-5 sm:p-6 flex-grow overflow-y-auto">
-                        <div id="panel-basico" class="space-y-4">
-                            <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
-                                <div><h4 class="font-bold text-sm text-red-600">Estado Operativo</h4><p class="text-[11px] text-gray-500">Cierra tu consultorio hoy.</p></div>
-                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                    <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
-                                    <div class="w-11 h-6 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                                </label>
-                            </div>
-                            <div><label class="text-xs font-bold text-gray-500">Nombre del Consultorio / Servicio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></div>
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2"><h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Horarios de Atención</h4><div id="contenedor-horarios"></div></div>
-                            <div><label class="text-xs font-bold text-gray-500">Descripción Profesional *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></textarea></div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></div>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-500">Especialidad *</label>
-                                    <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none">
-                                        <option value="Medicina General">Medicina General</option>
-                                        <option value="Especialidad Médica">Especialidad Médica</option>
-                                        <option value="Salud Mental">Salud Mental</option>
-                                        <option value="Nutrición">Nutrición</option>
-                                        <option value="Belleza y Spa">Belleza y Spa</option>
-                                        <option value="Servicio Técnico">Servicio Técnico</option>
-                                        <option value="Otro Servicio">Otro Servicio</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="panel-diseno" class="hidden space-y-4">
-                            <div id="bloqueo-diseno" class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center"><h3 class="font-bold text-blue-800 mb-2">Desbloquea el Diseño Pro</h3><button onclick="iniciarMejoraDirecta(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-blue-700">Mejorar a Pro ($150/mes)</button></div>
-                            <div id="contenido-diseno" class="hidden">
-                                <label class="text-sm font-bold text-gray-700">Banner / Foto Principal</label>
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-white hover:bg-gray-50 transition">
-                                    <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaImagen(event, 'negocios', 'admin-imagen-url', 'estado-subida', true)">
-                                    <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold block w-max mx-auto transition">Subir Imagen</label>
-                                    <p id="estado-subida" class="text-xs text-tm-azul mt-3 font-bold"></p>
-                                </div>
-                                <input type="hidden" id="admin-imagen-url">
-                            </div>
-                        </div>
-
-                        <div id="panel-servicios" class="hidden space-y-4 flex-col h-full">
-                            <div id="bloqueo-servicios" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center"><h3 class="font-bold text-yellow-800 mb-2">Activa tu Agenda Inteligente</h3><button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-yellow-600">Mejorar a Elite ($300/mes)</button></div>
-                            <div id="contenido-servicios" class="hidden flex-grow flex-col">
-                                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Nuevo Servicio (Aparecerá en tu agenda)</h4>
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                                        <input type="text" id="serv-nombre" placeholder="Ej. Consulta 1ra vez" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
-                                        <input type="number" id="serv-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
-                                        <input type="number" id="serv-duracion" placeholder="Minutos (Ej. 60)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
-                                    </div>
-                                    <textarea id="serv-desc" placeholder="Instrucciones previas" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
-                                    <button onclick="agregarServicioSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir Servicio</button>
-                                </div>
-                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Servicios Activos</h4>
-                                <div id="lista-servicios" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
-                            </div>
-                        </div>
-
-                        <div id="panel-verif" class="hidden space-y-4">
-                            <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mb-4"><h3 class="font-black text-blue-800 mb-1">🛡️ Sello de Confianza</h3></div>
-                            <form id="form-verif" class="bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
-                                <div><label class="text-xs font-bold text-gray-500">Nombre Responsable *</label><input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
-                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4">Enviar Documentos</button>
-                            </form>
-                        </div>
-                    </div>
+            <div id="panel-derecho" class="w-full lg:w-1/2 bg-gray-100 p-4 flex flex-col">
+                <div id="contenedor-calendario-full" class="hidden flex-grow bg-white rounded-2xl shadow-inner p-2">
+                    <div id="calendar"></div>
                 </div>
-
-                <div id="panel-derecho-mixto" class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col relative overflow-hidden">
-                    
-                    <div id="vista-previa-movil" class="flex flex-col items-center justify-center h-full w-full">
-                        <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold z-10">Vista Previa Móvil</div>
-                        <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 mx-auto relative z-10">
-                            <div class="bg-gray-100 p-3 border-b border-gray-200"><span class="text-[10px] font-bold text-gray-400">⬅ Volver</span></div>
-                            <div id="preview-banner-container" class="w-full h-32 bg-gray-100 relative hidden"><img id="preview-banner" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div></div>
-                            <div class="p-5 bg-white">
-                                <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
-                                <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro mt-2 leading-tight">Consultorio</h3>
-                                <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-3">Descripción...</p>
-                                <div class="mt-5 pt-4 border-t border-gray-100"><button class="w-full bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold">WhatsApp</button></div>
-                                <div class="mt-2"><button id="preview-btn-agenda" class="hidden w-full bg-tm-dorado text-white py-2.5 rounded-lg text-xs font-bold">📅 Agendar Cita</button></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="vista-calendario-profesional" class="hidden flex-col h-full w-full bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-black text-tm-azul-oscuro">Agenda Semanal</h3>
-                            <button onclick="abrirModalBloqueo()" class="bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1">➕ Bloqueo Manual</button>
-                        </div>
-                        <div id="calendar" class="flex-grow w-full min-h-[350px]"></div>
-                        <div class="mt-4 border-t border-gray-100 pt-4">
-                            <h4 class="text-sm font-bold text-gray-500 mb-2">Lista de Citas Activas</h4>
-                            <div id="lista-citas-negocio" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
-                        </div>
-                    </div>
+                <div id="preview-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <p class="font-bold">Vista Previa del Calendario</p>
+                    <p class="text-xs">Selecciona la pestaña "Calendario" para gestionar citas.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-            <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="absolute top-4 right-4 text-3xl text-gray-500">&times;</button>
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Bloquear Espacio 🛑</h3>
+    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Bloquear Espacio 🛑</h3>
             <div class="space-y-3">
-                <div><label class="text-xs font-bold">Motivo</label><input type="text" id="bloqueo-titulo" placeholder="Ej. Cirugía..." class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
-                <div><label class="text-xs font-bold">Fecha</label><input type="date" id="bloqueo-fecha" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-xs font-bold">Inicia</label><input type="time" id="bloqueo-inicio" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
-                    <div><label class="text-xs font-bold">Termina</label><input type="time" id="bloqueo-fin" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                <input type="text" id="bloqueo-titulo" placeholder="Motivo o Nombre Paciente Externo" class="w-full p-3 bg-gray-50 border rounded-xl">
+                <input type="date" id="bloqueo-fecha" class="w-full p-3 bg-gray-50 border rounded-xl">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="time" id="bloqueo-inicio" class="w-full p-3 bg-gray-50 border rounded-xl">
+                    <input type="time" id="bloqueo-fin" class="w-full p-3 bg-gray-50 border rounded-xl">
                 </div>
             </div>
-            <button onclick="guardarBloqueo()" class="w-full bg-tm-dorado text-white py-3 rounded-xl font-bold mt-6">Confirmar Bloqueo</button>
-        </div>
-    </div>
-
-    <div id="modal-agendar" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-            <button onclick="document.getElementById('modal-agendar').classList.add('hidden'); citaIdEditando = null;" class="absolute top-4 right-4 text-3xl text-gray-500">&times;</button>
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Reagendar Cita 📅</h3>
-            <p class="text-xs text-gray-500 mb-4" id="modal-agendar-negocio">Paciente...</p>
-            <input type="hidden" id="reserva-negocio-id">
-            <div class="space-y-3">
-                <div><label class="text-xs font-bold">Servicio</label><select id="reserva-servicio" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></select></div>
-                <div><label class="text-xs font-bold">Nuevo Día</label><input type="date" id="reserva-fecha" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
-                <div class="border-t border-gray-100 pt-3"><label class="text-xs font-bold">Horarios Libres</label><div id="contenedor-horarios-libres" class="grid grid-cols-3 gap-2"></div></div>
+            <div class="flex gap-2 mt-6">
+                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-3 font-bold text-gray-500">Cancelar</button>
+                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-3 rounded-xl font-bold">Confirmar</button>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const SUPABASE_KEY = 'TU_ANON_KEY'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let usuarioActual = null; let citaIdEditando = null; let calendar = null;
+        let calendar = null;
+        let usuarioActual = null;
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
-        function mostrarNotificacion(m, t = 'exito') {
-            const c = document.getElementById('toast-container'); const el = document.createElement('div');
-            el.className = `${t === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
-            el.innerText = m; c.appendChild(el); setTimeout(() => el.remove(), 3000);
-        }
-
-        function renderizarUIHorarios() { document.getElementById('contenedor-horarios').innerHTML = Object.keys(DIAS).map(d => `<div class="flex items-center justify-between gap-2 p-1.5"><label class="flex items-center gap-2 w-24 cursor-pointer"><input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" onchange="toggleInputsHorario(this)"><span class="text-sm font-bold text-gray-700">${DIAS[d]}</span></label><div class="flex items-center gap-1 flex-grow"><input type="time" class="hora-abre p-1.5 border border-gray-300 rounded text-xs w-full"><span class="text-gray-400 text-xs">a</span><input type="time" class="hora-cierra p-1.5 border border-gray-300 rounded text-xs w-full"></div></div>`).join(''); }
-        function toggleInputsHorario(cb) { const r = cb.closest('div'); const i = r.querySelectorAll('input[type="time"]'); i.forEach(inp => { inp.disabled = !cb.checked; inp.classList.toggle('opacity-50', !cb.checked); }); }
-        function obtenerHorariosDeUI() { let h = {}; [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value }; }); return h; }
-        function setearHorariosUI(hJSON) { [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; const cb = r.querySelector('.dia-abierto'); if (hJSON && hJSON[d]) { cb.checked = hJSON[d].abierto; r.querySelector('.hora-abre').value = hJSON[d].abre || '09:00'; r.querySelector('.hora-cierra').value = hJSON[d].cierra || '18:00'; } else { cb.checked = (d !== 0); r.querySelector('.hora-abre').value = '09:00'; r.querySelector('.hora-cierra').value = '18:00'; } toggleInputsHorario(cb); }); }
-
-        document.addEventListener("DOMContentLoaded", () => { renderizarUIHorarios(); });
-
-        clienteSupabase.auth.onAuthStateChange((e, s) => { 
-            usuarioActual = s ? s.user : null; 
-            if(usuarioActual) { 
-                document.getElementById('no-auth').classList.add('hidden'); document.getElementById('si-auth').classList.remove('hidden'); 
-                const idNegocio = new URLSearchParams(window.location.search).get('id');
-                if(idNegocio) cargarDatosProfesional(idNegocio); else prepararConsultorioNuevo();
-            } else { 
-                document.getElementById('no-auth').classList.remove('hidden'); document.getElementById('si-auth').classList.add('hidden'); 
-            } 
+        // Inicialización
+        document.addEventListener("DOMContentLoaded", () => {
+            renderizarUIHorarios();
+            clienteSupabase.auth.onAuthStateChange((event, session) => {
+                if (session) {
+                    usuarioActual = session.user;
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const idNegocio = urlParams.get('id');
+                    if (idNegocio) cargarDatosProfesional(idNegocio);
+                }
+            });
         });
+
+        function renderizarUIHorarios() {
+            document.getElementById('contenedor-horarios').innerHTML = Object.keys(DIAS).map(d => `
+                <div class="flex items-center justify-between gap-2 text-sm">
+                    <label class="flex items-center gap-2 w-28">
+                        <input type="checkbox" class="dia-abierto rounded text-tm-azul" checked>
+                        <span class="font-bold">${DIAS[d]}</span>
+                    </label>
+                    <div class="flex items-center gap-1">
+                        <input type="time" class="hora-abre border rounded p-1 text-xs" value="09:00">
+                        <span>-</span>
+                        <input type="time" class="hora-cierra border rounded p-1 text-xs" value="18:00">
+                    </div>
+                </div>
+            `).join('');
+        }
 
         async function cargarDatosProfesional(id) {
             const { data } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
-            if(!data || data.user_id !== usuarioActual.id) return alert("Error de permisos.");
-            
-            document.getElementById('admin-negocio-id').value = data.id;
-            document.getElementById('admin-nombre').value = data.nombre_negocio;
-            document.getElementById('admin-desc').value = data.descripcion || '';
-            document.getElementById('admin-wa').value = data.enlace_whatsapp || '';
-            document.getElementById('admin-cat').value = data.categoria || 'Medicina General';
-            document.getElementById('admin-imagen-url').value = data.imagen_url || '';
-            document.getElementById('admin-estado-apertura').checked = data.esta_abierto !== false;
-            setearHorariosUI(data.horarios);
-
-            const nivel = data.nivel_pago || 0;
-            document.getElementById('admin-nivel-badge').innerText = "Nivel: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
-            configurarPermisos(nivel);
-            
-            if (nivel >= 2) { cargarServicios(data.id); cargarAgendaYCalendario(data.id); }
-            actualizarPreview();
-        }
-
-        function prepararConsultorioNuevo() {
-            const plan = new URLSearchParams(window.location.search).get('plan') || '0';
-            document.getElementById('admin-nivel-intencion').value = plan;
-            document.getElementById('admin-titulo').innerText = "Crear Nuevo Consultorio";
-            setearHorariosUI(null);
-            configurarPermisos(parseInt(plan));
-            actualizarPreview();
-        }
-
-        function configurarPermisos(nivel) {
-            if (nivel >= 1) { document.getElementById('tab-diseno').innerText = "Diseño & Foto"; document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden'); } 
-            else { document.getElementById('tab-diseno').innerText = "Diseño 🔒"; document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden'); }
-
-            if (nivel >= 2) { 
-                document.getElementById('tab-servicios').innerText = "Servicios"; document.getElementById('tab-agenda').innerText = "Mi Calendario";
-                document.getElementById('bloqueo-servicios').classList.add('hidden'); document.getElementById('contenido-servicios').classList.remove('hidden'); 
-            } else { 
-                document.getElementById('tab-servicios').innerText = "Servicios 🔒"; document.getElementById('tab-agenda').innerText = "Mi Calendario 🔒";
-                document.getElementById('bloqueo-servicios').classList.remove('hidden'); document.getElementById('contenido-servicios').classList.add('hidden'); 
+            if (data) {
+                document.getElementById('admin-negocio-id').value = data.id;
+                document.getElementById('admin-nombre').value = data.nombre_negocio;
+                document.getElementById('admin-wa').value = data.enlace_whatsapp;
+                cargarServicios(data.id);
+                cargarAgendaYCalendario(data.id);
             }
         }
 
-        function cambiarPestana(tab) {
-            ['basico', 'diseno', 'servicios', 'agenda', 'verif'].forEach(t => {
-                let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
-                let btn = document.getElementById('tab-'+t); if(btn) { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
-            });
-            document.getElementById('panel-'+tab).classList.remove('hidden');
-            let aBtn = document.getElementById('tab-'+tab); if(aBtn) { aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
-
-            if(tab === 'agenda') {
-                document.getElementById('vista-previa-movil').classList.add('hidden'); document.getElementById('vista-calendario-profesional').classList.remove('hidden'); document.getElementById('vista-calendario-profesional').classList.add('flex');
-                if(calendar) { setTimeout(() => { calendar.render(); calendar.updateSize(); }, 100); }
-            } else {
-                document.getElementById('vista-calendario-profesional').classList.add('hidden'); document.getElementById('vista-calendario-profesional').classList.remove('flex'); document.getElementById('vista-previa-movil').classList.remove('hidden');
-                actualizarPreview();
-            }
-        }
-
-        function actualizarPreview() { 
-            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Consultorio'; 
-            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría'; 
-            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Descripción...'; 
-            
-            const nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
-            const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
-            const img = document.getElementById('admin-imagen-url').value;
-            
-            if(img && nivel >= 1) { document.getElementById('preview-banner').src = img; document.getElementById('preview-banner-container').classList.remove('hidden'); } else { document.getElementById('preview-banner-container').classList.add('hidden'); }
-            if(nivel >= 2) document.getElementById('preview-btn-agenda').classList.remove('hidden');
-        }
-
-        async function guardarNegocioSeguro() {
-            const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; btn.innerText = "Guardando...";
-            const id = document.getElementById('admin-negocio-id').value;
-            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
-            
-            const payload = { nombre_negocio: document.getElementById('admin-nombre').value, descripcion: document.getElementById('admin-desc').value, enlace_whatsapp: document.getElementById('admin-wa').value, categoria: document.getElementById('admin-cat').value, imagen_url: document.getElementById('admin-imagen-url').value, horarios: obtenerHorariosDeUI(), esta_abierto: document.getElementById('admin-estado-apertura').checked };
-            
-            if(!payload.nombre_negocio || !payload.enlace_whatsapp) { mostrarNotificacion("Nombre y WhatsApp requeridos", "error"); btn.disabled = false; btn.innerText = "Guardar Configuración"; return; }
-            
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payload } });
-            if (error || !data.success) { mostrarNotificacion("Error al guardar", "error"); btn.disabled = false; btn.innerText = "Guardar Configuración"; return; }
-            
-            document.getElementById('admin-negocio-id').value = data.id_negocio;
-            
-            if (nivelIntencion > 0 && !id) {
-                btn.innerText = "Redirigiendo...";
-                await iniciarFlujoStripeInterno(nivelIntencion, nivelIntencion===1?'price_1TItPTGtW4zuRQv9RMSEOnnn':'price_1TItQaGtW4zuRQv9gyQOTaC5', data.id_negocio);
-            } else {
-                mostrarNotificacion("Guardado"); btn.disabled = false; btn.innerText = "Guardar Configuración";
-            }
-        }
-
-        async function cargarServicios(anuncioId) { const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id'); const l = document.getElementById('lista-servicios'); if (!data || data.length===0) return l.innerHTML=`<p class="text-xs text-gray-400">Sin servicios.</p>`; l.innerHTML = data.map(p => `<div class="bg-gray-50 p-3 rounded-lg border text-sm font-bold flex justify-between"><span>${p.nombre} <span class="text-gray-500 font-normal">(${p.duracion_minutos}m)</span></span> <button onclick="eliminarServicio('${p.id}')" class="text-red-500 text-xs">Borrar</button></div>`).join(''); }
-        async function agregarServicioSeguro() { const aId = document.getElementById('admin-negocio-id').value; const p = { anuncio_id: aId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value }; const { error } = await clienteSupabase.from('servicios').insert([p]); if (!error) { document.getElementById('serv-nombre').value=''; cargarServicios(aId); } }
-        async function eliminarServicio(id) { if(confirm("¿Eliminar servicio?")) { await clienteSupabase.from('servicios').delete().eq('id', id); cargarServicios(document.getElementById('admin-negocio-id').value); } }
-
-        async function cargarAgendaYCalendario(anuncioId) {
-            const { data } = await clienteSupabase.from('citas').select('*, perfiles(nombre_completo, telefono), servicios(nombre)').eq('anuncio_id', anuncioId).neq('estado', 'cancelada').order('fecha_cita');
-            
-            const lista = document.getElementById('lista-citas-negocio');
-            const citasReales = (data || []).filter(c => c.estado !== 'bloqueado');
-            lista.innerHTML = citasReales.length === 0 ? `<p class="text-xs text-gray-400">Sin citas.</p>` : citasReales.map(c => `
-                <div class="bg-white p-2 rounded-lg border text-sm flex justify-between items-center">
-                    <div><b>${c.perfiles?.nombre_completo||'Paciente'}</b><br><span class="text-[10px] text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)}</span></div>
-                    <div class="flex flex-col gap-1"><button onclick='prepararReagendar(${JSON.stringify(c).replace(/'/g, "&apos;")})' class="text-[10px] bg-blue-50 text-blue-600 px-2 rounded">Edit</button><button onclick="cancelarCitaOwner('${c.id}')" class="text-[10px] bg-red-50 text-red-600 px-2 rounded">Canc</button></div>
+        async function cargarServicios(idN) {
+            const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN);
+            const l = document.getElementById('lista-servicios');
+            l.innerHTML = data.map(s => `
+                <div class="flex justify-between items-center p-3 bg-white border rounded-xl shadow-sm">
+                    <div>
+                        <p class="font-bold text-sm">${s.nombre}</p>
+                        <p class="text-[10px] text-gray-500">${s.duracion_minutos} min | $${s.precio}</p>
+                    </div>
+                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-xs">Eliminar</button>
                 </div>
             `).join('');
-
-            const calendarEl = document.getElementById('calendar');
-            if(calendar) calendar.destroy();
-            const eventos = (data || []).map(c => { const b = c.estado === 'bloqueado'; return { id: c.id, title: b ? `🛑 ${c.notas}` : `✅ ${c.perfiles?.nombre_completo||'Cita'}`, start: `${c.fecha_cita}T${c.hora_inicio}`, end: `${c.fecha_cita}T${c.hora_fin}`, backgroundColor: b ? '#ef4444' : '#22527b', borderColor: b ? '#b91c1c' : '#143653', extendedProps: { esBloqueo: b } }; });
-
-            calendar = new FullCalendar.Calendar(calendarEl, { locale: 'es', initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek', headerToolbar: { left: 'prev,next', center: 'title', right: 'timeGridWeek,timeGridDay,listWeek' }, slotMinTime: "07:00:00", slotMaxTime: "22:00:00", allDaySlot: false, events: eventos, eventClick: function(info) { if(info.event.extendedProps.esBloqueo) { if(confirm("¿Eliminar bloqueo?")) cancelarCitaOwner(info.event.id); } } });
-            if(!document.getElementById('vista-calendario-profesional').classList.contains('hidden')) calendar.render();
         }
 
-        function abrirModalBloqueo() { const h = new Date().toISOString().split('T')[0]; document.getElementById('bloqueo-fecha').min = h; document.getElementById('modal-bloqueo').classList.remove('hidden'); }
-        async function guardarBloqueo() { const p = { anuncio_id: document.getElementById('admin-negocio-id').value, fecha: document.getElementById('bloqueo-fecha').value, hora_inicio: document.getElementById('bloqueo-inicio').value, hora_fin: document.getElementById('bloqueo-fin').value, titulo: document.getElementById('bloqueo-titulo').value }; if(!p.titulo||!p.fecha||!p.hora_inicio) return mostrarNotificacion("Llenar datos", "error"); const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload: p } }); if (!error) { document.getElementById('modal-bloqueo').classList.add('hidden'); cargarAgendaYCalendario(p.anuncio_id); } }
+        async function agregarServicioSeguro() {
+            const idN = document.getElementById('admin-negocio-id').value;
+            const payload = {
+                anuncio_id: idN,
+                nombre: document.getElementById('serv-nombre').value,
+                precio: parseFloat(document.getElementById('serv-precio').value) || 0,
+                duracion_minutos: parseInt(document.getElementById('serv-duracion').value) || 60
+            };
+            const { error } = await clienteSupabase.from('servicios').insert([payload]);
+            if (!error) {
+                mostrarNotificacion("Servicio añadido");
+                cargarServicios(idN);
+            }
+        }
 
-        function prepararReagendar(cita) { citaIdEditando = cita.id; document.getElementById('modal-agendar').classList.remove('hidden'); document.getElementById('reserva-negocio-id').value = cita.anuncio_id; document.getElementById('reserva-fecha').value = cita.fecha_cita; cargarServiciosSelect(cita.anuncio_id, cita.servicios?.id).then(() => buscarHorarios()); }
-        async function cargarServiciosSelect(idN, idS) { const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN); document.getElementById('reserva-servicio').innerHTML = '<option value="">Seleccione...</option>' + (data||[]).map(s => `<option value="${s.id}" ${s.id===idS?'selected':''}>${s.nombre}</option>`).join(''); }
-        async function buscarHorarios() { const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, cita_id_excluir: citaIdEditando }; if(!p.servicio_id || !p.fecha) return; const { data } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } }); document.getElementById('contenedor-horarios-libres').innerHTML = (data?.disponibles||[]).map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-blue-600 p-2 rounded text-sm">${h}</button>`).join(''); }
-        async function confirmarCita(h) { const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, hora_inicio: h, cita_id: citaIdEditando }; const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'editar_cita', payload: p } }); if (!error) { document.getElementById('modal-agendar').classList.add('hidden'); cargarAgendaYCalendario(p.anuncio_id); citaIdEditando=null; } }
-        async function cancelarCitaOwner(id) { if(confirm("¿Eliminar registro?")) { await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } }); cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value); } }
+        async function eliminarServicio(id) {
+            if (!confirm("¿Borrar servicio?")) return;
+            await clienteSupabase.from('servicios').delete().eq('id', id);
+            cargarServicios(document.getElementById('admin-negocio-id').value);
+        }
 
-        async function procesarSubidaImagen(e, b, i, l, r) { const f = e.target.files[0]; if(!f) return; document.getElementById(l).innerText = "Subiendo..."; const n = `${usuarioActual.id}_${Date.now()}.png`; try { await clienteSupabase.storage.from(b).upload(n, f); document.getElementById(i).value = clienteSupabase.storage.from(b).getPublicUrl(n).data.publicUrl; document.getElementById(l).innerText = "✅ Listo"; if(r) actualizarPreview(); } catch (err) { document.getElementById(l).innerText = "Error"; } }
-        async function iniciarFlujoStripeInterno(n, p, aId) { try { const r = await fetch(URL_EDGE_FUNCTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ anuncioId: aId, nivel: n, priceId: p, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href }) }); const s = await r.json(); if (s.url) window.location.href = s.url; } catch (e) { mostrarNotificacion("Error con Stripe", "error"); } }
+        async function cargarAgendaYCalendario(idN) {
+            const { data } = await clienteSupabase.from('citas')
+                .select('*, perfiles:cliente_id(nombre_completo)')
+                .eq('anuncio_id', idN)
+                .neq('estado', 'cancelada');
+
+            const eventos = data.map(c => ({
+                id: c.id,
+                title: c.estado === 'bloqueado' ? `🛑 ${c.notas}` : `✅ ${c.perfiles?.nombre_completo || 'Cita'}`,
+                start: `${c.fecha_cita}T${c.hora_inicio}`,
+                end: `${c.fecha_cita}T${c.hora_fin}`,
+                backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
+                borderColor: 'transparent'
+            }));
+
+            if (calendar) calendar.destroy();
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                locale: 'es',
+                initialView: 'timeGridWeek',
+                slotMinTime: '07:00:00',
+                events: eventos,
+                eventClick: (info) => { if(confirm("¿Eliminar este registro?")) cancelarCitaOwner(info.event.id); }
+            });
+            calendar.render();
+        }
+
+        async function guardarBloqueo() {
+            const payload = {
+                anuncio_id: document.getElementById('admin-negocio-id').value,
+                fecha: document.getElementById('bloqueo-fecha').value,
+                hora_inicio: document.getElementById('bloqueo-inicio').value,
+                hora_fin: document.getElementById('bloqueo-fin').value,
+                titulo: document.getElementById('bloqueo-titulo').value
+            };
+            await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
+            document.getElementById('modal-bloqueo').classList.add('hidden');
+            cargarAgendaYCalendario(payload.anuncio_id);
+        }
+
+        async function cancelarCitaOwner(id) {
+            await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } });
+            cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value);
+        }
+
+        function cambiarPestana(p) {
+            ['basico', 'servicios', 'agenda'].forEach(t => {
+                document.getElementById('panel-'+t).classList.add('hidden');
+                document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2');
+            });
+            document.getElementById('panel-'+p).classList.remove('hidden');
+            document.getElementById('tab-'+p).classList.add('text-tm-azul', 'border-b-2');
+
+            if (p === 'agenda') {
+                document.getElementById('contenedor-calendario-full').classList.remove('hidden');
+                document.getElementById('preview-placeholder').classList.add('hidden');
+                setTimeout(() => calendar.updateSize(), 100);
+            }
+        }
+
+        function mostrarNotificacion(m) {
+            const el = document.createElement('div');
+            el.className = "bg-tm-azul-oscuro text-white px-6 py-3 rounded-xl shadow-2xl";
+            el.innerText = m;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
     </script>
 </body>
 </html>
