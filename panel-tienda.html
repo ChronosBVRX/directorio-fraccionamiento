@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Tiendas - Vive Tres Marías</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+    </script>
+    <style> .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } </style>
+</head>
+<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
+        <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
+        <p class="text-gray-500 mb-6">Inicia sesión para administrar tu tienda.</p>
+        <a href="login.html" target="_parent" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
+    </div>
+
+    <div id="si-auth" class="hidden max-w-7xl mx-auto">
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Tienda 🛒</h2>
+                <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tu catálogo, pedidos y visibilidad.</p>
+            </div>
+            <a href="dashboard.html" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold shadow hover:bg-gray-300 transition text-center">← Volver al Perfil</a>
+        </div>
+
+        <div id="seccion-admin-negocio" class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10 flex flex-col">
+            <div class="bg-tm-azul-oscuro text-white p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black flex items-center gap-3">
+                        <span id="admin-titulo">Configuración de Tienda</span>
+                    </h2>
+                    <p id="admin-nivel-badge" class="text-xs font-bold text-tm-azul-oscuro bg-white px-2 py-1 rounded inline-block mt-2">Nivel Actual: Cargando...</p>
+                </div>
+                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Configuración</button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row flex-grow min-h-[650px]">
+                <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50">
+                    <input type="hidden" id="admin-negocio-id"><input type="hidden" id="admin-nivel-intencion" value="0">
+                    
+                    <div id="tabs-container" class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
+                        <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos y Horarios</button>
+                        <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
+                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Catálogo de Productos 🔒</button>
+                        <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
+                    </div>
+
+                    <div class="p-5 sm:p-6 flex-grow overflow-y-auto">
+                        <div id="panel-basico" class="space-y-4">
+                            <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
+                                <div><h4 class="font-bold text-sm text-red-600">Estado Operativo</h4><p class="text-[11px] text-gray-500">Cierra tu tienda temporalmente.</p></div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                </label>
+                            </div>
+                            <div><label class="text-xs font-bold text-gray-500">Nombre de la Tienda / Restaurante *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></div>
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2"><h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Horarios de Apertura</h4><div id="contenedor-horarios"></div></div>
+                            <div><label class="text-xs font-bold text-gray-500">Descripción Corta *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></textarea></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-gray-500">WhatsApp Pedidos *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none"></div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500">Giro Comercial *</label>
+                                    <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none">
+                                        <option value="Alimentos">Comida / Alimentos</option>
+                                        <option value="Restaurante">Restaurante</option>
+                                        <option value="Postres">Postres y Antojos</option>
+                                        <option value="Abarrotes">Abarrotes y Tienda</option>
+                                        <option value="Ropa">Ropa y Moda</option>
+                                        <option value="Hogar">Artículos de Hogar</option>
+                                        <option value="Otro Producto">Otro Producto</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="panel-diseno" class="hidden space-y-4">
+                            <div id="bloqueo-diseno" class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center"><h3 class="font-bold text-blue-800 mb-2">Desbloquea el Diseño Pro</h3><button onclick="iniciarMejoraDirecta(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-blue-700">Mejorar a Pro ($150/mes)</button></div>
+                            <div id="contenido-diseno" class="hidden">
+                                <label class="text-sm font-bold text-gray-700">Banner / Foto Principal</label>
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-white hover:bg-gray-50 transition">
+                                    <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaImagen(event, 'negocios', 'admin-imagen-url', 'estado-subida', true)">
+                                    <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold block w-max mx-auto transition">Subir Imagen</label>
+                                    <p id="estado-subida" class="text-xs text-tm-azul mt-3 font-bold"></p>
+                                </div>
+                                <input type="hidden" id="admin-imagen-url">
+                            </div>
+                        </div>
+
+                        <div id="panel-menu" class="hidden space-y-4 flex-col h-full">
+                            <div id="bloqueo-menu" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center"><h3 class="font-bold text-yellow-800 mb-2">Activa tu Tienda en Línea</h3><button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-yellow-600">Mejorar a Elite ($300/mes)</button></div>
+                            <div id="contenido-menu" class="hidden flex-grow flex-col">
+                                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Nuevo Producto</h4>
+                                    <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none"><input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none"></div>
+                                    <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
+                                    <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Catálogo</button>
+                                </div>
+                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
+                                <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
+                            </div>
+                        </div>
+
+                        <div id="panel-verif" class="hidden space-y-4">
+                            <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mb-4"><h3 class="font-black text-blue-800 mb-1">🛡️ Sello de Confianza</h3></div>
+                            <form id="form-verif" class="bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
+                                <div><label class="text-xs font-bold text-gray-500">Nombre Responsable *</label><input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
+                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4">Enviar Documentos</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-derecho-mixto" class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col relative overflow-hidden">
+                    <div id="vista-previa-movil" class="flex flex-col items-center justify-center h-full w-full">
+                        <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold z-10">Vista Previa Móvil</div>
+                        <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 mx-auto relative z-10">
+                            <div class="bg-gray-100 p-3 border-b border-gray-200"><span class="text-[10px] font-bold text-gray-400">⬅ Volver</span></div>
+                            <div id="preview-banner-container" class="w-full h-32 bg-gray-100 relative hidden"><img id="preview-banner" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div></div>
+                            <div class="p-5 bg-white">
+                                <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
+                                <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro mt-2 leading-tight">Nombre de la Tienda</h3>
+                                <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-3">Descripción...</p>
+                                <div class="mt-5 pt-4 border-t border-gray-100"><button class="w-full bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold">WhatsApp</button></div>
+                                <div class="mt-2"><button id="preview-btn-menu" class="hidden w-full bg-tm-azul text-white py-2.5 rounded-lg text-xs font-bold">🛒 Ver Tienda y Pedir</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioActual = null;
+        const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
+
+        function mostrarNotificacion(m, t = 'exito') {
+            const c = document.getElementById('toast-container'); const el = document.createElement('div');
+            el.className = `${t === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
+            el.innerText = m; c.appendChild(el); setTimeout(() => el.remove(), 3000);
+        }
+
+        function renderizarUIHorarios() { document.getElementById('contenedor-horarios').innerHTML = Object.keys(DIAS).map(d => `<div class="flex items-center justify-between gap-2 p-1.5"><label class="flex items-center gap-2 w-24 cursor-pointer"><input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" onchange="toggleInputsHorario(this)"><span class="text-sm font-bold text-gray-700">${DIAS[d]}</span></label><div class="flex items-center gap-1 flex-grow"><input type="time" class="hora-abre p-1.5 border border-gray-300 rounded text-xs w-full"><span class="text-gray-400 text-xs">a</span><input type="time" class="hora-cierra p-1.5 border border-gray-300 rounded text-xs w-full"></div></div>`).join(''); }
+        function toggleInputsHorario(cb) { const r = cb.closest('div'); const i = r.querySelectorAll('input[type="time"]'); i.forEach(inp => { inp.disabled = !cb.checked; inp.classList.toggle('opacity-50', !cb.checked); }); }
+        function obtenerHorariosDeUI() { let h = {}; [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value }; }); return h; }
+        function setearHorariosUI(hJSON) { [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; const cb = r.querySelector('.dia-abierto'); if (hJSON && hJSON[d]) { cb.checked = hJSON[d].abierto; r.querySelector('.hora-abre').value = hJSON[d].abre || '09:00'; r.querySelector('.hora-cierra').value = hJSON[d].cierra || '18:00'; } else { cb.checked = (d !== 0); r.querySelector('.hora-abre').value = '09:00'; r.querySelector('.hora-cierra').value = '18:00'; } toggleInputsHorario(cb); }); }
+
+        document.addEventListener("DOMContentLoaded", () => { renderizarUIHorarios(); });
+        
+        clienteSupabase.auth.onAuthStateChange((e, s) => { 
+            usuarioActual = s ? s.user : null; 
+            if(usuarioActual) { 
+                document.getElementById('no-auth').classList.add('hidden'); document.getElementById('si-auth').classList.remove('hidden'); 
+                const urlParams = new URLSearchParams(window.location.search);
+                const idNegocio = urlParams.get('id');
+                if(idNegocio) { cargarDatosTienda(idNegocio); } else { prepararTiendaNueva(); }
+            } else { 
+                document.getElementById('no-auth').classList.remove('hidden'); document.getElementById('si-auth').classList.add('hidden'); 
+            } 
+        });
+
+        async function cargarDatosTienda(id) {
+            const { data } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            if(!data || data.user_id !== usuarioActual.id) return alert("Error de permisos.");
+            
+            document.getElementById('admin-negocio-id').value = data.id;
+            document.getElementById('admin-nombre').value = data.nombre_negocio;
+            document.getElementById('admin-desc').value = data.descripcion || '';
+            document.getElementById('admin-wa').value = data.enlace_whatsapp || '';
+            document.getElementById('admin-cat').value = data.categoria || 'Alimentos';
+            document.getElementById('admin-imagen-url').value = data.imagen_url || '';
+            document.getElementById('admin-estado-apertura').checked = data.esta_abierto !== false;
+            setearHorariosUI(data.horarios);
+
+            const nivel = data.nivel_pago || 0;
+            document.getElementById('admin-nivel-badge').innerText = "Nivel: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
+            configurarPermisos(nivel);
+            
+            if (nivel >= 2) cargarProductosMenu(data.id);
+            actualizarPreview();
+        }
+
+        function prepararTiendaNueva() {
+            const nivelIntencion = new URLSearchParams(window.location.search).get('plan') || '0';
+            document.getElementById('admin-nivel-intencion').value = nivelIntencion;
+            document.getElementById('admin-titulo').innerText = "Crear Nueva Tienda";
+            setearHorariosUI(null);
+            configurarPermisos(parseInt(nivelIntencion));
+            actualizarPreview();
+        }
+
+        function cambiarPestana(tab) {
+            ['basico', 'diseno', 'menu', 'verif'].forEach(t => {
+                let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
+                let btn = document.getElementById('tab-'+t); if(btn) { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
+            });
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            let aBtn = document.getElementById('tab-'+tab); if(aBtn) { aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
+        }
+
+        function configurarPermisos(nivel) {
+            if (nivel >= 1) { document.getElementById('tab-diseno').innerText = "Diseño & Foto"; document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden'); } 
+            else { document.getElementById('tab-diseno').innerText = "Diseño 🔒"; document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden'); }
+
+            if (nivel >= 2) { document.getElementById('tab-menu').innerText = "Tienda Activa"; document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden'); } 
+            else { document.getElementById('tab-menu').innerText = "Tienda Online 🔒"; document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden'); }
+        }
+
+        function actualizarPreview() { 
+            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Tienda'; 
+            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría'; 
+            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Descripción...'; 
+            
+            const nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
+            const img = document.getElementById('admin-imagen-url').value;
+            
+            if(img && nivel >= 1) { document.getElementById('preview-banner').src = img; document.getElementById('preview-banner-container').classList.remove('hidden'); } else { document.getElementById('preview-banner-container').classList.add('hidden'); }
+            if(nivel >= 2) document.getElementById('preview-btn-menu').classList.remove('hidden');
+        }
+
+        async function guardarNegocioSeguro() {
+            const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; btn.innerText = "Guardando...";
+            const id = document.getElementById('admin-negocio-id').value;
+            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
+            
+            const payload = { nombre_negocio: document.getElementById('admin-nombre').value, descripcion: document.getElementById('admin-desc').value, enlace_whatsapp: document.getElementById('admin-wa').value, categoria: document.getElementById('admin-cat').value, imagen_url: document.getElementById('admin-imagen-url').value, horarios: obtenerHorariosDeUI(), esta_abierto: document.getElementById('admin-estado-apertura').checked };
+            
+            if(!payload.nombre_negocio || !payload.enlace_whatsapp) { mostrarNotificacion("Nombre y WhatsApp requeridos", "error"); btn.disabled = false; btn.innerText = "Guardar Configuración"; return; }
+            
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payload } });
+            if (error || !data.success) { mostrarNotificacion("Error al guardar", "error"); btn.disabled = false; btn.innerText = "Guardar Configuración"; return; }
+            
+            document.getElementById('admin-negocio-id').value = data.id_negocio;
+            
+            if (nivelIntencion > 0 && !id) {
+                btn.innerText = "Redirigiendo a Stripe...";
+                await iniciarFlujoStripeInterno(nivelIntencion, nivelIntencion===1?'price_1TItPTGtW4zuRQv9RMSEOnnn':'price_1TItQaGtW4zuRQv9gyQOTaC5', data.id_negocio);
+            } else {
+                mostrarNotificacion("Guardado"); btn.disabled = false; btn.innerText = "Guardar Configuración";
+            }
+        }
+
+        // --- FUNCIONES DE PRODUCTOS ---
+        async function cargarProductosMenu(anuncioId) { const { data } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id'); const l = document.getElementById('lista-productos'); if (!data || data.length===0) return l.innerHTML=`<p class="text-xs text-gray-400">Sin productos.</p>`; l.innerHTML = data.map(p => `<div class="flex justify-between bg-gray-50 p-3 rounded-lg border"><div><p class="text-sm font-bold">${p.nombre}</p><p class="text-xs font-black text-tm-dorado">$${p.precio}</p></div><button onclick="eliminarProductoSeguro('${p.id}')" class="text-red-500 font-bold text-xs">Borrar</button></div>`).join(''); }
+        async function agregarProductoSeguro() { const aId = document.getElementById('admin-negocio-id').value; const p = { anuncio_id: aId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value }; const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: p } }); if (!error) { document.getElementById('prod-nombre').value=''; cargarProductosMenu(aId); } }
+        async function eliminarProductoSeguro(id) { if(confirm("¿Borrar?")) { await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: id } }); cargarProductosMenu(document.getElementById('admin-negocio-id').value); } }
+        
+        async function procesarSubidaImagen(e, b, i, l, r) { const f = e.target.files[0]; if(!f) return; document.getElementById(l).innerText = "Subiendo..."; const n = `${usuarioActual.id}_${Date.now()}.png`; try { await clienteSupabase.storage.from(b).upload(n, f); document.getElementById(i).value = clienteSupabase.storage.from(b).getPublicUrl(n).data.publicUrl; document.getElementById(l).innerText = "✅ Listo"; if(r) actualizarPreview(); } catch (err) { document.getElementById(l).innerText = "Error"; } }
+        async function iniciarFlujoStripeInterno(n, p, aId) { try { const r = await fetch(URL_EDGE_FUNCTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ anuncioId: aId, nivel: n, priceId: p, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href }) }); const s = await r.json(); if (s.url) window.location.href = s.url; } catch (e) { mostrarNotificacion("Error con Stripe", "error"); } }
+    </script>
+</body>
+</html>
