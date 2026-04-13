@@ -39,54 +39,68 @@
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col relative">
 
     <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul relative">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-4">
             
-            <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-14 w-auto object-contain">
+            <a href="#" onclick="document.getElementById('toggle-modo').checked = false; cambiarModoPlataforma();" class="flex items-center shrink-0 transition-transform hover:scale-105">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-12 w-auto object-contain">
             </a>
             
-            <div id="contenedor-switch" class="hidden items-center gap-1.5 sm:gap-2 bg-gray-100 px-2 py-1 rounded-full border border-gray-200 shrink-0 mx-auto">
-                <span class="text-[10px] sm:text-xs font-bold text-tm-azul" id="label-modo-comprar">🛍️</span>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
-                    <div class="w-8 h-4 sm:w-10 sm:h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 sm:after:h-4 sm:after:w-4 after:transition-all peer-checked:bg-tm-dorado"></div>
-                </label>
-                <span class="text-[10px] sm:text-xs font-bold text-gray-400" id="label-modo-vender">🏪</span>
-            </div>
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                
+                <div id="contenedor-switch" class="hidden items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                    <label class="relative flex items-center cursor-pointer select-none">
+                        <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
+                        
+                        <div class="w-[120px] sm:w-[150px] h-7 sm:h-8 relative flex items-center rounded-lg">
+                            <div class="absolute left-0 top-0 bottom-0 w-1/2 bg-white rounded-md shadow-[0_1px_3px_rgba(0,0,0,0.1)] border border-gray-200 transition-transform duration-300 ease-out peer-checked:translate-x-full peer-checked:border-tm-dorado"></div>
+                            
+                            <div id="label-modo-comprar" class="z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-tm-azul transition-colors duration-300">
+                                <span class="text-xs sm:text-sm">🛍️</span> <span class="hidden sm:inline">Comprar</span>
+                            </div>
+                            
+                            <div id="label-modo-vender" class="z-10 w-1/2 flex justify-center items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-400 transition-colors duration-300">
+                                <span class="text-xs sm:text-sm">🏪</span> <span class="hidden sm:inline">Vender</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
 
-            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 shadow-sm transition">
-                    <span class="text-sm sm:text-base">📱</span> <span class="hidden sm:inline">Descargar</span>
-                </button>
+                <div class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
 
-                <button onclick="toggleMenuPrincipal()" class="bg-gray-100 text-tm-azul p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm border border-gray-200">
-                    <span class="text-lg sm:text-xl leading-none">☰</span>
-                </button>
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <button id="btn-instalar" class="hidden bg-gradient-to-r from-tm-dorado to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition hover:-translate-y-0.5">
+                        <span class="text-base">📱</span> <span class="hidden sm:inline">Descargar</span>
+                    </button>
+
+                    <button onclick="toggleMenuPrincipal()" class="bg-gray-50 text-tm-azul p-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-gray-100 transition flex items-center shadow-sm border border-gray-200">
+                        <span class="text-xl leading-none">☰</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
-            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+        <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-52 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50 transition-all">
+            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                 <span class="text-lg">📍</span> Seguir Pedido
             </a>
             
-            <a href="airbnb-host.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+            <a href="airbnb-host.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                 <span class="text-lg">🏠</span> Panel Airbnb
             </a>
             
-            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition">
+            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-3 transition">
                 <span class="text-lg">🔑</span> Entrar
             </a>
 
-            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                 <span class="text-lg">👤</span> Mi Perfil
             </button>
             
-            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
                 <span class="text-lg">⚙️</span> Admin
             </a>
             
-            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                 <span class="text-lg">🚪</span> Salir
             </button>
         </div>
@@ -271,7 +285,7 @@
             }
         }
 
-        // --- FUNCIONES AVANZADAS DE HORARIO (Nuevas) ---
+        // --- FUNCIONES AVANZADAS DE HORARIO ---
         function estaAbiertoAhora(a) {
             try {
                 if (a.esta_abierto === false) return false; 
@@ -347,7 +361,7 @@
             lista.forEach(a => {
                 const esGratis = a.nivel_pago === 0;
                 const tieneMenu = a.nivel_pago >= 2;
-                const estaAbierto = estaAbiertoAhora(a); // Integración de cálculo avanzado
+                const estaAbierto = estaAbiertoAhora(a);
                 const textoHorario = stringHorarioHoy(a.horarios);
                 
                 let badgeAntiguedad = '';
@@ -415,7 +429,7 @@
             document.getElementById('cliente-notas').value = '';
 
             const permitePedidos = negocio.nivel_pago >= 2;
-            const negocioAbierto = estaAbiertoAhora(negocio); // Se evalúa en tiempo real
+            const negocioAbierto = estaAbiertoAhora(negocio); 
 
             const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
             const inputDireccion = document.getElementById('cliente-direccion');
@@ -577,7 +591,6 @@
                 document.getElementById('banner-airbnb').classList.remove('hidden');
                 document.getElementById('nombre-airbnb-banner').innerText = airbnbNombre;
             }
-            // Disparar carga de datos inmediatamente, no esperar a Supabase Auth
             cargarDatos();
         });
 
@@ -587,7 +600,7 @@
             location.reload();
         }
 
-        // --- PWA SERVICE WORKER (De la nueva versión) ---
+        // --- PWA SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(err => {}));
         }
