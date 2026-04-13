@@ -49,7 +49,7 @@
                 <span class="text-[10px] sm:text-xs font-bold text-tm-azul" id="label-modo-comprar">🛍️</span>
                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input type="checkbox" id="toggle-modo" class="sr-only peer" onchange="cambiarModoPlataforma()">
-                    <div class="w-8 h-4 sm:w-10 sm:h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 sm:after:h-4 sm:after:w-4 after:transition-all peer-checked:bg-tm-dorado"></div>
+                    <div class="w-8 h-4 sm:w-10 sm:h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 sm:after:h-4 sm:after:w-4 after:transition-all peer-checked:bg-tm-dorado"></div>
                 </label>
                 <span class="text-[10px] sm:text-xs font-bold text-gray-400" id="label-modo-vender">🏪</span>
             </div>
@@ -66,12 +66,29 @@
         </div>
 
         <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
-            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">📍 Seguir Pedido</a>
-            <a href="airbnb-host.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">🏠 Panel Airbnb</a>
-            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition">🔑 Entrar</a>
-            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">👤 Mi Perfil</button>
-            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">⚙️ Admin</a>
-            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">🚪 Salir</button>
+            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">📍</span> Seguir Pedido
+            </a>
+            
+            <a href="airbnb-host.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🏠</span> Panel Airbnb
+            </a>
+            
+            <a href="login.html" id="btn-login" class="block px-4 py-3 border-b border-gray-100 text-sm font-bold text-tm-azul hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🔑</span> Entrar
+            </a>
+
+            <button onclick="abrirPerfil(); toggleMenuPrincipal();" id="btn-perfil" class="hidden w-full text-left px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">👤</span> Mi Perfil
+            </button>
+            
+            <a href="admin.html" id="btn-admin" class="hidden px-4 py-3 border-b border-gray-100 text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                <span class="text-lg">⚙️</span> Admin
+            </a>
+            
+            <button onclick="cerrarSesion()" id="btn-logout" class="hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
+                <span class="text-lg">🚪</span> Salir
+            </button>
         </div>
     </header>
 
@@ -82,16 +99,36 @@
 
     <div id="vista-directorio" class="block flex-grow">
         <nav class="max-w-7xl mx-auto mt-4 sm:mt-6 px-2 sm:px-4 flex gap-2 sm:gap-3 overflow-x-auto pb-4 pt-2 border-b border-gray-200 hide-scrollbar snap-x">
-            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span></button>
-            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span></button>
-            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span></button>
-            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span></button>
-            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]"><span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span><span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span></button>
+            <button onclick="filtrar('Todos')" id="btn-Todos" class="filter-btn active-filter snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏪</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Todos</span>
+            </button>
+            <button onclick="filtrar('Alimentos')" id="btn-Alimentos" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🍔</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Alimentos</span>
+            </button>
+            <button onclick="filtrar('Servicios')" id="btn-Servicios" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🛠️</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Servicios</span>
+            </button>
+            <button onclick="filtrar('Salud')" id="btn-Salud" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🩺</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Salud</span>
+            </button>
+            <button onclick="filtrar('Hogar')" id="btn-Hogar" class="filter-btn snap-start flex flex-col items-center justify-center gap-1 sm:gap-2 px-1 py-2 sm:px-2 sm:py-3 rounded-xl sm:rounded-2xl border border-transparent hover:bg-gray-100 transition min-w-[75px] sm:min-w-[90px]">
+                <span class="text-3xl sm:text-4xl drop-shadow-sm">🏠</span>
+                <span class="label-categoria text-xs sm:text-sm font-bold text-tm-gris">Hogar</span>
+            </button>
         </nav>
-        <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8"><div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div></main>
+
+        <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+            <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
+        </main>
     </div>
 
-    <div id="vista-iframe-container" class="hidden flex-grow w-full"><iframe src="panel.html" id="panel-iframe" class="w-full h-full min-h-[85vh] border-none"></iframe></div>
+    <div id="vista-iframe-container" class="hidden flex-grow w-full">
+        <iframe src="panel.html" id="panel-iframe" class="w-full h-full min-h-[85vh] border-none"></iframe>
+    </div>
 
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden">
@@ -138,10 +175,11 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
+        // --- FUNCIONES UI BÁSICAS ---
         function toggleMenuPrincipal() { document.getElementById('dropdown-principal').classList.toggle('hidden'); }
         document.addEventListener('click', (event) => { const menu = document.getElementById('dropdown-principal'); const botonMenu = document.querySelector('button[onclick="toggleMenuPrincipal()"]'); if (menu && botonMenu && !menu.contains(event.target) && !botonMenu.contains(event.target)) menu.classList.add('hidden'); });
 
-        // --- INICIALIZACIÓN DE UI ---
+        // --- INICIALIZACIÓN UI ---
         document.addEventListener('DOMContentLoaded', () => {
             const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
             if (airbnbNombre) {
@@ -156,15 +194,15 @@
             location.reload(); 
         }
 
-        // --- GESTIÓN DE SESIÓN Y CARGA (SIN CUELLOS DE BOTELLA) ---
+        // --- GESTIÓN DE SESIÓN ---
         clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            // 1. Resolvemos quién es el usuario
+            if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN' && event !== 'SIGNED_OUT') return;
+
             usuarioActual = session ? session.user : null;
             document.getElementById('btn-login').classList.toggle('hidden', !!usuarioActual);
             document.getElementById('contenedor-switch').classList.toggle('hidden', !usuarioActual);
             document.getElementById('btn-logout').classList.toggle('hidden', !usuarioActual);
             
-            // 2. Si hay sesión, traemos su perfil para la UI
             if(usuarioActual) {
                 const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle();
                 perfilUsuarioActual = data;
@@ -174,7 +212,6 @@
                 perfilUsuarioActual = null;
             }
 
-            // 3. SOLO HASTA QUE SUPABASE TERMINÓ DE ACOMODAR LA SESIÓN, CARGAMOS EL DIRECTORIO
             cambiarModoPlataforma();
         });
 
@@ -196,7 +233,6 @@
                 document.getElementById('label-modo-comprar').classList.replace('text-gray-400', 'text-tm-azul');
                 document.getElementById('label-modo-vender').classList.replace('text-tm-dorado', 'text-gray-400');
                 
-                // Disparamos la lectura a la base de datos
                 cargarDatos();
             }
         }
@@ -334,6 +370,7 @@
             const permitePedidos = negocio.nivel_pago >= 2;
             const negocioAbierto = estaAbiertoAhora(negocio);
 
+            // --- AUTOCOMPLETADO AIRBNB Y PERFIL ---
             const airbnbDir = localStorage.getItem('tm_airbnb_direccion');
             const inputDir = document.getElementById('cliente-direccion');
             const inputNombre = document.getElementById('cliente-nombre');
