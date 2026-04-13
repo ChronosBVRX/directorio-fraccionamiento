@@ -4,49 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional - Vive Tres Marías</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js'></script>
 
     <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
-                    colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37' } 
-                } 
-            } 
-        }
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
     </script>
     <style>
-        .fc { background: white; border-radius: 1rem; padding: 1rem; min-height: 500px; }
-        .fc-event { cursor: pointer; transition: opacity 0.2s; }
-        .fc-event:hover { opacity: 0.8; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); min-height: 600px; }
+        .fc-event { cursor: pointer; border: none !important; padding: 2px 4px; border-radius: 4px; }
+        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; }
+        .fc .fc-button-primary:hover { background-color: #143653 !important; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-700 p-4 md:p-8">
+<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
 
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <div id="si-auth" class="max-w-7xl mx-auto">
-        <div class="mb-8 flex flex-col sm:row sm:items-center justify-between gap-4 border-b pb-6">
-            <div>
-                <h2 class="text-3xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-                <p class="text-gray-500">Gestiona tus servicios y agenda en tiempo real.</p>
-            </div>
-            <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="bg-tm-dorado hover:bg-yellow-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg">
-                Guardar Cambios
-            </button>
+    <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+        <div>
+            <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
+            <p class="text-sm text-gray-500 mt-1">Administra tus servicios, agenda y pacientes de Vive Tres Marías.</p>
         </div>
+        <div class="flex items-center gap-2">
+            <a href="index.html" class="bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition text-sm">🏠 Inicio</a>
+            <a href="panel.html" class="bg-tm-azul text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition text-sm">👤 Mi Perfil</a>
+        </div>
+    </div>
 
-        <div class="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[700px]">
-            <div class="w-full lg:w-1/2 border-r border-gray-100 flex flex-col">
-                <div class="flex gap-1 p-4 border-b bg-gray-50 overflow-x-auto">
-                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="px-4 py-2 font-bold text-tm-azul border-b-2 border-tm-azul">Datos</button>
-                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="px-4 py-2 font-bold text-gray-400">Servicios</button>
-                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="px-4 py-2 font-bold text-gray-400">Calendario</button>
+    <div id="si-auth" class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
+            
+            <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50/50">
+                <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
+                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap">Datos</button>
+                    <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Banner</button>
+                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Servicios</button>
+                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Mi Calendario</button>
                 </div>
 
                 <div class="p-6 flex-grow overflow-y-auto">
@@ -54,152 +56,160 @@
                         <input type="hidden" id="admin-negocio-id">
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Nombre del Consultorio</label>
-                            <input type="text" id="admin-nombre" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none focus:border-tm-azul">
+                            <input type="text" id="admin-nombre" class="w-full p-3 bg-white border border-gray-300 rounded-xl mt-1 focus:ring-2 focus:ring-tm-azul outline-none">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp</label>
-                            <input type="number" id="admin-wa" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none">
+                            <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp de Atención</label>
+                            <input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-xl mt-1 outline-none">
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Horarios de Atención</h4>
+                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Horarios Semanales</h4>
                             <div id="contenedor-horarios" class="space-y-2"></div>
+                        </div>
+                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado text-white py-4 rounded-xl font-black shadow-lg hover:bg-yellow-600 transition">GUARDAR CONFIGURACIÓN</button>
+                    </div>
+
+                    <div id="panel-diseno" class="hidden space-y-4">
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-white">
+                            <label class="text-sm font-bold text-gray-700 block mb-4">Imagen de Portada / Banner</label>
+                            <input type="file" id="admin-imagen-file" accept="image/*" class="hidden" onchange="subirBanner(event)">
+                            <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl font-bold inline-block hover:bg-tm-azul-oscuro">Seleccionar Imagen</label>
+                            <p id="estado-subida" class="text-xs mt-3 text-tm-azul font-bold"></p>
                         </div>
                     </div>
 
                     <div id="panel-servicios" class="hidden space-y-4">
-                        <div class="bg-tm-azul-oscuro p-4 rounded-2xl text-white">
-                            <h4 class="font-bold mb-3 text-sm">Añadir Nuevo Servicio</h4>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <input type="text" id="serv-nombre" placeholder="Nombre (Ej: Consulta)" class="p-2 rounded bg-white/10 border border-white/20 text-sm">
-                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-2 rounded bg-white/10 border border-white/20 text-sm">
+                        <div class="bg-tm-azul-oscuro p-5 rounded-2xl text-white shadow-xl">
+                            <h4 class="font-bold mb-4 flex items-center gap-2">✨ Nuevo Servicio</h4>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <input type="text" id="serv-nombre" placeholder="Ej: Consulta" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none">
+                                <input type="number" id="serv-precio" placeholder="Precio $" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none">
                             </div>
-                            <input type="number" id="serv-duracion" placeholder="Duración (minutos)" class="w-full p-2 rounded bg-white/10 border border-white/20 text-sm mb-2">
-                            <button onclick="agregarServicioSeguro()" class="w-full bg-tm-dorado py-2 rounded-xl font-bold text-sm">Insertar Servicio</button>
+                            <input type="number" id="serv-duracion" placeholder="Minutos (Ej: 60)" class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-sm mb-3 outline-none">
+                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado text-tm-azul-oscuro py-3 rounded-xl font-black text-sm uppercase">Añadir a la lista</button>
                         </div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase mt-6">Tus Servicios Activos</h4>
                         <div id="lista-servicios" class="space-y-2"></div>
                     </div>
 
                     <div id="panel-agenda" class="hidden space-y-4">
-                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                            🛑 Bloquear Fecha / Consulta Externa
-                        </button>
+                        <button onclick="abrirModalBloqueo()" class="w-full bg-red-500 text-white p-4 rounded-2xl font-black shadow-lg flex items-center justify-center gap-2 hover:bg-red-600 transition">🛑 BLOQUEAR DÍA / CITA EXTERNA</button>
                         <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="panel-derecho" class="w-full lg:w-1/2 bg-gray-100 p-4 flex flex-col">
-                <div id="contenedor-calendario-full" class="hidden flex-grow bg-white rounded-2xl shadow-inner p-2">
-                    <div id="calendar"></div>
-                </div>
-                <div id="preview-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
-                    <p class="font-bold">Vista Previa del Calendario</p>
-                    <p class="text-xs">Selecciona la pestaña "Calendario" para gestionar citas.</p>
+            <div class="w-full lg:w-1/2 bg-gray-100 p-4 md:p-6 flex flex-col">
+                <div id="contenedor-calendario-full" class="flex-grow bg-white rounded-3xl shadow-inner p-4 overflow-hidden">
+                    <div id="calendar" class="h-full"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Bloquear Espacio 🛑</h3>
-            <div class="space-y-3">
-                <input type="text" id="bloqueo-titulo" placeholder="Motivo o Nombre Paciente Externo" class="w-full p-3 bg-gray-50 border rounded-xl">
-                <input type="date" id="bloqueo-fecha" class="w-full p-3 bg-gray-50 border rounded-xl">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="time" id="bloqueo-inicio" class="w-full p-3 bg-gray-50 border rounded-xl">
-                    <input type="time" id="bloqueo-fin" class="w-full p-3 bg-gray-50 border rounded-xl">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Bloqueo Manual 🛑</h3>
+            <p class="text-sm text-gray-500 mb-6">Usa esto para cirugías, vacaciones o consultas agendadas fuera de la app.</p>
+            <div class="space-y-4">
+                <input type="text" id="bloqueo-titulo" placeholder="Motivo (Ej: Paciente Juan Pérez)" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                <input type="date" id="bloqueo-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl outline-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] font-bold ml-2">INICIO</label><input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl"></div>
+                    <div><label class="text-[10px] font-bold ml-2">FIN</label><input type="time" id="bloqueo-fin" class="w-full p-4 bg-gray-50 border rounded-2xl"></div>
                 </div>
             </div>
-            <div class="flex gap-2 mt-6">
-                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-3 font-bold text-gray-500">Cancelar</button>
-                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-3 rounded-xl font-bold">Confirmar</button>
+            <div class="flex gap-3 mt-8">
+                <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="flex-1 py-4 font-bold text-gray-400">Cancelar</button>
+                <button onclick="guardarBloqueo()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-lg">Confirmar</button>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY'; 
+        const SUPABASE_KEY = 'TU_ANON_KEY_AQUI'; // Reemplazar con la real
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let calendar = null;
         let usuarioActual = null;
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
-        // Inicialización
         document.addEventListener("DOMContentLoaded", () => {
             renderizarUIHorarios();
             clienteSupabase.auth.onAuthStateChange((event, session) => {
                 if (session) {
                     usuarioActual = session.user;
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const idNegocio = urlParams.get('id');
-                    if (idNegocio) cargarDatosProfesional(idNegocio);
+                    const idNegocio = new URLSearchParams(window.location.search).get('id');
+                    if (idNegocio) cargarTodo(idNegocio);
+                } else {
+                    window.location.href = 'index.html';
                 }
             });
         });
 
         function renderizarUIHorarios() {
-            document.getElementById('contenedor-horarios').innerHTML = Object.keys(DIAS).map(d => `
-                <div class="flex items-center justify-between gap-2 text-sm">
-                    <label class="flex items-center gap-2 w-28">
-                        <input type="checkbox" class="dia-abierto rounded text-tm-azul" checked>
-                        <span class="font-bold">${DIAS[d]}</span>
+            document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
+                <div class="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                    <label class="flex items-center gap-2 w-24 cursor-pointer">
+                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" checked>
+                        <span class="text-xs font-bold text-gray-700">${DIAS[d]}</span>
                     </label>
-                    <div class="flex items-center gap-1">
-                        <input type="time" class="hora-abre border rounded p-1 text-xs" value="09:00">
-                        <span>-</span>
-                        <input type="time" class="hora-cierra border rounded p-1 text-xs" value="18:00">
+                    <div class="flex items-center gap-1 flex-grow">
+                        <input type="time" class="hora-abre p-1 border rounded text-xs w-full" value="09:00">
+                        <span class="text-gray-400">-</span>
+                        <input type="time" class="hora-cierra p-1 border rounded text-xs w-full" value="18:00">
                     </div>
                 </div>
             `).join('');
         }
 
-        async function cargarDatosProfesional(id) {
-            const { data } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('admin-negocio-id').value = data.id;
-                document.getElementById('admin-nombre').value = data.nombre_negocio;
-                document.getElementById('admin-wa').value = data.enlace_whatsapp;
-                cargarServicios(data.id);
-                cargarAgendaYCalendario(data.id);
+        async function cargarTodo(id) {
+            const { data: n } = await clienteSupabase.from('anuncios').select('*').eq('id', id).single();
+            if (n) {
+                document.getElementById('admin-negocio-id').value = n.id;
+                document.getElementById('admin-nombre').value = n.nombre_negocio;
+                document.getElementById('admin-wa').value = n.enlace_whatsapp;
+                if (n.horarios) setearHorariosUI(n.horarios);
+                
+                cargarServicios(n.id);
+                cargarAgendaYCalendario(n.id);
             }
         }
 
         async function cargarServicios(idN) {
             const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN);
             const l = document.getElementById('lista-servicios');
-            l.innerHTML = data.map(s => `
-                <div class="flex justify-between items-center p-3 bg-white border rounded-xl shadow-sm">
-                    <div>
-                        <p class="font-bold text-sm">${s.nombre}</p>
-                        <p class="text-[10px] text-gray-500">${s.duracion_minutos} min | $${s.precio}</p>
-                    </div>
-                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-xs">Eliminar</button>
+            l.innerHTML = (data || []).map(s => `
+                <div class="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400">${s.duracion_minutos} min | $${s.precio}</p></div>
+                    <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-xs bg-red-50 px-3 py-1 rounded-full">Borrar</button>
                 </div>
             `).join('');
         }
 
-        async function agregarServicioSeguro() {
+        async function agregarServicio() {
             const idN = document.getElementById('admin-negocio-id').value;
-            const payload = {
+            const p = {
                 anuncio_id: idN,
                 nombre: document.getElementById('serv-nombre').value,
                 precio: parseFloat(document.getElementById('serv-precio').value) || 0,
                 duracion_minutos: parseInt(document.getElementById('serv-duracion').value) || 60
             };
-            const { error } = await clienteSupabase.from('servicios').insert([payload]);
+            const { error } = await clienteSupabase.from('servicios').insert([p]);
             if (!error) {
-                mostrarNotificacion("Servicio añadido");
+                notificar("Servicio añadido");
                 cargarServicios(idN);
+                document.getElementById('serv-nombre').value = '';
+                document.getElementById('serv-precio').value = '';
             }
         }
 
         async function eliminarServicio(id) {
-            if (!confirm("¿Borrar servicio?")) return;
-            await clienteSupabase.from('servicios').delete().eq('id', id);
-            cargarServicios(document.getElementById('admin-negocio-id').value);
+            if (confirm("¿Eliminar este servicio?")) {
+                await clienteSupabase.from('servicios').delete().eq('id', id);
+                cargarServicios(document.getElementById('admin-negocio-id').value);
+            }
         }
 
         async function cargarAgendaYCalendario(idN) {
@@ -208,65 +218,113 @@
                 .eq('anuncio_id', idN)
                 .neq('estado', 'cancelada');
 
-            const eventos = data.map(c => ({
+            const eventos = (data || []).map(c => ({
                 id: c.id,
                 title: c.estado === 'bloqueado' ? `🛑 ${c.notas}` : `✅ ${c.perfiles?.nombre_completo || 'Cita'}`,
                 start: `${c.fecha_cita}T${c.hora_inicio}`,
                 end: `${c.fecha_cita}T${c.hora_fin}`,
                 backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
-                borderColor: 'transparent'
+                extendedProps: { esBloqueo: c.estado === 'bloqueado' }
             }));
 
+            const calendarEl = document.getElementById('calendar');
             if (calendar) calendar.destroy();
-            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'es',
                 initialView: 'timeGridWeek',
-                slotMinTime: '07:00:00',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
                 events: eventos,
-                eventClick: (info) => { if(confirm("¿Eliminar este registro?")) cancelarCitaOwner(info.event.id); }
+                slotMinTime: '06:00:00',
+                slotMaxTime: '22:00:00',
+                allDaySlot: false,
+                eventClick: (info) => {
+                    if (confirm("¿Deseas cancelar/eliminar este registro?")) {
+                        cancelarCitaOwner(info.event.id);
+                    }
+                }
             });
             calendar.render();
         }
 
         async function guardarBloqueo() {
+            const idN = document.getElementById('admin-negocio-id').value;
             const payload = {
-                anuncio_id: document.getElementById('admin-negocio-id').value,
+                anuncio_id: idN,
                 fecha: document.getElementById('bloqueo-fecha').value,
                 hora_inicio: document.getElementById('bloqueo-inicio').value,
                 hora_fin: document.getElementById('bloqueo-fin').value,
-                titulo: document.getElementById('bloqueo-titulo').value
+                titulo: document.getElementById('bloqueo-titulo').value || 'Bloqueo Manual'
             };
-            await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload } });
-            document.getElementById('modal-bloqueo').classList.add('hidden');
-            cargarAgendaYCalendario(payload.anuncio_id);
-        }
-
-        async function cancelarCitaOwner(id) {
-            await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } });
-            cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value);
-        }
-
-        function cambiarPestana(p) {
-            ['basico', 'servicios', 'agenda'].forEach(t => {
-                document.getElementById('panel-'+t).classList.add('hidden');
-                document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2');
+            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { 
+                body: { accion: 'bloquear_espacio', payload } 
             });
-            document.getElementById('panel-'+p).classList.remove('hidden');
-            document.getElementById('tab-'+p).classList.add('text-tm-azul', 'border-b-2');
-
-            if (p === 'agenda') {
-                document.getElementById('contenedor-calendario-full').classList.remove('hidden');
-                document.getElementById('preview-placeholder').classList.add('hidden');
-                setTimeout(() => calendar.updateSize(), 100);
+            if (!error) {
+                notificar("Espacio bloqueado");
+                document.getElementById('modal-bloqueo').classList.add('hidden');
+                cargarAgendaYCalendario(idN);
             }
         }
 
-        function mostrarNotificacion(m) {
+        async function cancelarCitaOwner(id) {
+            await clienteSupabase.functions.invoke('gestionar-agendas', { 
+                body: { accion: 'cancelar_cita', payload: { cita_id: id } } 
+            });
+            cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value);
+        }
+
+        function cambiarPestana(tab) {
+            ['basico', 'diseno', 'servicios', 'agenda'].forEach(t => {
+                document.getElementById('panel-'+t).classList.add('hidden');
+                document.getElementById('tab-'+t).classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
+                document.getElementById('tab-'+t).classList.add('text-gray-400');
+            });
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            document.getElementById('tab-'+tab).classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
+            if (tab === 'agenda' && calendar) setTimeout(() => calendar.updateSize(), 100);
+        }
+
+        function notificar(m) {
             const el = document.createElement('div');
-            el.className = "bg-tm-azul-oscuro text-white px-6 py-3 rounded-xl shadow-2xl";
+            el.className = "bg-tm-azul-oscuro text-white px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm animate-bounce";
             el.innerText = m;
             document.getElementById('toast-container').appendChild(el);
             setTimeout(() => el.remove(), 3000);
+        }
+
+        // Helpers Horarios
+        function setearHorariosUI(hJSON) {
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
+                if (hJSON[d]) {
+                    r.querySelector('.dia-abierto').checked = hJSON[d].abierto;
+                    r.querySelector('.hora-abre').value = hJSON[d].abre;
+                    r.querySelector('.hora-cierra').value = hJSON[d].cierra;
+                }
+            });
+        }
+        
+        function obtenerHorariosUI() {
+            let h = {};
+            [1,2,3,4,5,6,0].forEach((d, idx) => {
+                const r = document.querySelectorAll('#contenedor-horarios > div')[idx];
+                h[d] = {
+                    abierto: r.querySelector('.dia-abierto').checked,
+                    abre: r.querySelector('.hora-abre').value,
+                    cierra: r.querySelector('.hora-cierra').value
+                };
+            });
+            return h;
+        }
+
+        async function guardarNegocioSeguro() {
+            const id = document.getElementById('admin-negocio-id').value;
+            const payload = {
+                nombre_negocio: document.getElementById('admin-nombre').value,
+                enlace_whatsapp: document.getElementById('admin-wa').value,
+                horarios: obtenerHorariosUI()
+            };
+            const { error } = await clienteSupabase.from('anuncios').update(payload).eq('id', id);
+            if (!error) notificar("Configuración guardada ✅");
         }
     </script>
 </body>
