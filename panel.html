@@ -53,29 +53,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10 border-t border-gray-200 pt-8">
                 <div>
                     <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Pedidos Recientes 🛵</h3>
-                    <div id="contenedor-mis-pedidos" class="space-y-3">
-                        <p class="text-sm text-gray-400">Cargando tus pedidos...</p>
-                    </div>
+                    <div id="contenedor-mis-pedidos" class="space-y-3"><p class="text-sm text-gray-400">Cargando tus pedidos...</p></div>
                 </div>
                 <div>
                     <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Próximas Citas 📅</h3>
-                    <div id="contenedor-mis-citas" class="space-y-3">
-                        <p class="text-sm text-gray-400">Cargando tus citas...</p>
-                    </div>
+                    <div id="contenedor-mis-citas" class="space-y-3"><p class="text-sm text-gray-400">Cargando tus citas...</p></div>
                 </div>
             </div>
         </div>
 
         <div id="seccion-lista-negocios">
             <div class="mb-8">
-                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Mis Negocios</h2>
+                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Mis Negocios / Consultorios</h2>
                 <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus anuncios activos en el directorio.</p>
             </div>
             <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"></div>
 
             <div id="seccion-crear-negocio" class="border-t border-gray-200 pt-12 mb-10 hidden">
                 <div class="text-center mb-10 px-2">
-                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Negocio</h2>
+                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Anuncio</h2>
                     <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -101,8 +97,8 @@
                         <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
                         <ul class="text-sm space-y-3 flex-grow text-gray-800 my-6">
                             <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1.</span></li>
-                            <li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú Interactivo</b> para pedidos.</span></li>
-                            <li class="flex items-start gap-2"><span>📅</span> <span><b>Agenda Inteligente</b> para profesionales.</span></li>
+                            <li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú Interactivo</b> (Para Comida).</span></li>
+                            <li class="flex items-start gap-2"><span>📅</span> <span><b>Agenda Inteligente</b> (Para Profesionales).</span></li>
                         </ul>
                         <button class="w-full bg-tm-dorado text-white font-bold py-3 rounded-lg mt-auto hover:bg-yellow-600 transition shadow">Elegir Elite</button>
                     </div>
@@ -129,9 +125,9 @@
                     <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
                         <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos & Horarios</button>
                         <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
-                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú Comida 🔒</button>
-                        <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
-                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Agenda 🔒</button>
+                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú Comida 🔒</button>
+                        <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
+                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Agenda 🔒</button>
                         <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
                     </div>
 
@@ -148,19 +144,22 @@
                                     <span class="ml-2 text-xs font-bold text-gray-700 w-12" id="label-estado-apertura">Abierto</span>
                                 </label>
                             </div>
-
                             <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio / Consultorio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
                             
                             <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Días y Horarios de Atención</h4>
-                                <p class="text-[10px] text-gray-400 leading-tight mb-2">Importante: Si usas la función de "Agenda", el sistema calculará las citas basándose estrictamente en estos horarios.</p>
                                 <div id="contenedor-horarios"></div>
                             </div>
 
                             <div><label class="text-xs font-bold text-gray-500">Descripción *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                                <div><label class="text-xs font-bold text-gray-500">Categoría *</label><select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"><option>Alimentos</option><option>Servicios</option><option>Salud Mental</option><option>Medicina</option><option>Belleza</option><option>Hogar</option></select></div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500">Categoría * (Define tus funciones)</label>
+                                    <select id="admin-cat" onchange="actualizarPreview(); configurarPermisos();" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                                        <option>Alimentos</option><option>Hogar</option><option>Servicios</option><option>Salud Mental</option><option>Medicina</option><option>Belleza</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -183,12 +182,12 @@
                         <div id="panel-menu" class="hidden space-y-4 flex-col h-full">
                             <div id="bloqueo-menu" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
                                 <h3 class="font-bold text-yellow-800 mb-2">Desbloquea Funciones Elite</h3>
-                                <p class="text-xs text-yellow-700 mb-4">Activa el carrito de compras o la agenda en línea.</p>
+                                <p class="text-xs text-yellow-700 mb-4">Activa el carrito de compras en línea.</p>
                                 <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
                             </div>
                             <div id="contenido-menu" class="hidden flex-grow flex-col">
                                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto (Comida/Artículos)</h4>
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto</h4>
                                     <div class="grid grid-cols-2 gap-3 mb-3">
                                         <input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none">
                                         <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
@@ -202,18 +201,25 @@
                         </div>
 
                         <div id="panel-servicios" class="hidden space-y-4 flex-col h-full">
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Servicio (Para Agendas)</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                                    <input type="text" id="serv-nombre" placeholder="Nombre (Ej. Terapia)" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
-                                    <input type="number" id="serv-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
-                                    <input type="number" id="serv-duracion" placeholder="Duración (Minutos)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
-                                </div>
-                                <textarea id="serv-desc" placeholder="Descripción corta" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
-                                <button onclick="agregarServicioSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir Servicio</button>
+                            <div id="bloqueo-servicios" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
+                                <h3 class="font-bold text-yellow-800 mb-2">Desbloquea la Agenda Inteligente</h3>
+                                <p class="text-xs text-yellow-700 mb-4">Permite que tus pacientes agenden citas las 24 horas.</p>
+                                <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
                             </div>
-                            <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Servicios Activos</h4>
-                            <div id="lista-servicios" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
+                            <div id="contenido-servicios" class="hidden flex-grow flex-col">
+                                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Servicio (Para Agendas)</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                        <input type="text" id="serv-nombre" placeholder="Nombre (Ej. Terapia)" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
+                                        <input type="number" id="serv-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
+                                        <input type="number" id="serv-duracion" placeholder="Duración (Minutos)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
+                                    </div>
+                                    <textarea id="serv-desc" placeholder="Descripción corta" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
+                                    <button onclick="agregarServicioSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir Servicio</button>
+                                </div>
+                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Servicios Activos</h4>
+                                <div id="lista-servicios" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
+                            </div>
                         </div>
 
                         <div id="panel-agenda" class="hidden space-y-4">
@@ -260,12 +266,11 @@
                                 <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition shadow-md mt-4">Enviar Documentos</button>
                             </form>
                         </div>
-
                     </div>
                 </div>
 
                 <div class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col items-center justify-center relative">
-                    <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase tracking-widest font-bold">Vista Previa Real</div>
+                    <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase tracking-widest font-bold">Vista Previa Móvil</div>
                     <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 transform transition-all duration-300 mx-auto mt-6">
                         <div class="bg-gray-100 p-3 flex justify-between items-center border-b border-gray-200">
                             <span class="text-[10px] font-bold text-gray-400">⬅ Volver</span><span class="text-[10px] font-bold text-gray-400">Directorio</span>
@@ -344,7 +349,7 @@
             setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 4000);
         }
 
-        // Horarios UI Compartida
+        // Horarios UI
         function renderizarUIHorarios() {
             const cont = document.getElementById('contenedor-horarios');
             cont.innerHTML = Object.keys(DIAS).map(d => `
@@ -463,7 +468,7 @@
             `).join('');
         }
 
-        // ------------------ FUNCIONES DEL DIRECTORIO / NEGOCIOS ------------------
+        // ------------------ FUNCIONES DE PANEL NEGOCIOS ------------------
         async function cargarMisNegocios() {
             const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
             const contenedor = document.getElementById('contenedor-mis-negocios');
@@ -512,7 +517,7 @@
             document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
             document.getElementById('admin-negocio-id').value = n.id; document.getElementById('admin-nivel-intencion').value = '0';
             document.getElementById('admin-nombre').value = n.nombre_negocio; document.getElementById('admin-desc').value = n.descripcion || '';
-            document.getElementById('admin-wa').value = n.enlace_whatsapp || ''; document.getElementById('admin-cat').value = n.categoria || 'Servicios';
+            document.getElementById('admin-wa').value = n.enlace_whatsapp || ''; document.getElementById('admin-cat').value = n.categoria || 'Alimentos';
             document.getElementById('admin-imagen-url').value = n.imagen_url || '';
             const estaAbierto = n.esta_abierto !== false; 
             document.getElementById('admin-estado-apertura').checked = estaAbierto; document.getElementById('label-estado-apertura').innerText = estaAbierto ? "Abierto" : "Cerrado";
@@ -525,7 +530,6 @@
 
             configurarPermisos(nivel); configurarPestanaVerificacion(n.estado_verificacion);
             
-            // Cargar datos especiales según el nivel
             if(nivel >= 2) {
                 document.getElementById('lista-productos').innerHTML = ''; cargarProductosMenu(n.id);
                 document.getElementById('lista-servicios').innerHTML = ''; cargarServicios(n.id);
@@ -541,10 +545,11 @@
             document.getElementById('seccion-admin-negocio').classList.add('hidden');
             document.getElementById('seccion-lista-negocios').classList.remove('hidden');
             document.getElementById('seccion-crear-negocio').classList.remove('hidden');
-            document.getElementById('seccion-perfil').classList.remove('hidden'); // Restaurar perfil
+            document.getElementById('seccion-perfil').classList.remove('hidden');
             cargarMisNegocios();
         }
 
+        // ================= TABS Y LÓGICA DE CATEGORÍAS =================
         function cambiarPestana(tab) {
             ['basico', 'diseno', 'menu', 'servicios', 'agenda', 'verif'].forEach(t => {
                 let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
@@ -562,7 +567,15 @@
             }
         }
 
-        function configurarPermisos(nivel) {
+        function configurarPermisos(nivelManual = null) {
+            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            let nivel = nivelManual !== null ? Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelManual) : Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
+            
+            const categoria = document.getElementById('admin-cat').value;
+            const usaComida = ['Alimentos', 'Hogar'].includes(categoria);
+            const usaAgenda = ['Servicios', 'Salud Mental', 'Medicina', 'Belleza'].includes(categoria);
+
+            // Permisos Diseño
             if (nivel >= 1) {
                 document.getElementById('tab-diseno').innerText = "Diseño & Banner";
                 document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden');
@@ -571,17 +584,40 @@
                 document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden');
             }
 
-            if (nivel >= 2) {
-                document.getElementById('tab-menu').innerText = "Menú Comida";
-                document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden');
-                document.getElementById('tab-servicios').innerText = "Servicios";
-                document.getElementById('panel-servicios').querySelector('.bg-white').classList.remove('hidden'); // Mostrar form servicios
-                document.getElementById('tab-agenda').innerText = "Mi Agenda";
-            } else {
-                document.getElementById('tab-menu').innerText = "Menú Comida 🔒";
-                document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden');
-                document.getElementById('tab-servicios').innerText = "Servicios 🔒";
-                document.getElementById('tab-agenda').innerText = "Mi Agenda 🔒";
+            // Ocultar pestañas dinámicas
+            document.getElementById('tab-menu').classList.add('hidden');
+            document.getElementById('tab-servicios').classList.add('hidden');
+            document.getElementById('tab-agenda').classList.add('hidden');
+
+            // Mostrar según categoría
+            if (usaComida) {
+                document.getElementById('tab-menu').classList.remove('hidden');
+                if (nivel >= 2) {
+                    document.getElementById('tab-menu').innerText = "Menú Comida";
+                    document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden');
+                } else {
+                    document.getElementById('tab-menu').innerText = "Menú Comida 🔒";
+                    document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden');
+                }
+            }
+
+            if (usaAgenda) {
+                document.getElementById('tab-servicios').classList.remove('hidden');
+                document.getElementById('tab-agenda').classList.remove('hidden');
+                if (nivel >= 2) {
+                    document.getElementById('tab-servicios').innerText = "Servicios";
+                    document.getElementById('bloqueo-servicios').classList.add('hidden'); document.getElementById('contenido-servicios').classList.remove('hidden');
+                    document.getElementById('tab-agenda').innerText = "Mi Agenda";
+                } else {
+                    document.getElementById('tab-servicios').innerText = "Servicios 🔒";
+                    document.getElementById('bloqueo-servicios').classList.remove('hidden'); document.getElementById('contenido-servicios').classList.add('hidden');
+                    document.getElementById('tab-agenda').innerText = "Mi Agenda 🔒";
+                }
+            }
+
+            const activeTab = document.querySelector('.border-b-2.border-tm-azul')?.id.replace('tab-', '');
+            if ((activeTab === 'menu' && !usaComida) || ((activeTab === 'servicios' || activeTab === 'agenda') && !usaAgenda)) {
+                cambiarPestana('basico');
             }
         }
 
@@ -594,20 +630,21 @@
             const bannerCont = document.getElementById('preview-banner-container');
             let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
             const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
+            const categoria = document.getElementById('admin-cat').value;
 
             if (imgUrl && nivel >= 1) { document.getElementById('preview-banner').src = imgUrl; bannerCont.classList.remove('hidden'); } 
             else { bannerCont.classList.add('hidden'); }
 
+            document.getElementById('preview-btn-menu').classList.add('hidden');
+            document.getElementById('preview-btn-agenda').classList.add('hidden');
+
             if (nivel >= 2) {
-                document.getElementById('preview-btn-menu').classList.remove('hidden');
-                document.getElementById('preview-btn-agenda').classList.remove('hidden');
-            } else {
-                document.getElementById('preview-btn-menu').classList.add('hidden');
-                document.getElementById('preview-btn-agenda').classList.add('hidden');
+                if (['Alimentos', 'Hogar'].includes(categoria)) document.getElementById('preview-btn-menu').classList.remove('hidden');
+                if (['Servicios', 'Salud Mental', 'Medicina', 'Belleza'].includes(categoria)) document.getElementById('preview-btn-agenda').classList.remove('hidden');
             }
         }
 
-        // ------------------ CRUD ESCRITURAS NEGOCIO BÁSICO ------------------
+        // ================= CRUD Y BASE DE DATOS =================
         async function guardarNegocioSeguro() {
             const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; 
             const id = document.getElementById('admin-negocio-id').value;
@@ -626,10 +663,7 @@
             }
 
             const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payloadDatos } });
-
-            if (error || !data.success) {
-                mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return;
-            }
+            if (error || !data.success) { mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return; }
 
             const idGenerado = data.id_negocio; document.getElementById('admin-negocio-id').value = idGenerado;
 
@@ -642,17 +676,14 @@
             }
         }
 
-        // ------------------ CRUD PRODUCTOS (RESTAURANTE/TIENDA) ------------------
+        // COMIDA
         async function cargarProductosMenu(anuncioId) {
             const { data } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id');
             const lista = document.getElementById('lista-productos');
             if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`;
             lista.innerHTML = data.map(p => `
                 <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <div>
-                        <p class="text-sm font-bold ${p.disponible ? 'text-tm-azul-oscuro' : 'text-gray-400 line-through'}">${p.nombre}</p>
-                        <p class="text-xs text-tm-dorado font-black">$${p.precio}</p>
-                    </div>
+                    <div><p class="text-sm font-bold ${p.disponible ? 'text-tm-azul-oscuro' : 'text-gray-400 line-through'}">${p.nombre}</p><p class="text-xs text-tm-dorado font-black">$${p.precio}</p></div>
                     <div class="flex items-center gap-4">
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" ${p.disponible !== false ? 'checked' : ''} onchange="toggleProductoSeguro('${p.id}', this.checked)"><div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div></label>
                         <button onclick="eliminarProductoSeguro('${p.id}')" class="text-gray-400 hover:text-red-500 transition">🗑️</button>
@@ -661,39 +692,25 @@
             `).join('');
         }
         async function agregarProductoSeguro() {
-            const anuncioId = document.getElementById('admin-negocio-id').value;
-            if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
-            const payloadDatos = { anuncio_id: anuncioId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value };
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: payloadDatos } });
-            if (error || !data.success) mostrarNotificacion("Error", "error"); 
-            else { document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = ''; cargarProductosMenu(anuncioId); }
+            const anuncioId = document.getElementById('admin-negocio-id').value; if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
+            const payload = { anuncio_id: anuncioId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value };
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: payload } });
+            if (error || !data.success) mostrarNotificacion("Error", "error"); else { document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = ''; cargarProductosMenu(anuncioId); }
         }
-        async function eliminarProductoSeguro(prodId) {
-            if(!confirm("¿Eliminar producto?")) return;
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: prodId } });
-            if(!error) cargarProductosMenu(document.getElementById('admin-negocio-id').value);
-        }
-        async function toggleProductoSeguro(prodId, estaDisponible) {
-            const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'toggle_producto', producto_id: prodId, disponible: estaDisponible } });
-            if (error) cargarProductosMenu(document.getElementById('admin-negocio-id').value); 
-        }
+        async function eliminarProductoSeguro(prodId) { if(!confirm("¿Eliminar producto?")) return; const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: prodId } }); if(!error) cargarProductosMenu(document.getElementById('admin-negocio-id').value); }
+        async function toggleProductoSeguro(prodId, disponible) { await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'toggle_producto', producto_id: prodId, disponible: disponible } }); cargarProductosMenu(document.getElementById('admin-negocio-id').value); }
 
-        // ------------------ CRUD SERVICIOS Y AGENDA (PROFESIONALES) ------------------
+        // SERVICIOS (AGENDAS)
         async function cargarServicios(anuncioId) {
             const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id');
             const lista = document.getElementById('lista-servicios');
             if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin servicios.</p>`;
-            lista.innerHTML = data.map(p => `
-                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between">
-                    <div><p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p><p class="text-xs text-gray-500">${p.duracion_minutos} min - $${p.precio}</p></div>
-                </div>
-            `).join('');
+            lista.innerHTML = data.map(p => `<div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between"><div><p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p><p class="text-xs text-gray-500">${p.duracion_minutos} min - $${p.precio}</p></div></div>`).join('');
         }
         async function agregarServicioSeguro() {
-            const anuncioId = document.getElementById('admin-negocio-id').value;
-            if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
+            const anuncioId = document.getElementById('admin-negocio-id').value; if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
             const payload = { anuncio_id: anuncioId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value };
-            const { error } = await clienteSupabase.from('servicios').insert([payload]); // Insert directo para agilizar
+            const { error } = await clienteSupabase.from('servicios').insert([payload]); 
             if (!error) { mostrarNotificacion("Servicio guardado"); cargarServicios(anuncioId); document.getElementById('serv-nombre').value=''; } else { mostrarNotificacion("Error al guardar", "error"); }
         }
         async function cargarAgendaNegocio(anuncioId) {
@@ -709,12 +726,11 @@
             `).join('');
         }
 
-        // ------------------ FUNCIONES MODAL RESERVA ------------------
+        // AGENDAR (CLIENTES)
         async function buscarHorarios() {
             const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value };
             if(!p.servicio_id || !p.fecha) return;
-            const cont = document.getElementById('contenedor-horarios-libres');
-            cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
+            const cont = document.getElementById('contenedor-horarios-libres'); cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
             const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } });
             if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3">Error.</p>';
             if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Sin horarios libres ❌</p>';
@@ -727,14 +743,12 @@
             if (error || !data?.success) { mostrarNotificacion("Horario ocupado", "error"); buscarHorarios(); } else { mostrarNotificacion("¡Cita agendada!"); document.getElementById('modal-agendar').classList.add('hidden'); cargarMisCitas(); }
         }
 
-        // ------------------ UTILIDADES (VERIFICACIÓN / IMAGEN / MAPA) ------------------
+        // ================= UTILIDADES =================
         function inicializarMapa(lat, lng) {
             document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
             setTimeout(() => {
                 if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+                    map = L.map('mapa-perfil').setView([lat, lng], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); marker = L.marker([lat, lng], {draggable: true}).addTo(map);
                     marker.on('dragend', function () { document.getElementById('perfil-lat').value = marker.getLatLng().lat; document.getElementById('perfil-lng').value = marker.getLatLng().lng; });
                     map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng; });
                 } else { map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); }
@@ -746,8 +760,7 @@
         }
         async function procesarSubidaImagen(event, bucketName, inputId, labelId, actualizaPreview) {
             const file = event.target.files[0]; if(!file) return; if(file.size > 2 * 1024 * 1024) return mostrarNotificacion("Máximo 2MB", "error");
-            document.getElementById(labelId).innerText = "Subiendo... ⏳";
-            const fileExt = file.name.split('.').pop(); const fileName = `${usuarioActual.id}_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            document.getElementById(labelId).innerText = "Subiendo... ⏳"; const fileExt = file.name.split('.').pop(); const fileName = `${usuarioActual.id}_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
             try {
                 const { error } = await clienteSupabase.storage.from(bucketName).upload(fileName, file); if (error) throw error;
                 let ruta = bucketName === 'verificaciones' ? fileName : clienteSupabase.storage.from(bucketName).getPublicUrl(fileName).data.publicUrl;
