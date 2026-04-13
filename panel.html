@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Vive Tres Marías</title>
+    <title>Panel Profesional - Vive Tres Marías</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,8 +11,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js'></script>
 
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
@@ -21,6 +24,13 @@
     <style>
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Estilos Elegantes del Calendario */
+        .fc { font-family: 'Montserrat', sans-serif; background: white; border-radius: 1rem; padding: 1rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+        .fc-theme-standard th { border-color: #f3f4f6; padding: 8px 0; color: #4b5563; }
+        .fc-theme-standard td { border-color: #f3f4f6; }
+        .fc .fc-button-primary { background-color: #22527b !important; border-color: #22527b !important; font-weight: bold; text-transform: capitalize; }
+        .fc .fc-button-primary:hover { background-color: #143653 !important; }
+        .fc-event { border: none !important; border-radius: 6px; padding: 2px 4px; cursor: pointer; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
@@ -38,7 +48,6 @@
         <div id="seccion-perfil" class="hidden bg-white rounded-2xl border border-gray-200 p-5 sm:p-8 shadow-sm mb-10">
             <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro mb-1">Mi Perfil</h2>
             <p class="text-sm text-gray-500 mb-6">Actualiza tus datos de contacto, revisa tus pedidos y próximas citas.</p>
-            
             <form onsubmit="event.preventDefault(); guardarPerfilSeguro();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <div><label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label><input type="text" id="perfil-nombre" required class="w-full p-2.5 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
@@ -49,36 +58,55 @@
                 </div>
                 <div class="flex flex-col"><label class="text-xs font-bold uppercase text-gray-500 mb-1">Ubica tu domicilio 📍</label><div id="mapa-perfil" class="w-full h-64 lg:h-full min-h-[250px] rounded-lg border-2 border-gray-200 z-0"></div></div>
             </form>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10 border-t border-gray-200 pt-8">
-                <div>
-                    <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Pedidos Recientes 🛵</h3>
-                    <div id="contenedor-mis-pedidos" class="space-y-3"><p class="text-sm text-gray-400">Cargando tus pedidos...</p></div>
-                </div>
-                <div>
-                    <h3 class="text-xl font-black text-tm-azul-oscuro mb-4">Mis Próximas Citas 📅</h3>
-                    <div id="contenedor-mis-citas" class="space-y-3"><p class="text-sm text-gray-400">Cargando tus citas...</p></div>
-                </div>
-            </div>
         </div>
 
         <div id="seccion-lista-negocios">
-            <div class="mb-8">
-                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Mis Negocios / Consultorios</h2>
-                <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus anuncios activos en el directorio.</p>
+            <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Mis Espacios</h2>
+                    <p class="text-sm sm:text-base text-gray-500 mt-1">Administra tus negocios y consultorios.</p>
+                </div>
+                <button onclick="iniciarCreacion()" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition transform hover:scale-105">+ Nuevo Espacio</button>
             </div>
             <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"></div>
 
-            <div id="seccion-crear-negocio" class="border-t border-gray-200 pt-12 mb-10 hidden">
-                <div class="text-center mb-10 px-2">
-                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">Crea un Nuevo Anuncio</h2>
-                    <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona el plan que mejor se adapte a tus metas.</p>
+            <div id="seccion-elegir-rubro" class="border-t border-gray-200 pt-12 mb-10 hidden">
+                <div class="text-center mb-8 px-2">
+                    <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2>
+                    <p class="text-sm sm:text-base text-gray-500 mt-2">Selecciona tu giro para personalizar tu panel de control.</p>
                 </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                    <div onclick="mostrarPlanes('tienda')" class="bg-white rounded-2xl border-2 border-transparent hover:border-tm-dorado p-8 text-center shadow-sm cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1 group">
+                        <span class="text-6xl block mb-4 group-hover:scale-110 transition">🛒</span>
+                        <h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Productos y Comida</h3>
+                        <p class="text-sm text-gray-500">Restaurantes, tiendas, postres, abarrotes, ropa. Todo lo que se vende por catálogo.</p>
+                    </div>
+                    <div onclick="mostrarPlanes('servicio')" class="bg-white rounded-2xl border-2 border-transparent hover:border-blue-500 p-8 text-center shadow-sm cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1 group">
+                        <span class="text-6xl block mb-4 group-hover:scale-110 transition">🩺</span>
+                        <h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Consultorios y Servicios</h3>
+                        <p class="text-sm text-gray-500">Médicos, terapeutas, belleza, mantenimiento. Todo lo que requiere agendar una cita.</p>
+                    </div>
+                </div>
+                <div class="text-center mt-8"><button onclick="cancelarCreacion()" class="text-sm text-gray-400 hover:text-gray-600 underline">Cancelar</button></div>
+            </div>
+
+            <div id="seccion-crear-negocio" class="pt-8 mb-10 hidden">
+                <div class="text-center mb-10 px-2 flex items-center justify-center gap-4">
+                    <button onclick="iniciarCreacion()" class="bg-gray-200 text-gray-600 p-2 rounded-full hover:bg-gray-300">← Volver</button>
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro" id="titulo-planes">Selecciona tu Plan</h2>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="rubro-seleccionado">
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     <div onclick="abrirAdminNuevo(0)" class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
                         <h3 class="font-bold text-lg text-gray-500 uppercase tracking-wide">Básico</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">Gratis</p>
                         <ul class="text-sm space-y-3 flex-grow text-gray-600 my-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Nombre y descripción</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Botón a tu WhatsApp</span></li><li class="flex items-start gap-2"><span>✔️</span> <span>Dirección y horarios</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Aparece en el directorio</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Botón a tu WhatsApp</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Dirección y horarios</span></li>
                         </ul>
                         <button class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-lg mt-auto hover:bg-gray-200 transition">Crear Gratis</button>
                     </div>
@@ -87,7 +115,9 @@
                         <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Profesional</div>
                         <h3 class="font-bold text-lg text-blue-600 uppercase tracking-wide">Pro (Nivel 1)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$150 <span class="text-sm font-normal text-gray-400">/mes</span></p>
                         <ul class="text-sm space-y-3 flex-grow text-gray-600 my-6">
-                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico.</span></li><li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo.</span></li><li class="flex items-start gap-2"><span>📋</span> <span>Catálogo en PDF/Link.</span></li>
+                            <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Básico.</span></li>
+                            <li class="flex items-start gap-2"><span>🖼️</span> <span><b>Banner</b> llamativo arriba.</span></li>
+                            <li class="flex items-start gap-2"><span>⭐</span> <span id="feat-pro-dinamico">Prioridad en búsquedas.</span></li>
                         </ul>
                         <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-auto hover:bg-blue-700 transition shadow">Elegir Pro</button>
                     </div>
@@ -97,8 +127,8 @@
                         <h3 class="font-bold text-lg text-tm-dorado uppercase tracking-wide mt-6">Elite (Nivel 2)</h3><p class="text-3xl font-black text-tm-azul-oscuro mt-2">$300 <span class="text-sm font-normal text-gray-400">/mes</span></p>
                         <ul class="text-sm space-y-3 flex-grow text-gray-800 my-6">
                             <li class="flex items-start gap-2"><span>✔️</span> <span>Todo lo del Nivel 1.</span></li>
-                            <li class="flex items-start gap-2"><span>🛒</span> <span><b>Menú Interactivo</b> (Para Comida).</span></li>
-                            <li class="flex items-start gap-2"><span>📅</span> <span><b>Agenda Inteligente</b> (Para Profesionales).</span></li>
+                            <li class="flex items-start gap-2"><span>🚀</span> <span id="feat-elite-1">Función Premium 1</span></li>
+                            <li class="flex items-start gap-2"><span>📊</span> <span id="feat-elite-2">Función Premium 2</span></li>
                         </ul>
                         <button class="w-full bg-tm-dorado text-white font-bold py-3 rounded-lg mt-auto hover:bg-yellow-600 transition shadow">Elegir Elite</button>
                     </div>
@@ -106,7 +136,7 @@
             </div>
         </div>
 
-        <div id="seccion-admin-negocio" class="hidden bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10">
+        <div id="seccion-admin-negocio" class="hidden bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mb-10 flex flex-col">
             <div class="bg-tm-azul-oscuro text-white p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black flex items-center gap-3">
@@ -115,61 +145,52 @@
                     </h2>
                     <p id="admin-nivel-badge" class="text-xs font-bold text-tm-azul-oscuro bg-white px-2 py-1 rounded inline-block mt-2">Nivel Actual: Cargando...</p>
                 </div>
-                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Cambios Básicos</button>
+                <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 px-6 py-3 rounded-lg font-bold transition shadow text-center">Guardar Configuración Básica</button>
             </div>
 
-            <div class="flex flex-col lg:flex-row min-h-[600px]">
+            <div class="flex flex-col lg:flex-row flex-grow min-h-[650px]">
                 <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-100 bg-gray-50">
                     <input type="hidden" id="admin-negocio-id"><input type="hidden" id="admin-nivel-intencion" value="0">
+                    <input type="hidden" id="admin-rubro-interno">
                     
-                    <div class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
-                        <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos & Horarios</button>
+                    <div id="tabs-container" class="flex gap-1 p-4 border-b border-gray-200 overflow-x-auto bg-white scrollbar-hide">
+                        <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-3 py-2 whitespace-nowrap">Datos</button>
                         <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Banner 🔒</button>
-                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Menú Comida/Ventas 🔒</button>
+                        
+                        <button onclick="cambiarPestana('menu')" id="tab-menu" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Catálogo/Menú 🔒</button>
+                        
                         <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
-                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Agenda 🔒</button>
+                        <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="hidden font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Calendario 🔒</button>
+                        
                         <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-3 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
                     </div>
 
                     <div class="p-5 sm:p-6 flex-grow overflow-y-auto">
                         <div id="panel-basico" class="space-y-4">
                             <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-bold text-sm text-red-600">Botón de Emergencia</h4>
-                                    <p class="text-[11px] text-gray-500">Cierra tu negocio o consultorio manualmente por hoy.</p>
-                                </div>
+                                <div><h4 class="font-bold text-sm text-red-600">Estado Operativo</h4><p class="text-[11px] text-gray-500">Cierra tu negocio temporalmente.</p></div>
                                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                     <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                                    <span class="ml-2 text-xs font-bold text-gray-700 w-12" id="label-estado-apertura">Abierto</span>
                                 </label>
                             </div>
-                            <div><label class="text-xs font-bold text-gray-500">Nombre del Negocio / Consultorio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                            
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                                <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Días y Horarios de Atención</h4>
-                                <div id="contenedor-horarios"></div>
-                            </div>
-
+                            <div><label class="text-xs font-bold text-gray-500">Nombre del Espacio *</label><input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2"><h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Horarios Habituales</h4><div id="contenedor-horarios"></div></div>
                             <div><label class="text-xs font-bold text-gray-500">Descripción *</label><textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="text-xs font-bold text-gray-500">WhatsApp *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                                <div><label class="text-xs font-bold text-gray-500">WhatsApp de Contacto *</label><input type="number" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500">Categoría * (Define tus funciones)</label>
-                                    <select id="admin-cat" onchange="actualizarPreview(); configurarPermisos();" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                                        <option>Alimentos</option><option>Hogar</option><option>Servicios</option><option>Salud Mental</option><option>Medicina</option><option>Belleza</option>
-                                    </select>
+                                    <label class="text-xs font-bold text-gray-500">Categoría Específica *</label>
+                                    <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                                        </select>
                                 </div>
                             </div>
                         </div>
 
                         <div id="panel-diseno" class="hidden space-y-4">
-                            <div id="bloqueo-diseno" class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center">
-                                <h3 class="font-bold text-blue-800 mb-2">Desbloquea el Diseño Pro</h3>
-                                <button onclick="iniciarMejoraDirecta(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-blue-700 transition">Mejorar a Pro ($150/mes)</button>
-                            </div>
+                            <div id="bloqueo-diseno" class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center"><h3 class="font-bold text-blue-800 mb-2">Desbloquea el Diseño Pro</h3><button onclick="iniciarMejoraDirecta(1, 'price_1TItPTGtW4zuRQv9RMSEOnnn')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-blue-700">Mejorar a Pro ($150/mes)</button></div>
                             <div id="contenido-diseno" class="hidden">
-                                <label class="text-sm font-bold text-gray-700">Banner Principal</label>
+                                <label class="text-sm font-bold text-gray-700">Banner / Foto Principal</label>
                                 <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-white hover:bg-gray-50 transition">
                                     <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaImagen(event, 'negocios', 'admin-imagen-url', 'estado-subida', true)">
                                     <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold block w-max mx-auto transition">Subir Imagen</label>
@@ -180,20 +201,13 @@
                         </div>
 
                         <div id="panel-menu" class="hidden space-y-4 flex-col h-full">
-                            <div id="bloqueo-menu" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
-                                <h3 class="font-bold text-yellow-800 mb-2">Desbloquea Funciones Elite</h3>
-                                <p class="text-xs text-yellow-700 mb-4">Activa el carrito de compras en línea.</p>
-                                <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
-                            </div>
+                            <div id="bloqueo-menu" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center"><h3 class="font-bold text-yellow-800 mb-2">Activa tu Tienda en Línea</h3><button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-yellow-600">Mejorar a Elite ($300/mes)</button></div>
                             <div id="contenido-menu" class="hidden flex-grow flex-col">
                                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Producto</h4>
-                                    <div class="grid grid-cols-2 gap-3 mb-3">
-                                        <input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none">
-                                        <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
-                                    </div>
-                                    <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
-                                    <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Menú</button>
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Nuevo Producto</h4>
+                                    <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none"><input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none"></div>
+                                    <textarea id="prod-desc" placeholder="Descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
+                                    <button onclick="agregarProductoSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir al Catálogo</button>
                                 </div>
                                 <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Productos</h4>
                                 <div id="lista-productos" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
@@ -201,703 +215,349 @@
                         </div>
 
                         <div id="panel-servicios" class="hidden space-y-4 flex-col h-full">
-                            <div id="bloqueo-servicios" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
-                                <h3 class="font-bold text-yellow-800 mb-2">Desbloquea la Agenda Inteligente</h3>
-                                <p class="text-xs text-yellow-700 mb-4">Permite que tus pacientes agenden citas las 24 horas.</p>
-                                <button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-yellow-600 transition">Mejorar a Elite ($300/mes)</button>
-                            </div>
+                            <div id="bloqueo-servicios" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center"><h3 class="font-bold text-yellow-800 mb-2">Activa tu Agenda Inteligente</h3><button onclick="iniciarMejoraDirecta(2, 'price_1TItQaGtW4zuRQv9gyQOTaC5')" class="bg-tm-dorado text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow mt-2 hover:bg-yellow-600">Mejorar a Elite ($300/mes)</button></div>
                             <div id="contenido-servicios" class="hidden flex-grow flex-col">
                                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Agregar Nuevo Servicio (Para Agendas)</h4>
+                                    <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Nuevo Servicio</h4>
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                                        <input type="text" id="serv-nombre" placeholder="Nombre (Ej. Terapia)" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
+                                        <input type="text" id="serv-nombre" placeholder="Ej. Terapia, Consulta..." class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-3">
                                         <input type="number" id="serv-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none">
-                                        <input type="number" id="serv-duracion" placeholder="Duración (Minutos)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
+                                        <input type="number" id="serv-duracion" placeholder="Minutos (Ej. 60)" value="60" class="p-2 border border-gray-300 rounded text-sm outline-none col-span-1 sm:col-span-2">
                                     </div>
-                                    <textarea id="serv-desc" placeholder="Descripción corta" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
+                                    <textarea id="serv-desc" placeholder="Instrucciones para el paciente" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3"></textarea>
                                     <button onclick="agregarServicioSeguro()" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow">Añadir Servicio</button>
                                 </div>
-                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Tus Servicios Activos</h4>
+                                <h4 class="font-bold text-sm text-gray-600 border-b pb-2 mb-3">Servicios Ofrecidos</h4>
                                 <div id="lista-servicios" class="space-y-2 overflow-y-auto max-h-64 pr-2"></div>
                             </div>
                         </div>
 
-                        <div id="panel-agenda" class="hidden space-y-4">
-                            <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 mb-4">
-                                <h3 class="font-bold text-yellow-800 mb-1">Agenda Activa</h3>
-                                <p class="text-xs text-yellow-700">Gestiona las citas de tus pacientes. Puedes reagendar o cancelar.</p>
-                            </div>
-                            <div id="lista-citas-negocio" class="space-y-3">
-                                <p class="text-sm text-gray-400">Sin citas pendientes por ahora.</p>
-                            </div>
-                        </div>
-
                         <div id="panel-verif" class="hidden space-y-4">
-                            <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mb-4">
-                                <h3 class="font-black text-blue-800 mb-1 flex items-center gap-2"><span class="text-xl">🛡️</span> Sello de Confianza</h3>
-                                <p class="text-sm text-blue-700">Sube una identificación oficial para ganar el sello verificado.</p>
-                            </div>
-                            <div id="estado-verif-pendiente" class="hidden bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-center">
-                                <span class="text-4xl block mb-2">⏳</span>
-                                <h3 class="font-bold text-yellow-800">Documentos en Revisión</h3>
-                            </div>
-                            <div id="estado-verif-aprobado" class="hidden bg-green-50 p-6 rounded-xl border border-green-200 text-center">
-                                <span class="text-4xl block mb-2">✅</span>
-                                <h3 class="font-bold text-green-800">¡Negocio Verificado!</h3>
-                            </div>
-                            <form id="form-verif" class="hidden space-y-4 bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
-                                <div><label class="text-xs font-bold text-gray-500">Nombre Completo del Responsable *</label><input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg mt-1 outline-none"></div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center bg-gray-50">
-                                        <p class="text-xs font-bold text-gray-600 mb-2">INE (Frente) *</p>
-                                        <input type="file" id="file-ine-frente" accept="image/*" class="hidden" onchange="procesarSubidaImagen(event, 'verificaciones', 'url-ine-frente', 'estado-frente', false)" required>
-                                        <label for="file-ine-frente" class="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold block w-max mx-auto shadow-sm">Subir Foto</label>
-                                        <p id="estado-frente" class="text-[10px] text-tm-azul mt-2 font-bold"></p>
-                                        <input type="hidden" id="url-ine-frente">
-                                    </div>
-                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center bg-gray-50">
-                                        <p class="text-xs font-bold text-gray-600 mb-2">INE (Reverso) *</p>
-                                        <input type="file" id="file-ine-reverso" accept="image/*" class="hidden" onchange="procesarSubidaImagen(event, 'verificaciones', 'url-ine-reverso', 'estado-reverso', false)" required>
-                                        <label for="file-ine-reverso" class="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold block w-max mx-auto shadow-sm">Subir Foto</label>
-                                        <p id="estado-reverso" class="text-[10px] text-tm-azul mt-2 font-bold"></p>
-                                        <input type="hidden" id="url-ine-reverso">
-                                    </div>
-                                </div>
-                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition shadow-md mt-4">Enviar Documentos</button>
+                            <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mb-4"><h3 class="font-black text-blue-800 mb-1">🛡️ Sello de Confianza</h3></div>
+                            <form id="form-verif" class="bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
+                                <div><label class="text-xs font-bold text-gray-500">Nombre Responsable *</label><input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg mt-1 outline-none"></div>
+                                <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold mt-4">Enviar Documentos</button>
                             </form>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col items-center justify-center relative">
-                    <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase tracking-widest font-bold">Vista Previa Móvil</div>
-                    <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 transform transition-all duration-300 mx-auto mt-6">
-                        <div class="bg-gray-100 p-3 flex justify-between items-center border-b border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-400">⬅ Volver</span><span class="text-[10px] font-bold text-gray-400">Directorio</span>
+                <div id="panel-derecho-mixto" class="w-full lg:w-1/2 p-6 bg-gray-200 flex flex-col relative overflow-hidden">
+                    
+                    <div id="vista-previa-movil" class="flex flex-col items-center justify-center h-full w-full">
+                        <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold z-10">Vista Previa Móvil</div>
+                        <div class="w-full max-w-[320px] bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 transform transition-all duration-300 mx-auto relative z-10">
+                            <div class="bg-gray-100 p-3 border-b border-gray-200"><span class="text-[10px] font-bold text-gray-400">⬅ Volver</span></div>
+                            <div id="preview-banner-container" class="w-full h-32 bg-gray-100 relative hidden"><img id="preview-banner" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div></div>
+                            <div class="p-5 bg-white">
+                                <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
+                                <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro mt-2 leading-tight">Nombre del Negocio</h3>
+                                <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-3">Descripción...</p>
+                                <div class="mt-5 pt-4 border-t border-gray-100"><button class="w-full bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold">WhatsApp</button></div>
+                                <div class="mt-2"><button id="preview-btn-menu" class="hidden w-full bg-tm-azul text-white py-2.5 rounded-lg text-xs font-bold">🛒 Ver Tienda</button></div>
+                                <div class="mt-2"><button id="preview-btn-agenda" onclick="abrirModalBloqueo()" class="hidden w-full bg-tm-dorado text-white py-2.5 rounded-lg text-xs font-bold">📅 Bloquear Espacio</button></div>
+                            </div>
                         </div>
-                        <div id="preview-banner-container" class="w-full h-32 bg-gray-100 relative hidden">
-                            <img id="preview-banner" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+
+                    <div id="vista-calendario-profesional" class="hidden flex-col h-full w-full bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black text-tm-azul-oscuro">Agenda Semanal</h3>
+                            <button onclick="abrirModalBloqueo()" class="bg-tm-dorado hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1">➕ Bloqueo Manual</button>
                         </div>
-                        <div class="p-5 bg-white">
-                            <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase tracking-widest bg-yellow-50 px-2 py-0.5 rounded">Categoría</span>
-                            <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro leading-tight mt-2">Nombre del Negocio</h3>
-                            <p id="preview-desc" class="text-xs text-gray-500 mt-2 line-clamp-4 leading-relaxed">Escribe una descripción en la pestaña 'Datos Básicos'.</p>
-                            
-                            <div class="mt-5 pt-4 border-t border-gray-100 flex gap-2">
-                                <button class="flex-1 bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold text-center shadow-sm">WhatsApp</button>
-                            </div>
-                            <div class="flex gap-2 mt-2">
-                                <button id="preview-btn-menu" class="hidden flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm">🛒 Ver Menú / Comprar</button>
-                            </div>
-                            <div class="flex gap-2 mt-2">
-                                <button id="preview-btn-agenda" onclick="abrirAgendaPreview()" class="hidden flex-1 bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 rounded-lg text-xs font-bold text-center shadow-sm transition transform hover:scale-[1.02]">📅 Agendar Cita / Bloquear</button>
-                            </div>
+                        <div id="calendar" class="flex-grow w-full min-h-[350px]"></div>
+                        
+                        <div class="mt-4 border-t border-gray-100 pt-4">
+                            <h4 class="text-sm font-bold text-gray-500 mb-2">Lista de Citas Activas</h4>
+                            <div id="lista-citas-negocio" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+            <button onclick="document.getElementById('modal-bloqueo').classList.add('hidden')" class="absolute top-4 right-4 text-3xl text-gray-500">&times;</button>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Bloquear Espacio 🛑</h3>
+            <p class="text-xs text-gray-500 mb-4">Evita que los pacientes agenden en este lapso.</p>
+            <div class="space-y-3">
+                <div><label class="text-xs font-bold text-gray-500">Motivo</label><input type="text" id="bloqueo-titulo" placeholder="Ej. Cirugía, Comida..." class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                <div><label class="text-xs font-bold text-gray-500">Fecha</label><input type="date" id="bloqueo-fecha" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-xs font-bold text-gray-500">Inicia</label><input type="time" id="bloqueo-inicio" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                    <div><label class="text-xs font-bold text-gray-500">Termina</label><input type="time" id="bloqueo-fin" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                </div>
+            </div>
+            <button onclick="guardarBloqueo()" class="w-full bg-tm-dorado text-white py-3 rounded-xl font-bold mt-6">Confirmar Bloqueo</button>
         </div>
     </div>
 
     <div id="modal-agendar" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform transition-transform relative">
-            <button onclick="cerrarModalAgendar()" class="absolute top-4 right-4 text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1" id="titulo-modal-agendar">Agendar Cita 📅</h3>
-            <p class="text-xs text-gray-500 mb-5" id="modal-agendar-negocio">Consultorio</p>
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+            <button onclick="document.getElementById('modal-agendar').classList.add('hidden'); citaIdEditando = null;" class="absolute top-4 right-4 text-3xl text-gray-500">&times;</button>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-1">Reagendar Cita 📅</h3>
+            <p class="text-xs text-gray-500 mb-4" id="modal-agendar-negocio">Paciente...</p>
             <input type="hidden" id="reserva-negocio-id">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">1. Servicio</label>
-                    <select id="reserva-servicio" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none text-sm font-semibold text-gray-700">
-                        <option value="">Cargando servicios...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs font-bold uppercase text-gray-500">2. Día</label>
-                    <input type="date" id="reserva-fecha" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none text-sm font-semibold text-gray-700">
-                </div>
-                <div class="border-t border-gray-100 pt-4">
-                    <label class="text-xs font-bold uppercase text-gray-500 mb-2 block">3. Horarios Disponibles</label>
-                    <div id="contenedor-horarios-libres" class="grid grid-cols-3 gap-2 min-h-[60px]">
-                        <p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>
-                    </div>
-                </div>
+            <div class="space-y-3">
+                <div><label class="text-xs font-bold text-gray-500">Servicio</label><select id="reserva-servicio" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></select></div>
+                <div><label class="text-xs font-bold text-gray-500">Nuevo Día</label><input type="date" id="reserva-fecha" onchange="buscarHorarios()" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 text-sm"></div>
+                <div class="border-t border-gray-100 pt-3"><label class="text-xs font-bold text-gray-500 mb-2 block">Horarios Libres</label><div id="contenedor-horarios-libres" class="grid grid-cols-3 gap-2"></div></div>
             </div>
-            <button onclick="cerrarModalAgendar()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold mt-6 transition">Cancelar</button>
         </div>
     </div>
 
     <script>
-        const stripe = Stripe('pk_live_51TIbWAGtW4zuRQv9BoUbQxHh1hHUdLMysM1q5aglozGBNkdBXV2EFiyTPYDZf0gKRM2JjFy2bHLEsJHlvT8nlNfT004EDyUyWi');
-        const URL_EDGE_FUNCTION = 'https://vlnpefgqodnxcqeztcnh.supabase.co/functions/v1/create-checkout';
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let usuarioActual = null;
-        let map = null; let marker = null;
-        let citaIdEditando = null; // VARIABLE GLOBAL PARA SABER SI ESTAMOS EDITANDO
+        let usuarioActual = null; let map = null; let marker = null;
+        let citaIdEditando = null; let calendar = null;
         
+        const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
+        const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio'];
         const DIAS = { 1:'Lunes', 2:'Martes', 3:'Miércoles', 4:'Jueves', 5:'Viernes', 6:'Sábado', 0:'Domingo' };
 
-        // ------------------ FUNCIONES GLOBALES / UI ------------------
-        function mostrarNotificacion(mensaje, tipo = 'exito') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bgClass = tipo === 'error' ? 'bg-red-500' : 'bg-green-500';
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 max-w-sm`;
-            toast.innerHTML = `<span class="text-sm font-bold leading-tight">${mensaje}</span><button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-lg">×</button>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-[-100%]', 'opacity-0'), 10);
-            setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 4000);
+        // --- SISTEMA DE SEPARACIÓN TIENDA VS SERVICIO ---
+        function iniciarCreacion() {
+            document.getElementById('seccion-lista-negocios').classList.add('hidden');
+            document.getElementById('seccion-elegir-rubro').classList.remove('hidden');
         }
-
-        function renderizarUIHorarios() {
-            const cont = document.getElementById('contenedor-horarios');
-            cont.innerHTML = Object.keys(DIAS).map(d => `
-                <div class="flex items-center justify-between gap-2 p-1.5 hover:bg-gray-50 rounded" data-dia="${d}">
-                    <label class="flex items-center gap-2 w-24 cursor-pointer">
-                        <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded focus:ring-tm-azul" onchange="toggleInputsHorario(this)">
-                        <span class="text-sm font-bold text-gray-700">${DIAS[d]}</span>
-                    </label>
-                    <div class="flex items-center gap-1 flex-grow">
-                        <input type="time" class="hora-abre p-1.5 border border-gray-300 rounded text-xs w-full outline-none">
-                        <span class="text-gray-400 text-xs">a</span>
-                        <input type="time" class="hora-cierra p-1.5 border border-gray-300 rounded text-xs w-full outline-none">
-                    </div>
-                </div>
-            `).join('');
-        }
-        function toggleInputsHorario(checkbox) {
-            const row = checkbox.closest('div[data-dia]');
-            const inputs = row.querySelectorAll('input[type="time"]');
-            inputs.forEach(inp => { inp.disabled = !checkbox.checked; inp.classList.toggle('opacity-50', !checkbox.checked); inp.classList.toggle('bg-gray-100', !checkbox.checked); });
-        }
-        function obtenerHorariosDeUI() {
-            let horarios = {};
-            [1, 2, 3, 4, 5, 6, 0].forEach(dia => {
-                const row = document.querySelector(`div[data-dia="${dia}"]`);
-                horarios[dia] = { abierto: row.querySelector('.dia-abierto').checked, abre: row.querySelector('.hora-abre').value, cierra: row.querySelector('.hora-cierra').value };
-            });
-            return horarios;
-        }
-        function setearHorariosUI(horariosJSON) {
-            [1, 2, 3, 4, 5, 6, 0].forEach(dia => {
-                const row = document.querySelector(`div[data-dia="${dia}"]`);
-                const cb = row.querySelector('.dia-abierto');
-                if (horariosJSON && horariosJSON[dia]) {
-                    cb.checked = horariosJSON[dia].abierto;
-                    row.querySelector('.hora-abre').value = horariosJSON[dia].abre || '09:00';
-                    row.querySelector('.hora-cierra').value = horariosJSON[dia].cierra || '18:00';
-                } else {
-                    cb.checked = (dia !== 0); 
-                    row.querySelector('.hora-abre').value = '09:00'; row.querySelector('.hora-cierra').value = '18:00';
-                }
-                toggleInputsHorario(cb);
-            });
-        }
-
-        document.getElementById('admin-estado-apertura').addEventListener('change', function(e) { document.getElementById('label-estado-apertura').innerText = e.target.checked ? "Abierto" : "Cerrado"; });
-        document.addEventListener("DOMContentLoaded", () => {
-            renderizarUIHorarios();
-            const view = new URLSearchParams(window.location.search).get('view') || 'perfil'; 
-            if (view === 'negocio') { document.getElementById('seccion-perfil').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.remove('hidden'); }
-            else { document.getElementById('seccion-perfil').classList.remove('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden'); }
-        });
-
-        clienteSupabase.auth.onAuthStateChange((event, session) => {
-            usuarioActual = session ? session.user : null;
-            if(usuarioActual) {
-                document.getElementById('no-auth').classList.add('hidden'); document.getElementById('si-auth').classList.remove('hidden');
-                cargarMisNegocios(); cargarPerfil();
-            } else {
-                document.getElementById('no-auth').classList.remove('hidden'); document.getElementById('si-auth').classList.add('hidden');
-            }
-        });
-
-        // ------------------ PERFIL, PEDIDOS Y CITAS ------------------
-        async function cargarPerfil() {
-            const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single();
-            let lat = 19.7028; let lng = -101.1924;
-            if (data) {
-                document.getElementById('perfil-nombre').value = data.nombre_completo || '';
-                document.getElementById('perfil-telefono').value = data.telefono || '';
-                document.getElementById('perfil-direccion').value = data.direccion || '';
-                if(data.latitud && data.longitud) { lat = data.latitud; lng = data.longitud; }
-            }
-            inicializarMapa(lat, lng);
-            cargarMisPedidos();
-            cargarMisCitas();
-        }
-
-        async function guardarPerfilSeguro() {
-            const btn = document.getElementById('btn-guardar-perfil'); btn.innerText = "Guardando..."; btn.disabled = true;
-            const payload = { nombre_completo: document.getElementById('perfil-nombre').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value, latitud: document.getElementById('perfil-lat').value, longitud: document.getElementById('perfil-lng').value };
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_perfil', payload: payload } });
-            btn.innerText = "Guardar Perfil"; btn.disabled = false;
-            if (error || !data.success) mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); else mostrarNotificacion("¡Perfil guardado!");
-        }
-
-        async function cargarMisPedidos() {
-            const { data } = await clienteSupabase.from('pedidos').select('*, anuncios(nombre_negocio)').eq('cliente_id', usuarioActual.id).order('creado_en', { ascending: false }).limit(5);
-            const contenedor = document.getElementById('contenedor-mis-pedidos');
-            if (!data || data.length === 0) return contenedor.innerHTML = '<p class="text-sm text-gray-500">Sin pedidos recientes.</p>';
-            contenedor.innerHTML = data.map(p => {
-                let colorEstado = 'bg-gray-100 text-gray-600'; let textoEstado = p.estado;
-                if(p.estado === 'esperando_activacion') { colorEstado = 'bg-yellow-100 text-yellow-700'; textoEstado = 'Pendiente de Pago'; }
-                if(p.estado === 'aceptado' || p.estado === 'en_camino') { colorEstado = 'bg-green-100 text-green-700'; textoEstado = 'En Ruta'; }
-                return `
-                <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl">
-                    <span class="text-[10px] font-bold uppercase ${colorEstado} px-2 py-0.5 rounded">${textoEstado}</span>
-                    <p class="font-bold text-tm-azul-oscuro text-sm mt-1">${p.anuncios ? p.anuncios.nombre_negocio : 'Negocio'}</p>
-                    <p class="text-xs text-tm-dorado font-black">$${p.total}</p>
-                </div>`;
-            }).join('');
-        }
-
-        async function cargarMisCitas() {
-            const { data } = await clienteSupabase.from('citas').select('*, anuncios(nombre_negocio), servicios(nombre, duracion_minutos)').eq('cliente_id', usuarioActual.id).order('fecha_cita', { ascending: true }).limit(5);
-            const cont = document.getElementById('contenedor-mis-citas');
-            if (!data || data.length === 0) return cont.innerHTML = '<p class="text-sm text-gray-500">No tienes citas programadas.</p>';
-            cont.innerHTML = data.map(c => `
-                <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex flex-col">
-                    <span class="text-[10px] font-bold uppercase text-blue-600 self-start bg-white px-2 py-0.5 rounded shadow-sm">${c.estado}</span>
-                    <p class="font-bold text-tm-azul-oscuro mt-1 text-sm">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)}</p>
-                    <p class="text-xs text-gray-600 font-semibold">${c.anuncios?.nombre_negocio || 'Consultorio'}</p>
-                    <p class="text-[10px] text-gray-400 mt-1">${c.servicios?.nombre}</p>
-                </div>
-            `).join('');
-        }
-
-        // ------------------ FUNCIONES DE PANEL NEGOCIOS ------------------
-        async function cargarMisNegocios() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
-            const contenedor = document.getElementById('contenedor-mis-negocios');
-            if (!data || data.length === 0) return contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center text-gray-500 col-span-2">Aún no tienes negocios. Selecciona un plan abajo.</div>`;
-            contenedor.innerHTML = data.map(n => `
-                <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:shadow-md transition">
-                    <div class="w-full text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2">
-                            <h3 class="font-bold text-lg text-tm-azul-oscuro leading-tight">${n.nombre_negocio}</h3>
-                            ${n.es_verificado ? '<span title="Verificado">☑️</span>' : ''}
-                        </div>
-                        <span class="${n.nivel_pago > 0 ? (n.nivel_pago == 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700') : 'bg-gray-100 text-gray-600'} text-[10px] uppercase px-2 py-1 rounded font-bold inline-block mt-1">
-                            ${n.nivel_pago == 2 ? 'Elite (Nivel 2)' : (n.nivel_pago == 1 ? 'Pro (Nivel 1)' : 'Básico')}
-                        </span>
-                    </div>
-                    <button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow whitespace-nowrap">Editar Panel</button>
-                </div>
-            `).join('');
-        }
-
-        function abrirAdminNuevo(nivelDeseado) {
-            document.getElementById('seccion-perfil').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.getElementById('admin-titulo').innerText = "Creando Nuevo Negocio";
-            document.getElementById('admin-negocio-id').value = ''; document.getElementById('admin-nivel-intencion').value = nivelDeseado;
-            ['admin-nombre', 'admin-desc', 'admin-wa', 'admin-imagen-url', 'url-ine-frente', 'url-ine-reverso', 'verif-nombre'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('admin-estado-apertura').checked = true; document.getElementById('label-estado-apertura').innerText = "Abierto";
-            setearHorariosUI(null);
-
-            const btnGuardar = document.getElementById('btn-guardar-admin');
-            if (nivelDeseado > 0) {
-                document.getElementById('admin-nivel-badge').innerText = "Creando: " + (nivelDeseado===1 ? "Pro" : "Elite");
-                btnGuardar.innerText = "Continuar al Pago Seguro 🔒"; btnGuardar.classList.replace('bg-tm-dorado', 'bg-blue-600'); btnGuardar.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
-            } else {
-                document.getElementById('admin-nivel-badge').innerText = "Creando: Básico";
-                btnGuardar.innerText = "Crear Negocio Gratis"; btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado'); btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
-            }
-
-            configurarPermisos(nivelDeseado); configurarPestanaVerificacion('no_solicitado');
-            document.getElementById('seccion-lista-negocios').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden');
-            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
-            actualizarPreview(); cambiarPestana('basico');
-        }
-
-        function abrirAdminEdit(n) {
-            document.getElementById('seccion-perfil').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.getElementById('admin-titulo').innerText = "Editando: " + n.nombre_negocio;
-            document.getElementById('admin-negocio-id').value = n.id; document.getElementById('admin-nivel-intencion').value = '0';
-            document.getElementById('admin-nombre').value = n.nombre_negocio; document.getElementById('admin-desc').value = n.descripcion || '';
-            document.getElementById('admin-wa').value = n.enlace_whatsapp || ''; document.getElementById('admin-cat').value = n.categoria || 'Alimentos';
-            document.getElementById('admin-imagen-url').value = n.imagen_url || '';
-            const estaAbierto = n.esta_abierto !== false; 
-            document.getElementById('admin-estado-apertura').checked = estaAbierto; document.getElementById('label-estado-apertura').innerText = estaAbierto ? "Abierto" : "Cerrado";
-            setearHorariosUI(n.horarios);
-            
-            const nivel = n.nivel_pago || 0;
-            document.getElementById('admin-nivel-badge').innerText = "Nivel Actual: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
-            const btnGuardar = document.getElementById('btn-guardar-admin');
-            btnGuardar.innerText = "Guardar Cambios Básicos"; btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado'); btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
-
-            configurarPermisos(nivel); configurarPestanaVerificacion(n.estado_verificacion);
-            
-            if(nivel >= 2) {
-                document.getElementById('lista-productos').innerHTML = ''; cargarProductosMenu(n.id);
-                document.getElementById('lista-servicios').innerHTML = ''; cargarServicios(n.id);
-                document.getElementById('lista-citas-negocio').innerHTML = ''; cargarAgendaNegocio(n.id);
-            }
-            
-            document.getElementById('seccion-lista-negocios').classList.add('hidden'); document.getElementById('seccion-crear-negocio').classList.add('hidden');
-            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
-            actualizarPreview(); cambiarPestana('basico');
-        }
-
-        function cerrarAdminNegocio() {
-            document.getElementById('seccion-admin-negocio').classList.add('hidden');
+        function cancelarCreacion() {
+            document.getElementById('seccion-elegir-rubro').classList.add('hidden');
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
             document.getElementById('seccion-lista-negocios').classList.remove('hidden');
+        }
+        
+        function mostrarPlanes(rubro) {
+            document.getElementById('seccion-elegir-rubro').classList.add('hidden');
             document.getElementById('seccion-crear-negocio').classList.remove('hidden');
-            document.getElementById('seccion-perfil').classList.remove('hidden');
-            cargarMisNegocios();
+            document.getElementById('rubro-seleccionado').value = rubro;
+
+            const titulo = document.getElementById('titulo-planes');
+            const featPro = document.getElementById('feat-pro-dinamico');
+            const featElite1 = document.getElementById('feat-elite-1');
+            const featElite2 = document.getElementById('feat-elite-2');
+
+            if (rubro === 'tienda') {
+                titulo.innerText = "Planes para Tiendas y Comida";
+                featPro.innerHTML = "<b>Catálogo PDF</b> o enlace.";
+                featElite1.innerHTML = "<b>Tienda en línea</b> con carrito.";
+                featElite2.innerHTML = "<b>Pedidos directos</b> a WhatsApp.";
+            } else {
+                titulo.innerText = "Planes para Consultorios";
+                featPro.innerHTML = "<b>Listado</b> de servicios.";
+                featElite1.innerHTML = "<b>Agenda Inteligente</b> 24/7.";
+                featElite2.innerHTML = "<b>Calendario</b> profesional.";
+            }
+        }
+
+        // Modificamos abrirAdminNuevo para inyectar el rubro seleccionado
+        function abrirAdminNuevo(nivelDeseado) {
+            const rubro = document.getElementById('rubro-seleccionado').value || 'tienda';
+            prepararPanelEditor(null, rubro, nivelDeseado);
+            document.getElementById('seccion-crear-negocio').classList.add('hidden');
+        }
+
+        // Modificamos abrirAdminEdit para deducir el rubro de la categoría
+        function abrirAdminEdit(n) {
+            const rubro = CATEGORIAS_SERVICIO.includes(n.categoria) ? 'servicio' : 'tienda';
+            prepararPanelEditor(n, rubro, n.nivel_pago || 0);
+            document.getElementById('seccion-lista-negocios').classList.add('hidden');
+        }
+
+        function prepararPanelEditor(datos, rubro, nivel) {
+            document.getElementById('seccion-admin-negocio').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const esNuevo = !datos;
+            document.getElementById('admin-negocio-id').value = esNuevo ? '' : datos.id;
+            document.getElementById('admin-nivel-intencion').value = esNuevo ? nivel : '0';
+            document.getElementById('admin-rubro-interno').value = rubro;
+
+            document.getElementById('admin-titulo').innerText = esNuevo ? "Nuevo Espacio" : "Editando: " + datos.nombre_negocio;
+            document.getElementById('admin-nombre').value = esNuevo ? '' : datos.nombre_negocio;
+            document.getElementById('admin-desc').value = esNuevo ? '' : (datos.descripcion || '');
+            document.getElementById('admin-wa').value = esNuevo ? '' : (datos.enlace_whatsapp || '');
+            document.getElementById('admin-imagen-url').value = esNuevo ? '' : (datos.imagen_url || '');
+            
+            const estaAbierto = esNuevo ? true : (datos.esta_abierto !== false);
+            document.getElementById('admin-estado-apertura').checked = estaAbierto;
+            
+            setearHorariosUI(esNuevo ? null : datos.horarios);
+
+            // Cargar selectores de categoría correctos
+            const selectCat = document.getElementById('admin-cat');
+            const arrayOpciones = rubro === 'tienda' ? CATEGORIAS_TIENDA : CATEGORIAS_SERVICIO;
+            selectCat.innerHTML = arrayOpciones.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (!esNuevo && arrayOpciones.includes(datos.categoria)) selectCat.value = datos.categoria;
+
+            const btnGuardar = document.getElementById('btn-guardar-admin');
+            document.getElementById('admin-nivel-badge').innerText = "Nivel: " + (nivel===2 ? "Elite" : (nivel===1 ? "Pro" : "Básico"));
+            
+            if (esNuevo && nivel > 0) {
+                btnGuardar.innerText = "Continuar al Pago Seguro 🔒"; 
+                btnGuardar.classList.replace('bg-tm-dorado', 'bg-blue-600'); btnGuardar.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
+            } else {
+                btnGuardar.innerText = "Guardar Configuración"; 
+                btnGuardar.classList.replace('bg-blue-600', 'bg-tm-dorado'); btnGuardar.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-600');
+            }
+
+            configurarPermisos(nivel, rubro);
+            
+            if (!esNuevo && nivel >= 2) {
+                if(rubro === 'tienda') cargarProductosMenu(datos.id);
+                if(rubro === 'servicio') { cargarServicios(datos.id); cargarAgendaYCalendario(datos.id); }
+            }
+            
+            actualizarPreview();
+            cambiarPestana('basico');
+        }
+
+        // --- SISTEMA DE PESTAÑAS ESTRICTO ---
+        function configurarPermisos(nivel, rubro) {
+            // Diseño Pro
+            if (nivel >= 1) {
+                document.getElementById('tab-diseno').innerText = "Diseño & Foto";
+                document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-diseno').innerText = "Diseño 🔒";
+                document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden');
+            }
+
+            // Ocultar Todo Elite primero
+            document.getElementById('tab-menu').classList.add('hidden');
+            document.getElementById('tab-servicios').classList.add('hidden');
+            document.getElementById('tab-agenda').classList.add('hidden');
+
+            if (rubro === 'tienda') {
+                document.getElementById('tab-menu').classList.remove('hidden');
+                if (nivel >= 2) {
+                    document.getElementById('tab-menu').innerText = "Tienda Activa";
+                    document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden');
+                } else {
+                    document.getElementById('tab-menu').innerText = "Tienda Online 🔒";
+                    document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden');
+                }
+            } else if (rubro === 'servicio') {
+                document.getElementById('tab-servicios').classList.remove('hidden');
+                document.getElementById('tab-agenda').classList.remove('hidden');
+                if (nivel >= 2) {
+                    document.getElementById('tab-servicios').innerText = "Servicios";
+                    document.getElementById('tab-agenda').innerText = "Mi Calendario";
+                    document.getElementById('bloqueo-servicios').classList.add('hidden'); document.getElementById('contenido-servicios').classList.remove('hidden');
+                } else {
+                    document.getElementById('tab-servicios').innerText = "Servicios 🔒";
+                    document.getElementById('tab-agenda').innerText = "Mi Calendario 🔒";
+                    document.getElementById('bloqueo-servicios').classList.remove('hidden'); document.getElementById('contenido-servicios').classList.add('hidden');
+                }
+            }
         }
 
         function cambiarPestana(tab) {
             ['basico', 'diseno', 'menu', 'servicios', 'agenda', 'verif'].forEach(t => {
                 let p = document.getElementById('panel-'+t); if(p) p.classList.add('hidden');
-                let btn = document.getElementById('tab-'+t);
-                if(btn) {
-                    if(btn.classList.contains('text-blue-500')) { btn.classList.remove('border-b-2', 'border-blue-500'); } 
-                    else { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
-                }
+                let btn = document.getElementById('tab-'+t); if(btn) { btn.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); btn.classList.add('text-gray-400'); }
             });
-            let targetPanel = document.getElementById('panel-'+tab); if(targetPanel) targetPanel.classList.remove('hidden');
-            let activeBtn = document.getElementById('tab-'+tab);
-            if(activeBtn) {
-                if(tab === 'verif') { activeBtn.classList.add('border-b-2', 'border-blue-500'); activeBtn.classList.remove('text-gray-400'); } 
-                else { activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
-            }
-        }
+            document.getElementById('panel-'+tab).classList.remove('hidden');
+            let aBtn = document.getElementById('tab-'+tab); if(aBtn) { aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
 
-        function configurarPermisos(nivelManual = null) {
-            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
-            let nivel = nivelManual !== null ? Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelManual) : Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
-            
-            const categoria = document.getElementById('admin-cat').value;
-            const usaComida = ['Alimentos', 'Hogar'].includes(categoria);
-            const usaAgenda = ['Servicios', 'Salud Mental', 'Medicina', 'Belleza'].includes(categoria);
-
-            if (nivel >= 1) {
-                document.getElementById('tab-diseno').innerText = "Diseño & Banner";
-                document.getElementById('bloqueo-diseno').classList.add('hidden'); document.getElementById('contenido-diseno').classList.remove('hidden');
+            // Lógica Mitad Derecha
+            if(tab === 'agenda') {
+                document.getElementById('vista-previa-movil').classList.add('hidden');
+                document.getElementById('vista-calendario-profesional').classList.remove('hidden');
+                document.getElementById('vista-calendario-profesional').classList.add('flex');
+                if(calendar) { setTimeout(() => { calendar.render(); calendar.updateSize(); }, 100); }
             } else {
-                document.getElementById('tab-diseno').innerText = "Banner 🔒";
-                document.getElementById('bloqueo-diseno').classList.remove('hidden'); document.getElementById('contenido-diseno').classList.add('hidden');
-            }
-
-            document.getElementById('tab-menu').classList.add('hidden');
-            document.getElementById('tab-servicios').classList.add('hidden');
-            document.getElementById('tab-agenda').classList.add('hidden');
-
-            if (usaComida) {
-                document.getElementById('tab-menu').classList.remove('hidden');
-                if (nivel >= 2) {
-                    document.getElementById('tab-menu').innerText = "Menú Comida";
-                    document.getElementById('bloqueo-menu').classList.add('hidden'); document.getElementById('contenido-menu').classList.remove('hidden');
-                } else {
-                    document.getElementById('tab-menu').innerText = "Menú Comida 🔒";
-                    document.getElementById('bloqueo-menu').classList.remove('hidden'); document.getElementById('contenido-menu').classList.add('hidden');
-                }
-            }
-
-            if (usaAgenda) {
-                document.getElementById('tab-servicios').classList.remove('hidden');
-                document.getElementById('tab-agenda').classList.remove('hidden');
-                if (nivel >= 2) {
-                    document.getElementById('tab-servicios').innerText = "Servicios";
-                    document.getElementById('bloqueo-servicios').classList.add('hidden'); document.getElementById('contenido-servicios').classList.remove('hidden');
-                    document.getElementById('tab-agenda').innerText = "Mi Agenda";
-                } else {
-                    document.getElementById('tab-servicios').innerText = "Servicios 🔒";
-                    document.getElementById('bloqueo-servicios').classList.remove('hidden'); document.getElementById('contenido-servicios').classList.add('hidden');
-                    document.getElementById('tab-agenda').innerText = "Mi Agenda 🔒";
-                }
-            }
-
-            const activeTab = document.querySelector('.border-b-2.border-tm-azul')?.id.replace('tab-', '');
-            if ((activeTab === 'menu' && !usaComida) || ((activeTab === 'servicios' || activeTab === 'agenda') && !usaAgenda)) {
-                cambiarPestana('basico');
+                document.getElementById('vista-calendario-profesional').classList.add('hidden');
+                document.getElementById('vista-calendario-profesional').classList.remove('flex');
+                document.getElementById('vista-previa-movil').classList.remove('hidden');
+                actualizarPreview();
             }
         }
 
-        function actualizarPreview() {
-            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre del Negocio';
-            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Escribe tu descripción...';
-            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría';
+        function actualizarPreview() { 
+            document.getElementById('preview-nombre').innerText = document.getElementById('admin-nombre').value || 'Nombre'; 
+            document.getElementById('preview-cat').innerText = document.getElementById('admin-cat').value || 'Categoría'; 
+            document.getElementById('preview-desc').innerText = document.getElementById('admin-desc').value || 'Descripción...'; 
+            
+            const rubro = document.getElementById('admin-rubro-interno').value;
+            const nivelInt = parseInt(document.getElementById('admin-nivel-intencion').value);
+            const nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
+            const nivel = Math.max(nivelInt, nivelReal);
 
-            const imgUrl = document.getElementById('admin-imagen-url').value;
-            const bannerCont = document.getElementById('preview-banner-container');
-            let nivelReal = document.getElementById('admin-nivel-badge').innerText.includes("Pro") ? 1 : (document.getElementById('admin-nivel-badge').innerText.includes("Elite") ? 2 : 0);
-            const nivel = Math.max(parseInt(document.getElementById('admin-nivel-intencion').value), nivelReal);
-            const categoria = document.getElementById('admin-cat').value;
-
-            if (imgUrl && nivel >= 1) { document.getElementById('preview-banner').src = imgUrl; bannerCont.classList.remove('hidden'); } 
-            else { bannerCont.classList.add('hidden'); }
+            const img = document.getElementById('admin-imagen-url').value;
+            if(img && nivel >= 1) { document.getElementById('preview-banner').src = img; document.getElementById('preview-banner-container').classList.remove('hidden'); }
+            else { document.getElementById('preview-banner-container').classList.add('hidden'); }
 
             document.getElementById('preview-btn-menu').classList.add('hidden');
             document.getElementById('preview-btn-agenda').classList.add('hidden');
-
-            if (nivel >= 2) {
-                if (['Alimentos', 'Hogar'].includes(categoria)) document.getElementById('preview-btn-menu').classList.remove('hidden');
-                if (['Servicios', 'Salud Mental', 'Medicina', 'Belleza'].includes(categoria)) document.getElementById('preview-btn-agenda').classList.remove('hidden');
-            }
-        }
-
-        async function guardarNegocioSeguro() {
-            const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; 
-            const id = document.getElementById('admin-negocio-id').value;
-            const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value);
             
-            btn.innerText = nivelIntencion > 0 ? "Preparando pago..." : "Guardando...";
-            const payloadDatos = {
-                nombre_negocio: document.getElementById('admin-nombre').value, descripcion: document.getElementById('admin-desc').value,
-                enlace_whatsapp: document.getElementById('admin-wa').value, categoria: document.getElementById('admin-cat').value,
-                imagen_url: document.getElementById('admin-imagen-url').value, horarios: obtenerHorariosDeUI(),
-                esta_abierto: document.getElementById('admin-estado-apertura').checked 
-            };
-
-            if(!payloadDatos.nombre_negocio || !payloadDatos.enlace_whatsapp) {
-                mostrarNotificacion("Nombre y WhatsApp son obligatorios", "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return;
-            }
-
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payloadDatos } });
-            if (error || !data.success) { mostrarNotificacion("Error: " + (error?.message || data?.error), "error"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos"; return; }
-
-            const idGenerado = data.id_negocio; document.getElementById('admin-negocio-id').value = idGenerado;
-
-            if (nivelIntencion > 0 && !id) {
-                btn.innerText = "Redirigiendo a Stripe...";
-                const priceId = nivelIntencion === 1 ? 'price_1TItPTGtW4zuRQv9RMSEOnnn' : 'price_1TItQaGtW4zuRQv9gyQOTaC5';
-                await iniciarFlujoStripeInterno(nivelIntencion, priceId, idGenerado);
-            } else {
-                mostrarNotificacion("¡Datos guardados!"); btn.disabled = false; btn.innerText = "Guardar Cambios Básicos";
+            if(nivel >= 2) {
+                if(rubro === 'tienda') document.getElementById('preview-btn-menu').classList.remove('hidden');
+                if(rubro === 'servicio') document.getElementById('preview-btn-agenda').classList.remove('hidden');
             }
         }
 
-        // COMIDA
-        async function cargarProductosMenu(anuncioId) {
-            const { data } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id');
-            const lista = document.getElementById('lista-productos');
-            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin productos.</p>`;
-            lista.innerHTML = data.map(p => `
-                <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <div><p class="text-sm font-bold ${p.disponible ? 'text-tm-azul-oscuro' : 'text-gray-400 line-through'}">${p.nombre}</p><p class="text-xs text-tm-dorado font-black">$${p.precio}</p></div>
-                    <div class="flex items-center gap-4">
-                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" ${p.disponible !== false ? 'checked' : ''} onchange="toggleProductoSeguro('${p.id}', this.checked)"><div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div></label>
-                        <button onclick="eliminarProductoSeguro('${p.id}')" class="text-gray-400 hover:text-red-500 transition">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-        async function agregarProductoSeguro() {
-            const anuncioId = document.getElementById('admin-negocio-id').value; if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
-            const payload = { anuncio_id: anuncioId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value };
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: payload } });
-            if (error || !data.success) mostrarNotificacion("Error", "error"); else { document.getElementById('prod-nombre').value = ''; document.getElementById('prod-precio').value = ''; document.getElementById('prod-desc').value = ''; cargarProductosMenu(anuncioId); }
-        }
-        async function eliminarProductoSeguro(prodId) { if(!confirm("¿Eliminar producto?")) return; const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: prodId } }); if(!error) cargarProductosMenu(document.getElementById('admin-negocio-id').value); }
-        async function toggleProductoSeguro(prodId, disponible) { await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'toggle_producto', producto_id: prodId, disponible: disponible } }); cargarProductosMenu(document.getElementById('admin-negocio-id').value); }
+        function cerrarAdminNegocio() { document.getElementById('seccion-admin-negocio').classList.add('hidden'); document.getElementById('seccion-lista-negocios').classList.remove('hidden'); }
 
-        // SERVICIOS (AGENDAS)
-        async function cargarServicios(anuncioId) {
-            const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id');
-            const lista = document.getElementById('lista-servicios');
-            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin servicios.</p>`;
-            lista.innerHTML = data.map(p => `<div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between"><div><p class="text-sm font-bold text-tm-azul-oscuro">${p.nombre}</p><p class="text-xs text-gray-500">${p.duracion_minutos} min - $${p.precio}</p></div></div>`).join('');
+        // --- FUNCIONES GLOBALES / AUTH (Reducidas) ---
+        function mostrarNotificacion(m, t = 'exito') {
+            const c = document.getElementById('toast-container'); const el = document.createElement('div');
+            el.className = `${t === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
+            el.innerText = m; c.appendChild(el); setTimeout(() => el.remove(), 3000);
         }
-        async function agregarServicioSeguro() {
-            const anuncioId = document.getElementById('admin-negocio-id').value; if(!anuncioId) return mostrarNotificacion("Guarda los datos básicos primero", "error");
-            const payload = { anuncio_id: anuncioId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value };
-            const { error } = await clienteSupabase.from('servicios').insert([payload]); 
-            if (!error) { mostrarNotificacion("Servicio guardado"); cargarServicios(anuncioId); document.getElementById('serv-nombre').value=''; } else { mostrarNotificacion("Error al guardar", "error"); }
-        }
-        
-        async function cargarAgendaNegocio(anuncioId) {
-            const { data } = await clienteSupabase
-                .from('citas')
-                .select('*, perfiles(nombre_completo, telefono), servicios(nombre, id)')
-                .eq('anuncio_id', anuncioId)
-                .neq('estado', 'cancelada')
-                .order('fecha_cita', { ascending: true });
+        function renderizarUIHorarios() { document.getElementById('contenedor-horarios').innerHTML = Object.keys(DIAS).map(d => `<div class="flex items-center justify-between gap-2 p-1.5"><label class="flex items-center gap-2 w-24 cursor-pointer"><input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" onchange="toggleInputsHorario(this)"><span class="text-sm font-bold text-gray-700">${DIAS[d]}</span></label><div class="flex items-center gap-1 flex-grow"><input type="time" class="hora-abre p-1.5 border border-gray-300 rounded text-xs w-full"><span class="text-gray-400 text-xs">a</span><input type="time" class="hora-cierra p-1.5 border border-gray-300 rounded text-xs w-full"></div></div>`).join(''); }
+        function toggleInputsHorario(cb) { const r = cb.closest('div'); const i = r.querySelectorAll('input[type="time"]'); i.forEach(inp => { inp.disabled = !cb.checked; inp.classList.toggle('opacity-50', !cb.checked); }); }
+        function obtenerHorariosDeUI() { let h = {}; [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; h[d] = { abierto: r.querySelector('.dia-abierto').checked, abre: r.querySelector('.hora-abre').value, cierra: r.querySelector('.hora-cierra').value }; }); return h; }
+        function setearHorariosUI(hJSON) { [1, 2, 3, 4, 5, 6, 0].forEach(d => { const r = document.querySelectorAll('#contenedor-horarios > div')[d===0?6:d-1]; const cb = r.querySelector('.dia-abierto'); if (hJSON && hJSON[d]) { cb.checked = hJSON[d].abierto; r.querySelector('.hora-abre').value = hJSON[d].abre || '09:00'; r.querySelector('.hora-cierra').value = hJSON[d].cierra || '18:00'; } else { cb.checked = (d !== 0); r.querySelector('.hora-abre').value = '09:00'; r.querySelector('.hora-cierra').value = '18:00'; } toggleInputsHorario(cb); }); }
 
+        document.addEventListener("DOMContentLoaded", () => { renderizarUIHorarios(); const v = new URLSearchParams(window.location.search).get('view'); if (v === 'negocio') { document.getElementById('seccion-perfil').classList.add('hidden'); document.getElementById('seccion-lista-negocios').classList.remove('hidden'); } else { document.getElementById('seccion-perfil').classList.remove('hidden'); document.getElementById('seccion-lista-negocios').classList.add('hidden'); } });
+        clienteSupabase.auth.onAuthStateChange((e, s) => { usuarioActual = s ? s.user : null; if(usuarioActual) { document.getElementById('no-auth').classList.add('hidden'); document.getElementById('si-auth').classList.remove('hidden'); cargarMisNegocios(); cargarPerfil(); } else { document.getElementById('no-auth').classList.remove('hidden'); document.getElementById('si-auth').classList.add('hidden'); } });
+
+        async function cargarPerfil() { const { data } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).single(); if (data) { document.getElementById('perfil-nombre').value = data.nombre_completo || ''; document.getElementById('perfil-telefono').value = data.telefono || ''; } }
+        async function cargarMisNegocios() { const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false }); const c = document.getElementById('contenedor-mis-negocios'); if (!data || data.length === 0) return c.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-dashed text-center text-gray-500 col-span-2">Aún no tienes espacios.</div>`; c.innerHTML = data.map(n => `<div class="bg-white p-5 rounded-2xl border shadow-sm flex justify-between items-center"><h3 class="font-bold text-lg text-tm-azul-oscuro">${n.nombre_negocio}</h3><button onclick='abrirAdminEdit(${JSON.stringify(n).replace(/'/g, "&apos;")})' class="bg-tm-azul text-white px-5 py-2 rounded-lg text-sm font-bold shadow">Gestionar</button></div>`).join(''); }
+        async function guardarNegocioSeguro() { const btn = document.getElementById('btn-guardar-admin'); btn.disabled = true; const id = document.getElementById('admin-negocio-id').value; const nivelIntencion = parseInt(document.getElementById('admin-nivel-intencion').value); const payload = { nombre_negocio: document.getElementById('admin-nombre').value, descripcion: document.getElementById('admin-desc').value, enlace_whatsapp: document.getElementById('admin-wa').value, categoria: document.getElementById('admin-cat').value, imagen_url: document.getElementById('admin-imagen-url').value, horarios: obtenerHorariosDeUI(), esta_abierto: document.getElementById('admin-estado-apertura').checked }; if(!payload.nombre_negocio || !payload.enlace_whatsapp) { mostrarNotificacion("Nombre y WhatsApp requeridos", "error"); btn.disabled = false; return; } const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_negocio', id_negocio: id, payload: payload } }); if (error || !data.success) { mostrarNotificacion("Error al guardar", "error"); btn.disabled = false; return; } document.getElementById('admin-negocio-id').value = data.id_negocio; if (nivelIntencion > 0 && !id) { await iniciarFlujoStripeInterno(nivelIntencion, nivelIntencion===1?'price_1TItPTGtW4zuRQv9RMSEOnnn':'price_1TItQaGtW4zuRQv9gyQOTaC5', data.id_negocio); } else { mostrarNotificacion("Guardado"); btn.disabled = false; } }
+
+        // --- TIENDA: PRODUCTOS ---
+        async function cargarProductosMenu(anuncioId) { const { data } = await clienteSupabase.from('productos').select('*').eq('anuncio_id', anuncioId).order('id'); const l = document.getElementById('lista-productos'); if (!data || data.length===0) return l.innerHTML=`<p class="text-xs text-gray-400">Sin productos.</p>`; l.innerHTML = data.map(p => `<div class="flex justify-between bg-gray-50 p-3 rounded-lg border"><div><p class="text-sm font-bold">${p.nombre}</p><p class="text-xs font-black text-tm-dorado">$${p.precio}</p></div><button onclick="eliminarProductoSeguro('${p.id}')" class="text-red-500 font-bold text-xs">Borrar</button></div>`).join(''); }
+        async function agregarProductoSeguro() { const aId = document.getElementById('admin-negocio-id').value; const p = { anuncio_id: aId, nombre: document.getElementById('prod-nombre').value, precio: document.getElementById('prod-precio').value, descripcion: document.getElementById('prod-desc').value }; const { error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'agregar_producto', payload: p } }); if (!error) { document.getElementById('prod-nombre').value=''; cargarProductosMenu(aId); } }
+        async function eliminarProductoSeguro(id) { if(confirm("¿Borrar?")) { await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'eliminar_producto', producto_id: id } }); cargarProductosMenu(document.getElementById('admin-negocio-id').value); } }
+
+        // --- CONSULTORIO: SERVICIOS Y AGENDA ---
+        async function cargarServicios(anuncioId) { const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', anuncioId).order('id'); const l = document.getElementById('lista-servicios'); if (!data || data.length===0) return l.innerHTML=`<p class="text-xs text-gray-400">Sin servicios.</p>`; l.innerHTML = data.map(p => `<div class="bg-gray-50 p-3 rounded-lg border text-sm font-bold">${p.nombre} <span class="text-gray-500 font-normal">(${p.duracion_minutos}m)</span></div>`).join(''); }
+        async function agregarServicioSeguro() { const aId = document.getElementById('admin-negocio-id').value; const p = { anuncio_id: aId, nombre: document.getElementById('serv-nombre').value, precio: document.getElementById('serv-precio').value, duracion_minutos: document.getElementById('serv-duracion').value, descripcion: document.getElementById('serv-desc').value }; const { error } = await clienteSupabase.from('servicios').insert([p]); if (!error) { document.getElementById('serv-nombre').value=''; cargarServicios(aId); } }
+
+        async function cargarAgendaYCalendario(anuncioId) {
+            const { data } = await clienteSupabase.from('citas').select('*, perfiles(nombre_completo, telefono), servicios(nombre)').eq('anuncio_id', anuncioId).neq('estado', 'cancelada').order('fecha_cita');
+            
             const lista = document.getElementById('lista-citas-negocio');
-            if (!data || data.length === 0) return lista.innerHTML = `<p class="text-xs text-gray-400">Sin citas próximas.</p>`;
-
-            lista.innerHTML = data.map(c => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-tm-azul flex flex-col sm:flex-row justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)} a ${c.hora_fin.substring(0,5)}</p>
-                        <p class="font-black text-tm-azul-oscuro text-lg">${c.perfiles?.nombre_completo || 'Paciente'}</p>
-                        <p class="text-sm text-gray-600">${c.servicios?.nombre}</p>
-                        <p class="text-xs text-tm-azul font-bold mt-1">Tel: ${c.perfiles?.telefono || 'N/A'}</p>
-                    </div>
-                    <div class="flex sm:flex-col gap-2 justify-center shrink-0">
-                        <button onclick='prepararReagendar(${JSON.stringify(c).replace(/'/g, "&apos;")})' class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition">Reagendar</button>
-                        <button onclick="cancelarCitaOwner('${c.id}')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancelar</button>
-                    </div>
+            const citasReales = (data || []).filter(c => c.estado !== 'bloqueado');
+            lista.innerHTML = citasReales.length === 0 ? `<p class="text-xs text-gray-400">Sin citas.</p>` : citasReales.map(c => `
+                <div class="bg-white p-2 rounded-lg border text-sm flex justify-between items-center">
+                    <div><b>${c.perfiles?.nombre_completo||'Paciente'}</b><br><span class="text-[10px] text-gray-500">${c.fecha_cita} | ${c.hora_inicio.substring(0,5)}</span></div>
+                    <div class="flex flex-col gap-1"><button onclick='prepararReagendar(${JSON.stringify(c).replace(/'/g, "&apos;")})' class="text-[10px] bg-blue-50 text-blue-600 px-2 rounded">Edit</button><button onclick="cancelarCitaOwner('${c.id}')" class="text-[10px] bg-red-50 text-red-600 px-2 rounded">Canc</button></div>
                 </div>
             `).join('');
+
+            const calendarEl = document.getElementById('calendar');
+            if(calendar) calendar.destroy();
+            const eventos = (data || []).map(c => { const b = c.estado === 'bloqueado'; return { id: c.id, title: b ? `🛑 ${c.notas}` : `✅ ${c.perfiles?.nombre_completo||'Cita'}`, start: `${c.fecha_cita}T${c.hora_inicio}`, end: `${c.fecha_cita}T${c.hora_fin}`, backgroundColor: b ? '#ef4444' : '#22527b', borderColor: b ? '#b91c1c' : '#143653', extendedProps: { esBloqueo: b } }; });
+
+            calendar = new FullCalendar.Calendar(calendarEl, { locale: 'es', initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek', headerToolbar: { left: 'prev,next', center: 'title', right: 'timeGridWeek,timeGridDay,listWeek' }, slotMinTime: "07:00:00", slotMaxTime: "22:00:00", allDaySlot: false, events: eventos, eventClick: function(info) { if(info.event.extendedProps.esBloqueo) { if(confirm("¿Eliminar bloqueo?")) cancelarCitaOwner(info.event.id); } } });
+            if(!document.getElementById('vista-calendario-profesional').classList.contains('hidden')) calendar.render();
         }
 
-        // ================= GESTIÓN DE CITAS (DUEÑO) =================
-        function cerrarModalAgendar() {
-            document.getElementById('modal-agendar').classList.add('hidden');
-            citaIdEditando = null; // Limpiamos la variable al cerrar
-        }
+        function abrirModalBloqueo() { const h = new Date().toISOString().split('T')[0]; document.getElementById('bloqueo-fecha').min = h; document.getElementById('modal-bloqueo').classList.remove('hidden'); }
+        async function guardarBloqueo() { const p = { anuncio_id: document.getElementById('admin-negocio-id').value, fecha: document.getElementById('bloqueo-fecha').value, hora_inicio: document.getElementById('bloqueo-inicio').value, hora_fin: document.getElementById('bloqueo-fin').value, titulo: document.getElementById('bloqueo-titulo').value }; if(!p.titulo||!p.fecha||!p.hora_inicio) return mostrarNotificacion("Llenar datos", "error"); const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'bloquear_espacio', payload: p } }); if (!error) { document.getElementById('modal-bloqueo').classList.add('hidden'); cargarAgendaYCalendario(p.anuncio_id); } }
 
-        async function abrirAgendaPreview() {
-            const idNegocio = document.getElementById('admin-negocio-id').value;
-            citaIdEditando = null; // Aseguramos que estamos en modo "Nueva Cita/Bloqueo"
-            
-            if (!idNegocio) {
-                mostrarNotificacion("Primero guarda tu negocio para poder probar la agenda.", "error"); return;
-            }
-
-            document.getElementById('modal-agendar').classList.remove('hidden');
-            document.getElementById('titulo-modal-agendar').innerText = "Bloquear Espacio / Agendar 📅";
-            document.getElementById('modal-agendar-negocio').innerText = document.getElementById('admin-nombre').value;
-            document.getElementById('reserva-negocio-id').value = idNegocio;
-            
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('reserva-fecha').min = hoy;
-            document.getElementById('reserva-fecha').value = '';
-            document.getElementById('contenedor-horarios-libres').innerHTML = '<p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>';
-
-            await cargarServiciosSelect(idNegocio, null);
-        }
-
-        function prepararReagendar(cita) {
-            citaIdEditando = cita.id; // Activamos el modo "Edición"
-            
-            document.getElementById('modal-agendar').classList.remove('hidden');
-            document.getElementById('titulo-modal-agendar').innerText = "Reagendar Cita 📅";
-            document.getElementById('modal-agendar-negocio').innerText = "Paciente: " + (cita.perfiles?.nombre_completo || 'Desconocido');
-            document.getElementById('reserva-negocio-id').value = cita.anuncio_id;
-            
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('reserva-fecha').min = hoy;
-            document.getElementById('reserva-fecha').value = cita.fecha_cita;
-            
-            // Cargar servicios y autoseleccionar el actual, luego buscar horarios
-            cargarServiciosSelect(cita.anuncio_id, cita.servicios?.id).then(() => {
-                buscarHorarios();
-            });
-        }
-
-        async function cargarServiciosSelect(idNegocio, servicioIdActivo) {
-            const selectServicio = document.getElementById('reserva-servicio');
-            selectServicio.innerHTML = '<option value="">Cargando servicios...</option>';
-            const { data, error } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idNegocio).order('id');
-            
-            if (error || !data || data.length === 0) {
-                selectServicio.innerHTML = '<option value="">Aún no has agregado servicios.</option>';
-            } else {
-                selectServicio.innerHTML = '<option value="">Selecciona un servicio...</option>' + 
-                    data.map(s => `<option value="${s.id}" ${s.id === servicioIdActivo ? 'selected' : ''}>${s.nombre} (${s.duracion_minutos} min) - $${s.precio}</option>`).join('');
-            }
-        }
-
-        async function buscarHorarios() {
-            const p = { 
-                anuncio_id: document.getElementById('reserva-negocio-id').value, 
-                servicio_id: document.getElementById('reserva-servicio').value, 
-                fecha: document.getElementById('reserva-fecha').value,
-                cita_id_excluir: citaIdEditando // Mandamos el ID para ignorar la cita actual al reagendar
-            };
-            
-            if(!p.servicio_id || !p.fecha) return;
-            
-            const cont = document.getElementById('contenedor-horarios-libres'); 
-            cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando horarios...</p>';
-            
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } });
-            
-            if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3 text-center">Error al consultar horarios.</p>';
-            if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Sin horarios libres para este día ❌</p>';
-            
-            cont.innerHTML = data.disponibles.map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white transition shadow-sm">${h}</button>`).join('');
-        }
-
-        async function confirmarCita(hora) {
-            const anuncioId = document.getElementById('reserva-negocio-id').value;
-            const fecha = document.getElementById('reserva-fecha').value;
-            const servicioId = document.getElementById('reserva-servicio').value;
-
-            const payload = { 
-                anuncio_id: anuncioId, 
-                cliente_id: usuarioActual.id, 
-                servicio_id: servicioId, 
-                fecha: fecha, 
-                hora_inicio: hora,
-                cita_id: citaIdEditando 
-            };
-            
-            const accion = citaIdEditando ? 'editar_cita' : 'crear_cita';
-            const msgConfirm = citaIdEditando ? `¿Reagendar para el ${fecha} a las ${hora}?` : `¿Bloquear espacio el ${fecha} a las ${hora}?`;
-            
-            if(!confirm(msgConfirm)) return;
-            
-            const cont = document.getElementById('contenedor-horarios-libres');
-            cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Procesando...</p>';
-
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: accion, payload: payload } });
-            
-            if (error || !data?.success) { 
-                mostrarNotificacion("Error en la operación, es posible que el horario se haya ocupado", "error"); 
-                buscarHorarios(); 
-            } else { 
-                mostrarNotificacion(citaIdEditando ? "Cita reagendada con éxito" : "Espacio bloqueado con éxito"); 
-                cerrarModalAgendar();
-                cargarAgendaNegocio(anuncioId); // Refrescar la lista de citas
-            }
-        }
-
-        async function cancelarCitaOwner(id) {
-            if(!confirm("¿Estás seguro de cancelar esta cita? El paciente perderá su lugar y el horario quedará libre.")) return;
-            
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
-                body: { accion: 'cancelar_cita', payload: { cita_id: id } }
-            });
-
-            if (error) {
-                mostrarNotificacion("Error al cancelar la cita", "error");
-            } else {
-                mostrarNotificacion("Cita cancelada correctamente");
-                cargarAgendaNegocio(document.getElementById('admin-negocio-id').value);
-            }
-        }
-
-        // ================= UTILIDADES =================
-        function inicializarMapa(lat, lng) {
-            document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
-            setTimeout(() => {
-                if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    marker.on('dragend', function () { document.getElementById('perfil-lat').value = marker.getLatLng().lat; document.getElementById('perfil-lng').value = marker.getLatLng().lng; });
-                    map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng; });
-                } else { map.setView([lat, lng], 13); marker.setLatLng([lat, lng]); map.invalidateSize(); }
-            }, 300);
-        }
-        function configurarPestanaVerificacion(estado) {
-            document.getElementById('estado-verif-pendiente').classList.add('hidden'); document.getElementById('estado-verif-aprobado').classList.add('hidden'); document.getElementById('form-verif').classList.add('hidden');
-            if (estado === 'aprobado') { document.getElementById('estado-verif-aprobado').classList.remove('hidden'); } else if (estado === 'pendiente') { document.getElementById('estado-verif-pendiente').classList.remove('hidden'); } else { document.getElementById('form-verif').classList.remove('hidden'); }
-        }
-        async function procesarSubidaImagen(event, bucketName, inputId, labelId, actualizaPreview) {
-            const file = event.target.files[0]; if(!file) return; if(file.size > 2 * 1024 * 1024) return mostrarNotificacion("Máximo 2MB", "error");
-            document.getElementById(labelId).innerText = "Subiendo... ⏳"; const fileExt = file.name.split('.').pop(); const fileName = `${usuarioActual.id}_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-            try {
-                const { error } = await clienteSupabase.storage.from(bucketName).upload(fileName, file); if (error) throw error;
-                let ruta = bucketName === 'verificaciones' ? fileName : clienteSupabase.storage.from(bucketName).getPublicUrl(fileName).data.publicUrl;
-                document.getElementById(inputId).value = ruta; document.getElementById(labelId).innerText = "¡Guardada! ✅"; if(actualizaPreview) actualizarPreview();
-            } catch (error) { document.getElementById(labelId).innerText = "Error"; mostrarNotificacion("Error al subir", "error"); }
-        }
-        async function solicitarVerificacion() {
-            const idNegocio = document.getElementById('admin-negocio-id').value; if(!idNegocio) return mostrarNotificacion("Guarda los datos básicos", "error");
-            const btn = document.getElementById('btn-enviar-verif'); btn.disabled = true; btn.innerText = "Enviando...";
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'solicitar_verificacion', id_negocio: idNegocio, responsable_nombre: document.getElementById('verif-nombre').value, ine_frente_url: document.getElementById('url-ine-frente').value, ine_reverso_url: document.getElementById('url-ine-reverso').value } });
-            if (error || !data.success) { mostrarNotificacion("Error", "error"); btn.disabled = false; btn.innerText = "Enviar Documentos"; } else { mostrarNotificacion("¡Solicitud enviada!"); cerrarAdminNegocio(); }
-        }
-        async function iniciarFlujoStripeInterno(nivel, priceId, anuncioId) {
-            try { const response = await fetch(URL_EDGE_FUNCTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ anuncioId, nivel, priceId, userId: usuarioActual.id, userEmail: usuarioActual.email, returnUrl: window.location.href.split('?')[0] }) }); const session = await response.json(); if (session.url) window.location.href = session.url; } catch (error) { mostrarNotificacion("Error con Stripe", "error"); }
-        }
+        function prepararReagendar(cita) { citaIdEditando = cita.id; document.getElementById('modal-agendar').classList.remove('hidden'); document.getElementById('reserva-negocio-id').value = cita.anuncio_id; document.getElementById('reserva-fecha').value = cita.fecha_cita; cargarServiciosSelect(cita.anuncio_id, cita.servicios?.id).then(() => buscarHorarios()); }
+        async function cargarServiciosSelect(idN, idS) { const { data } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN); document.getElementById('reserva-servicio').innerHTML = '<option value="">Seleccione...</option>' + (data||[]).map(s => `<option value="${s.id}" ${s.id===idS?'selected':''}>${s.nombre}</option>`).join(''); }
+        async function buscarHorarios() { const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, cita_id_excluir: citaIdEditando }; if(!p.servicio_id || !p.fecha) return; const { data } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: p } }); document.getElementById('contenedor-horarios-libres').innerHTML = (data?.disponibles||[]).map(h => `<button onclick="confirmarCita('${h}')" class="bg-blue-50 text-blue-600 p-2 rounded text-sm">${h}</button>`).join(''); }
+        async function confirmarCita(h) { const p = { anuncio_id: document.getElementById('reserva-negocio-id').value, servicio_id: document.getElementById('reserva-servicio').value, fecha: document.getElementById('reserva-fecha').value, hora_inicio: h, cita_id: citaIdEditando }; const { error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'editar_cita', payload: p } }); if (!error) { document.getElementById('modal-agendar').classList.add('hidden'); cargarAgendaYCalendario(p.anuncio_id); citaIdEditando=null; } }
+        async function cancelarCitaOwner(id) { if(confirm("¿Eliminar registro?")) { await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'cancelar_cita', payload: { cita_id: id } } }); cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value); } }
     </script>
 </body>
 </html>
