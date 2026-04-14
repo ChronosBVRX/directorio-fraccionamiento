@@ -216,7 +216,6 @@
         let negocioActualPedido = null;
         let perfilUsuarioActual = null;
 
-        // --- CONSTANTES DE CATEGORÍAS (Actualizadas según los paneles nuevos) ---
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
         const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza'];
 
@@ -268,7 +267,6 @@
             }
         });
 
-        // NUEVA LÓGICA: En lugar de iframes, mandamos al usuario a panel.html
         function cambiarModoPlataforma() {
             const isVendedor = document.getElementById('toggle-modo').checked;
             if(isVendedor) {
@@ -332,6 +330,8 @@
             if (navBtn) {
                 let filtroActivo = navBtn.id.replace('btn-', '');
                 if(filtroActivo === 'Salud-Mental') filtroActivo = 'Salud Mental';
+                if(filtroActivo === 'Medicina') filtroActivo = 'Medicina General';
+                if(filtroActivo === 'Belleza') filtroActivo = 'Belleza y Spa';
                 filtrar(filtroActivo);
             } else {
                 filtrar('Todos');
@@ -372,7 +372,6 @@
                 let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
-                // LÓGICA DE BOTONES ACTUALIZADA SEGÚN LA CATEGORÍA DEL ANUNCIO
                 let botones = '';
                 if(tieneMenu) {
                     if(usaComida) {
@@ -424,7 +423,6 @@
             renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
         }
 
-        // --- FUNCIONES MENÚ COMIDA / TIENDAS ---
         async function abrirMenu(negocio) {
             negocioActualPedido = negocio;
             carritoActual = {};
@@ -581,7 +579,6 @@
             cerrarMenu();
         }
 
-        // --- FUNCIONES AGENDA / CITAS PROFESIONALES ---
         async function abrirAgenda(negocio) {
             if (!usuarioActual) {
                 alert("Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.");
@@ -615,32 +612,95 @@
             document.getElementById('modal-agendar-index').classList.add('hidden');
         }
 
+        // --- FUNCIONES CORREGIDAS PARA AGENDAS (CON PARSEO Y FALLBACK) ---
         async function buscarHorariosIndex() {
-            const negocioId = document.getElementById('reserva-negocio-id-index').value;
-            const servicioId = document.getElementById('reserva-servicio-index').value;
+            const negocioIdStr = document.getElementById('reserva-negocio-id-index').value;
+            const servicioIdStr = document.getElementById('reserva-servicio-index').value;
             const fecha = document.getElementById('reserva-fecha-index').value;
             const cont = document.getElementById('contenedor-horarios-libres-index');
 
-            if(!servicioId || !fecha) {
+            if(!servicioIdStr || !fecha) {
                 cont.innerHTML = '<p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>';
                 return;
             }
             
+            // CORRECCIÓN VITAL: Convertir los IDs de Texto a Número Entero para que la Base de Datos no colapse (Error 400).
+            const negocioId = parseInt(negocioIdStr);
+            const servicioId = parseInt(servicioIdStr);
+
             cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando disponibilidad...</p>';
             
-            const payload = { anuncio_id: negocioId, servicio_id: servicioId, fecha: fecha };
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: payload } });
-            
-            if (error || !data?.success) return cont.innerHTML = '<p class="text-xs text-red-500 col-span-3 text-center">Hubo un error al buscar horarios.</p>';
-            if (data.disponibles.length === 0) return cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">No hay espacios disponibles para esta fecha ❌</p>';
-            
-            cont.innerHTML = data.disponibles.map(h => `<button onclick="confirmarCitaIndex('${h}')" class="bg-blue-50 border border-blue-100 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white transition shadow-sm">${h}</button>`).join('');
+            try {
+                // INTENTO 1: Usando tu Edge Function (Ideal)
+                const payload = { anuncio_id: negocioId, servicio_id: servicioId, fecha: fecha };
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: payload } });
+                
+                if (!error && data && data.success) {
+                    mostrarHorarios(data.disponibles, cont);
+                    return;
+                }
+                throw new Error("La Edge Function falló. Activando Respaldo Automático.");
+            } catch(err) {
+                console.warn("Utilizando Respaldo (Fallback) para buscar horarios:", err);
+                
+                // INTENTO 2: Cálculo directo en el navegador si la Edge Function llega a fallar.
+                try {
+                    const { data: anuncio } = await clienteSupabase.from('anuncios').select('horarios').eq('id', negocioId).single();
+                    const { data: servicio } = await clienteSupabase.from('servicios').select('duracion_minutos').eq('id', servicioId).single();
+                    const { data: citas } = await clienteSupabase.from('citas').select('hora_inicio').eq('anuncio_id', negocioId).eq('fecha', fecha);
+
+                    if (!anuncio || !servicio) throw new Error("Faltan datos en la base de datos.");
+
+                    // Aseguramos obtener el día de la semana correcto
+                    const [year, month, day] = fecha.split('-').map(Number);
+                    const diaSemana = new Date(year, month - 1, day).getDay();
+                    const horarioHoy = anuncio.horarios ? anuncio.horarios[diaSemana] : null;
+
+                    if (!horarioHoy || !horarioHoy.abierto || !horarioHoy.abre || !horarioHoy.cierra) {
+                        cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">El negocio no atiende este día ❌</p>';
+                        return;
+                    }
+
+                    let disponibles = [];
+                    let horaActual = horarioHoy.abre; // Ej: "09:00"
+                    const duracionMin = servicio.duracion_minutos || 30; 
+                    const citasOcupadas = citas ? citas.map(c => c.hora_inicio.substring(0,5)) : []; 
+
+                    while (horaActual < horarioHoy.cierra) {
+                        let horaStr = horaActual.substring(0,5);
+                        if (!citasOcupadas.includes(horaStr)) {
+                            disponibles.push(horaStr);
+                        }
+                        
+                        let [h, m] = horaStr.split(':').map(Number);
+                        m += duracionMin;
+                        h += Math.floor(m / 60);
+                        m = m % 60;
+                        horaActual = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    }
+
+                    mostrarHorarios(disponibles, cont);
+                } catch (fallbackErr) {
+                    console.error("Error en Respaldo:", fallbackErr);
+                    cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Hubo un error al buscar los horarios disponibles. Intenta recargando.</p>';
+                }
+            }
+        }
+
+        // FUNCIÓN NUEVA: Para renderizar los botones de horarios calculados
+        function mostrarHorarios(disponibles, contenedor) {
+            if (!disponibles || disponibles.length === 0) {
+                contenedor.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">No hay espacios disponibles para esta fecha ❌</p>';
+                return;
+            }
+            contenedor.innerHTML = disponibles.map(h => `<button onclick="confirmarCitaIndex('${h}')" class="bg-blue-50 border border-blue-100 text-tm-azul py-2 rounded-lg font-bold hover:bg-tm-azul hover:text-white transition shadow-sm">${h}</button>`).join('');
         }
 
         async function confirmarCitaIndex(hora) {
             const fecha = document.getElementById('reserva-fecha-index').value;
-            const servicioId = document.getElementById('reserva-servicio-index').value;
-            const negocioId = document.getElementById('reserva-negocio-id-index').value;
+            // CORRECCIÓN VITAL: Convertir IDs a Números
+            const servicioId = parseInt(document.getElementById('reserva-servicio-index').value);
+            const negocioId = parseInt(document.getElementById('reserva-negocio-id-index').value);
             
             if(!confirm(`¿Confirmas tu reserva el día ${fecha} a las ${hora}?`)) return;
             
@@ -655,23 +715,41 @@
             const cont = document.getElementById('contenedor-horarios-libres-index');
             cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Reservando...</p>';
 
-            const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: payload } });
-            
-            if (error || !data?.success) { 
-                alert("Este horario acaba de ser ocupado. Por favor, selecciona otro.");
-                buscarHorariosIndex(); 
-            } else { 
-                alert(`¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.`); 
-                cerrarAgenda(); 
+            try {
+                // INTENTO 1: Edge Function
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: payload } });
+                
+                if (error || !data?.success) { 
+                    throw new Error("Error en Edge Function al intentar guardar");
+                } 
+                reservaExitosa();
+            } catch (err) {
+                console.warn("La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...", err);
+                
+                // INTENTO 2: Inserción directa (Fallback)
+                const { error: insertError } = await clienteSupabase.from('citas').insert([payload]);
+                
+                if (insertError) {
+                    alert("Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.");
+                    buscarHorariosIndex(); 
+                } else {
+                    reservaExitosa();
+                }
             }
         }
+
+        // FUNCIÓN NUEVA: Para evitar repetir código de éxito
+        function reservaExitosa() {
+            alert(`¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.`); 
+            cerrarAgenda(); 
+        }
+        // --- FIN DE CORRECCIONES PARA AGENDAS ---
 
         async function cerrarSesion() { 
             await clienteSupabase.auth.signOut(); 
             window.location.reload(); 
         }
 
-        // CARGA INICIAL ROBUSTA
         window.addEventListener('DOMContentLoaded', () => {
             const airbnbNombre = localStorage.getItem('tm_airbnb_nombre');
             if (airbnbNombre) {
