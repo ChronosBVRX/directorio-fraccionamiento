@@ -143,8 +143,8 @@
         </main>
     </div>
 
-    <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden">
+    <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
             <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
                 <h2 id="menu-titulo" class="font-black text-lg sm:text-xl text-tm-azul truncate pr-4">Menú</h2>
                 <button onclick="cerrarMenu()" class="text-3xl leading-none text-gray-500 hover:text-black">&times;</button>
@@ -163,7 +163,7 @@
                     <textarea id="cliente-notas" placeholder="Notas (Ej. Sin cebolla, extra aderezo...)" class="w-full px-3 py-2 border border-yellow-300 bg-yellow-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-tm-dorado" rows="2"></textarea>
                 </div>
 
-                <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition">
+                <button id="btn-confirmar-pedido" onclick="procesarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base flex justify-center items-center gap-2 transition shadow-md">
                     Confirmar Pedido
                 </button>
             </div>
@@ -198,6 +198,16 @@
         </div>
     </div>
 
+    <div id="modal-notificacion" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-transform relative text-center">
+            <div id="noti-icono" class="text-5xl mb-3"></div>
+            <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
+            <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+            <div id="noti-botones" class="flex gap-3 justify-center">
+                </div>
+        </div>
+    </div>
+
     <a href="login-repartidor.html" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-tm-azul-oscuro text-white p-2.5 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 border-2 border-tm-dorado group cursor-pointer">
         <span class="text-xl sm:text-3xl drop-shadow-md">🛵</span>
         <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-[11px] sm:text-base tracking-wide">
@@ -218,6 +228,52 @@
 
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
         const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza'];
+
+        // --- SISTEMA DE NOTIFICACIONES ELEGANTES (Reemplazo de alert y confirm) ---
+        function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-notificacion');
+                const icono = document.getElementById('noti-icono');
+                const tituloEl = document.getElementById('noti-titulo');
+                const mensajeEl = document.getElementById('noti-mensaje');
+                const botonesCont = document.getElementById('noti-botones');
+
+                tituloEl.innerText = titulo;
+                mensajeEl.innerText = mensaje;
+
+                let iconEmoji = 'ℹ️';
+                if (tipo === 'success') iconEmoji = '✅';
+                if (tipo === 'error') iconEmoji = '❌';
+                if (tipo === 'warning') iconEmoji = '⚠️';
+                icono.innerText = iconEmoji;
+
+                botonesCont.innerHTML = '';
+
+                if (esConfirmacion) {
+                    const btnCancelar = document.createElement('button');
+                    btnCancelar.className = "flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200 transition border border-gray-200";
+                    btnCancelar.innerText = "Cancelar";
+                    btnCancelar.onclick = () => { modal.classList.add('hidden'); resolve(false); };
+
+                    const btnConfirmar = document.createElement('button');
+                    btnConfirmar.className = "flex-1 bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
+                    btnConfirmar.innerText = "Confirmar";
+                    btnConfirmar.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+
+                    botonesCont.appendChild(btnCancelar);
+                    botonesCont.appendChild(btnConfirmar);
+                } else {
+                    const btnEntendido = document.createElement('button');
+                    btnEntendido.className = "w-full bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
+                    btnEntendido.innerText = "Entendido";
+                    btnEntendido.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    botonesCont.appendChild(btnEntendido);
+                }
+
+                modal.classList.remove('hidden');
+            });
+        }
+        // ------------------------------------------------------------------------
 
         function toggleMenuPrincipal() {
             const menu = document.getElementById('dropdown-principal');
@@ -529,7 +585,10 @@
             const direccion = document.getElementById('cliente-direccion').value.trim();
             const notas = document.getElementById('cliente-notas').value.trim();
 
-            if (!nombre || !telefono || !direccion) return alert("Por favor, llena todos tus datos de envío.");
+            if (!nombre || !telefono || !direccion) {
+                await lanzarNotificacion("Faltan Datos", "Por favor, llena todos tus datos de envío.", "warning");
+                return;
+            }
 
             let total = 0;
             let detallesPedido = [];
@@ -547,7 +606,10 @@
                 }
             }
 
-            if(detallesPedido.length === 0) return alert("Por favor agrega productos a tu pedido.");
+            if(detallesPedido.length === 0) {
+                await lanzarNotificacion("Carrito Vacío", "Por favor agrega productos a tu pedido.", "warning");
+                return;
+            }
             if (notas) textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
 
             const btn = document.getElementById('btn-confirmar-pedido');
@@ -560,7 +622,10 @@
 
             btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-            if (error || !data.success) return alert("Hubo un error al generar tu pedido. Intenta nuevamente.");
+            if (error || !data.success) {
+                await lanzarNotificacion("Error", "Hubo un error al generar tu pedido. Intenta nuevamente.", "error");
+                return;
+            }
 
             const folioVenta = data.folio;
             textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n*Folio:* ${folioVenta}\n\n`;
@@ -572,16 +637,16 @@
             if(numeroVendedor) {
                 window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`, '_blank');
             } else {
-                alert("El negocio no tiene un número configurado. Guarda este Folio para aclaraciones: " + folioVenta);
+                await lanzarNotificacion("Atención", "El negocio no tiene un número configurado. Guarda este Folio para aclaraciones:\n\n" + folioVenta, "warning");
             }
 
-            alert(`¡Pedido generado!\nTu folio es: ${folioVenta}\n\nGuárdalo para rastrear a tu repartidor.`);
+            await lanzarNotificacion("¡Pedido Generado!", "Tu folio es: " + folioVenta + "\n\nGuárdalo para rastrear a tu repartidor.", "success");
             cerrarMenu();
         }
 
         async function abrirAgenda(negocio) {
             if (!usuarioActual) {
-                alert("Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.");
+                await lanzarNotificacion("Inicia Sesión", "Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.", "warning");
                 window.location.href = 'login.html';
                 return;
             }
@@ -612,7 +677,6 @@
             document.getElementById('modal-agendar-index').classList.add('hidden');
         }
 
-        // --- FUNCIONES CORREGIDAS PARA AGENDAS (CON PARSEO Y FALLBACK) ---
         async function buscarHorariosIndex() {
             const negocioIdStr = document.getElementById('reserva-negocio-id-index').value;
             const servicioIdStr = document.getElementById('reserva-servicio-index').value;
@@ -624,14 +688,12 @@
                 return;
             }
             
-            // CORRECCIÓN VITAL: Convertir los IDs de Texto a Número Entero para que la Base de Datos no colapse (Error 400).
             const negocioId = parseInt(negocioIdStr);
             const servicioId = parseInt(servicioIdStr);
 
             cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando disponibilidad...</p>';
             
             try {
-                // INTENTO 1: Usando tu Edge Function (Ideal)
                 const payload = { anuncio_id: negocioId, servicio_id: servicioId, fecha: fecha };
                 const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: payload } });
                 
@@ -643,7 +705,6 @@
             } catch(err) {
                 console.warn("Utilizando Respaldo (Fallback) para buscar horarios:", err);
                 
-                // INTENTO 2: Cálculo directo en el navegador si la Edge Function llega a fallar.
                 try {
                     const { data: anuncio } = await clienteSupabase.from('anuncios').select('horarios').eq('id', negocioId).single();
                     const { data: servicio } = await clienteSupabase.from('servicios').select('duracion_minutos').eq('id', servicioId).single();
@@ -651,7 +712,6 @@
 
                     if (!anuncio || !servicio) throw new Error("Faltan datos en la base de datos.");
 
-                    // Aseguramos obtener el día de la semana correcto
                     const [year, month, day] = fecha.split('-').map(Number);
                     const diaSemana = new Date(year, month - 1, day).getDay();
                     const horarioHoy = anuncio.horarios ? anuncio.horarios[diaSemana] : null;
@@ -662,7 +722,7 @@
                     }
 
                     let disponibles = [];
-                    let horaActual = horarioHoy.abre; // Ej: "09:00"
+                    let horaActual = horarioHoy.abre; 
                     const duracionMin = servicio.duracion_minutos || 30; 
                     const citasOcupadas = citas ? citas.map(c => c.hora_inicio.substring(0,5)) : []; 
 
@@ -687,7 +747,6 @@
             }
         }
 
-        // FUNCIÓN NUEVA: Para renderizar los botones de horarios calculados
         function mostrarHorarios(disponibles, contenedor) {
             if (!disponibles || disponibles.length === 0) {
                 contenedor.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">No hay espacios disponibles para esta fecha ❌</p>';
@@ -698,11 +757,12 @@
 
         async function confirmarCitaIndex(hora) {
             const fecha = document.getElementById('reserva-fecha-index').value;
-            // CORRECCIÓN VITAL: Convertir IDs a Números
             const servicioId = parseInt(document.getElementById('reserva-servicio-index').value);
             const negocioId = parseInt(document.getElementById('reserva-negocio-id-index').value);
             
-            if(!confirm(`¿Confirmas tu reserva el día ${fecha} a las ${hora}?`)) return;
+            // Reemplazo del confirm() nativo por nuestra Notificación Elegante (Promise)
+            const confirmado = await lanzarNotificacion("Confirmar Reserva", `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, "info", true);
+            if(!confirmado) return;
             
             const payload = { 
                 anuncio_id: negocioId, 
@@ -716,34 +776,30 @@
             cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Reservando...</p>';
 
             try {
-                // INTENTO 1: Edge Function
                 const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: payload } });
                 
                 if (error || !data?.success) { 
                     throw new Error("Error en Edge Function al intentar guardar");
                 } 
-                reservaExitosa();
+                await reservaExitosa();
             } catch (err) {
                 console.warn("La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...", err);
                 
-                // INTENTO 2: Inserción directa (Fallback)
                 const { error: insertError } = await clienteSupabase.from('citas').insert([payload]);
                 
                 if (insertError) {
-                    alert("Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.");
+                    await lanzarNotificacion("Horario Ocupado", "Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.", "error");
                     buscarHorariosIndex(); 
                 } else {
-                    reservaExitosa();
+                    await reservaExitosa();
                 }
             }
         }
 
-        // FUNCIÓN NUEVA: Para evitar repetir código de éxito
-        function reservaExitosa() {
-            alert(`¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.`); 
+        async function reservaExitosa() {
+            await lanzarNotificacion("¡Cita Agendada!", "¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.", "success");
             cerrarAgenda(); 
         }
-        // --- FIN DE CORRECCIONES PARA AGENDAS ---
 
         async function cerrarSesion() { 
             await clienteSupabase.auth.signOut(); 
