@@ -86,8 +86,6 @@
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8">
 
-    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
-
     <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
         <div>
             <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
@@ -156,7 +154,14 @@
                             <h4 class="font-bold text-sm text-tm-azul-oscuro mb-2">Imagen Principal</h4>
                             <p class="text-xs text-gray-500 mb-4">Sube una foto de tu consultorio o un logotipo profesional para generar más confianza.</p>
                             
-                            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
+                            <div id="contenedor-preview" class="hidden mb-6 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative h-48 sm:h-64 bg-gray-100 group">
+                                <img id="preview-imagen" src="" alt="Vista previa" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                                    <span class="text-white font-black text-sm drop-shadow-md">Vista Previa de tu Anuncio</span>
+                                </div>
+                            </div>
+
+                            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition relative">
                                 <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaImagen(event, 'negocios', 'admin-imagen-url', 'estado-subida', false)">
                                 <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold block w-max mx-auto transition shadow hover:bg-tm-azul-oscuro">Seleccionar Imagen</label>
                                 <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold"></p>
@@ -238,7 +243,7 @@
         </div>
     </div>
 
-    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+    <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[90] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white rounded-[2.5rem] p-6 md:p-8 w-full max-w-2xl shadow-2xl max-h-[92vh] overflow-y-auto">
             <input type="hidden" id="modal-modo" value="manual">
 
@@ -337,6 +342,16 @@
         </div>
     </div>
 
+    <div id="modal-notificacion" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-transform relative text-center">
+            <div id="noti-icono" class="text-5xl mb-3"></div>
+            <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
+            <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
+            <div id="noti-botones" class="flex gap-3 justify-center">
+                </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
@@ -357,16 +372,62 @@
             6: 'Sábado'
         };
 
+        // --- SISTEMA DE NOTIFICACIONES ELEGANTES ---
+        function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-notificacion');
+                const icono = document.getElementById('noti-icono');
+                const tituloEl = document.getElementById('noti-titulo');
+                const mensajeEl = document.getElementById('noti-mensaje');
+                const botonesCont = document.getElementById('noti-botones');
+
+                tituloEl.innerText = titulo;
+                mensajeEl.innerText = mensaje;
+
+                let iconEmoji = 'ℹ️';
+                if (tipo === 'success') iconEmoji = '✅';
+                if (tipo === 'error') iconEmoji = '❌';
+                if (tipo === 'warning') iconEmoji = '⚠️';
+                icono.innerText = iconEmoji;
+
+                botonesCont.innerHTML = '';
+
+                if (esConfirmacion) {
+                    const btnCancelar = document.createElement('button');
+                    btnCancelar.className = "flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200 transition border border-gray-200";
+                    btnCancelar.innerText = "Cancelar";
+                    btnCancelar.onclick = () => { modal.classList.add('hidden'); resolve(false); };
+
+                    const btnConfirmar = document.createElement('button');
+                    btnConfirmar.className = "flex-1 bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
+                    btnConfirmar.innerText = "Confirmar";
+                    btnConfirmar.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+
+                    botonesCont.appendChild(btnCancelar);
+                    botonesCont.appendChild(btnConfirmar);
+                } else {
+                    const btnEntendido = document.createElement('button');
+                    btnEntendido.className = "w-full bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
+                    btnEntendido.innerText = "Entendido";
+                    btnEntendido.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    botonesCont.appendChild(btnEntendido);
+                }
+
+                modal.classList.remove('hidden');
+            });
+        }
+        // ------------------------------------------
+
         document.addEventListener("DOMContentLoaded", () => {
             renderizarUIHorarios();
 
-            clienteSupabase.auth.onAuthStateChange((event, session) => {
+            clienteSupabase.auth.onAuthStateChange(async (event, session) => {
                 if (session) {
                     const idUrl = new URLSearchParams(window.location.search).get('id');
                     if (idUrl) {
                         cargarTodo(idUrl.replace('eq.', ''));
                     } else {
-                        notificar("No se recibió el ID del consultorio");
+                        await lanzarNotificacion("Atención", "No se recibió el ID del consultorio", "warning");
                     }
                 } else {
                     window.location.href = 'index.html';
@@ -469,8 +530,6 @@
 
         async function cargarTodo(id) {
             try {
-                console.log('Cargando anuncio con ID:', id);
-
                 const { data: n, error } = await clienteSupabase
                     .from('anuncios')
                     .select('*')
@@ -480,7 +539,7 @@
                 if (error) throw error;
 
                 if (!n) {
-                    notificar("No se encontró el consultorio o no tienes permiso para verlo");
+                    await lanzarNotificacion("Acceso Denegado", "No se encontró el consultorio o no tienes permiso para verlo", "error");
                     return;
                 }
 
@@ -489,12 +548,14 @@
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 
-                // Nuevos campos agregados
                 document.getElementById('admin-imagen-url').value = n.imagen_url || '';
                 document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false;
                 
+                // Cargar vista previa si existe imagen
                 if (n.imagen_url) {
                     document.getElementById('estado-subida').innerText = "✅ Imagen cargada previamente";
+                    document.getElementById('preview-imagen').src = n.imagen_url;
+                    document.getElementById('contenedor-preview').classList.remove('hidden');
                 }
 
                 if (n.horarios && typeof n.horarios === 'object') {
@@ -508,7 +569,7 @@
                 await cargarAgendaYCalendario(n.id, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar(err?.message || "Error al cargar el panel");
+                await lanzarNotificacion("Error", err?.message || "Error al cargar el panel", "error");
             }
         }
 
@@ -553,7 +614,7 @@
                 `;
             } catch (err) {
                 console.error(err);
-                notificar("Error al cargar servicios");
+                await lanzarNotificacion("Error", "Error al cargar servicios", "error");
             }
         }
 
@@ -564,9 +625,9 @@
                 const precio = parseFloat(document.getElementById('serv-precio').value) || 0;
                 const duracion = parseInt(document.getElementById('serv-duracion').value) || 60;
 
-                if (!idN) return notificar("No se detectó el negocio");
-                if (!nombre) return notificar("Escribe el nombre del servicio");
-                if (duracion <= 0) return notificar("La duración debe ser mayor a 0");
+                if (!idN) return await lanzarNotificacion("Atención", "No se detectó el negocio", "warning");
+                if (!nombre) return await lanzarNotificacion("Faltan datos", "Escribe el nombre del servicio", "warning");
+                if (duracion <= 0) return await lanzarNotificacion("Faltan datos", "La duración debe ser mayor a 0", "warning");
 
                 const payload = {
                     anuncio_id: idN,
@@ -582,17 +643,18 @@
                 document.getElementById('serv-precio').value = '';
                 document.getElementById('serv-duracion').value = '';
 
-                notificar("Servicio creado ✅");
+                await lanzarNotificacion("¡Éxito!", "Servicio creado correctamente", "success");
                 await cargarServicios(idN);
             } catch (err) {
                 console.error(err);
-                notificar("No se pudo crear el servicio");
+                await lanzarNotificacion("Error", "No se pudo crear el servicio", "error");
             }
         }
 
         async function eliminarServicio(idServicio) {
             try {
-                if (!confirm("¿Seguro que quieres borrar este servicio?")) return;
+                const confirmado = await lanzarNotificacion("Eliminar Servicio", "¿Seguro que quieres borrar este servicio?", "warning", true);
+                if (!confirmado) return;
 
                 const { error } = await clienteSupabase
                     .from('servicios')
@@ -602,11 +664,11 @@
                 if (error) throw error;
 
                 const idN = document.getElementById('admin-negocio-id').value;
-                notificar("Servicio eliminado");
+                await lanzarNotificacion("Eliminado", "Servicio eliminado correctamente", "success");
                 await cargarServicios(idN);
             } catch (err) {
                 console.error(err);
-                notificar("No se pudo eliminar el servicio");
+                await lanzarNotificacion("Error", "No se pudo eliminar el servicio", "error");
             }
         }
 
@@ -614,15 +676,12 @@
             if (c.estado === 'bloqueado') {
                 return c.notas || 'Bloqueo manual';
             }
-
             if (c.perfiles?.nombre_completo) {
                 return c.perfiles.nombre_completo;
             }
-
             if (c.notas) {
                 return c.notas.replace(/^Paciente manual:\s*/i, '').trim();
             }
-
             return 'Cita manual';
         }
 
@@ -771,9 +830,10 @@
                         });
                     },
 
-                    eventClick: (info) => {
+                    eventClick: async (info) => {
                         const tipo = info.event.extendedProps.estado === 'bloqueado' ? 'este bloqueo' : 'esta cita';
-                        if (confirm(`¿Deseas eliminar ${tipo}?`)) {
+                        const confirmado = await lanzarNotificacion("Eliminar Registro", `¿Deseas eliminar ${tipo}?`, "warning", true);
+                        if (confirmado) {
                             cancelarCitaOwner(info.event.id);
                         }
                     },
@@ -787,7 +847,7 @@
                 calendar.render();
             } catch (err) {
                 console.error(err);
-                notificar("Error al cargar agenda");
+                await lanzarNotificacion("Error", "Error al cargar agenda", "error");
             }
         }
 
@@ -803,11 +863,11 @@
                 if (error) throw error;
                 if (data?.error) throw new Error(data.error);
 
-                notificar("Registro eliminado");
+                await lanzarNotificacion("Eliminado", "Registro eliminado correctamente", "success");
                 await cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar("No se pudo eliminar el registro");
+                await lanzarNotificacion("Error", "No se pudo eliminar el registro", "error");
             }
         }
 
@@ -873,7 +933,7 @@
             });
         }
 
-        function copiarHorarioATodos() {
+        async function copiarHorarioATodos() {
             const primerRow = document.querySelector('#contenedor-horarios > div[data-dia="1"]');
             if (!primerRow) return;
 
@@ -888,17 +948,21 @@
                 toggleHorarioDia(row.querySelector('.dia-abierto'));
             });
 
-            notificar("Horario copiado a todos los días");
+            await lanzarNotificacion("Horarios Copiados", "Se han copiado los horarios del Lunes a todos los días de la semana.", "success");
         }
 
-        // Lógica para subida de imagenes (diseño) importada del panel de ventas
+        // Lógica actualizada para incluir Vista Previa al instante
         async function procesarSubidaImagen(e, bucket, inputId, labelId) { 
             const f = e.target.files[0]; 
             if(!f) return; 
             
-            document.getElementById(labelId).innerText = "⏳ Subiendo imagen..."; 
+            // Generar vista previa instantánea localmente para que se sienta súper rápido
+            const previewUrlLocal = URL.createObjectURL(f);
+            document.getElementById('preview-imagen').src = previewUrlLocal;
+            document.getElementById('contenedor-preview').classList.remove('hidden');
+
+            document.getElementById(labelId).innerText = "⏳ Subiendo imagen al servidor..."; 
             
-            // Si el usuario no está logueado, fallará, aseguramos el nombre
             const userId = (await clienteSupabase.auth.getUser()).data.user?.id || 'invitado';
             const nombreArchivo = `${userId}_${Date.now()}.png`; 
             
@@ -906,6 +970,9 @@
                 await clienteSupabase.storage.from(bucket).upload(nombreArchivo, f); 
                 const pubUrl = clienteSupabase.storage.from(bucket).getPublicUrl(nombreArchivo).data.publicUrl;
                 document.getElementById(inputId).value = pubUrl; 
+                
+                // Actualizar la vista previa con la ruta oficial (para evitar problemas de memoria)
+                document.getElementById('preview-imagen').src = pubUrl; 
                 document.getElementById(labelId).innerText = "✅ Imagen cargada correctamente"; 
             } catch (err) { 
                 document.getElementById(labelId).innerText = "❌ Error al subir. Intenta de nuevo."; 
@@ -913,17 +980,15 @@
             } 
         }
 
-        // Lógica para el panel de verificación añadida
-        function solicitarVerificacion(e) {
+        async function solicitarVerificacion(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-enviar-verif');
             btn.disabled = true;
             btn.innerText = "Enviando documentos...";
             
-            // Aquí puedes conectar el envío de datos a tu tabla de "verificaciones" en Supabase.
-            // Por ahora he dejado un flujo simulado visualmente correcto para el programa:
-            setTimeout(() => {
-                notificar("¡Tus documentos han sido enviados a revisión!");
+            // Simulación asíncrona elegante
+            setTimeout(async () => {
+                await lanzarNotificacion("¡Enviado!", "Tus documentos han sido enviados a revisión exitosamente.", "success");
                 document.getElementById('form-verif').reset();
                 btn.disabled = false;
                 btn.innerText = "Enviar para Revisión";
@@ -933,17 +998,16 @@
         async function guardarNegocioSeguro() {
             try {
                 const id = document.getElementById('admin-negocio-id').value;
-                if (!id) return notificar("No se detectó el negocio");
+                if (!id) return await lanzarNotificacion("Atención", "No se detectó el negocio", "warning");
 
                 const horarios = obtenerHorariosDesdeUI();
 
                 for (const [dia, valor] of Object.entries(horarios)) {
                     if (valor.abierto && (!valor.abre || !valor.cierra || valor.abre >= valor.cierra)) {
-                        return notificar(`Revisa el horario de ${DIAS[dia]}`);
+                        return await lanzarNotificacion("Revisa el Horario", `Por favor verifica los horarios del día ${DIAS[dia]}`, "warning");
                     }
                 }
 
-                // Payload actualizado para incluir la imagen y si está abierto
                 const payload = {
                     anuncio_id: id,
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
@@ -969,10 +1033,10 @@
                 aplicarConfiguracionCalendario(horariosActuales);
                 await cargarAgendaYCalendario(id, horariosActuales);
 
-                notificar("Guardado con éxito ✅");
+                await lanzarNotificacion("¡Guardado!", "Los cambios se guardaron con éxito", "success");
             } catch (err) {
                 console.error(err);
-                notificar(err?.message || "No se pudieron guardar los cambios");
+                await lanzarNotificacion("Error", err?.message || "No se pudieron guardar los cambios", "error");
             }
         }
 
@@ -1082,7 +1146,7 @@
                 };
 
                 if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) {
-                    return notificar("Completa fecha y horario del bloqueo");
+                    return await lanzarNotificacion("Faltan datos", "Completa fecha y horario del bloqueo", "warning");
                 }
 
                 const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
@@ -1095,12 +1159,12 @@
                 if (error) throw error;
                 if (data?.error) throw new Error(data.error);
 
-                notificar("Bloqueo registrado ✅");
+                await lanzarNotificacion("¡Guardado!", "Bloqueo registrado correctamente", "success");
                 cerrarModalAgenda();
                 await cargarAgendaYCalendario(idN, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar(err?.message || "No se pudo registrar el bloqueo");
+                await lanzarNotificacion("Error", err?.message || "No se pudo registrar el bloqueo", "error");
             }
         }
 
@@ -1118,9 +1182,9 @@
                     notas: document.getElementById('manual-notas').value.trim() || null
                 };
 
-                if (!payload.paciente) return notificar("Escribe el nombre del paciente");
+                if (!payload.paciente) return await lanzarNotificacion("Faltan datos", "Escribe el nombre del paciente", "warning");
                 if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) {
-                    return notificar("Completa fecha y horario de la cita");
+                    return await lanzarNotificacion("Faltan datos", "Completa fecha y horario de la cita", "warning");
                 }
 
                 const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
@@ -1133,7 +1197,7 @@
                 if (error) throw error;
                 if (data?.error) throw new Error(data.error);
 
-                notificar("Cita manual registrada ✅");
+                await lanzarNotificacion("¡Guardado!", "Cita manual registrada correctamente", "success");
                 cerrarModalAgenda();
 
                 document.getElementById('manual-paciente').value = '';
@@ -1146,28 +1210,8 @@
                 await cargarAgendaYCalendario(idN, horariosActuales);
             } catch (err) {
                 console.error(err);
-                notificar(err?.message || "No se pudo registrar la cita manual");
+                await lanzarNotificacion("Error", err?.message || "No se pudo registrar la cita manual", "error");
             }
-        }
-
-        function notificar(mensaje) {
-            const el = document.createElement('div');
-            el.className = "bg-green-500 text-white px-6 py-4 rounded-2xl shadow-xl font-black text-xs uppercase z-[9999]";
-            
-            // Reviso si es error para cambiar el color
-            if(mensaje.toLowerCase().includes('error') || mensaje.toLowerCase().includes('no se pudo') || mensaje.toLowerCase().includes('revisa')) {
-                el.className = "bg-red-500 text-white px-6 py-4 rounded-2xl shadow-xl font-black text-xs uppercase z-[9999]";
-            }
-
-            el.innerText = mensaje;
-            document.getElementById('toast-container').appendChild(el);
-
-            setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(-8px)';
-                el.style.transition = 'all .25s ease';
-                setTimeout(() => el.remove(), 250);
-            }, 3000);
         }
     </script>
 </body>
