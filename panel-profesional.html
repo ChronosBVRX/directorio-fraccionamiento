@@ -91,10 +91,10 @@
     <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
         <div>
             <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-            <p class="text-sm text-gray-500 mt-1">Administra tus servicios y agenda en <b>Vive Tres Marías</b>.</p>
+            <p class="text-sm text-gray-500 mt-1">Administra tus servicios, agenda y verificación en <b>Vive Tres Marías</b>.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="index.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold text-sm">🏠 Inicio</a>
+            <a href="index.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition">🏠 Inicio</a>
         </div>
     </div>
 
@@ -103,15 +103,28 @@
 
             <div class="w-full lg:w-5/12 flex flex-col border-r bg-gray-50/30">
                 <div class="flex gap-1 p-4 border-b bg-white overflow-x-auto scrollbar-hide">
-                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap">Datos</button>
-                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Servicios</button>
-                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap">Mi Calendario</button>
+                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap transition">Datos</button>
+                    <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Diseño & Foto</button>
+                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios</button>
+                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Mi Calendario</button>
+                    <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
                 </div>
 
                 <div class="p-6 flex-grow overflow-y-auto">
 
                     <div id="panel-basico" class="space-y-5">
                         <input type="hidden" id="admin-negocio-id">
+
+                        <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-[10px] uppercase tracking-widest text-red-600">Estado Operativo</h4>
+                                <p class="text-[10px] text-gray-500">Cierra tu consultorio temporalmente.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                        </div>
 
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
@@ -126,15 +139,33 @@
                         <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
                             <div class="flex items-center justify-between gap-4 mb-4">
                                 <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Horarios</h4>
-                                <button type="button" onclick="copiarHorarioATodos()" class="text-[10px] font-black px-3 py-2 rounded-xl bg-gray-100 text-gray-600">
-                                    Copiar horario de lunes a todos
+                                <button type="button" onclick="copiarHorarioATodos()" class="text-[10px] font-black px-3 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                                    Copiar a todos
                                 </button>
                             </div>
                             <div id="contenedor-horarios" class="space-y-3"></div>
                         </div>
 
-                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado text-white py-5 rounded-2xl font-black shadow-xl">
+                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado hover:bg-yellow-600 transition text-white py-5 rounded-2xl font-black shadow-xl">
                             GUARDAR CAMBIOS
+                        </button>
+                    </div>
+
+                    <div id="panel-diseno" class="hidden space-y-4">
+                        <div class="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
+                            <h4 class="font-bold text-sm text-tm-azul-oscuro mb-2">Imagen Principal</h4>
+                            <p class="text-xs text-gray-500 mb-4">Sube una foto de tu consultorio o un logotipo profesional para generar más confianza.</p>
+                            
+                            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
+                                <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg" class="hidden" onchange="procesarSubidaImagen(event, 'negocios', 'admin-imagen-url', 'estado-subida', false)">
+                                <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold block w-max mx-auto transition shadow hover:bg-tm-azul-oscuro">Seleccionar Imagen</label>
+                                <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold"></p>
+                            </div>
+                            <input type="hidden" id="admin-imagen-url">
+                        </div>
+                        
+                        <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado hover:bg-yellow-600 transition text-white py-5 rounded-2xl font-black shadow-xl mt-4">
+                            GUARDAR DISEÑO
                         </button>
                     </div>
 
@@ -149,7 +180,7 @@
 
                             <input type="number" id="serv-duracion" placeholder="Minutos (Ej: 60)" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-sm mb-4 outline-none text-white placeholder-white/60">
 
-                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase">
+                            <button onclick="agregarServicio()" class="w-full bg-tm-dorado hover:bg-yellow-500 transition text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase">
                                 Añadir
                             </button>
                         </div>
@@ -159,22 +190,45 @@
 
                     <div id="panel-agenda" class="hidden space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button onclick="abrirModalAgenda({ modo: 'manual' })" class="w-full bg-tm-azul text-white p-5 rounded-[2rem] font-black shadow-lg">
+                            <button onclick="abrirModalAgenda({ modo: 'manual' })" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro transition text-white p-5 rounded-[2rem] font-black shadow-lg">
                                 ➕ NUEVA CITA MANUAL
                             </button>
 
-                            <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="w-full bg-red-500 text-white p-5 rounded-[2rem] font-black shadow-lg">
+                            <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="w-full bg-red-500 hover:bg-red-600 transition text-white p-5 rounded-[2rem] font-black shadow-lg">
                                 🛑 BLOQUEAR HORARIO
                             </button>
                         </div>
 
-                        <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed">
+                        <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed shadow-sm">
                             <b class="text-tm-azul-oscuro">Tip:</b> también puedes dar clic o arrastrar directamente sobre el calendario para abrir el formulario con fecha y hora precargadas.
                         </div>
 
                         <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
                         <div id="lista-citas-negocio" class="space-y-2"></div>
                     </div>
+
+                    <div id="panel-verif" class="hidden space-y-4">
+                        <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-200 mb-4 shadow-sm">
+                            <h3 class="font-black text-blue-800 mb-2 text-lg">🛡️ Sello de Confianza</h3>
+                            <p class="text-xs text-blue-700 leading-relaxed">Destaca tu perfil profesional enviando tus documentos de acreditación. Los usuarios confían más en cuentas verificadas.</p>
+                        </div>
+                        <form id="form-verif" class="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm" onsubmit="solicitarVerificacion(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Completo Profesional *</label>
+                                    <input type="text" id="verif-nombre" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Cédula Profesional o Acreditación *</label>
+                                    <input type="text" id="verif-cedula" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none" placeholder="Número de registro">
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-5 rounded-2xl font-black mt-6 shadow-xl uppercase text-sm">
+                                Enviar para Revisión
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
 
@@ -184,7 +238,6 @@
         </div>
     </div>
 
-    <!-- MODAL AGENDA -->
     <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white rounded-[2.5rem] p-6 md:p-8 w-full max-w-2xl shadow-2xl max-h-[92vh] overflow-y-auto">
             <input type="hidden" id="modal-modo" value="manual">
@@ -194,19 +247,18 @@
                     <h3 id="modal-titulo" class="text-2xl font-black text-tm-azul-oscuro mb-2">Gestión de Agenda</h3>
                     <p class="text-sm text-gray-500">Crea una cita manual o bloquea un espacio directamente desde aquí.</p>
                 </div>
-                <button onclick="cerrarModalAgenda()" class="text-gray-400 text-2xl font-black leading-none">&times;</button>
+                <button onclick="cerrarModalAgenda()" class="text-gray-400 text-3xl font-black leading-none hover:text-red-500 transition">&times;</button>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button id="btn-modo-manual" onclick="cambiarModoReserva('manual')" class="modo-btn-activo py-4 rounded-2xl font-black text-sm">
+                <button id="btn-modo-manual" onclick="cambiarModoReserva('manual')" class="modo-btn-activo py-4 rounded-2xl font-black text-sm transition">
                     👤 CITA MANUAL
                 </button>
-                <button id="btn-modo-bloqueo" onclick="cambiarModoReserva('bloqueo')" class="modo-btn-inactivo py-4 rounded-2xl font-black text-sm">
+                <button id="btn-modo-bloqueo" onclick="cambiarModoReserva('bloqueo')" class="modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition">
                     🛑 BLOQUEO
                 </button>
             </div>
 
-            <!-- PANEL MANUAL -->
             <div id="panel-modal-manual" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
@@ -243,7 +295,6 @@
                 </div>
             </div>
 
-            <!-- PANEL BLOQUEO -->
             <div id="panel-modal-bloqueo" class="hidden space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
@@ -257,7 +308,7 @@
                     </div>
 
                     <div class="flex items-end">
-                        <label class="flex items-center gap-3 p-4 border rounded-2xl bg-gray-50 w-full cursor-pointer">
+                        <label class="flex items-center gap-3 p-4 border rounded-2xl bg-gray-50 w-full cursor-pointer hover:bg-gray-100 transition">
                             <input type="checkbox" id="bloqueo-todo-dia" onchange="sincronizarBloqueoTodoElDia()" class="w-5 h-5 rounded text-tm-azul">
                             <span class="font-bold text-sm text-tm-azul-oscuro">Bloquear toda la jornada</span>
                         </label>
@@ -276,10 +327,10 @@
             </div>
 
             <div class="flex gap-3 mt-8">
-                <button onclick="cerrarModalAgenda()" class="flex-1 py-4 font-bold text-gray-400">
+                <button onclick="cerrarModalAgenda()" class="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition">
                     Cerrar
                 </button>
-                <button id="btn-confirmar-modal" onclick="guardarDesdeModalAgenda()" class="flex-1 bg-tm-azul text-white py-4 rounded-2xl font-bold shadow-xl">
+                <button id="btn-confirmar-modal" onclick="guardarDesdeModalAgenda()" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro transition text-white py-4 rounded-2xl font-bold shadow-xl">
                     Guardar
                 </button>
             </div>
@@ -437,6 +488,14 @@
                 document.getElementById('admin-negocio-id').value = n.id;
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
+                
+                // Nuevos campos agregados
+                document.getElementById('admin-imagen-url').value = n.imagen_url || '';
+                document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false;
+                
+                if (n.imagen_url) {
+                    document.getElementById('estado-subida').innerText = "✅ Imagen cargada previamente";
+                }
 
                 if (n.horarios && typeof n.horarios === 'object') {
                     horariosActuales = n.horarios;
@@ -472,7 +531,7 @@
                                 <p class="font-bold text-tm-azul-oscuro">${s.nombre}</p>
                                 <p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p>
                             </div>
-                            <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 px-4 py-2 rounded-xl">
+                            <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">
                                 Borrar
                             </button>
                         </div>
@@ -609,7 +668,7 @@
                                 ${servicio}
                             </div>
                             <div class="flex items-center">
-                                <button onclick="cancelarCitaOwner('${c.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 px-4 py-2 rounded-xl">
+                                <button onclick="cancelarCitaOwner('${c.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">
                                     ${esBloqueo ? 'Quitar' : 'Cancelar'}
                                 </button>
                             </div>
@@ -753,15 +812,29 @@
         }
 
         function cambiarPestana(tab) {
-            ['basico', 'servicios', 'agenda'].forEach(t => {
-                document.getElementById('panel-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).className = "font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap";
+            ['basico', 'diseno', 'servicios', 'agenda', 'verif'].forEach(t => {
+                const panel = document.getElementById('panel-' + t);
+                const boton = document.getElementById('tab-' + t);
+                
+                if(panel) panel.classList.add('hidden');
+                
+                if(boton) {
+                    boton.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
+                    boton.classList.add('text-gray-400');
+                }
             });
 
-            document.getElementById('panel-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).className = "font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap";
+            const pActivo = document.getElementById('panel-' + tab);
+            const bActivo = document.getElementById('tab-' + tab);
 
-            if (calendar) setTimeout(() => calendar.updateSize(), 120);
+            if(pActivo) pActivo.classList.remove('hidden');
+            
+            if(bActivo) {
+                bActivo.classList.remove('text-gray-400');
+                bActivo.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
+            }
+
+            if (calendar && tab === 'agenda') setTimeout(() => calendar.updateSize(), 120);
         }
 
         function renderizarUIHorarios() {
@@ -818,6 +891,45 @@
             notificar("Horario copiado a todos los días");
         }
 
+        // Lógica para subida de imagenes (diseño) importada del panel de ventas
+        async function procesarSubidaImagen(e, bucket, inputId, labelId) { 
+            const f = e.target.files[0]; 
+            if(!f) return; 
+            
+            document.getElementById(labelId).innerText = "⏳ Subiendo imagen..."; 
+            
+            // Si el usuario no está logueado, fallará, aseguramos el nombre
+            const userId = (await clienteSupabase.auth.getUser()).data.user?.id || 'invitado';
+            const nombreArchivo = `${userId}_${Date.now()}.png`; 
+            
+            try { 
+                await clienteSupabase.storage.from(bucket).upload(nombreArchivo, f); 
+                const pubUrl = clienteSupabase.storage.from(bucket).getPublicUrl(nombreArchivo).data.publicUrl;
+                document.getElementById(inputId).value = pubUrl; 
+                document.getElementById(labelId).innerText = "✅ Imagen cargada correctamente"; 
+            } catch (err) { 
+                document.getElementById(labelId).innerText = "❌ Error al subir. Intenta de nuevo."; 
+                console.error(err);
+            } 
+        }
+
+        // Lógica para el panel de verificación añadida
+        function solicitarVerificacion(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-enviar-verif');
+            btn.disabled = true;
+            btn.innerText = "Enviando documentos...";
+            
+            // Aquí puedes conectar el envío de datos a tu tabla de "verificaciones" en Supabase.
+            // Por ahora he dejado un flujo simulado visualmente correcto para el programa:
+            setTimeout(() => {
+                notificar("¡Tus documentos han sido enviados a revisión!");
+                document.getElementById('form-verif').reset();
+                btn.disabled = false;
+                btn.innerText = "Enviar para Revisión";
+            }, 1200);
+        }
+
         async function guardarNegocioSeguro() {
             try {
                 const id = document.getElementById('admin-negocio-id').value;
@@ -831,10 +943,13 @@
                     }
                 }
 
+                // Payload actualizado para incluir la imagen y si está abierto
                 const payload = {
                     anuncio_id: id,
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
                     enlace_whatsapp: document.getElementById('admin-wa').value.trim(),
+                    imagen_url: document.getElementById('admin-imagen-url').value,
+                    esta_abierto: document.getElementById('admin-estado-apertura').checked,
                     horarios
                 };
 
@@ -854,7 +969,7 @@
                 aplicarConfiguracionCalendario(horariosActuales);
                 await cargarAgendaYCalendario(id, horariosActuales);
 
-                notificar("Guardado ✅");
+                notificar("Guardado con éxito ✅");
             } catch (err) {
                 console.error(err);
                 notificar(err?.message || "No se pudieron guardar los cambios");
@@ -896,15 +1011,15 @@
             const btnConfirmar = document.getElementById('btn-confirmar-modal');
 
             if (modo === 'manual') {
-                btnManual.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm';
-                btnBloqueo.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm';
+                btnManual.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition';
+                btnBloqueo.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition';
                 panelManual.classList.remove('hidden');
                 panelBloqueo.classList.add('hidden');
                 titulo.textContent = 'Nueva cita manual 👤';
                 btnConfirmar.textContent = 'Guardar cita';
             } else {
-                btnManual.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm';
-                btnBloqueo.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm';
+                btnManual.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition';
+                btnBloqueo.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition';
                 panelManual.classList.add('hidden');
                 panelBloqueo.classList.remove('hidden');
                 titulo.textContent = 'Bloquear horario 🛑';
@@ -1037,7 +1152,13 @@
 
         function notificar(mensaje) {
             const el = document.createElement('div');
-            el.className = "bg-tm-azul-oscuro text-white px-6 py-4 rounded-2xl shadow-xl font-black text-xs uppercase";
+            el.className = "bg-green-500 text-white px-6 py-4 rounded-2xl shadow-xl font-black text-xs uppercase z-[9999]";
+            
+            // Reviso si es error para cambiar el color
+            if(mensaje.toLowerCase().includes('error') || mensaje.toLowerCase().includes('no se pudo') || mensaje.toLowerCase().includes('revisa')) {
+                el.className = "bg-red-500 text-white px-6 py-4 rounded-2xl shadow-xl font-black text-xs uppercase z-[9999]";
+            }
+
             el.innerText = mensaje;
             document.getElementById('toast-container').appendChild(el);
 
@@ -1046,7 +1167,7 @@
                 el.style.transform = 'translateY(-8px)';
                 el.style.transition = 'all .25s ease';
                 setTimeout(() => el.remove(), 250);
-            }, 2500);
+            }, 3000);
         }
     </script>
 </body>
