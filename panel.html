@@ -972,21 +972,11 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
-
-                if (sessionError) {
-                    throw new Error("No se pudo leer la sesión actual.");
-                }
-
-                const accessToken = sessionData?.session?.access_token;
-                const email = sessionData?.session?.user?.email;
-
-                if (!accessToken) {
-                    throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
-                }
-
+                // Obtenemos email si está disponible para auto-rellenarlo en Stripe
+                const email = usuarioActual.email || null;
                 const returnUrl = `${window.location.origin}${window.location.pathname}`;
 
+                // CORRECCIÓN AQUÍ: Eliminamos el "headers" manual, el cliente Supabase lo incluye de forma nativa e infalible.
                 const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
                     body: {
                         nivel,
@@ -994,16 +984,13 @@
                         rubro,
                         returnUrl,
                         userId: usuarioActual.id,
-                        userEmail: email || usuarioActual.email || null
-                    },
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
+                        userEmail: email
                     }
                 });
 
                 if (error) {
                     console.error("Error invoke create-checkout:", error);
-                    throw new Error(error.message || "No se pudo crear la sesión de pago.");
+                    throw new Error("No se pudo crear la sesión de pago.");
                 }
 
                 if (!data?.success || !data?.url) {
@@ -1041,27 +1028,14 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
-
-                if (sessionError) {
-                    throw new Error("No se pudo recuperar la sesión.");
-                }
-
-                const accessToken = sessionData?.session?.access_token;
-                if (!accessToken) {
-                    throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");
-                }
-
+                // CORRECCIÓN AQUÍ: Igual que arriba, dejamos que el SDK maneje los Headers.
                 const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId },
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
+                    body: { sessionId }
                 });
 
                 if (error) {
                     console.error("Error invoke confirm-checkout:", error);
-                    throw new Error(error.message || "No se pudo validar el pago.");
+                    throw new Error("No se pudo validar el pago.");
                 }
 
                 if (!data?.success) {
