@@ -143,6 +143,19 @@
         </main>
     </div>
 
+    <footer class="bg-tm-azul-oscuro text-white py-8 mt-auto border-t-4 border-tm-dorado">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm">
+            <div class="text-center sm:text-left">
+                <p class="font-bold text-lg mb-1">Vive Tres Marías</p>
+                <p class="text-gray-300">&copy; 2026 Todos los derechos reservados.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-6 text-center">
+                <button onclick="abrirDocumentoLegal('privacidad.html', 'Aviso de Privacidad')" class="text-gray-300 hover:text-tm-dorado font-semibold transition">Aviso de Privacidad</button>
+                <button onclick="abrirDocumentoLegal('terminos.html', 'Términos y Condiciones')" class="text-gray-300 hover:text-tm-dorado font-semibold transition">Términos y Condiciones</button>
+            </div>
+        </div>
+    </footer>
+
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
             <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -205,6 +218,18 @@
             <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
             <div id="noti-botones" class="flex gap-3 justify-center">
                 </div>
+        </div>
+    </div>
+
+    <div id="modal-documento-legal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center shrink-0">
+                <h2 id="modal-legal-titulo" class="font-black text-lg sm:text-xl text-tm-azul">Documento</h2>
+                <button onclick="cerrarDocumentoLegal()" class="text-3xl leading-none text-gray-500 hover:text-black transition">&times;</button>
+            </div>
+            <div class="flex-grow w-full relative bg-white">
+                <iframe id="iframe-documento-legal" class="absolute inset-0 w-full h-full border-0" src=""></iframe>
+            </div>
         </div>
     </div>
 
@@ -760,7 +785,6 @@
             const servicioId = parseInt(document.getElementById('reserva-servicio-index').value);
             const negocioId = parseInt(document.getElementById('reserva-negocio-id-index').value);
             
-            // Reemplazo del confirm() nativo por nuestra Notificación Elegante (Promise)
             const confirmado = await lanzarNotificacion("Confirmar Reserva", `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, "info", true);
             if(!confirmado) return;
             
@@ -833,6 +857,23 @@
             eventoInstalacion = null;
         });
         window.addEventListener('appinstalled', () => btnInstalar.classList.add('hidden'));
+
+        // === NUEVAS FUNCIONES PARA DOCUMENTOS LEGALES ===
+        function abrirDocumentoLegal(url, titulo) {
+            // Ponemos el título en el modal
+            document.getElementById('modal-legal-titulo').innerText = titulo;
+            // Le decimos al iframe qué página cargar
+            document.getElementById('iframe-documento-legal').src = url;
+            // Mostramos el modal
+            document.getElementById('modal-documento-legal').classList.remove('hidden');
+        }
+
+        function cerrarDocumentoLegal() {
+            // Ocultamos el modal
+            document.getElementById('modal-documento-legal').classList.add('hidden');
+            // Limpiamos el iframe para que no consuma memoria
+            document.getElementById('iframe-documento-legal').src = '';
+        }
     </script>
 </body>
 </html>
