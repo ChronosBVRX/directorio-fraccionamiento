@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mi Perfil - Vive Tres Marías</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,16 +19,16 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    fontFamily: { sans: ["Montserrat", "sans-serif"] },
                     colors: {
-                        'tm-azul': '#22527b',
-                        'tm-azul-oscuro': '#143653',
-                        'tm-dorado': '#d4af37',
-                        'tm-gris': '#4b5563'
+                        "tm-azul": "#22527b",
+                        "tm-azul-oscuro": "#143653",
+                        "tm-dorado": "#d4af37",
+                        "tm-gris": "#4b5563"
                     }
                 }
             }
-        }
+        };
     </script>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
@@ -50,7 +51,6 @@
     </div>
 
     <div id="si-auth" class="hidden max-w-6xl mx-auto space-y-8 pb-16">
-
         <div class="flex justify-between items-center border-b border-gray-200 pb-4">
             <h1 class="text-3xl font-black text-tm-azul-oscuro">Mi Tablero</h1>
             <div class="flex gap-3">
@@ -67,20 +67,25 @@
                 <div class="space-y-4">
                     <div>
                         <label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
-                        <input type="text" id="perfil-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                        <input type="text" id="perfil-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul" />
                     </div>
                     <div>
                         <label class="text-xs font-bold uppercase text-gray-500">Teléfono (WhatsApp)</label>
-                        <input type="tel" id="perfil-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                        <input type="tel" id="perfil-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul" />
                     </div>
                     <div>
                         <label class="text-xs font-bold uppercase text-gray-500">Dirección Exacta</label>
                         <textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea>
                     </div>
-                    <input type="hidden" id="perfil-lat">
-                    <input type="hidden" id="perfil-lng">
-                    <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-xl font-bold transition shadow-md">Guardar Mis Datos</button>
+
+                    <input type="hidden" id="perfil-lat" />
+                    <input type="hidden" id="perfil-lng" />
+
+                    <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-xl font-bold transition shadow-md">
+                        Guardar Mis Datos
+                    </button>
                 </div>
+
                 <div class="flex flex-col">
                     <label class="text-xs font-bold uppercase text-gray-500 mb-2">Ubica tu domicilio en el mapa 📍</label>
                     <div id="mapa-perfil" class="w-full h-64 lg:h-full min-h-[250px] rounded-xl border-2 border-gray-200 z-0 shadow-inner"></div>
@@ -91,11 +96,16 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col">
                 <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>🛵</span> Mis Pedidos</h3>
-                <div id="contenedor-mis-pedidos" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2"><p class="text-sm text-gray-400">Cargando...</p></div>
+                <div id="contenedor-mis-pedidos" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2">
+                    <p class="text-sm text-gray-400">Cargando...</p>
+                </div>
             </div>
+
             <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col">
                 <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2"><span>📅</span> Mis Citas</h3>
-                <div id="contenedor-mis-citas" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2"><p class="text-sm text-gray-400">Cargando...</p></div>
+                <div id="contenedor-mis-citas" class="space-y-3 flex-grow overflow-y-auto max-h-80 pr-2">
+                    <p class="text-sm text-gray-400">Cargando...</p>
+                </div>
             </div>
         </div>
 
@@ -127,7 +137,9 @@
                     <div class="text-center mb-8">
                         <p class="text-sm uppercase tracking-[0.25em] text-tm-dorado font-bold mb-2">Empieza tu espacio</p>
                         <h2 class="text-2xl sm:text-4xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2>
-                        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">Selecciona el tipo de negocio y después verás una experiencia visual con beneficios reales de cada plan, como si estuvieras eligiendo una membresía premium.</p>
+                        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                            Selecciona el tipo de negocio y después verás una experiencia visual con beneficios reales de cada plan, como si estuvieras eligiendo una membresía premium.
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -199,8 +211,7 @@
                         </div>
                     </div>
 
-                    <input type="hidden" id="rubro-seleccionado-memoria">
-
+                    <input type="hidden" id="rubro-seleccionado-memoria" />
                     <div id="catalogo-planes" class="grid grid-cols-1 xl:grid-cols-3 gap-5"></div>
                 </div>
             </div>
@@ -208,402 +219,656 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
+        const SUPABASE_URL = "https://vlnpefgqodnxcqeztcnh.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM";
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioActual = null;
         let map = null;
         let marker = null;
         let retornoStripeProcesado = false;
+        let panelCargando = false;
+        let panelListo = false;
 
-        const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
+        const CATEGORIAS_TIENDA = ["Alimentos", "Restaurante", "Postres", "Abarrotes", "Hogar", "Ropa", "Otro Producto"];
 
         const STRIPE_PRICE_IDS = {
             tienda: {
-                1: 'price_1TItPTGtW4zuRQv9RMSEOnnn',
-                2: 'price_1TItQaGtW4zuRQv9gyQOTaC5'
+                1: "price_1TItPTGtW4zuRQv9RMSEOnnn",
+                2: "price_1TItQaGtW4zuRQv9gyQOTaC5"
             },
             servicio: {
-                1: 'price_1TItPTGtW4zuRQv9RMSEOnnn',
-                2: 'price_1TItQaGtW4zuRQv9gyQOTaC5'
+                1: "price_1TItPTGtW4zuRQv9RMSEOnnn",
+                2: "price_1TItQaGtW4zuRQv9gyQOTaC5"
             }
         };
 
         const PLANES_CONFIG = {
             tienda: {
-                badge: 'Productos y comida',
-                titulo: 'Planes para tiendas y comida',
-                subtitulo: 'Desde un catálogo básico hasta una vitrina premium para vender mejor y lucir más profesional.',
+                badge: "Productos y comida",
+                titulo: "Planes para tiendas y comida",
+                subtitulo: "Desde un catálogo básico hasta una vitrina premium para vender mejor y lucir más profesional.",
                 planes: [
                     {
                         nivel: 0,
-                        nombre: 'Básico',
-                        precio: 'Gratis',
-                        cta: 'Empezar gratis',
+                        nombre: "Básico",
+                        precio: "Gratis",
+                        cta: "Empezar gratis",
                         destacado: false,
-                        etiqueta: 'Para arrancar',
-                        fondo: 'from-gray-50 via-white to-gray-100',
-                        borde: 'border-gray-200',
-                        boton: 'bg-gray-900 hover:bg-black text-white',
-                        demoEmoji: '🛍️',
-                        demoTitulo: 'Ejemplo básico',
-                        demoTexto: 'Ficha simple del negocio con datos esenciales y presencia dentro del directorio.',
+                        etiqueta: "Para arrancar",
+                        fondo: "from-gray-50 via-white to-gray-100",
+                        borde: "border-gray-200",
+                        boton: "bg-gray-900 hover:bg-black text-white",
+                        demoEmoji: "🛍️",
+                        demoTitulo: "Ejemplo básico",
+                        demoTexto: "Ficha simple del negocio con datos esenciales y presencia dentro del directorio.",
                         beneficios: [
-                            'Apareces en el directorio',
-                            'Datos básicos del negocio',
-                            'Ubicación y contacto',
-                            'Ideal para empezar'
+                            "Apareces en el directorio",
+                            "Datos básicos del negocio",
+                            "Ubicación y contacto",
+                            "Ideal para empezar"
                         ]
                     },
                     {
                         nivel: 1,
-                        nombre: 'Nivel 1',
-                        precio: '$150',
-                        periodo: '/mes',
-                        cta: 'Ir a pago seguro',
+                        nombre: "Nivel 1",
+                        precio: "$150",
+                        periodo: "/mes",
+                        cta: "Ir a pago seguro",
                         destacado: true,
-                        etiqueta: 'Más elegido',
-                        fondo: 'from-blue-50 via-white to-cyan-50',
-                        borde: 'border-blue-300',
-                        boton: 'bg-blue-600 hover:bg-blue-700 text-white',
-                        demoEmoji: '🍔',
-                        demoTitulo: 'Ejemplo con catálogo',
-                        demoTexto: 'Menú visual, productos mejor organizados y un escaparate mucho más atractivo.',
+                        etiqueta: "Más elegido",
+                        fondo: "from-blue-50 via-white to-cyan-50",
+                        borde: "border-blue-300",
+                        boton: "bg-blue-600 hover:bg-blue-700 text-white",
+                        demoEmoji: "🍔",
+                        demoTitulo: "Ejemplo con catálogo",
+                        demoTexto: "Menú visual, productos mejor organizados y un escaparate mucho más atractivo.",
                         beneficios: [
-                            'Todo lo del plan básico',
-                            'Mayor presencia visual',
-                            'Catálogo más vistoso',
-                            'Mejor conversión de visitas'
+                            "Todo lo del plan básico",
+                            "Mayor presencia visual",
+                            "Catálogo más vistoso",
+                            "Mejor conversión de visitas"
                         ]
                     },
                     {
                         nivel: 2,
-                        nombre: 'Nivel 2',
-                        precio: '$300',
-                        periodo: '/mes',
-                        cta: 'Ir a pago premium',
+                        nombre: "Nivel 2",
+                        precio: "$300",
+                        periodo: "/mes",
+                        cta: "Ir a pago premium",
                         destacado: false,
-                        etiqueta: 'Mayor alcance',
-                        fondo: 'from-yellow-50 via-white to-orange-50',
-                        borde: 'border-yellow-400',
-                        boton: 'bg-tm-dorado hover:bg-yellow-600 text-white',
-                        demoEmoji: '🚀',
-                        demoTitulo: 'Ejemplo premium',
-                        demoTexto: 'Imagen más potente, mejor presentación, mayor confianza y sensación de marca sólida.',
+                        etiqueta: "Mayor alcance",
+                        fondo: "from-yellow-50 via-white to-orange-50",
+                        borde: "border-yellow-400",
+                        boton: "bg-tm-dorado hover:bg-yellow-600 text-white",
+                        demoEmoji: "🚀",
+                        demoTitulo: "Ejemplo premium",
+                        demoTexto: "Imagen más potente, mejor presentación, mayor confianza y sensación de marca sólida.",
                         beneficios: [
-                            'Todo lo del nivel 1',
-                            'Imagen premium del negocio',
-                            'Mayor prioridad visual',
-                            'Experiencia más profesional'
+                            "Todo lo del nivel 1",
+                            "Imagen premium del negocio",
+                            "Mayor prioridad visual",
+                            "Experiencia más profesional"
                         ]
                     }
                 ]
             },
             servicio: {
-                badge: 'Consultorios y servicios',
-                titulo: 'Planes para consultorios y servicios',
-                subtitulo: 'Ideal para profesionales que quieren mostrar autoridad, facilitar citas y verse realmente profesionales.',
+                badge: "Consultorios y servicios",
+                titulo: "Planes para consultorios y servicios",
+                subtitulo: "Ideal para profesionales que quieren mostrar autoridad, facilitar citas y verse realmente profesionales.",
                 planes: [
                     {
                         nivel: 0,
-                        nombre: 'Básico',
-                        precio: 'Gratis',
-                        cta: 'Empezar gratis',
+                        nombre: "Básico",
+                        precio: "Gratis",
+                        cta: "Empezar gratis",
                         destacado: false,
-                        etiqueta: 'Para iniciar',
-                        fondo: 'from-gray-50 via-white to-gray-100',
-                        borde: 'border-gray-200',
-                        boton: 'bg-gray-900 hover:bg-black text-white',
-                        demoEmoji: '📇',
-                        demoTitulo: 'Ejemplo básico',
-                        demoTexto: 'Perfil simple con nombre, especialidad, dirección y contacto.',
+                        etiqueta: "Para iniciar",
+                        fondo: "from-gray-50 via-white to-gray-100",
+                        borde: "border-gray-200",
+                        boton: "bg-gray-900 hover:bg-black text-white",
+                        demoEmoji: "📇",
+                        demoTitulo: "Ejemplo básico",
+                        demoTexto: "Perfil simple con nombre, especialidad, dirección y contacto.",
                         beneficios: [
-                            'Apareces en el directorio',
-                            'Perfil básico profesional',
-                            'Información esencial',
-                            'Presencia inicial'
+                            "Apareces en el directorio",
+                            "Perfil básico profesional",
+                            "Información esencial",
+                            "Presencia inicial"
                         ]
                     },
                     {
                         nivel: 1,
-                        nombre: 'Nivel 1',
-                        precio: '$150',
-                        periodo: '/mes',
-                        cta: 'Ir a pago seguro',
+                        nombre: "Nivel 1",
+                        precio: "$150",
+                        periodo: "/mes",
+                        cta: "Ir a pago seguro",
                         destacado: true,
-                        etiqueta: 'Más elegido',
-                        fondo: 'from-blue-50 via-white to-cyan-50',
-                        borde: 'border-blue-300',
-                        boton: 'bg-blue-600 hover:bg-blue-700 text-white',
-                        demoEmoji: '📅',
-                        demoTitulo: 'Ejemplo con agenda',
-                        demoTexto: 'Presentación más sólida y percepción de orden con mejor experiencia para pedir cita.',
+                        etiqueta: "Más elegido",
+                        fondo: "from-blue-50 via-white to-cyan-50",
+                        borde: "border-blue-300",
+                        boton: "bg-blue-600 hover:bg-blue-700 text-white",
+                        demoEmoji: "📅",
+                        demoTitulo: "Ejemplo con agenda",
+                        demoTexto: "Presentación más sólida y percepción de orden con mejor experiencia para pedir cita.",
                         beneficios: [
-                            'Todo lo del plan básico',
-                            'Perfil con mejor presencia',
-                            'Más confianza al usuario',
-                            'Experiencia más atractiva'
+                            "Todo lo del plan básico",
+                            "Perfil con mejor presencia",
+                            "Más confianza al usuario",
+                            "Experiencia más atractiva"
                         ]
                     },
                     {
                         nivel: 2,
-                        nombre: 'Nivel 2',
-                        precio: '$300',
-                        periodo: '/mes',
-                        cta: 'Ir a pago premium',
+                        nombre: "Nivel 2",
+                        precio: "$300",
+                        periodo: "/mes",
+                        cta: "Ir a pago premium",
                         destacado: false,
-                        etiqueta: 'Imagen premium',
-                        fondo: 'from-yellow-50 via-white to-orange-50',
-                        borde: 'border-yellow-400',
-                        boton: 'bg-tm-dorado hover:bg-yellow-600 text-white',
-                        demoEmoji: '🏥',
-                        demoTitulo: 'Ejemplo premium',
-                        demoTexto: 'Marca personal o de consultorio mucho más elegante, confiable y memorable.',
+                        etiqueta: "Imagen premium",
+                        fondo: "from-yellow-50 via-white to-orange-50",
+                        borde: "border-yellow-400",
+                        boton: "bg-tm-dorado hover:bg-yellow-600 text-white",
+                        demoEmoji: "🏥",
+                        demoTitulo: "Ejemplo premium",
+                        demoTexto: "Marca personal o de consultorio mucho más elegante, confiable y memorable.",
                         beneficios: [
-                            'Todo lo del nivel 1',
-                            'Imagen más premium',
-                            'Mayor percepción de valor',
-                            'Panel pensado para crecer'
+                            "Todo lo del nivel 1",
+                            "Imagen más premium",
+                            "Mayor percepción de valor",
+                            "Panel pensado para crecer"
                         ]
                     }
                 ]
             }
         };
 
-        function mostrarNotificacion(mensaje, tipo = 'exito') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg`;
+        function escapeHtml(valor) {
+            return String(valor ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function mostrarNotificacion(mensaje, tipo = "exito") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `${tipo === "error" ? "bg-red-500" : "bg-green-500"} text-white px-4 py-3 rounded-lg shadow-lg max-w-sm`;
             toast.innerText = mensaje;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         }
 
-        function mostrarOverlay(texto = 'Un momento, estamos validando tu información...') {
-            document.getElementById('texto-overlay').innerText = texto;
-            document.getElementById('overlay-proceso').classList.remove('hidden');
+        function mostrarOverlay(texto = "Un momento, estamos validando tu información...") {
+            document.getElementById("texto-overlay").innerText = texto;
+            document.getElementById("overlay-proceso").classList.remove("hidden");
         }
 
         function ocultarOverlay() {
-            document.getElementById('overlay-proceso').classList.add('hidden');
+            document.getElementById("overlay-proceso").classList.add("hidden");
         }
 
         function limpiarQueryString() {
             const url = new URL(window.location.href);
-            url.searchParams.delete('success');
-            url.searchParams.delete('canceled');
-            url.searchParams.delete('session_id');
+            url.searchParams.delete("success");
+            url.searchParams.delete("canceled");
+            url.searchParams.delete("session_id");
             window.history.replaceState({}, document.title, url.pathname + url.search);
         }
 
-        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            usuarioActual = session ? session.user : null;
+        function mostrarVistaAuth() {
+            document.getElementById("no-auth").classList.add("hidden");
+            document.getElementById("si-auth").classList.remove("hidden");
+        }
 
-            if (usuarioActual) {
-                document.getElementById('no-auth').classList.add('hidden');
-                document.getElementById('si-auth').classList.remove('hidden');
+        function mostrarVistaNoAuth() {
+            document.getElementById("no-auth").classList.remove("hidden");
+            document.getElementById("si-auth").classList.add("hidden");
+        }
+
+        function formatearHora(hora) {
+            if (!hora) return "";
+            return String(hora).substring(0, 5);
+        }
+
+        async function iniciarPanel() {
+            if (panelCargando) return;
+            panelCargando = true;
+
+            try {
+                const { data, error } = await clienteSupabase.auth.getSession();
+
+                if (error) {
+                    console.error("Error obteniendo sesión:", error);
+                    mostrarVistaNoAuth();
+                    return;
+                }
+
+                usuarioActual = data?.session?.user ?? null;
+
+                if (!usuarioActual) {
+                    mostrarVistaNoAuth();
+                    return;
+                }
+
+                mostrarVistaAuth();
                 await cargarPerfilCompleto();
                 await procesarRetornoStripe();
-            } else {
-                document.getElementById('no-auth').classList.remove('hidden');
-                document.getElementById('si-auth').classList.add('hidden');
+                panelListo = true;
+            } catch (err) {
+                console.error("Error iniciando panel:", err);
+                mostrarVistaNoAuth();
+            } finally {
+                panelCargando = false;
             }
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await iniciarPanel();
+
+            clienteSupabase.auth.onAuthStateChange(async (_event, session) => {
+                const nuevoUsuario = session?.user ?? null;
+                const cambioDeUsuario = nuevoUsuario?.id !== usuarioActual?.id;
+
+                usuarioActual = nuevoUsuario;
+
+                if (!usuarioActual) {
+                    mostrarVistaNoAuth();
+                    return;
+                }
+
+                mostrarVistaAuth();
+
+                if (!panelListo || cambioDeUsuario) {
+                    await cargarPerfilCompleto();
+                    panelListo = true;
+                }
+            });
         });
 
         async function cerrarSesion() {
-            await clienteSupabase.auth.signOut();
-            window.location.href = 'index.html';
+            try {
+                await clienteSupabase.auth.signOut();
+            } catch (err) {
+                console.error("Error cerrando sesión:", err);
+            }
+            window.location.href = "index.html";
+        }
+
+        async function obtenerMapaNombres(tabla, ids, campoNombre = "nombre") {
+            if (!ids || ids.length === 0) return {};
+
+            const idsLimpios = [...new Set(ids.filter(Boolean))];
+            if (idsLimpios.length === 0) return {};
+
+            const { data, error } = await clienteSupabase
+                .from(tabla)
+                .select(`id, ${campoNombre}`)
+                .in("id", idsLimpios);
+
+            if (error) {
+                console.error(`Error obteniendo nombres de ${tabla}:`, error);
+                return {};
+            }
+
+            const mapa = {};
+            for (const item of data || []) {
+                mapa[item.id] = item[campoNombre];
+            }
+            return mapa;
         }
 
         async function cargarPerfilCompleto() {
-            const { data: perfil } = await clienteSupabase
-                .from('perfiles')
-                .select('*')
-                .eq('user_id', usuarioActual.id)
-                .maybeSingle();
-
-            let lat = 19.7028;
-            let lng = -101.1924;
-
-            if (perfil) {
-                document.getElementById('perfil-nombre').value = perfil.nombre_completo || '';
-                document.getElementById('perfil-telefono').value = perfil.telefono || '';
-                document.getElementById('perfil-direccion').value = perfil.direccion || '';
-                if (perfil.latitud && perfil.longitud) {
-                    lat = perfil.latitud;
-                    lng = perfil.longitud;
-                }
+            if (!usuarioActual?.id) {
+                mostrarVistaNoAuth();
+                return;
             }
 
-            inicializarMapa(lat, lng);
+            try {
+                console.log("Cargando panel para usuario:", usuarioActual.id);
 
-            const { data: pedidos } = await clienteSupabase
-                .from('pedidos')
-                .select('*, anuncios(nombre_negocio)')
-                .eq('cliente_id', usuarioActual.id)
-                .order('creado_en', { ascending: false })
-                .limit(5);
+                const { data: perfil, error: perfilError } = await clienteSupabase
+                    .from("perfiles")
+                    .select("*")
+                    .eq("user_id", usuarioActual.id)
+                    .maybeSingle();
 
-            document.getElementById('contenedor-mis-pedidos').innerHTML =
-                (!pedidos || pedidos.length === 0)
-                    ? '<p class="text-sm text-gray-400">Sin pedidos.</p>'
-                    : pedidos.map(p => `
-                        <div class="bg-gray-50 border p-3 rounded-xl flex justify-between">
+                if (perfilError) {
+                    console.error("Error cargando perfil:", perfilError);
+                }
+
+                let lat = 19.7028;
+                let lng = -101.1924;
+
+                document.getElementById("perfil-nombre").value = perfil?.nombre_completo || "";
+                document.getElementById("perfil-telefono").value = perfil?.telefono || "";
+                document.getElementById("perfil-direccion").value = perfil?.direccion || "";
+
+                if (perfil?.latitud != null && perfil?.longitud != null) {
+                    lat = Number(perfil.latitud);
+                    lng = Number(perfil.longitud);
+                }
+
+                inicializarMapa(lat, lng);
+
+                await Promise.all([
+                    cargarPedidos(),
+                    cargarCitas(),
+                    cargarMisNegocios()
+                ]);
+            } catch (err) {
+                console.error("Error general en cargarPerfilCompleto:", err);
+                document.getElementById("contenedor-mis-pedidos").innerHTML = `<p class="text-sm text-red-500">Error al cargar pedidos.</p>`;
+                document.getElementById("contenedor-mis-citas").innerHTML = `<p class="text-sm text-red-500">Error al cargar citas.</p>`;
+                document.getElementById("contenedor-mis-negocios").innerHTML = `<p class="text-sm text-red-300">Error al cargar tus espacios.</p>`;
+            }
+        }
+
+        async function cargarPedidos() {
+            const contenedor = document.getElementById("contenedor-mis-pedidos");
+            contenedor.innerHTML = `<p class="text-sm text-gray-400">Cargando...</p>`;
+
+            try {
+                let pedidos = null;
+
+                const intentoRelacion = await clienteSupabase
+                    .from("pedidos")
+                    .select("*, anuncios(nombre_negocio)")
+                    .eq("cliente_id", usuarioActual.id)
+                    .order("creado_en", { ascending: false })
+                    .limit(5);
+
+                if (!intentoRelacion.error) {
+                    pedidos = intentoRelacion.data || [];
+                } else {
+                    console.warn("Falló la consulta relacional de pedidos, uso fallback:", intentoRelacion.error);
+
+                    const fallback = await clienteSupabase
+                        .from("pedidos")
+                        .select("*")
+                        .eq("cliente_id", usuarioActual.id)
+                        .order("creado_en", { ascending: false })
+                        .limit(5);
+
+                    if (fallback.error) {
+                        throw fallback.error;
+                    }
+
+                    pedidos = fallback.data || [];
+
+                    const mapaAnuncios = await obtenerMapaNombres(
+                        "anuncios",
+                        pedidos.map(p => p.anuncio_id),
+                        "nombre_negocio"
+                    );
+
+                    pedidos = pedidos.map(p => ({
+                        ...p,
+                        anuncios: { nombre_negocio: mapaAnuncios[p.anuncio_id] || "Negocio" }
+                    }));
+                }
+
+                if (!pedidos || pedidos.length === 0) {
+                    contenedor.innerHTML = `<p class="text-sm text-gray-400">Sin pedidos.</p>`;
+                    return;
+                }
+
+                contenedor.innerHTML = pedidos.map(p => `
+                    <div class="bg-gray-50 border p-3 rounded-xl flex justify-between gap-3">
+                        <div>
+                            <p class="font-bold text-sm">${escapeHtml(p.anuncios?.nombre_negocio || "Negocio")}</p>
+                            <span class="text-[10px] uppercase text-green-600">${escapeHtml(p.estado || "")}</span>
+                        </div>
+                        <p class="font-black whitespace-nowrap">$${escapeHtml(p.total || 0)}</p>
+                    </div>
+                `).join("");
+            } catch (err) {
+                console.error("Error cargando pedidos:", err);
+                contenedor.innerHTML = `<p class="text-sm text-red-500">Error al cargar pedidos.</p>`;
+            }
+        }
+
+        async function cargarCitas() {
+            const contenedor = document.getElementById("contenedor-mis-citas");
+            contenedor.innerHTML = `<p class="text-sm text-gray-400">Cargando...</p>`;
+
+            try {
+                const hoy = new Date().toISOString().split("T")[0];
+                let citas = null;
+
+                const intentoRelacion = await clienteSupabase
+                    .from("citas")
+                    .select("*, anuncios(nombre_negocio), servicios(nombre)")
+                    .eq("cliente_id", usuarioActual.id)
+                    .gte("fecha_cita", hoy)
+                    .order("fecha_cita", { ascending: true })
+                    .limit(5);
+
+                if (!intentoRelacion.error) {
+                    citas = intentoRelacion.data || [];
+                } else {
+                    console.warn("Falló la consulta relacional de citas, uso fallback:", intentoRelacion.error);
+
+                    const fallback = await clienteSupabase
+                        .from("citas")
+                        .select("*")
+                        .eq("cliente_id", usuarioActual.id)
+                        .gte("fecha_cita", hoy)
+                        .order("fecha_cita", { ascending: true })
+                        .limit(5);
+
+                    if (fallback.error) {
+                        throw fallback.error;
+                    }
+
+                    citas = fallback.data || [];
+
+                    const mapaAnuncios = await obtenerMapaNombres(
+                        "anuncios",
+                        citas.map(c => c.anuncio_id),
+                        "nombre_negocio"
+                    );
+
+                    const mapaServicios = await obtenerMapaNombres(
+                        "servicios",
+                        citas.map(c => c.servicio_id),
+                        "nombre"
+                    );
+
+                    citas = citas.map(c => ({
+                        ...c,
+                        anuncios: { nombre_negocio: mapaAnuncios[c.anuncio_id] || "Consultorio" },
+                        servicios: { nombre: mapaServicios[c.servicio_id] || "" }
+                    }));
+                }
+
+                if (!citas || citas.length === 0) {
+                    contenedor.innerHTML = `<p class="text-sm text-gray-400">Sin citas próximas.</p>`;
+                    return;
+                }
+
+                contenedor.innerHTML = citas.map(c => `
+                    <div class="bg-blue-50 border p-3 rounded-xl">
+                        <div class="flex justify-between gap-3">
                             <div>
-                                <p class="font-bold text-sm">${p.anuncios?.nombre_negocio || 'Negocio'}</p>
-                                <span class="text-[10px] uppercase text-green-600">${p.estado}</span>
+                                <p class="font-bold text-sm">${escapeHtml(c.fecha_cita || "")}</p>
+                                <p class="text-xs font-bold text-gray-500">${escapeHtml(formatearHora(c.hora_inicio || ""))}</p>
                             </div>
-                            <p class="font-black">$${p.total}</p>
+                            <span class="text-[9px] text-white bg-tm-azul px-2 rounded h-fit">${escapeHtml(c.estado || "")}</span>
                         </div>
-                    `).join('');
-
-            const hoy = new Date().toISOString().split('T')[0];
-            const { data: citas } = await clienteSupabase
-                .from('citas')
-                .select('*, anuncios(nombre_negocio), servicios(nombre)')
-                .eq('cliente_id', usuarioActual.id)
-                .gte('fecha_cita', hoy)
-                .order('fecha_cita', { ascending: true })
-                .limit(5);
-
-            document.getElementById('contenedor-mis-citas').innerHTML =
-                (!citas || citas.length === 0)
-                    ? '<p class="text-sm text-gray-400">Sin citas próximas.</p>'
-                    : citas.map(c => `
-                        <div class="bg-blue-50 border p-3 rounded-xl">
-                            <div class="flex justify-between">
-                                <div>
-                                    <p class="font-bold text-sm">${c.fecha_cita}</p>
-                                    <p class="text-xs font-bold text-gray-500">${(c.hora_inicio || '').substring(0, 5)}</p>
-                                </div>
-                                <span class="text-[9px] text-white bg-tm-azul px-2 rounded">${c.estado}</span>
-                            </div>
-                            <p class="text-sm mt-2 font-bold">${c.anuncios?.nombre_negocio || 'Consultorio'}</p>
-                            <p class="text-[10px] text-gray-500">${c.servicios?.nombre || ''}</p>
-                        </div>
-                    `).join('');
-
-            await cargarMisNegocios();
+                        <p class="text-sm mt-2 font-bold">${escapeHtml(c.anuncios?.nombre_negocio || "Consultorio")}</p>
+                        <p class="text-[10px] text-gray-500">${escapeHtml(c.servicios?.nombre || "")}</p>
+                    </div>
+                `).join("");
+            } catch (err) {
+                console.error("Error cargando citas:", err);
+                contenedor.innerHTML = `<p class="text-sm text-red-500">Error al cargar citas.</p>`;
+            }
         }
 
         async function guardarPerfilSeguro() {
-            const btn = document.getElementById('btn-guardar-perfil');
-            btn.innerText = "Guardando...";
-            btn.disabled = true;
+            const btn = document.getElementById("btn-guardar-perfil");
+            const originalText = btn.innerText;
 
-            const payload = {
-                nombre_completo: document.getElementById('perfil-nombre').value,
-                telefono: document.getElementById('perfil-telefono').value,
-                direccion: document.getElementById('perfil-direccion').value,
-                latitud: document.getElementById('perfil-lat').value,
-                longitud: document.getElementById('perfil-lng').value
-            };
+            try {
+                btn.innerText = "Guardando...";
+                btn.disabled = true;
 
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
-                body: { accion: 'guardar_perfil', payload }
-            });
+                const payload = {
+                    nombre_completo: document.getElementById("perfil-nombre").value.trim(),
+                    telefono: document.getElementById("perfil-telefono").value.trim(),
+                    direccion: document.getElementById("perfil-direccion").value.trim(),
+                    latitud: document.getElementById("perfil-lat").value || null,
+                    longitud: document.getElementById("perfil-lng").value || null
+                };
 
-            btn.innerText = "Guardar Mis Datos";
-            btn.disabled = false;
+                const { data, error } = await clienteSupabase.functions.invoke("panel-gestionar", {
+                    body: { accion: "guardar_perfil", payload }
+                });
 
-            if (error || !data?.success) {
-                mostrarNotificacion("Error al guardar", "error");
-            } else {
+                if (error || !data?.success) {
+                    console.error("Error guardando perfil:", error || data);
+                    mostrarNotificacion("Error al guardar el perfil", "error");
+                    return;
+                }
+
                 mostrarNotificacion("¡Perfil guardado!");
+            } catch (err) {
+                console.error("Error inesperado guardando perfil:", err);
+                mostrarNotificacion("Error al guardar el perfil", "error");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
         function inicializarMapa(lat, lng) {
-            document.getElementById('perfil-lat').value = lat;
-            document.getElementById('perfil-lng').value = lng;
+            document.getElementById("perfil-lat").value = lat;
+            document.getElementById("perfil-lng").value = lng;
 
             setTimeout(() => {
-                if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 14);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                try {
+                    if (!window.L) {
+                        console.error("Leaflet no cargó correctamente.");
+                        return;
+                    }
 
-                    marker.on('dragend', function () {
-                        const p = marker.getLatLng();
-                        document.getElementById('perfil-lat').value = p.lat;
-                        document.getElementById('perfil-lng').value = p.lng;
-                    });
+                    if (!map) {
+                        map = L.map("mapa-perfil").setView([lat, lng], 14);
 
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                        document.getElementById('perfil-lat').value = e.latlng.lat;
-                        document.getElementById('perfil-lng').value = e.latlng.lng;
-                    });
-                } else {
-                    map.setView([lat, lng], 14);
-                    marker.setLatLng([lat, lng]);
+                        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                            maxZoom: 19,
+                            attribution: "&copy; OpenStreetMap"
+                        }).addTo(map);
+
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+                        marker.on("dragend", function () {
+                            const p = marker.getLatLng();
+                            document.getElementById("perfil-lat").value = p.lat;
+                            document.getElementById("perfil-lng").value = p.lng;
+                        });
+
+                        map.on("click", function (e) {
+                            marker.setLatLng(e.latlng);
+                            document.getElementById("perfil-lat").value = e.latlng.lat;
+                            document.getElementById("perfil-lng").value = e.latlng.lng;
+                        });
+                    } else {
+                        map.setView([lat, lng], 14);
+                        marker.setLatLng([lat, lng]);
+                    }
+
+                    setTimeout(() => {
+                        map.invalidateSize();
+                    }, 250);
+                } catch (err) {
+                    console.error("Error inicializando mapa:", err);
                 }
-
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 200);
             }, 300);
         }
 
         async function cargarMisNegocios() {
-            const { data } = await clienteSupabase
-                .from('anuncios')
-                .select('*')
-                .eq('user_id', usuarioActual.id)
-                .order('id', { ascending: false });
+            const contenedor = document.getElementById("contenedor-mis-negocios");
+            contenedor.innerHTML = `
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 border-dashed text-center text-gray-300 col-span-full">
+                    Cargando tus espacios...
+                </div>
+            `;
 
-            const contenedor = document.getElementById('contenedor-mis-negocios');
+            try {
+                const { data, error } = await clienteSupabase
+                    .from("anuncios")
+                    .select("*")
+                    .eq("user_id", usuarioActual.id)
+                    .order("id", { ascending: false });
 
-            if (!data || data.length === 0) {
-                contenedor.innerHTML = `
-                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 border-dashed text-center text-gray-300 col-span-full">
-                        Aún no administras ningún espacio.
-                    </div>
-                `;
-                return;
-            }
+                if (error) {
+                    throw error;
+                }
 
-            contenedor.innerHTML = data.map(n => {
-                const esTienda = CATEGORIAS_TIENDA.includes(n.categoria) || n.categoria === 'Restaurante';
-                const activo = n.nivel_pago === 0 || n.subscription_status === 'active';
-                const enlacePanel = esTienda ? `panel-tienda.html?id=${n.id}` : `panel-profesional.html?id=${n.id}`;
-
-                return `
-                    <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
-                        <div class="flex justify-between items-start mb-4 gap-4">
-                            <div class="flex gap-3">
-                                <span class="text-2xl">${esTienda ? '🛒' : '🩺'}</span>
-                                <div>
-                                    <h3 class="font-bold text-white text-lg">${n.nombre_negocio || 'Nuevo espacio'}</h3>
-                                    <p class="text-[10px] text-gray-300 uppercase">${n.categoria || 'Sin categoría'}</p>
-                                </div>
-                            </div>
-                            <span class="${activo ? 'bg-green-500/15 text-green-300' : 'bg-red-500/15 text-red-300'} text-[9px] font-black px-2 py-1 rounded">
-                                ${activo ? 'ACTIVO' : 'PENDIENTE'}
-                            </span>
+                if (!data || data.length === 0) {
+                    contenedor.innerHTML = `
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 border-dashed text-center text-gray-300 col-span-full">
+                            Aún no administras ningún espacio.
                         </div>
-                        <a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">
-                            Gestionar →
-                        </a>
+                    `;
+                    return;
+                }
+
+                contenedor.innerHTML = data.map(n => {
+                    const esTienda = CATEGORIAS_TIENDA.includes(n.categoria) || n.categoria === "Restaurante";
+                    const activo = Number(n.nivel_pago || 0) === 0 || n.subscription_status === "active";
+                    const enlacePanel = esTienda
+                        ? `panel-tienda.html?id=${n.id}`
+                        : `panel-profesional.html?id=${n.id}`;
+
+                    return `
+                        <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
+                            <div class="flex justify-between items-start mb-4 gap-4">
+                                <div class="flex gap-3">
+                                    <span class="text-2xl">${esTienda ? "🛒" : "🩺"}</span>
+                                    <div>
+                                        <h3 class="font-bold text-white text-lg">${escapeHtml(n.nombre_negocio || "Nuevo espacio")}</h3>
+                                        <p class="text-[10px] text-gray-300 uppercase">${escapeHtml(n.categoria || "Sin categoría")}</p>
+                                    </div>
+                                </div>
+                                <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
+                                    ${activo ? "ACTIVO" : "PENDIENTE"}
+                                </span>
+                            </div>
+                            <a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">
+                                Gestionar →
+                            </a>
+                        </div>
+                    `;
+                }).join("");
+            } catch (err) {
+                console.error("Error cargando negocios:", err);
+                contenedor.innerHTML = `
+                    <div class="bg-red-500/10 p-6 rounded-2xl border border-red-400/20 text-center text-red-200 col-span-full">
+                        Error al cargar tus espacios.
                     </div>
                 `;
-            }).join('');
+            }
         }
 
         function iniciarCreacionEspacio() {
-            document.getElementById('modal-nuevo-espacio').classList.remove('hidden');
-            document.getElementById('paso-1-rubro').classList.remove('hidden');
-            document.getElementById('paso-2-planes').classList.add('hidden');
+            document.getElementById("modal-nuevo-espacio").classList.remove("hidden");
+            document.getElementById("paso-1-rubro").classList.remove("hidden");
+            document.getElementById("paso-2-planes").classList.add("hidden");
         }
 
         function cerrarCreacionEspacio() {
-            document.getElementById('modal-nuevo-espacio').classList.add('hidden');
+            document.getElementById("modal-nuevo-espacio").classList.add("hidden");
         }
 
         function volverARubro() {
-            document.getElementById('paso-2-planes').classList.add('hidden');
-            document.getElementById('paso-1-rubro').classList.remove('hidden');
+            document.getElementById("paso-2-planes").classList.add("hidden");
+            document.getElementById("paso-1-rubro").classList.remove("hidden");
         }
 
         function renderPlanCard(plan, rubro) {
@@ -625,7 +890,7 @@
                             <h3 class="text-3xl font-black text-tm-azul-oscuro">${plan.nombre}</h3>
                             <div class="mt-3 flex items-end gap-2">
                                 <span class="text-4xl font-black text-gray-900">${plan.precio}</span>
-                                <span class="text-sm text-gray-500 mb-1">${plan.periodo || ''}</span>
+                                <span class="text-sm text-gray-500 mb-1">${plan.periodo || ""}</span>
                             </div>
                         </div>
 
@@ -651,7 +916,7 @@
                                         <span class="w-6 h-6 rounded-full bg-white shadow border flex items-center justify-center text-green-600 text-xs font-black">✓</span>
                                         <p class="text-sm text-gray-700 font-medium">${b}</p>
                                     </div>
-                                `).join('')}
+                                `).join("")}
                             </div>
                         </div>
 
@@ -665,45 +930,46 @@
 
         function mostrarPlanes(rubro) {
             const config = PLANES_CONFIG[rubro];
-            document.getElementById('rubro-seleccionado-memoria').value = rubro;
-            document.getElementById('paso-1-rubro').classList.add('hidden');
-            document.getElementById('paso-2-planes').classList.remove('hidden');
-            document.getElementById('titulo-planes').innerText = config.titulo;
-            document.getElementById('subtitulo-planes').innerText = config.subtitulo;
-            document.getElementById('badge-rubro').innerText = config.badge;
+            document.getElementById("rubro-seleccionado-memoria").value = rubro;
+            document.getElementById("paso-1-rubro").classList.add("hidden");
+            document.getElementById("paso-2-planes").classList.remove("hidden");
+            document.getElementById("titulo-planes").innerText = config.titulo;
+            document.getElementById("subtitulo-planes").innerText = config.subtitulo;
+            document.getElementById("badge-rubro").innerText = config.badge;
 
-            const catalogo = document.getElementById('catalogo-planes');
-            catalogo.innerHTML = config.planes.map(plan => renderPlanCard(plan, rubro)).join('');
+            const catalogo = document.getElementById("catalogo-planes");
+            catalogo.innerHTML = config.planes.map(plan => renderPlanCard(plan, rubro)).join("");
         }
 
         async function seleccionarPlan(nivel) {
-            const rubro = document.getElementById('rubro-seleccionado-memoria').value;
+            const rubro = document.getElementById("rubro-seleccionado-memoria").value;
+
             if (!rubro) {
-                mostrarNotificacion('Primero selecciona el tipo de espacio.', 'error');
+                mostrarNotificacion("Primero selecciona el tipo de espacio.", "error");
                 return;
             }
 
             if (nivel === 0) {
-                const destino = rubro === 'tienda'
-                    ? 'panel-tienda.html?plan=0&modo=nuevo'
-                    : 'panel-profesional.html?plan=0&modo=nuevo';
+                const destino = rubro === "tienda"
+                    ? "panel-tienda.html?plan=0&modo=nuevo"
+                    : "panel-profesional.html?plan=0&modo=nuevo";
 
                 window.location.href = destino;
                 return;
             }
 
             const priceId = STRIPE_PRICE_IDS?.[rubro]?.[nivel];
-            if (!priceId || priceId.includes('_AQUI')) {
-                mostrarNotificacion('Falta configurar el Price ID de Stripe para este plan.', 'error');
+            if (!priceId || priceId.includes("_AQUI")) {
+                mostrarNotificacion("Falta configurar el Price ID de Stripe para este plan.", "error");
                 return;
             }
 
             try {
-                mostrarOverlay('Te estamos llevando al checkout seguro de Stripe...');
+                mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
                 const returnUrl = `${window.location.origin}${window.location.pathname}`;
 
-                const { data, error } = await clienteSupabase.functions.invoke('create-checkout', {
+                const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
                     body: {
                         nivel,
                         priceId,
@@ -715,13 +981,14 @@
                 });
 
                 if (error || !data?.url) {
-                    throw new Error(data?.error || error?.message || 'No se pudo crear la sesión de pago.');
+                    throw new Error(data?.error || error?.message || "No se pudo crear la sesión de pago.");
                 }
 
                 window.location.href = data.url;
             } catch (err) {
+                console.error("Error creando checkout:", err);
                 ocultarOverlay();
-                mostrarNotificacion(err.message || 'Error al iniciar el pago.', 'error');
+                mostrarNotificacion(err.message || "Error al iniciar el pago.", "error");
             }
         }
 
@@ -729,13 +996,13 @@
             if (retornoStripeProcesado) return;
 
             const params = new URLSearchParams(window.location.search);
-            const success = params.get('success') === 'true';
-            const canceled = params.get('canceled') === 'true';
-            const sessionId = params.get('session_id');
+            const success = params.get("success") === "true";
+            const canceled = params.get("canceled") === "true";
+            const sessionId = params.get("session_id");
 
             if (canceled) {
                 retornoStripeProcesado = true;
-                mostrarNotificacion('El proceso de pago fue cancelado.', 'error');
+                mostrarNotificacion("El proceso de pago fue cancelado.", "error");
                 limpiarQueryString();
                 return;
             }
@@ -745,26 +1012,27 @@
             retornoStripeProcesado = true;
 
             try {
-                mostrarOverlay('Validando tu pago y preparando tu panel...');
+                mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                const { data, error } = await clienteSupabase.functions.invoke('confirm-checkout', {
+                const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
                     body: { sessionId }
                 });
 
                 if (error || !data?.success) {
-                    throw new Error(data?.error || error?.message || 'No se pudo validar el pago.');
+                    throw new Error(data?.error || error?.message || "No se pudo validar el pago.");
                 }
 
-                const destino = data.rubro === 'tienda'
+                const destino = data.rubro === "tienda"
                     ? `panel-tienda.html?id=${data.anuncioId}`
                     : `panel-profesional.html?id=${data.anuncioId}`;
 
-                mostrarNotificacion('Pago validado correctamente. Entrando a tu panel...');
+                mostrarNotificacion("Pago validado correctamente. Entrando a tu panel...");
                 limpiarQueryString();
                 window.location.href = destino;
             } catch (err) {
+                console.error("Error confirmando checkout:", err);
                 ocultarOverlay();
-                mostrarNotificacion(err.message || 'Ocurrió un problema al validar el pago.', 'error');
+                mostrarNotificacion(err.message || "Ocurrió un problema al validar el pago.", "error");
                 limpiarQueryString();
             }
         }
