@@ -254,6 +254,46 @@
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
         const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza'];
 
+
+        function limpiarIdIndex(valor) {
+            return valor === null || valor === undefined ? '' : String(valor).trim();
+        }
+
+        function hhmmIndex(hora) {
+            return hora ? String(hora).substring(0, 5) : '00:00';
+        }
+
+        function minsIndex(hora) {
+            const [hh, mm] = hhmmIndex(hora).split(':').map(Number);
+            return (hh * 60) + mm;
+        }
+
+        function strHoraIndex(mins) {
+            const hh = String(Math.floor(mins / 60)).padStart(2, '0');
+            const mm = String(mins % 60).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function sumarMinutosIndex(hora, minutos) {
+            return strHoraIndex(minsIndex(hora) + Number(minutos || 0));
+        }
+
+        function hayTraslapeIndex(inicioNuevo, finNuevo, ocupados = []) {
+            const nuevoIni = minsIndex(inicioNuevo);
+            const nuevoFin = minsIndex(finNuevo);
+
+            return ocupados.some((cita) => {
+                const citaIni = minsIndex(cita.hora_inicio);
+                const citaFin = minsIndex(cita.hora_fin);
+                return nuevoIni < citaFin && nuevoFin > citaIni;
+            });
+        }
+
+        function detalleErrorSupabase(error) {
+            if (!error) return 'Sin detalle';
+            return [error.message, error.details, error.hint, error.code].filter(Boolean).join(' | ');
+        }
+
         // --- SISTEMA DE NOTIFICACIONES ELEGANTES (Reemplazo de alert y confirm) ---
         function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
             return new Promise((resolve) => {
@@ -703,40 +743,67 @@
         }
 
         async function buscarHorariosIndex() {
-            const negocioIdStr = document.getElementById('reserva-negocio-id-index').value;
-            const servicioIdStr = document.getElementById('reserva-servicio-index').value;
+            const negocioId = limpiarIdIndex(document.getElementById('reserva-negocio-id-index').value);
+            const servicioId = limpiarIdIndex(document.getElementById('reserva-servicio-index').value);
             const fecha = document.getElementById('reserva-fecha-index').value;
             const cont = document.getElementById('contenedor-horarios-libres-index');
 
-            if(!servicioIdStr || !fecha) {
+            if (!negocioId || !servicioId || !fecha) {
                 cont.innerHTML = '<p class="text-xs text-gray-400 col-span-3 text-center italic mt-2">Selecciona un servicio y fecha arriba.</p>';
                 return;
             }
-            
-            // Revertido a parseInt para asegurar el tipo de dato numérico en la base de datos
-            const negocioId = parseInt(negocioIdStr, 10);
-            const servicioId = parseInt(servicioIdStr, 10);
 
             cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando disponibilidad...</p>';
-            
+
             try {
-                const payload = { anuncio_id: negocioId, servicio_id: servicioId, fecha: fecha };
-                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'obtener_disponibilidad', payload: payload } });
-                
-                if (!error && data && data.success) {
-                    mostrarHorarios(data.disponibles, cont);
+                const payload = {
+                    anuncio_id: negocioId,
+                    servicio_id: servicioId,
+                    fecha: fecha,
+                };
+
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
+                    body: { accion: 'obtener_disponibilidad', payload }
+                });
+
+                if (error) {
+                    console.error('Error en Edge Function obtener_disponibilidad:', detalleErrorSupabase(error), error);
+                    throw error;
+                }
+
+                if (data?.success) {
+                    mostrarHorarios(data.disponibles || [], cont);
                     return;
                 }
-                throw new Error("La Edge Function falló. Activando Respaldo Automático.");
-            } catch(err) {
-                console.warn("Utilizando Respaldo (Fallback) para buscar horarios:", err);
-                
-                try {
-                    const { data: anuncio, error: errAnuncio } = await clienteSupabase.from('anuncios').select('horarios').eq('id', negocioId).maybeSingle();
-                    const { data: servicio, error: errServicio } = await clienteSupabase.from('servicios').select('duracion_minutos').eq('id', servicioId).maybeSingle();
-                    const { data: citas, error: errCitas } = await clienteSupabase.from('citas').select('hora_inicio').eq('anuncio_id', negocioId).eq('fecha', fecha);
 
-                    if (!anuncio) throw new Error("Faltan datos del anuncio en la base de datos.");
+                throw new Error(data?.error || 'La Edge Function no devolvió success=true.');
+            } catch (err) {
+                console.warn('Utilizando Respaldo (Fallback) para buscar horarios:', err);
+
+                try {
+                    const { data: anuncio, error: errAnuncio } = await clienteSupabase
+                        .from('anuncios')
+                        .select('horarios')
+                        .eq('id', negocioId)
+                        .maybeSingle();
+
+                    const { data: servicio, error: errServicio } = await clienteSupabase
+                        .from('servicios')
+                        .select('duracion_minutos')
+                        .eq('id', servicioId)
+                        .maybeSingle();
+
+                    const { data: citas, error: errCitas } = await clienteSupabase
+                        .from('citas')
+                        .select('hora_inicio,hora_fin,estado')
+                        .eq('anuncio_id', negocioId)
+                        .eq('fecha_cita', fecha)
+                        .neq('estado', 'cancelada');
+
+                    if (errAnuncio) throw errAnuncio;
+                    if (errServicio) throw errServicio;
+                    if (errCitas) throw errCitas;
+                    if (!anuncio) throw new Error('Faltan datos del anuncio en la base de datos.');
 
                     const [year, month, day] = fecha.split('-').map(Number);
                     const diaSemana = new Date(year, month - 1, day).getDay();
@@ -747,28 +814,24 @@
                         return;
                     }
 
-                    let disponibles = [];
-                    let horaActual = horarioHoy.abre; 
-                    
-                    const duracionMin = (servicio && servicio.duracion_minutos) ? servicio.duracion_minutos : 30; 
-                    const citasOcupadas = (citas && !errCitas) ? citas.map(c => c.hora_inicio.substring(0,5)) : []; 
+                    const duracionMin = Number(servicio?.duracion_minutos || 60);
+                    const disponibles = [];
+                    const inicioJornada = minsIndex(horarioHoy.abre);
+                    const finJornada = minsIndex(horarioHoy.cierra);
+                    const citasOcupadas = Array.isArray(citas) ? citas : [];
 
-                    while (horaActual < horarioHoy.cierra) {
-                        let horaStr = horaActual.substring(0,5);
-                        if (!citasOcupadas.includes(horaStr)) {
-                            disponibles.push(horaStr);
+                    for (let t = inicioJornada; (t + duracionMin) <= finJornada; t += duracionMin) {
+                        const horaInicio = strHoraIndex(t);
+                        const horaFin = strHoraIndex(t + duracionMin);
+
+                        if (!hayTraslapeIndex(horaInicio, horaFin, citasOcupadas)) {
+                            disponibles.push(horaInicio);
                         }
-                        
-                        let [h, m] = horaStr.split(':').map(Number);
-                        m += duracionMin;
-                        h += Math.floor(m / 60);
-                        m = m % 60;
-                        horaActual = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
                     }
 
                     mostrarHorarios(disponibles, cont);
                 } catch (fallbackErr) {
-                    console.error("Error en Respaldo:", fallbackErr);
+                    console.error('Error en Respaldo:', fallbackErr);
                     cont.innerHTML = '<p class="text-sm text-red-500 col-span-3 text-center">Hubo un error al buscar los horarios disponibles. Intenta recargando.</p>';
                 }
             }
@@ -784,44 +847,95 @@
 
         async function confirmarCitaIndex(hora) {
             const fecha = document.getElementById('reserva-fecha-index').value;
-            const servicioIdStr = document.getElementById('reserva-servicio-index').value;
-            const negocioIdStr = document.getElementById('reserva-negocio-id-index').value;
+            const servicioId = limpiarIdIndex(document.getElementById('reserva-servicio-index').value);
+            const negocioId = limpiarIdIndex(document.getElementById('reserva-negocio-id-index').value);
 
-            // Revertido a parseInt para asegurar el tipo de dato numérico en la base de datos y evitar el Error 400
-            const servicioId = parseInt(servicioIdStr, 10);
-            const negocioId = parseInt(negocioIdStr, 10);
-            
-            const confirmado = await lanzarNotificacion("Confirmar Reserva", `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, "info", true);
-            if(!confirmado) return;
-            
-            const payload = { 
-                anuncio_id: negocioId, 
-                cliente_id: usuarioActual.id, 
-                servicio_id: servicioId, 
-                fecha: fecha, 
-                hora_inicio: hora 
-            };
-            
+            if (!usuarioActual?.id) {
+                await lanzarNotificacion('Inicia Sesión', 'Necesitas iniciar sesión para reservar una cita.', 'warning');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const confirmado = await lanzarNotificacion('Confirmar Reserva', `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, 'info', true);
+            if (!confirmado) return;
+
             const cont = document.getElementById('contenedor-horarios-libres-index');
             cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Reservando...</p>';
 
             try {
-                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', { body: { accion: 'crear_cita', payload: payload } });
-                
-                if (error || !data?.success) { 
-                    throw new Error("Error en Edge Function al intentar guardar");
-                } 
+                const { data: servicioInfo, error: servicioErr } = await clienteSupabase
+                    .from('servicios')
+                    .select('duracion_minutos')
+                    .eq('id', servicioId)
+                    .maybeSingle();
+
+                if (servicioErr) {
+                    console.error('Error obteniendo duración del servicio:', detalleErrorSupabase(servicioErr), servicioErr);
+                    throw servicioErr;
+                }
+
+                const duracion = Number(servicioInfo?.duracion_minutos || 60);
+                const horaFin = sumarMinutosIndex(hora, duracion);
+
+                const payload = {
+                    anuncio_id: negocioId,
+                    cliente_id: usuarioActual.id,
+                    servicio_id: servicioId,
+                    fecha_cita: fecha,
+                    hora_inicio: hora,
+                    hora_fin: horaFin
+                };
+
+                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
+                    body: { accion: 'crear_cita', payload }
+                });
+
+                if (error) {
+                    console.error('Error en Edge Function crear_cita:', detalleErrorSupabase(error), error);
+                    throw error;
+                }
+
+                if (!data?.success) {
+                    throw new Error(data?.error || 'La Edge Function no confirmó la reserva.');
+                }
+
                 await reservaExitosa();
             } catch (err) {
-                console.warn("La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...", err);
-                
-                const { error: insertError } = await clienteSupabase.from('citas').insert([payload]);
-                
-                if (insertError) {
-                    await lanzarNotificacion("Horario Ocupado", "Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.", "error");
-                    buscarHorariosIndex(); 
-                } else {
-                    await reservaExitosa();
+                console.warn('La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...', err);
+
+                try {
+                    const { data: servicioInfo, error: servicioErr } = await clienteSupabase
+                        .from('servicios')
+                        .select('duracion_minutos')
+                        .eq('id', servicioId)
+                        .maybeSingle();
+
+                    if (servicioErr) throw servicioErr;
+
+                    const duracion = Number(servicioInfo?.duracion_minutos || 60);
+                    const horaFin = sumarMinutosIndex(hora, duracion);
+
+                    const { error: insertError } = await clienteSupabase.from('citas').insert([{
+                        anuncio_id: negocioId,
+                        cliente_id: usuarioActual.id,
+                        servicio_id: servicioId,
+                        fecha_cita: fecha,
+                        hora_inicio: `${hhmmIndex(hora)}:00`,
+                        hora_fin: `${hhmmIndex(horaFin)}:00`,
+                        estado: 'confirmada'
+                    }]);
+
+                    if (insertError) {
+                        console.error('Error al insertar cita directamente:', detalleErrorSupabase(insertError), insertError);
+                        await lanzarNotificacion('Horario Ocupado', 'Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.', 'error');
+                        buscarHorariosIndex();
+                    } else {
+                        await reservaExitosa();
+                    }
+                } catch (insertErr) {
+                    console.error('Error final al guardar la cita:', insertErr);
+                    await lanzarNotificacion('Error', 'No se pudo guardar la cita. Revisa la consola y la Edge Function.', 'error');
+                    buscarHorariosIndex();
                 }
             }
         }
