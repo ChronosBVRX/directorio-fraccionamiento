@@ -949,6 +949,11 @@
                 return;
             }
 
+            if (!usuarioActual) {
+                mostrarNotificacion("Tu sesión no está disponible. Vuelve a iniciar sesión.", "error");
+                return;
+            }
+
             if (nivel === 0) {
                 const destino = rubro === "tienda"
                     ? "panel-tienda.html?plan=0&modo=nuevo"
@@ -967,21 +972,43 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
+                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
+
+                if (sessionError) {
+                    throw new Error("No se pudo leer la sesión actual.");
+                }
+
+                const accessToken = sessionData?.session?.access_token;
+                const email = sessionData?.session?.user?.email;
+
+                if (!accessToken) {
+                    throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+                }
+
                 const returnUrl = `${window.location.origin}${window.location.pathname}`;
 
                 const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
                     body: {
                         nivel,
                         priceId,
-                        userId: usuarioActual.id,
-                        userEmail: usuarioActual.email,
                         rubro,
-                        returnUrl
+                        returnUrl,
+                        userId: usuarioActual.id,
+                        userEmail: email || usuarioActual.email || null
+                    },
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
                     }
                 });
 
-                if (error || !data?.url) {
-                    throw new Error(data?.error || error?.message || "No se pudo crear la sesión de pago.");
+                if (error) {
+                    console.error("Error invoke create-checkout:", error);
+                    throw new Error(error.message || "No se pudo crear la sesión de pago.");
+                }
+
+                if (!data?.success || !data?.url) {
+                    console.error("Respuesta create-checkout:", data);
+                    throw new Error(data?.error || "No se pudo crear la sesión de pago.");
                 }
 
                 window.location.href = data.url;
@@ -1014,12 +1041,32 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
+                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
+
+                if (sessionError) {
+                    throw new Error("No se pudo recuperar la sesión.");
+                }
+
+                const accessToken = sessionData?.session?.access_token;
+                if (!accessToken) {
+                    throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");
+                }
+
                 const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId }
+                    body: { sessionId },
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
                 });
 
-                if (error || !data?.success) {
-                    throw new Error(data?.error || error?.message || "No se pudo validar el pago.");
+                if (error) {
+                    console.error("Error invoke confirm-checkout:", error);
+                    throw new Error(error.message || "No se pudo validar el pago.");
+                }
+
+                if (!data?.success) {
+                    console.error("Respuesta confirm-checkout:", data);
+                    throw new Error(data?.error || "No se pudo validar el pago.");
                 }
 
                 const destino = data.rubro === "tienda"
