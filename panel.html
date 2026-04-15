@@ -4,23 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - Vive Tres Marías</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: {
+                        'tm-azul': '#22527b',
+                        'tm-azul-oscuro': '#143653',
+                        'tm-dorado': '#d4af37',
+                        'tm-gris': '#4b5563'
+                    }
+                }
+            }
+        }
     </script>
 </head>
 <body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 relative min-h-screen">
 
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="overlay-proceso" class="hidden fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl px-8 py-7 max-w-md w-full text-center">
+            <div class="w-14 h-14 mx-auto rounded-full border-4 border-gray-200 border-t-tm-dorado animate-spin mb-5"></div>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Procesando</h3>
+            <p id="texto-overlay" class="text-sm text-gray-500">Un momento, estamos validando tu información...</p>
+        </div>
+    </div>
 
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
@@ -29,8 +49,8 @@
         <a href="index.html" class="mt-4 text-sm text-gray-400 hover:text-gray-600 underline">Volver al directorio</a>
     </div>
 
-    <div id="si-auth" class="hidden max-w-5xl mx-auto space-y-8 pb-16">
-        
+    <div id="si-auth" class="hidden max-w-6xl mx-auto space-y-8 pb-16">
+
         <div class="flex justify-between items-center border-b border-gray-200 pb-4">
             <h1 class="text-3xl font-black text-tm-azul-oscuro">Mi Tablero</h1>
             <div class="flex gap-3">
@@ -42,13 +62,23 @@
         <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
             <h2 class="text-2xl font-black text-tm-azul-oscuro mb-1">Mis Datos</h2>
             <p class="text-sm text-gray-500 mb-6">Asegúrate de que tu dirección sea correcta para tus entregas.</p>
-            
+
             <form onsubmit="event.preventDefault(); guardarPerfilSeguro();" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
-                    <div><label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label><input type="text" id="perfil-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                    <div><label class="text-xs font-bold uppercase text-gray-500">Teléfono (WhatsApp)</label><input type="tel" id="perfil-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></div>
-                    <div><label class="text-xs font-bold uppercase text-gray-500">Dirección Exacta</label><textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea></div>
-                    <input type="hidden" id="perfil-lat"><input type="hidden" id="perfil-lng">
+                    <div>
+                        <label class="text-xs font-bold uppercase text-gray-500">Nombre Completo</label>
+                        <input type="text" id="perfil-nombre" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold uppercase text-gray-500">Teléfono (WhatsApp)</label>
+                        <input type="tel" id="perfil-telefono" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold uppercase text-gray-500">Dirección Exacta</label>
+                        <textarea id="perfil-direccion" required rows="3" placeholder="Calle, Número, Coto..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea>
+                    </div>
+                    <input type="hidden" id="perfil-lat">
+                    <input type="hidden" id="perfil-lng">
                     <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3 rounded-xl font-bold transition shadow-md">Guardar Mis Datos</button>
                 </div>
                 <div class="flex flex-col">
@@ -69,38 +99,109 @@
             </div>
         </div>
 
-        <div class="bg-gray-800 rounded-3xl p-6 sm:p-8 shadow-xl text-white mt-12 relative overflow-hidden">
-            <div class="absolute -right-10 -top-10 text-[150px] opacity-10">🏢</div>
+        <div class="bg-gray-900 rounded-3xl p-6 sm:p-8 shadow-xl text-white mt-12 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-tm-azul-oscuro via-gray-900 to-black opacity-95"></div>
+            <div class="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-tm-dorado/10 blur-3xl"></div>
+            <div class="absolute -left-16 bottom-0 w-56 h-56 rounded-full bg-blue-400/10 blur-3xl"></div>
+
             <div class="relative z-10">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-black text-tm-dorado">Zona de Socios</h2>
                         <p class="text-sm text-gray-300 mt-1">¿Tienes un negocio, restaurante o consultorio? Adminístralo aquí.</p>
                     </div>
-                    <button onclick="iniciarCreacionEspacio()" class="bg-tm-dorado text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-yellow-600 transition whitespace-nowrap">+ Nuevo Espacio</button>
+                    <button onclick="iniciarCreacionEspacio()" class="bg-tm-dorado text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-yellow-600 transition whitespace-nowrap">
+                        + Nuevo Espacio
+                    </button>
                 </div>
+
                 <div id="contenedor-mis-negocios" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
-        <div id="modal-nuevo-espacio" class="hidden fixed inset-0 bg-black/80 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-            <div class="bg-white rounded-3xl w-full max-w-4xl p-6 sm:p-10 shadow-2xl relative max-h-[95vh] overflow-y-auto">
+        <div id="modal-nuevo-espacio" class="hidden fixed inset-0 bg-black/80 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-3xl w-full max-w-7xl p-6 sm:p-10 shadow-2xl relative max-h-[95vh] overflow-y-auto">
                 <button onclick="cerrarCreacionEspacio()" class="absolute top-4 right-5 text-4xl leading-none text-gray-400 hover:text-gray-800">&times;</button>
+
                 <div id="paso-1-rubro">
-                    <div class="text-center mb-8"><h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div onclick="mostrarPlanes('tienda')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-tm-dorado p-8 text-center cursor-pointer transition transform hover:-translate-y-1"><span class="text-6xl block mb-4">🛒</span><h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Productos y Comida</h3></div>
-                        <div onclick="mostrarPlanes('servicio')" class="bg-gray-50 rounded-2xl border-2 border-transparent hover:border-blue-500 p-8 text-center cursor-pointer transition transform hover:-translate-y-1"><span class="text-6xl block mb-4">🩺</span><h3 class="text-xl font-black text-tm-azul-oscuro mb-2">Consultorios y Servicios</h3></div>
+                    <div class="text-center mb-8">
+                        <p class="text-sm uppercase tracking-[0.25em] text-tm-dorado font-bold mb-2">Empieza tu espacio</p>
+                        <h2 class="text-2xl sm:text-4xl font-black text-tm-azul-oscuro">¿Qué tipo de espacio vas a crear?</h2>
+                        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">Selecciona el tipo de negocio y después verás una experiencia visual con beneficios reales de cada plan, como si estuvieras eligiendo una membresía premium.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div onclick="mostrarPlanes('tienda')" class="group relative overflow-hidden rounded-[28px] bg-gradient-to-br from-orange-50 via-white to-yellow-50 border border-orange-100 p-8 cursor-pointer hover:shadow-2xl transition duration-300 hover:-translate-y-1">
+                            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-r from-orange-500/5 via-yellow-300/5 to-red-500/5"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-6">
+                                    <span class="text-6xl">🛒</span>
+                                    <span class="bg-white text-orange-600 border border-orange-100 text-xs font-black px-3 py-2 rounded-full shadow-sm">PRODUCTOS Y COMIDA</span>
+                                </div>
+                                <h3 class="text-3xl font-black text-tm-azul-oscuro mb-3">Tiendas, comida y delivery</h3>
+                                <p class="text-gray-600 mb-6">Perfecto para restaurantes, snacks, postres, abarrotes o cualquier negocio que quiera vender, mostrar catálogo y recibir pedidos.</p>
+
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">🍔</div>
+                                        <p class="text-xs font-bold text-gray-700">Menú visual</p>
+                                    </div>
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">🛵</div>
+                                        <p class="text-xs font-bold text-gray-700">Pedidos</p>
+                                    </div>
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">⭐</div>
+                                        <p class="text-xs font-bold text-gray-700">Más visibilidad</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div onclick="mostrarPlanes('servicio')" class="group relative overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-50 via-white to-cyan-50 border border-blue-100 p-8 cursor-pointer hover:shadow-2xl transition duration-300 hover:-translate-y-1">
+                            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-r from-blue-500/5 via-cyan-300/5 to-indigo-500/5"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-6">
+                                    <span class="text-6xl">🩺</span>
+                                    <span class="bg-white text-blue-600 border border-blue-100 text-xs font-black px-3 py-2 rounded-full shadow-sm">CONSULTORIOS Y SERVICIOS</span>
+                                </div>
+                                <h3 class="text-3xl font-black text-tm-azul-oscuro mb-3">Citas, agenda y servicios</h3>
+                                <p class="text-gray-600 mb-6">Ideal para médicos, terapeutas, dentistas, nutriólogos, abogados, estéticas y cualquier profesional que agende por cita.</p>
+
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">📅</div>
+                                        <p class="text-xs font-bold text-gray-700">Agenda</p>
+                                    </div>
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">⏰</div>
+                                        <p class="text-xs font-bold text-gray-700">Horarios</p>
+                                    </div>
+                                    <div class="bg-white/80 backdrop-blur rounded-2xl p-3 border border-white shadow-sm">
+                                        <div class="text-2xl mb-2">💼</div>
+                                        <p class="text-xs font-bold text-gray-700">Perfil profesional</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 <div id="paso-2-planes" class="hidden">
-                    <div class="text-center mb-8 flex items-center justify-center gap-4"><button onclick="volverARubro()" class="bg-gray-100 px-3 py-1 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button><h2 class="text-2xl sm:text-3xl font-black text-tm-azul-oscuro" id="titulo-planes">Selecciona tu Plan</h2></div>
-                    <input type="hidden" id="rubro-seleccionado-memoria">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div onclick="irAlPanel(0)" class="bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col cursor-pointer hover:shadow-lg transition"><h3 class="font-bold text-gray-500 uppercase">Básico</h3><p class="text-2xl font-black mt-1">Gratis</p><button class="w-full bg-gray-200 text-gray-700 font-bold py-2 rounded-lg mt-auto">Empezar</button></div>
-                        <div onclick="irAlPanel(1)" class="bg-white rounded-2xl border-2 border-blue-400 p-6 flex flex-col cursor-pointer hover:shadow-xl transition"><h3 class="font-bold text-blue-600 uppercase">Nivel 1</h3><p class="text-2xl font-black mt-1">$150 <span class="text-xs">/mes</span></p><button class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg mt-auto">Elegir Pro</button></div>
-                        <div onclick="irAlPanel(2)" class="bg-gradient-to-b from-white to-yellow-50 rounded-2xl border-2 border-tm-dorado p-6 flex flex-col cursor-pointer hover:shadow-xl transition transform hover:scale-105"><h3 class="font-bold text-tm-dorado uppercase">Nivel 2</h3><p class="text-2xl font-black mt-1">$300 <span class="text-xs">/mes</span></p><button class="w-full bg-tm-dorado text-white font-bold py-2 rounded-lg mt-auto">Elegir Elite</button></div>
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <button onclick="volverARubro()" class="bg-gray-100 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button>
+                                <span id="badge-rubro" class="text-xs font-black uppercase tracking-wider bg-gray-100 text-gray-600 px-3 py-2 rounded-full">Rubro</span>
+                            </div>
+                            <h2 id="titulo-planes" class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Selecciona tu plan</h2>
+                            <p id="subtitulo-planes" class="text-gray-500 mt-2">Compara ventajas, estilo y alcance de cada opción.</p>
+                        </div>
                     </div>
+
+                    <input type="hidden" id="rubro-seleccionado-memoria">
+
+                    <div id="catalogo-planes" class="grid grid-cols-1 xl:grid-cols-3 gap-5"></div>
                 </div>
             </div>
         </div>
@@ -108,94 +209,565 @@
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let usuarioActual = null; let map = null; let marker = null;
+        let usuarioActual = null;
+        let map = null;
+        let marker = null;
+        let retornoStripeProcesado = false;
+
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
 
+        const STRIPE_PRICE_IDS = {
+            tienda: {
+                1: 'price_1TItPTGtW4zuRQv9RMSEOnnn',
+                2: 'price_1TItQaGtW4zuRQv9gyQOTaC5'
+            },
+            servicio: {
+                1: 'price_1TItPTGtW4zuRQv9RMSEOnnn',
+                2: 'price_1TItQaGtW4zuRQv9gyQOTaC5'
+            }
+        };
+
+        const PLANES_CONFIG = {
+            tienda: {
+                badge: 'Productos y comida',
+                titulo: 'Planes para tiendas y comida',
+                subtitulo: 'Desde un catálogo básico hasta una vitrina premium para vender mejor y lucir más profesional.',
+                planes: [
+                    {
+                        nivel: 0,
+                        nombre: 'Básico',
+                        precio: 'Gratis',
+                        cta: 'Empezar gratis',
+                        destacado: false,
+                        etiqueta: 'Para arrancar',
+                        fondo: 'from-gray-50 via-white to-gray-100',
+                        borde: 'border-gray-200',
+                        boton: 'bg-gray-900 hover:bg-black text-white',
+                        demoEmoji: '🛍️',
+                        demoTitulo: 'Ejemplo básico',
+                        demoTexto: 'Ficha simple del negocio con datos esenciales y presencia dentro del directorio.',
+                        beneficios: [
+                            'Apareces en el directorio',
+                            'Datos básicos del negocio',
+                            'Ubicación y contacto',
+                            'Ideal para empezar'
+                        ]
+                    },
+                    {
+                        nivel: 1,
+                        nombre: 'Nivel 1',
+                        precio: '$150',
+                        periodo: '/mes',
+                        cta: 'Ir a pago seguro',
+                        destacado: true,
+                        etiqueta: 'Más elegido',
+                        fondo: 'from-blue-50 via-white to-cyan-50',
+                        borde: 'border-blue-300',
+                        boton: 'bg-blue-600 hover:bg-blue-700 text-white',
+                        demoEmoji: '🍔',
+                        demoTitulo: 'Ejemplo con catálogo',
+                        demoTexto: 'Menú visual, productos mejor organizados y un escaparate mucho más atractivo.',
+                        beneficios: [
+                            'Todo lo del plan básico',
+                            'Mayor presencia visual',
+                            'Catálogo más vistoso',
+                            'Mejor conversión de visitas'
+                        ]
+                    },
+                    {
+                        nivel: 2,
+                        nombre: 'Nivel 2',
+                        precio: '$300',
+                        periodo: '/mes',
+                        cta: 'Ir a pago premium',
+                        destacado: false,
+                        etiqueta: 'Mayor alcance',
+                        fondo: 'from-yellow-50 via-white to-orange-50',
+                        borde: 'border-yellow-400',
+                        boton: 'bg-tm-dorado hover:bg-yellow-600 text-white',
+                        demoEmoji: '🚀',
+                        demoTitulo: 'Ejemplo premium',
+                        demoTexto: 'Imagen más potente, mejor presentación, mayor confianza y sensación de marca sólida.',
+                        beneficios: [
+                            'Todo lo del nivel 1',
+                            'Imagen premium del negocio',
+                            'Mayor prioridad visual',
+                            'Experiencia más profesional'
+                        ]
+                    }
+                ]
+            },
+            servicio: {
+                badge: 'Consultorios y servicios',
+                titulo: 'Planes para consultorios y servicios',
+                subtitulo: 'Ideal para profesionales que quieren mostrar autoridad, facilitar citas y verse realmente profesionales.',
+                planes: [
+                    {
+                        nivel: 0,
+                        nombre: 'Básico',
+                        precio: 'Gratis',
+                        cta: 'Empezar gratis',
+                        destacado: false,
+                        etiqueta: 'Para iniciar',
+                        fondo: 'from-gray-50 via-white to-gray-100',
+                        borde: 'border-gray-200',
+                        boton: 'bg-gray-900 hover:bg-black text-white',
+                        demoEmoji: '📇',
+                        demoTitulo: 'Ejemplo básico',
+                        demoTexto: 'Perfil simple con nombre, especialidad, dirección y contacto.',
+                        beneficios: [
+                            'Apareces en el directorio',
+                            'Perfil básico profesional',
+                            'Información esencial',
+                            'Presencia inicial'
+                        ]
+                    },
+                    {
+                        nivel: 1,
+                        nombre: 'Nivel 1',
+                        precio: '$150',
+                        periodo: '/mes',
+                        cta: 'Ir a pago seguro',
+                        destacado: true,
+                        etiqueta: 'Más elegido',
+                        fondo: 'from-blue-50 via-white to-cyan-50',
+                        borde: 'border-blue-300',
+                        boton: 'bg-blue-600 hover:bg-blue-700 text-white',
+                        demoEmoji: '📅',
+                        demoTitulo: 'Ejemplo con agenda',
+                        demoTexto: 'Presentación más sólida y percepción de orden con mejor experiencia para pedir cita.',
+                        beneficios: [
+                            'Todo lo del plan básico',
+                            'Perfil con mejor presencia',
+                            'Más confianza al usuario',
+                            'Experiencia más atractiva'
+                        ]
+                    },
+                    {
+                        nivel: 2,
+                        nombre: 'Nivel 2',
+                        precio: '$300',
+                        periodo: '/mes',
+                        cta: 'Ir a pago premium',
+                        destacado: false,
+                        etiqueta: 'Imagen premium',
+                        fondo: 'from-yellow-50 via-white to-orange-50',
+                        borde: 'border-yellow-400',
+                        boton: 'bg-tm-dorado hover:bg-yellow-600 text-white',
+                        demoEmoji: '🏥',
+                        demoTitulo: 'Ejemplo premium',
+                        demoTexto: 'Marca personal o de consultorio mucho más elegante, confiable y memorable.',
+                        beneficios: [
+                            'Todo lo del nivel 1',
+                            'Imagen más premium',
+                            'Mayor percepción de valor',
+                            'Panel pensado para crecer'
+                        ]
+                    }
+                ]
+            }
+        };
+
         function mostrarNotificacion(mensaje, tipo = 'exito') {
-            const container = document.getElementById('toast-container'); const toast = document.createElement('div');
-            toast.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg mb-2`;
-            toast.innerText = mensaje; container.appendChild(toast); setTimeout(() => toast.remove(), 4000);
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg`;
+            toast.innerText = mensaje;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         }
 
-        clienteSupabase.auth.onAuthStateChange((event, session) => {
+        function mostrarOverlay(texto = 'Un momento, estamos validando tu información...') {
+            document.getElementById('texto-overlay').innerText = texto;
+            document.getElementById('overlay-proceso').classList.remove('hidden');
+        }
+
+        function ocultarOverlay() {
+            document.getElementById('overlay-proceso').classList.add('hidden');
+        }
+
+        function limpiarQueryString() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('success');
+            url.searchParams.delete('canceled');
+            url.searchParams.delete('session_id');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+
+        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
             usuarioActual = session ? session.user : null;
-            if(usuarioActual) {
+
+            if (usuarioActual) {
                 document.getElementById('no-auth').classList.add('hidden');
                 document.getElementById('si-auth').classList.remove('hidden');
-                cargarPerfilCompleto();
+                await cargarPerfilCompleto();
+                await procesarRetornoStripe();
             } else {
                 document.getElementById('no-auth').classList.remove('hidden');
                 document.getElementById('si-auth').classList.add('hidden');
             }
         });
 
-        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.href = 'index.html'; }
+        async function cerrarSesion() {
+            await clienteSupabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
 
         async function cargarPerfilCompleto() {
-            // MAYBESINGLE evita errores si el perfil no existe aún
-            const { data: perfil } = await clienteSupabase.from('perfiles').select('*').eq('user_id', usuarioActual.id).maybeSingle();
-            let lat = 19.7028; let lng = -101.1924; 
-            
+            const { data: perfil } = await clienteSupabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .maybeSingle();
+
+            let lat = 19.7028;
+            let lng = -101.1924;
+
             if (perfil) {
                 document.getElementById('perfil-nombre').value = perfil.nombre_completo || '';
                 document.getElementById('perfil-telefono').value = perfil.telefono || '';
                 document.getElementById('perfil-direccion').value = perfil.direccion || '';
-                if(perfil.latitud && perfil.longitud) { lat = perfil.latitud; lng = perfil.longitud; }
+                if (perfil.latitud && perfil.longitud) {
+                    lat = perfil.latitud;
+                    lng = perfil.longitud;
+                }
             }
+
             inicializarMapa(lat, lng);
 
-            const { data: pedidos } = await clienteSupabase.from('pedidos').select('*, anuncios(nombre_negocio)').eq('cliente_id', usuarioActual.id).order('creado_en', { ascending: false }).limit(5);
-            document.getElementById('contenedor-mis-pedidos').innerHTML = (!pedidos || pedidos.length === 0) ? '<p class="text-sm text-gray-400">Sin pedidos.</p>' : pedidos.map(p => `<div class="bg-gray-50 border p-3 rounded-xl flex justify-between"><div><p class="font-bold text-sm">${p.anuncios?.nombre_negocio||'Negocio'}</p><span class="text-[10px] uppercase text-green-600">${p.estado}</span></div><p class="font-black">$${p.total}</p></div>`).join('');
+            const { data: pedidos } = await clienteSupabase
+                .from('pedidos')
+                .select('*, anuncios(nombre_negocio)')
+                .eq('cliente_id', usuarioActual.id)
+                .order('creado_en', { ascending: false })
+                .limit(5);
+
+            document.getElementById('contenedor-mis-pedidos').innerHTML =
+                (!pedidos || pedidos.length === 0)
+                    ? '<p class="text-sm text-gray-400">Sin pedidos.</p>'
+                    : pedidos.map(p => `
+                        <div class="bg-gray-50 border p-3 rounded-xl flex justify-between">
+                            <div>
+                                <p class="font-bold text-sm">${p.anuncios?.nombre_negocio || 'Negocio'}</p>
+                                <span class="text-[10px] uppercase text-green-600">${p.estado}</span>
+                            </div>
+                            <p class="font-black">$${p.total}</p>
+                        </div>
+                    `).join('');
 
             const hoy = new Date().toISOString().split('T')[0];
-            const { data: citas } = await clienteSupabase.from('citas').select('*, anuncios(nombre_negocio), servicios(nombre)').eq('cliente_id', usuarioActual.id).gte('fecha_cita', hoy).order('fecha_cita', { ascending: true }).limit(5);
-            document.getElementById('contenedor-mis-citas').innerHTML = (!citas || citas.length === 0) ? '<p class="text-sm text-gray-400">Sin citas próximas.</p>' : citas.map(c => `<div class="bg-blue-50 border p-3 rounded-xl"><div class="flex justify-between"><div><p class="font-bold text-sm">${c.fecha_cita}</p><p class="text-xs font-bold text-gray-500">${c.hora_inicio.substring(0,5)}</p></div><span class="text-[9px] text-white bg-tm-azul px-2 rounded">${c.estado}</span></div><p class="text-sm mt-2 font-bold">${c.anuncios?.nombre_negocio||'Consultorio'}</p><p class="text-[10px] text-gray-500">${c.servicios?.nombre}</p></div>`).join('');
+            const { data: citas } = await clienteSupabase
+                .from('citas')
+                .select('*, anuncios(nombre_negocio), servicios(nombre)')
+                .eq('cliente_id', usuarioActual.id)
+                .gte('fecha_cita', hoy)
+                .order('fecha_cita', { ascending: true })
+                .limit(5);
 
-            cargarMisNegocios();
+            document.getElementById('contenedor-mis-citas').innerHTML =
+                (!citas || citas.length === 0)
+                    ? '<p class="text-sm text-gray-400">Sin citas próximas.</p>'
+                    : citas.map(c => `
+                        <div class="bg-blue-50 border p-3 rounded-xl">
+                            <div class="flex justify-between">
+                                <div>
+                                    <p class="font-bold text-sm">${c.fecha_cita}</p>
+                                    <p class="text-xs font-bold text-gray-500">${(c.hora_inicio || '').substring(0, 5)}</p>
+                                </div>
+                                <span class="text-[9px] text-white bg-tm-azul px-2 rounded">${c.estado}</span>
+                            </div>
+                            <p class="text-sm mt-2 font-bold">${c.anuncios?.nombre_negocio || 'Consultorio'}</p>
+                            <p class="text-[10px] text-gray-500">${c.servicios?.nombre || ''}</p>
+                        </div>
+                    `).join('');
+
+            await cargarMisNegocios();
         }
 
         async function guardarPerfilSeguro() {
-            const btn = document.getElementById('btn-guardar-perfil'); btn.innerText = "Guardando..."; btn.disabled = true;
-            const payload = { nombre_completo: document.getElementById('perfil-nombre').value, telefono: document.getElementById('perfil-telefono').value, direccion: document.getElementById('perfil-direccion').value, latitud: document.getElementById('perfil-lat').value, longitud: document.getElementById('perfil-lng').value };
-            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', { body: { accion: 'guardar_perfil', payload: payload } });
-            btn.innerText = "Guardar Mis Datos"; btn.disabled = false;
-            if (error || !data.success) mostrarNotificacion("Error al guardar", "error"); else mostrarNotificacion("¡Perfil guardado!");
+            const btn = document.getElementById('btn-guardar-perfil');
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+
+            const payload = {
+                nombre_completo: document.getElementById('perfil-nombre').value,
+                telefono: document.getElementById('perfil-telefono').value,
+                direccion: document.getElementById('perfil-direccion').value,
+                latitud: document.getElementById('perfil-lat').value,
+                longitud: document.getElementById('perfil-lng').value
+            };
+
+            const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
+                body: { accion: 'guardar_perfil', payload }
+            });
+
+            btn.innerText = "Guardar Mis Datos";
+            btn.disabled = false;
+
+            if (error || !data?.success) {
+                mostrarNotificacion("Error al guardar", "error");
+            } else {
+                mostrarNotificacion("¡Perfil guardado!");
+            }
         }
 
         function inicializarMapa(lat, lng) {
-            document.getElementById('perfil-lat').value = lat; document.getElementById('perfil-lng').value = lng;
+            document.getElementById('perfil-lat').value = lat;
+            document.getElementById('perfil-lng').value = lng;
+
             setTimeout(() => {
                 if (!map) {
-                    map = L.map('mapa-perfil').setView([lat, lng], 14); 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
-                    marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-                    marker.on('dragend', function () { document.getElementById('perfil-lat').value = marker.getLatLng().lat; document.getElementById('perfil-lng').value = marker.getLatLng().lng; });
-                    map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('perfil-lat').value = e.latlng.lat; document.getElementById('perfil-lng').value = e.latlng.lng; });
-                } else { map.setView([lat, lng], 14); marker.setLatLng([lat, lng]); }
-                // FORZAR RESIZE DEL MAPA PARA EVITAR CUADRO GRIS
-                setTimeout(() => { map.invalidateSize(); }, 200);
+                    map = L.map('mapa-perfil').setView([lat, lng], 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+                    marker.on('dragend', function () {
+                        const p = marker.getLatLng();
+                        document.getElementById('perfil-lat').value = p.lat;
+                        document.getElementById('perfil-lng').value = p.lng;
+                    });
+
+                    map.on('click', function(e) {
+                        marker.setLatLng(e.latlng);
+                        document.getElementById('perfil-lat').value = e.latlng.lat;
+                        document.getElementById('perfil-lng').value = e.latlng.lng;
+                    });
+                } else {
+                    map.setView([lat, lng], 14);
+                    marker.setLatLng([lat, lng]);
+                }
+
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 200);
             }, 300);
         }
 
         async function cargarMisNegocios() {
-            const { data } = await clienteSupabase.from('anuncios').select('*').eq('user_id', usuarioActual.id).order('id', { ascending: false });
+            const { data } = await clienteSupabase
+                .from('anuncios')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .order('id', { ascending: false });
+
             const contenedor = document.getElementById('contenedor-mis-negocios');
-            if (!data || data.length === 0) return contenedor.innerHTML = `<div class="bg-gray-700/50 p-6 rounded-2xl border-gray-600 border-dashed text-center text-gray-400 col-span-full">Aún no administras ningún espacio.</div>`;
+
+            if (!data || data.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 border-dashed text-center text-gray-300 col-span-full">
+                        Aún no administras ningún espacio.
+                    </div>
+                `;
+                return;
+            }
+
             contenedor.innerHTML = data.map(n => {
-                const esTienda = CATEGORIAS_TIENDA.includes(n.categoria);
+                const esTienda = CATEGORIAS_TIENDA.includes(n.categoria) || n.categoria === 'Restaurante';
+                const activo = n.nivel_pago === 0 || n.subscription_status === 'active';
                 const enlacePanel = esTienda ? `panel-tienda.html?id=${n.id}` : `panel-profesional.html?id=${n.id}`;
-                return `<div class="bg-gray-700 rounded-2xl p-5 border border-gray-600 flex flex-col justify-between hover:bg-gray-600"><div class="flex justify-between items-start mb-4"><div class="flex gap-3"><span class="text-2xl">${esTienda?'🛒':'🩺'}</span><div><h3 class="font-bold text-white text-lg">${n.nombre_negocio}</h3><p class="text-[10px] text-gray-400 uppercase">${n.categoria}</p></div></div><span class="bg-gray-200 text-gray-700 text-[9px] font-black px-2 py-1 rounded">ACTIVO</span></div><a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">Gestionar →</a></div>`;
+
+                return `
+                    <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
+                        <div class="flex justify-between items-start mb-4 gap-4">
+                            <div class="flex gap-3">
+                                <span class="text-2xl">${esTienda ? '🛒' : '🩺'}</span>
+                                <div>
+                                    <h3 class="font-bold text-white text-lg">${n.nombre_negocio || 'Nuevo espacio'}</h3>
+                                    <p class="text-[10px] text-gray-300 uppercase">${n.categoria || 'Sin categoría'}</p>
+                                </div>
+                            </div>
+                            <span class="${activo ? 'bg-green-500/15 text-green-300' : 'bg-red-500/15 text-red-300'} text-[9px] font-black px-2 py-1 rounded">
+                                ${activo ? 'ACTIVO' : 'PENDIENTE'}
+                            </span>
+                        </div>
+                        <a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">
+                            Gestionar →
+                        </a>
+                    </div>
+                `;
             }).join('');
         }
 
-        function iniciarCreacionEspacio() { document.getElementById('modal-nuevo-espacio').classList.remove('hidden'); document.getElementById('paso-1-rubro').classList.remove('hidden'); document.getElementById('paso-2-planes').classList.add('hidden'); }
-        function cerrarCreacionEspacio() { document.getElementById('modal-nuevo-espacio').classList.add('hidden'); }
-        function volverARubro() { document.getElementById('paso-2-planes').classList.add('hidden'); document.getElementById('paso-1-rubro').classList.remove('hidden'); }
-        function mostrarPlanes(rubro) { document.getElementById('paso-1-rubro').classList.add('hidden'); document.getElementById('paso-2-planes').classList.remove('hidden'); document.getElementById('rubro-seleccionado-memoria').value = rubro; document.getElementById('titulo-planes').innerText = rubro === 'tienda' ? "Planes para Tiendas" : "Planes para Consultorios"; }
-        function irAlPanel(nivel) { const r = document.getElementById('rubro-seleccionado-memoria').value; window.location.href = r === 'tienda' ? `panel-tienda.html?plan=${nivel}` : `panel-profesional.html?plan=${nivel}`; }
+        function iniciarCreacionEspacio() {
+            document.getElementById('modal-nuevo-espacio').classList.remove('hidden');
+            document.getElementById('paso-1-rubro').classList.remove('hidden');
+            document.getElementById('paso-2-planes').classList.add('hidden');
+        }
+
+        function cerrarCreacionEspacio() {
+            document.getElementById('modal-nuevo-espacio').classList.add('hidden');
+        }
+
+        function volverARubro() {
+            document.getElementById('paso-2-planes').classList.add('hidden');
+            document.getElementById('paso-1-rubro').classList.remove('hidden');
+        }
+
+        function renderPlanCard(plan, rubro) {
+            return `
+                <div class="relative overflow-hidden rounded-[30px] border ${plan.borde} bg-gradient-to-br ${plan.fondo} shadow-sm hover:shadow-2xl transition duration-300 hover:-translate-y-1">
+                    ${plan.destacado ? `
+                        <div class="absolute top-4 right-4 z-20 bg-blue-600 text-white text-[10px] uppercase font-black tracking-wider px-3 py-2 rounded-full shadow-lg">
+                            ${plan.etiqueta}
+                        </div>
+                    ` : `
+                        <div class="absolute top-4 right-4 z-20 bg-white/90 text-gray-700 text-[10px] uppercase font-black tracking-wider px-3 py-2 rounded-full shadow">
+                            ${plan.etiqueta}
+                        </div>
+                    `}
+
+                    <div class="p-6 h-full flex flex-col">
+                        <div class="mb-5">
+                            <p class="text-xs uppercase tracking-[0.25em] text-gray-500 font-bold mb-2">${PLANES_CONFIG[rubro].badge}</p>
+                            <h3 class="text-3xl font-black text-tm-azul-oscuro">${plan.nombre}</h3>
+                            <div class="mt-3 flex items-end gap-2">
+                                <span class="text-4xl font-black text-gray-900">${plan.precio}</span>
+                                <span class="text-sm text-gray-500 mb-1">${plan.periodo || ''}</span>
+                            </div>
+                        </div>
+
+                        <div class="rounded-[24px] bg-white/80 backdrop-blur border border-white shadow-sm p-4 mb-5">
+                            <div class="rounded-[20px] h-40 bg-gradient-to-br ${plan.fondo} border border-white flex items-center justify-center text-center p-5 shadow-inner">
+                                <div>
+                                    <div class="text-6xl mb-3">${plan.demoEmoji}</div>
+                                    <div class="text-sm font-black text-tm-azul-oscuro uppercase tracking-wider">${plan.demoTitulo}</div>
+                                    <div class="text-xs text-gray-500 mt-1">Vista ilustrativa del plan</div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm font-bold text-gray-800">${plan.demoTitulo}</p>
+                                <p class="text-xs text-gray-500 mt-1">${plan.demoTexto}</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-bold mb-3">Lo que incluye</p>
+                            <div class="space-y-3">
+                                ${plan.beneficios.map(b => `
+                                    <div class="flex items-start gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-white shadow border flex items-center justify-center text-green-600 text-xs font-black">✓</span>
+                                        <p class="text-sm text-gray-700 font-medium">${b}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <button onclick="seleccionarPlan(${plan.nivel})" class="mt-auto w-full ${plan.boton} py-3 rounded-2xl font-black text-sm shadow-lg transition">
+                            ${plan.cta}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function mostrarPlanes(rubro) {
+            const config = PLANES_CONFIG[rubro];
+            document.getElementById('rubro-seleccionado-memoria').value = rubro;
+            document.getElementById('paso-1-rubro').classList.add('hidden');
+            document.getElementById('paso-2-planes').classList.remove('hidden');
+            document.getElementById('titulo-planes').innerText = config.titulo;
+            document.getElementById('subtitulo-planes').innerText = config.subtitulo;
+            document.getElementById('badge-rubro').innerText = config.badge;
+
+            const catalogo = document.getElementById('catalogo-planes');
+            catalogo.innerHTML = config.planes.map(plan => renderPlanCard(plan, rubro)).join('');
+        }
+
+        async function seleccionarPlan(nivel) {
+            const rubro = document.getElementById('rubro-seleccionado-memoria').value;
+            if (!rubro) {
+                mostrarNotificacion('Primero selecciona el tipo de espacio.', 'error');
+                return;
+            }
+
+            if (nivel === 0) {
+                const destino = rubro === 'tienda'
+                    ? 'panel-tienda.html?plan=0&modo=nuevo'
+                    : 'panel-profesional.html?plan=0&modo=nuevo';
+
+                window.location.href = destino;
+                return;
+            }
+
+            const priceId = STRIPE_PRICE_IDS?.[rubro]?.[nivel];
+            if (!priceId || priceId.includes('_AQUI')) {
+                mostrarNotificacion('Falta configurar el Price ID de Stripe para este plan.', 'error');
+                return;
+            }
+
+            try {
+                mostrarOverlay('Te estamos llevando al checkout seguro de Stripe...');
+
+                const returnUrl = `${window.location.origin}${window.location.pathname}`;
+
+                const { data, error } = await clienteSupabase.functions.invoke('create-checkout', {
+                    body: {
+                        nivel,
+                        priceId,
+                        userId: usuarioActual.id,
+                        userEmail: usuarioActual.email,
+                        rubro,
+                        returnUrl
+                    }
+                });
+
+                if (error || !data?.url) {
+                    throw new Error(data?.error || error?.message || 'No se pudo crear la sesión de pago.');
+                }
+
+                window.location.href = data.url;
+            } catch (err) {
+                ocultarOverlay();
+                mostrarNotificacion(err.message || 'Error al iniciar el pago.', 'error');
+            }
+        }
+
+        async function procesarRetornoStripe() {
+            if (retornoStripeProcesado) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const success = params.get('success') === 'true';
+            const canceled = params.get('canceled') === 'true';
+            const sessionId = params.get('session_id');
+
+            if (canceled) {
+                retornoStripeProcesado = true;
+                mostrarNotificacion('El proceso de pago fue cancelado.', 'error');
+                limpiarQueryString();
+                return;
+            }
+
+            if (!success || !sessionId || !usuarioActual) return;
+
+            retornoStripeProcesado = true;
+
+            try {
+                mostrarOverlay('Validando tu pago y preparando tu panel...');
+
+                const { data, error } = await clienteSupabase.functions.invoke('confirm-checkout', {
+                    body: { sessionId }
+                });
+
+                if (error || !data?.success) {
+                    throw new Error(data?.error || error?.message || 'No se pudo validar el pago.');
+                }
+
+                const destino = data.rubro === 'tienda'
+                    ? `panel-tienda.html?id=${data.anuncioId}`
+                    : `panel-profesional.html?id=${data.anuncioId}`;
+
+                mostrarNotificacion('Pago validado correctamente. Entrando a tu panel...');
+                limpiarQueryString();
+                window.location.href = destino;
+            } catch (err) {
+                ocultarOverlay();
+                mostrarNotificacion(err.message || 'Ocurrió un problema al validar el pago.', 'error');
+                limpiarQueryString();
+            }
+        }
     </script>
 </body>
 </html>
