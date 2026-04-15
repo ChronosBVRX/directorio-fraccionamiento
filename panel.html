@@ -717,6 +717,10 @@
                 btn.innerText = "Guardando...";
                 btn.disabled = true;
 
+                // Recuperamos explícitamente el token de acceso
+                const { data: sessionData } = await clienteSupabase.auth.getSession();
+                const accessToken = sessionData?.session?.access_token;
+
                 const payload = {
                     nombre_completo: document.getElementById("perfil-nombre").value.trim(),
                     telefono: document.getElementById("perfil-telefono").value.trim(),
@@ -725,8 +729,10 @@
                     longitud: document.getElementById("perfil-lng").value || null
                 };
 
+                // Inyectamos el header explícito aquí también
                 const { data, error } = await clienteSupabase.functions.invoke("panel-gestionar", {
-                    body: { accion: "guardar_perfil", payload }
+                    body: { accion: "guardar_perfil", payload },
+                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
                 });
 
                 if (error || !data?.success) {
@@ -972,11 +978,17 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                // Obtenemos email si está disponible para auto-rellenarlo en Stripe
-                const email = usuarioActual.email || null;
+                // Recuperamos explícitamente el token de acceso para la petición
+                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
+                if (sessionError || !sessionData?.session) {
+                    throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
+                }
+
+                const accessToken = sessionData.session.access_token;
+                const email = sessionData.session.user?.email || usuarioActual.email || null;
                 const returnUrl = `${window.location.origin}${window.location.pathname}`;
 
-                // CORRECCIÓN AQUÍ: Eliminamos el "headers" manual, el cliente Supabase lo incluye de forma nativa e infalible.
+                // Inyectamos el header para que la función Deno no rechace la petición con 401
                 const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
                     body: {
                         nivel,
@@ -985,6 +997,9 @@
                         returnUrl,
                         userId: usuarioActual.id,
                         userEmail: email
+                    },
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
                     }
                 });
 
@@ -1028,9 +1043,18 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                // CORRECCIÓN AQUÍ: Igual que arriba, dejamos que el SDK maneje los Headers.
+                // Recuperamos explícitamente el token para verificar el checkout
+                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
+                if (sessionError || !sessionData?.session) {
+                    throw new Error("Tu sesión es inválida o expiró.");
+                }
+                const accessToken = sessionData.session.access_token;
+
                 const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId }
+                    body: { sessionId },
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
                 });
 
                 if (error) {
