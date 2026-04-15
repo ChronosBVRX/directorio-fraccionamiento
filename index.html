@@ -703,6 +703,7 @@
         }
 
         async function buscarHorariosIndex() {
+            // CORRECCIÓN 1: Dejamos el ID como string nativo en vez de forzarlo a parseInt()
             const negocioIdStr = document.getElementById('reserva-negocio-id-index').value;
             const servicioIdStr = document.getElementById('reserva-servicio-index').value;
             const fecha = document.getElementById('reserva-fecha-index').value;
@@ -713,8 +714,8 @@
                 return;
             }
             
-            const negocioId = parseInt(negocioIdStr);
-            const servicioId = parseInt(servicioIdStr);
+            const negocioId = negocioIdStr;
+            const servicioId = servicioIdStr;
 
             cont.innerHTML = '<p class="text-sm text-tm-azul animate-pulse col-span-3 text-center">Buscando disponibilidad...</p>';
             
@@ -731,11 +732,12 @@
                 console.warn("Utilizando Respaldo (Fallback) para buscar horarios:", err);
                 
                 try {
-                    const { data: anuncio } = await clienteSupabase.from('anuncios').select('horarios').eq('id', negocioId).single();
-                    const { data: servicio } = await clienteSupabase.from('servicios').select('duracion_minutos').eq('id', servicioId).single();
-                    const { data: citas } = await clienteSupabase.from('citas').select('hora_inicio').eq('anuncio_id', negocioId).eq('fecha', fecha);
+                    // CORRECCIÓN 2: Usar maybeSingle() para prevenir errores 400 cuando la fila no se encuentra y capturar errores para que no rompan el try/catch.
+                    const { data: anuncio, error: errAnuncio } = await clienteSupabase.from('anuncios').select('horarios').eq('id', negocioId).maybeSingle();
+                    const { data: servicio, error: errServicio } = await clienteSupabase.from('servicios').select('duracion_minutos').eq('id', servicioId).maybeSingle();
+                    const { data: citas, error: errCitas } = await clienteSupabase.from('citas').select('hora_inicio').eq('anuncio_id', negocioId).eq('fecha', fecha);
 
-                    if (!anuncio || !servicio) throw new Error("Faltan datos en la base de datos.");
+                    if (!anuncio) throw new Error("Faltan datos del anuncio en la base de datos.");
 
                     const [year, month, day] = fecha.split('-').map(Number);
                     const diaSemana = new Date(year, month - 1, day).getDay();
@@ -748,8 +750,10 @@
 
                     let disponibles = [];
                     let horaActual = horarioHoy.abre; 
-                    const duracionMin = servicio.duracion_minutos || 30; 
-                    const citasOcupadas = citas ? citas.map(c => c.hora_inicio.substring(0,5)) : []; 
+                    
+                    // CORRECCIÓN 3: Programación defensiva. Si falla la DB en entregar el servicio, asumiremos 30 minutos.
+                    const duracionMin = (servicio && servicio.duracion_minutos) ? servicio.duracion_minutos : 30; 
+                    const citasOcupadas = (citas && !errCitas) ? citas.map(c => c.hora_inicio.substring(0,5)) : []; 
 
                     while (horaActual < horarioHoy.cierra) {
                         let horaStr = horaActual.substring(0,5);
@@ -782,8 +786,9 @@
 
         async function confirmarCitaIndex(hora) {
             const fecha = document.getElementById('reserva-fecha-index').value;
-            const servicioId = parseInt(document.getElementById('reserva-servicio-index').value);
-            const negocioId = parseInt(document.getElementById('reserva-negocio-id-index').value);
+            // CORRECCIÓN 4: Remover parseInt() aquí también para mantener la integridad de los IDs de Supabase
+            const servicioId = document.getElementById('reserva-servicio-index').value;
+            const negocioId = document.getElementById('reserva-negocio-id-index').value;
             
             const confirmado = await lanzarNotificacion("Confirmar Reserva", `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, "info", true);
             if(!confirmado) return;
