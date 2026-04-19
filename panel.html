@@ -978,29 +978,16 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                // Recuperamos explícitamente el token de acceso para la petición
-                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
-                if (sessionError || !sessionData?.session) {
-                    throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
-                }
+                const { email } = await obtenerSesionValidaStripe();
+                const returnUrl = construirReturnUrlStripe();
 
-                const accessToken = sessionData.session.access_token;
-                const email = sessionData.session.user?.email || usuarioActual.email || null;
-                const returnUrl = `${window.location.origin}${window.location.pathname}`;
-
-                // Inyectamos el header para que la función Deno no rechace la petición con 401
-                const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
-                    body: {
-                        nivel,
-                        priceId,
-                        rubro,
-                        returnUrl,
-                        userId: usuarioActual.id,
-                        userEmail: email
-                    },
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
+                const { data, error } = await invocarFuncionStripe("create-checkout", {
+                    nivel,
+                    priceId,
+                    rubro,
+                    returnUrl,
+                    userId: usuarioActual.id,
+                    userEmail: email
                 });
 
                 if (error) {
@@ -1043,19 +1030,9 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                // Recuperamos explícitamente el token para verificar el checkout
-                const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
-                if (sessionError || !sessionData?.session) {
-                    throw new Error("Tu sesión es inválida o expiró.");
-                }
-                const accessToken = sessionData.session.access_token;
+                await obtenerSesionValidaStripe();
 
-                const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId },
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                });
+                const { data, error } = await invocarFuncionStripe("confirm-checkout", { sessionId });
 
                 if (error) {
                     console.error("Error invoke confirm-checkout:", error);
@@ -1080,6 +1057,52 @@
                 mostrarNotificacion(err.message || "Ocurrió un problema al validar el pago.", "error");
                 limpiarQueryString();
             }
+        }
+
+        async function obtenerSesionValidaStripe() {
+            const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
+            if (sessionError || !sessionData?.session) {
+                throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
+            }
+
+            let session = sessionData.session;
+            const expiraEnMs = (session.expires_at || 0) * 1000 - Date.now();
+
+            if (expiraEnMs < 60_000) {
+                const { data: refreshData, error: refreshError } = await clienteSupabase.auth.refreshSession();
+                if (refreshError || !refreshData?.session) {
+                    throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+                }
+                session = refreshData.session;
+            }
+
+            return {
+                email: session.user?.email || usuarioActual?.email || null
+            };
+        }
+
+        async function invocarFuncionStripe(nombreFuncion, body) {
+            const { data: sessionData } = await clienteSupabase.auth.getSession();
+            const token = sessionData?.session?.access_token;
+            if (!token) {
+                throw new Error("No encontramos una sesión activa para procesar el pago.");
+            }
+
+            return clienteSupabase.functions.invoke(nombreFuncion, {
+                body,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    apikey: SUPABASE_KEY
+                }
+            });
+        }
+
+        function construirReturnUrlStripe() {
+            if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+                return `${window.location.origin}${window.location.pathname}`;
+            }
+
+            throw new Error("El checkout de Stripe requiere abrirse desde una URL http/https.");
         }
     </script>
 </body>
