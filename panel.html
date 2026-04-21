@@ -46,13 +46,13 @@
     <div id="modal-confirmacion-eliminar" class="hidden fixed inset-0 z-[400] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center relative transform transition-all">
             <div class="w-16 h-16 bg-red-50 rounded-full border-4 border-red-100 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">⏸️</span>
+                <span class="text-2xl">🗑️</span>
             </div>
-            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">¿Desactivar espacio?</h3>
-            <p class="text-gray-500 text-sm mb-6">Estás a punto de desactivar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. El negocio ya no será visible en el directorio público.</p>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">¿Eliminar espacio?</h3>
+            <p class="text-gray-500 text-sm mb-6">Estás a punto de eliminar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. Esta acción borrará el negocio, sus citas y pedidos, y <span class="text-red-500 font-bold">no se puede deshacer</span>.</p>
             <div class="flex gap-3">
                 <button onclick="cerrarModalEliminar()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Cancelar</button>
-                <button id="btn-confirmar-desactivar" onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, desactivar</button>
+                <button id="btn-confirmar-eliminar" onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, eliminar</button>
             </div>
         </div>
     </div>
@@ -245,7 +245,7 @@
         let retornoStripeProcesado = false;
         let panelCargando = false;
         let panelListo = false;
-        
+
         const CATEGORIAS_TIENDA = ["Alimentos", "Restaurante", "Postres", "Abarrotes", "Hogar", "Ropa", "Otro Producto"];
 
         const STRIPE_PRICE_IDS = {
@@ -805,17 +805,14 @@
             }, 300);
         }
 
-        // --- SOLUCIÓN A PRUEBA DE BALAS PARA LA DESACTIVACIÓN ---
+        // --- SOLUCIÓN ACTUALIZADA PARA BORRADO DEFINITIVO (.delete) ---
         function abrirModalEliminar(id, nombre) {
-            // Validación extra: Si por algún motivo el ID no es real, frenamos antes de hablar con Supabase.
             if (!id || id === 'null' || id === 'undefined') {
                 mostrarNotificacion("Error de sistema: No pudimos identificar tu negocio. Intenta recargar la página.", "error");
                 return;
             }
 
-            // Aquí está la magia: incrustamos el ID directamente en el botón del HTML. 
-            // Esto evita que JavaScript "olvide" o "sobreescriba" la variable.
-            const btnConfirmar = document.getElementById("btn-confirmar-desactivar");
+            const btnConfirmar = document.getElementById("btn-confirmar-eliminar");
             btnConfirmar.dataset.anuncioId = id;
 
             document.getElementById("nombre-espacio-eliminar").innerText = nombre;
@@ -823,14 +820,12 @@
         }
 
         function cerrarModalEliminar() {
-            // Limpiamos el botón por seguridad
-            document.getElementById("btn-confirmar-desactivar").dataset.anuncioId = "";
+            document.getElementById("btn-confirmar-eliminar").dataset.anuncioId = "";
             document.getElementById("modal-confirmacion-eliminar").classList.add("hidden");
         }
 
         async function ejecutarEliminacion() {
-            // Recuperamos el ID directamente del botón que el usuario acaba de presionar
-            const btnConfirmar = document.getElementById("btn-confirmar-desactivar");
+            const btnConfirmar = document.getElementById("btn-confirmar-eliminar");
             const idAnuncioReal = btnConfirmar.dataset.anuncioId;
 
             if (!idAnuncioReal || idAnuncioReal === 'null' || idAnuncioReal === 'undefined') {
@@ -839,22 +834,29 @@
             }
 
             cerrarModalEliminar();
-            mostrarOverlay("Desactivando espacio...");
+            mostrarOverlay("Eliminando espacio...");
 
             try {
+                // Ejecutamos el Delete. IMPORTANTE: Esto solo funcionará si ya corriste el SQL de la cascada.
                 const { error } = await clienteSupabase
                     .from("anuncios")
-                    .update({ activo: false })
-                    .eq("id", idAnuncioReal) // <-- Aquí le pasamos el ID correcto y asegurado
+                    .delete()
+                    .eq("id", idAnuncioReal)
                     .eq("user_id", usuarioActual.id); 
 
-                if (error) throw error;
+                if (error) {
+                    // Si el usuario olvida correr el SQL, Supabase arrojará el error de ForeignKey. Lo capturamos.
+                    if(error.code === '23503') {
+                        throw new Error("Aún hay pedidos o citas ligadas a este negocio. Corre el código SQL de Cascade en Supabase primero.");
+                    }
+                    throw error;
+                }
 
-                mostrarNotificacion("Espacio desactivado correctamente.");
+                mostrarNotificacion("Espacio eliminado permanentemente.");
                 await cargarMisNegocios(); // Recarga la lista para que desaparezca
             } catch (err) {
-                console.error("Error desactivando negocio:", err);
-                mostrarNotificacion("No se pudo desactivar el espacio.", "error");
+                console.error("Error eliminando negocio:", err);
+                mostrarNotificacion(err.message || "No se pudo eliminar el espacio. Revisa tu consola SQL.", "error");
             } finally {
                 ocultarOverlay();
             }
@@ -870,11 +872,11 @@
             `;
 
             try {
+                // Al volver al Hard Delete, quitamos el filtro de activo=true
                 const { data, error } = await clienteSupabase
                     .from("anuncios")
                     .select("*")
                     .eq("user_id", usuarioActual.id)
-                    .eq("activo", true) 
                     .order("id", { ascending: false });
 
                 if (error) throw error;
@@ -913,13 +915,15 @@
                                     <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
                                         ${activo ? "ACTIVO" : "PENDIENTE"}
                                     </span>
-                                    <button onclick="abrirModalEliminar('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Desactivar este espacio">
-                                        <span class="text-lg leading-none">⏸️</span>
+                                    <button onclick="abrirModalEliminar('${n.id || ''}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Eliminar este espacio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
                             <div class="flex gap-2 w-full mt-2">
-                                <button onclick="iniciarCambioPlan('${n.id}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
+                                <button onclick="iniciarCambioPlan('${n.id || ''}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
                                     Cambiar Plan ⭐
                                 </button>
                                 <a href="${enlacePanel}" class="flex-1 bg-white/10 text-white text-center py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/20 transition">
