@@ -43,6 +43,20 @@
         </div>
     </div>
 
+    <div id="modal-confirmacion-eliminar" class="hidden fixed inset-0 z-[400] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center relative transform transition-all">
+            <div class="w-16 h-16 bg-red-50 rounded-full border-4 border-red-100 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">🗑️</span>
+            </div>
+            <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">¿Eliminar espacio?</h3>
+            <p class="text-gray-500 text-sm mb-6">Estás a punto de eliminar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. Esta acción <span class="text-red-500 font-bold">no se puede deshacer</span>.</p>
+            <div class="flex gap-3">
+                <button onclick="cerrarModalEliminar()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Cancelar</button>
+                <button onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="no-auth" class="flex flex-col items-center justify-center h-[70vh] text-center hidden px-4">
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
         <p class="text-gray-500 mb-6">Inicia sesión o crea una cuenta para ver tus pedidos, citas y perfil.</p>
@@ -231,6 +245,9 @@
         let retornoStripeProcesado = false;
         let panelCargando = false;
         let panelListo = false;
+        
+        // Variables para la lógica del modal de eliminación
+        let idEspacioAEliminar = null;
 
         const CATEGORIAS_TIENDA = ["Alimentos", "Restaurante", "Postres", "Abarrotes", "Hogar", "Ropa", "Otro Producto"];
 
@@ -791,32 +808,45 @@
             }, 300);
         }
 
-        // --- FUNCIÓN PARA ELIMINAR NEGOCIO ---
-        async function eliminarNegocio(id, nombre) {
-            const confirmacion = confirm(`¿Estás seguro de que deseas eliminar "${nombre}"? Esta acción no se puede deshacer y perderás toda la información del negocio.`);
-            
-            if (!confirmacion) return;
+        // --- NUEVAS FUNCIONES PARA EL MODAL INTEGRADO DE ELIMINACIÓN ---
+        function abrirModalEliminar(id, nombre) {
+            idEspacioAEliminar = id;
+            document.getElementById("nombre-espacio-eliminar").innerText = nombre;
+            document.getElementById("modal-confirmacion-eliminar").classList.remove("hidden");
+        }
+
+        function cerrarModalEliminar() {
+            idEspacioAEliminar = null;
+            document.getElementById("modal-confirmacion-eliminar").classList.add("hidden");
+        }
+
+        async function ejecutarEliminacion() {
+            if (!idEspacioAEliminar) return;
+
+            // Cerramos el modal de pregunta y abrimos el de "cargando"
+            cerrarModalEliminar();
+            mostrarOverlay("Eliminando espacio de forma segura...");
 
             try {
-                mostrarOverlay("Eliminando espacio...");
-                
+                // Esta llamada funciona gracias a la política RLS explicada arriba
                 const { error } = await clienteSupabase
                     .from("anuncios")
                     .delete()
-                    .eq("id", id)
-                    .eq("user_id", usuarioActual.id); // Seguridad extra
+                    .eq("id", idEspacioAEliminar)
+                    .eq("user_id", usuarioActual.id); // Validamos doble seguridad desde el cliente
 
                 if (error) throw error;
 
                 mostrarNotificacion("Espacio eliminado correctamente.");
-                await cargarMisNegocios(); // Recargar la lista
+                await cargarMisNegocios(); // Recarga la lista para que desaparezca
             } catch (err) {
                 console.error("Error eliminando negocio:", err);
-                mostrarNotificacion("No se pudo eliminar el espacio.", "error");
+                mostrarNotificacion("No se pudo eliminar. Verifica los permisos de Supabase.", "error");
             } finally {
                 ocultarOverlay();
             }
         }
+        // -------------------------------------------------------------
 
         async function cargarMisNegocios() {
             const contenedor = document.getElementById("contenedor-mis-negocios");
@@ -869,7 +899,7 @@
                                     <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
                                         ${activo ? "ACTIVO" : "PENDIENTE"}
                                     </span>
-                                    <button onclick="eliminarNegocio('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Eliminar este espacio">
+                                    <button onclick="abrirModalEliminar('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Eliminar este espacio">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
