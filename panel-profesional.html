@@ -208,7 +208,7 @@
                                 <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold inline-block transition shadow hover:bg-tm-azul-oscuro">
                                     Seleccionar Imagen
                                 </label>
-                                <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold"></p>
+                                <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold">Las imágenes se optimizarán automáticamente para ahorrar espacio.</p>
                             </div>
 
                             <input type="hidden" id="admin-imagen-url">
@@ -512,6 +512,44 @@
             5: 'Viernes',
             6: 'Sábado'
         };
+
+        async function obtenerTokenUsuario() {
+            const { data } = await clienteSupabase.auth.getSession();
+            return data?.session?.access_token || null;
+        }
+
+        // 🗜️ NUEVO: COMPRESOR DE IMÁGENES WEBP EN EL NAVEGADOR
+        function comprimirImagenAWebP(file, maxWidth = 1080) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob(blob => {
+                            resolve(blob);
+                        }, 'image/webp', 0.8); // 80% calidad WEBP
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
 
         function mostrarToast(mensaje, tipo = 'exito') {
             const c = document.getElementById('toast-container');
@@ -1015,7 +1053,7 @@
             document.getElementById('admin-wa').value = '';
             document.getElementById('admin-imagen-url').value = '';
             document.getElementById('admin-estado-apertura').checked = true;
-            document.getElementById('estado-subida').innerText = '';
+            document.getElementById('estado-subida').innerText = 'Las imágenes se optimizarán automáticamente para ahorrar espacio.';
             document.getElementById('preview-top-image-wrap').classList.add('hidden');
             document.getElementById('contenedor-preview-imagen').classList.add('hidden');
 
@@ -1037,6 +1075,7 @@
 
         async function procesarSubidaImagen(e) {
             const f = e.target.files[0];
+            const estado = document.getElementById('estado-subida');
             if (!f) return;
 
             if (estadoPanel.nivelActual < 1) {
@@ -1049,26 +1088,32 @@
                 return;
             }
 
-            document.getElementById('estado-subida').innerText = '⏳ Subiendo imagen al servidor...';
-
-            const previewUrlLocal = URL.createObjectURL(f);
-            document.getElementById('preview-imagen').src = previewUrlLocal;
-            document.getElementById('contenedor-preview-imagen').classList.remove('hidden');
-
-            const extension = (f.name.split('.').pop() || 'png').toLowerCase();
-            const nombreArchivo = `${usuarioActual.id}/${Date.now()}.${extension}`;
-
             try {
-                const { error } = await clienteSupabase.storage.from('negocios').upload(nombreArchivo, f);
+                estado.innerText = 'Optimizando y subiendo imagen al servidor... ⏳';
+
+                const previewUrlLocal = URL.createObjectURL(f);
+                document.getElementById('preview-imagen').src = previewUrlLocal;
+                document.getElementById('contenedor-preview-imagen').classList.remove('hidden');
+
+                // 🗜️ CORRECCIÓN: COMPRIMIR A WEBP EN EL NAVEGADOR
+                const blobOptimizado = await comprimirImagenAWebP(f, 1080);
+                const nombreArchivo = `${usuarioActual.id}/profesional_${Date.now()}.webp`;
+
+                const { error } = await clienteSupabase.storage
+                    .from('negocios')
+                    .upload(nombreArchivo, blobOptimizado, { contentType: 'image/webp', upsert: false });
+
                 if (error) throw error;
 
                 const pubUrl = clienteSupabase.storage.from('negocios').getPublicUrl(nombreArchivo).data.publicUrl;
                 document.getElementById('admin-imagen-url').value = pubUrl;
                 document.getElementById('preview-imagen').src = pubUrl;
-                document.getElementById('estado-subida').innerText = '✅ Imagen cargada correctamente';
+                estado.className = "text-[11px] text-green-600 mt-4 font-bold";
+                estado.innerText = '✅ Imagen optimizada y cargada correctamente';
                 actualizarPreviewProfesional();
             } catch (err) {
-                document.getElementById('estado-subida').innerText = '❌ Error al subir. Intenta de nuevo.';
+                estado.className = "text-[11px] text-red-500 mt-4 font-bold";
+                estado.innerText = '❌ Error al subir. Intenta de nuevo.';
                 await lanzarNotificacion('Error', 'No se pudo subir la imagen.', 'error');
             }
         }
@@ -1107,16 +1152,27 @@
                 btn.innerText = 'GUARDANDO...';
                 mostrarOverlay('Guardando tu consultorio...');
 
-                const { data, error } = await clienteSupabase.functions.invoke('panel-gestionar', {
-                    body: {
+                const token = await obtenerTokenUsuario();
+
+                // 🚀 CORRECCIÓN: FETCH NATIVO PARA GUARDAR
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/panel-gestionar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': SUPABASE_KEY
+                    },
+                    body: JSON.stringify({
                         accion: 'guardar_negocio',
                         id_negocio: id,
                         payload
-                    }
+                    })
                 });
 
-                if (error || !data?.success) {
-                    throw new Error(data?.error || error?.message || 'No se pudo guardar el consultorio.');
+                const data = await response.json();
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.error || 'No se pudo guardar el consultorio.');
                 }
 
                 const nuevoId = data.id_negocio || id;
@@ -1403,20 +1459,32 @@
             try {
                 if (estadoPanel.nivelActual < 2) return;
 
-                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
-                    body: {
+                const token = await obtenerTokenUsuario();
+
+                // 🚀 CORRECCIÓN: FETCH NATIVO
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': SUPABASE_KEY
+                    },
+                    body: JSON.stringify({
                         accion: 'cancelar_cita',
                         payload: { cita_id: id }
-                    }
+                    })
                 });
 
-                if (error) throw error;
-                if (data?.error) throw new Error(data.error);
+                const data = await response.json();
+
+                if (!response.ok || data?.error) {
+                    throw new Error(data?.error || 'No se pudo eliminar el registro.');
+                }
 
                 await lanzarNotificacion('Eliminado', 'Registro eliminado correctamente.', 'success');
                 await cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value, horariosActuales);
             } catch (err) {
-                await lanzarNotificacion('Error', 'No se pudo eliminar el registro.', 'error');
+                await lanzarNotificacion('Error', err.message || 'No se pudo eliminar el registro.', 'error');
             }
         }
 
@@ -1532,15 +1600,27 @@
                     return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario del bloqueo.', 'warning');
                 }
 
-                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
-                    body: {
+                const token = await obtenerTokenUsuario();
+
+                // 🚀 CORRECCIÓN: FETCH NATIVO
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': SUPABASE_KEY
+                    },
+                    body: JSON.stringify({
                         accion: 'bloquear_espacio',
                         payload
-                    }
+                    })
                 });
 
-                if (error) throw error;
-                if (data?.error) throw new Error(data.error);
+                const data = await response.json();
+
+                if (!response.ok || data?.error) {
+                    throw new Error(data?.error || 'No se pudo registrar el bloqueo.');
+                }
 
                 await lanzarNotificacion('¡Guardado!', 'Bloqueo registrado correctamente.', 'success');
                 cerrarModalAgenda();
@@ -1570,15 +1650,27 @@
                     return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario de la cita.', 'warning');
                 }
 
-                const { data, error } = await clienteSupabase.functions.invoke('gestionar-agendas', {
-                    body: {
+                const token = await obtenerTokenUsuario();
+
+                // 🚀 CORRECCIÓN: FETCH NATIVO
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': SUPABASE_KEY
+                    },
+                    body: JSON.stringify({
                         accion: 'crear_cita_manual',
                         payload
-                    }
+                    })
                 });
 
-                if (error) throw error;
-                if (data?.error) throw new Error(data.error);
+                const data = await response.json();
+
+                if (!response.ok || data?.error) {
+                    throw new Error(data?.error || 'No se pudo registrar la cita.');
+                }
 
                 await lanzarNotificacion('¡Guardado!', 'Cita manual registrada correctamente.', 'success');
                 cerrarModalAgenda();
