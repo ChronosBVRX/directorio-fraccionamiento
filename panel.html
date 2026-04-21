@@ -978,7 +978,8 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                const { email } = await obtenerSesionValidaStripe();
+                // AQUI SACAMOS EL ACCESSTOKEN DE LA FUNCIÓN CORREGIDA
+                const { email, accessToken } = await obtenerSesionValidaStripe();
                 const returnUrl = construirReturnUrlStripe();
 
                 const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
@@ -989,7 +990,9 @@
                         returnUrl,
                         userId: usuarioActual.id,
                         userEmail: email
-                    }
+                    },
+                    // INYECTAMOS EL TOKEN MANUALMENTE AQUÍ:
+                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
                 });
 
                 if (error) {
@@ -1032,10 +1035,13 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                await obtenerSesionValidaStripe();
+                // AQUI SACAMOS EL ACCESSTOKEN DE LA FUNCIÓN CORREGIDA
+                const { accessToken } = await obtenerSesionValidaStripe();
 
                 const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId }
+                    body: { sessionId },
+                    // INYECTAMOS EL TOKEN MANUALMENTE AQUÍ TAMBIÉN:
+                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
                 });
 
                 if (error) {
@@ -1070,10 +1076,13 @@
             }
 
             const session = sessionData.session;
-            clienteSupabase.functions.setAuth(session.access_token);
+            
+            // ELIMINAMOS clienteSupabase.functions.setAuth(session.access_token); PORQUE NO ES UN ESTÁNDAR SEGURO ACTUALMENTE
+            // EN SU LUGAR, EXPORTAMOS EL ACCESSTOKEN PARA USARLO EN LOS HEADERS DIRECTAMENTE:
 
             return {
                 session,
+                accessToken: session.access_token,
                 email: session.user?.email || usuarioActual?.email || null
             };
         }
