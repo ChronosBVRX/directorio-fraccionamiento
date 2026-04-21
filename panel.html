@@ -717,6 +717,8 @@
                 btn.innerText = "Guardando...";
                 btn.disabled = true;
 
+                const { accessToken } = await obtenerSesionValidaStripe();
+
                 const payload = {
                     nombre_completo: document.getElementById("perfil-nombre").value.trim(),
                     telefono: document.getElementById("perfil-telefono").value.trim(),
@@ -725,13 +727,21 @@
                     longitud: document.getElementById("perfil-lng").value || null
                 };
 
-                // Removemos la inyección manual. El SDK de Supabase lo maneja solo.
-                const { data, error } = await clienteSupabase.functions.invoke("panel-gestionar", {
-                    body: { accion: "guardar_perfil", payload }
+                // Reemplazamos 'invoke' por un fetch nativo para ser invulnerables a los bugs del SDK
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/panel-gestionar`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${accessToken}`,
+                        "apikey": SUPABASE_KEY
+                    },
+                    body: JSON.stringify({ accion: "guardar_perfil", payload })
                 });
 
-                if (error || !data?.success) {
-                    console.error("Error guardando perfil:", error || data);
+                const data = await response.json();
+
+                if (!response.ok || !data?.success) {
+                    console.error("Error guardando perfil:", data);
                     mostrarNotificacion("Error al guardar el perfil", "error");
                     return;
                 }
@@ -973,28 +983,35 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                const { email } = await obtenerSesionValidaStripe();
+                const { email, accessToken } = await obtenerSesionValidaStripe();
                 const returnUrl = construirReturnUrlStripe();
 
-                // Sin inyección manual de headers para evitar duplicar el token
-                const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
-                    body: {
+                // 🚀 ADIÓS A LOS BUGS DE INVOKE. USAMOS FETCH NATIVO PARA CONTROL TOTAL DE HEADERS
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${accessToken}`,
+                        "apikey": SUPABASE_KEY
+                    },
+                    body: JSON.stringify({
                         nivel,
                         priceId,
                         rubro,
                         returnUrl,
                         userId: usuarioActual.id,
                         userEmail: email
-                    }
+                    })
                 });
 
-                if (error) {
-                    console.error("Error invoke create-checkout:", error);
-                    throw new Error("No se pudo crear la sesión de pago.");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Error explícito del servidor backend:", data);
+                    throw new Error(data?.error || "El servidor rechazó la petición. Revisa el backend.");
                 }
 
                 if (!data?.success || !data?.url) {
-                    console.error("Respuesta create-checkout:", data);
                     throw new Error(data?.error || "No se pudo crear la sesión de pago.");
                 }
 
@@ -1002,6 +1019,7 @@
             } catch (err) {
                 console.error("Error creando checkout:", err);
                 ocultarOverlay();
+                // Ahora si falla, te mostrará el texto EXACTO del problema que envíe tu servidor.
                 mostrarNotificacion(err.message || "Error al iniciar el pago.", "error");
             }
         }
@@ -1028,20 +1046,27 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                await obtenerSesionValidaStripe();
+                const { accessToken } = await obtenerSesionValidaStripe();
 
-                // Sin inyección manual de headers para evitar duplicar el token
-                const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId }
+                // 🚀 USAMOS FETCH NATIVO
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/confirm-checkout`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${accessToken}`,
+                        "apikey": SUPABASE_KEY
+                    },
+                    body: JSON.stringify({ sessionId })
                 });
 
-                if (error) {
-                    console.error("Error invoke confirm-checkout:", error);
-                    throw new Error("No se pudo validar el pago.");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Error explícito del servidor backend:", data);
+                    throw new Error(data?.error || "El servidor rechazó la validación del pago.");
                 }
 
                 if (!data?.success) {
-                    console.error("Respuesta confirm-checkout:", data);
                     throw new Error(data?.error || "No se pudo validar el pago.");
                 }
 
@@ -1061,14 +1086,9 @@
         }
 
         async function obtenerSesionValidaStripe() {
-            // AQUÍ ESTÁ LA MAGIA REAL: Forzamos la regeneración de la sesión. 
-            // Si el token estaba cerca de expirar, pedimos uno nuevo al servidor 
-            // asegurándonos de que nunca falle por caducidad.
             const { data, error } = await clienteSupabase.auth.refreshSession();
-            
             let session = data?.session;
 
-            // Si el refresh falla, como plan de respaldo, buscamos la sesión normal
             if (error || !session) {
                 const fallback = await clienteSupabase.auth.getSession();
                 if (fallback.error || !fallback.data?.session) {
@@ -1079,6 +1099,7 @@
 
             return {
                 session,
+                accessToken: session.access_token,
                 email: session.user?.email || usuarioActual?.email || null
             };
         }
