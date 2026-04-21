@@ -3,215 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activar y Asignar Pedido - Vive Tres Marías</title>
+    <title>Estado del Pedido - Vive Tres Marías</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Montserrat', sans-serif; } </style>
+    
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+    </script>
+    <style>
+        /* Animaciones para las estrellas */
+        .star-btn:hover, .star-btn.active { color: #d4af37; transform: scale(1.1); }
+        .star-btn { transition: all 0.2s; color: #e2e8f0; cursor: pointer; }
+    </style>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-50 font-sans h-screen flex flex-col">
 
-    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
-        <h1 class="text-2xl font-black text-[#143653] mb-2">Directorio de Repartidores</h1>
-        <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
+    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md z-10 shrink-0">
+        <a href="index.html" class="font-bold text-sm hover:text-gray-200">← Volver</a>
+        <h1 class="font-black text-lg">Estado de tu Pedido</h1>
+    </header>
+
+    <div id="pantalla-busqueda" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-t-4 border-tm-dorado">
+            <span class="text-4xl mb-4 block">📦</span>
+            <h2 class="text-xl font-black text-tm-azul mb-2">Rastrea tu Pedido</h2>
+            <p class="text-sm text-gray-500 mb-6">Ingresa el código que te enviamos al generar tu orden</p>
+            
+            <input type="text" id="input-folio" placeholder="VTM-XXXXXX" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg text-lg font-bold uppercase outline-none focus:border-tm-azul transition mb-4">
+            
+            <button onclick="buscarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white font-black py-3 rounded-lg shadow-md transition uppercase tracking-wider text-sm">Buscar</button>
+            <p id="msg-error" class="text-red-500 text-sm font-bold mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <div id="pantalla-estado" class="hidden flex-grow overflow-y-auto p-4 max-w-md mx-auto w-full pb-10 relative">
         
-        <div id="loader" class="my-6 flex justify-center">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22527b]"></div>
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 text-center">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Folio</p>
+            <p id="info-folio-display" class="text-2xl font-black text-tm-azul mb-4"></p>
+            
+            <div class="flex justify-center gap-6 border-t pt-4">
+                <div>
+                    <p class="text-[10px] uppercase text-gray-400 font-bold">Total</p>
+                    <p id="info-total" class="text-lg font-black text-gray-800">$0.00</p>
+                </div>
+                <div>
+                    <p class="text-[10px] uppercase text-gray-400 font-bold">Repartidor</p>
+                    <p id="info-repartidor" class="text-sm font-bold text-gray-800 mt-0.5">Buscando...</p>
+                </div>
+            </div>
         </div>
 
-        <div id="zona-login" class="hidden text-center my-6">
-            <span class="text-4xl block mb-2">🔒</span>
-            <p class="text-gray-700 font-bold mb-4">Debes iniciar sesión con la cuenta de tu negocio para confirmar este pedido.</p>
-            <a href="login.html" id="btn-ir-login" class="inline-block w-full bg-[#22527b] text-white font-bold py-3 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
-                Ir a Iniciar Sesión
-            </a>
+        <div id="zona-calificacion" class="hidden bg-gradient-to-br from-[#143653] to-[#22527b] p-6 rounded-2xl shadow-lg mb-8 text-center text-white transform transition-all scale-100">
+            <h3 class="font-black text-lg mb-1">¡Pedido Entregado! 🎉</h3>
+            <p class="text-xs text-blue-200 mb-4">¿Cómo calificarías el servicio de tu repartidor?</p>
+            
+            <div class="flex justify-center gap-2 mb-4 text-4xl" id="contenedor-estrellas">
+                <button class="star-btn" onmouseover="iluminarEstrellas(1)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(1)">★</button>
+                <button class="star-btn" onmouseover="iluminarEstrellas(2)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(2)">★</button>
+                <button class="star-btn" onmouseover="iluminarEstrellas(3)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(3)">★</button>
+                <button class="star-btn" onmouseover="iluminarEstrellas(4)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(4)">★</button>
+                <button class="star-btn" onmouseover="iluminarEstrellas(5)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(5)">★</button>
+            </div>
+            
+            <button id="btn-enviar-calificacion" onclick="enviarCalificacion()" class="hidden w-full bg-tm-dorado hover:bg-yellow-500 text-white font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Enviar Calificación</button>
         </div>
 
-        <div id="zona-asignacion" class="hidden text-left">
-            <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <label class="block text-sm font-bold text-gray-700 mb-3 text-center uppercase">¿Cómo está el pago?</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="pago" value="false" checked class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-red-500 peer-checked:bg-red-50 text-gray-400 peer-checked:text-red-600 transition-all uppercase leading-tight">
-                            ❌ Cobrar<br>Efectivo
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="pago" value="true" class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-green-500 peer-checked:bg-green-50 text-gray-400 peer-checked:text-green-600 transition-all uppercase leading-tight">
-                            ✅ Ya está<br>Pagado
-                        </div>
-                    </label>
+        <div id="mensaje-gracias" class="hidden bg-green-50 border border-green-200 p-4 rounded-xl text-center mb-8">
+            <p class="text-green-600 font-black text-lg">¡Gracias por calificar! ⭐</p>
+            <p class="text-xs text-green-700 font-bold mt-1">Ayudas a mejorar nuestra comunidad.</p>
+        </div>
+
+        <h3 class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4 ml-2">Línea de Tiempo</h3>
+        
+        <div class="ml-4 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+            
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div id="icon-step-1" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">📋</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
+                    <div class="font-bold text-slate-900 text-sm">Pedido Recibido</div>
+                    <div class="text-xs text-slate-500">El negocio tiene tu solicitud de pedido.</div>
+                </div>
+            </div>
+            
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div id="icon-step-2" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">👨‍🍳</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
+                    <div class="font-bold text-slate-900 text-sm">Preparando / Asignado</div>
+                    <div class="text-xs text-slate-500">Ya tenemos un repartidor asignado. Está recolectando tus productos.</div>
                 </div>
             </div>
 
-            <label class="block text-sm font-bold text-gray-700 mb-2">Elige un Repartidor Conectado:</label>
-            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6 font-bold text-xs h-32" size="4">
-                </select>
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div id="icon-step-3" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">🛵</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
+                    <div class="font-bold text-slate-900 text-sm">En Camino</div>
+                    <div class="text-xs text-slate-500">El repartidor va hacia tu domicilio. ¡Prepárate para recibirlo!</div>
+                </div>
+            </div>
 
-            <button onclick="asignarPedido()" id="btn-asignar" class="w-full bg-[#22527b] text-white font-bold py-4 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
-                Confirmar y Enviar WhatsApp
-            </button>
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div id="icon-step-4" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">✅</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
+                    <div class="font-bold text-slate-900 text-sm">Entregado</div>
+                    <div class="text-xs text-slate-500">¡Tu pedido ha sido entregado exitosamente!</div>
+                </div>
+            </div>
+
         </div>
-
-        <div id="mensaje-final" class="hidden mt-4"></div>
-        <button id="btn-cerrar" class="mt-6 hidden w-full bg-gray-200 text-gray-800 font-bold px-4 py-3 rounded-lg hover:bg-gray-300 transition" onclick="window.close()">Cerrar Pestaña</button>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let folioActual = null;
-        let usuarioActual = null;
-        let listaRepartidores = [];
-        let nombreNegocioSesion = "Un negocio";
+        let suscripcionEstado = null;
+        
+        // Variables globales para guardar temporalmente la info al calificar
+        let idPedidoActual = null;
+        let idRepartidorActual = null;
+        let estrellasSeleccionadas = 0;
 
-        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            usuarioActual = session ? session.user : null;
-            if (usuarioActual) {
-                // Sacar el nombre del negocio para usarlo en el mensaje de whatsapp
-                const { data: negocioInfo } = await clienteSupabase.from('anuncios').select('nombre_negocio').eq('user_id', usuarioActual.id).maybeSingle();
-                if(negocioInfo) nombreNegocioSesion = negocioInfo.nombre_negocio;
-                
-                inicializar();
-            } else {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('zona-asignacion').classList.add('hidden');
-                document.getElementById('zona-login').classList.remove('hidden');
-                document.getElementById('folio-display').innerText = 'Acceso Denegado';
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const folioParam = urlParams.get('folio');
-                if (folioParam) {
-                    const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioParam}`);
-                    document.getElementById('btn-ir-login').href = `login.html?returnTo=${rutaRegreso}`;
-                } else {
-                    document.getElementById('btn-ir-login').href = 'login.html';
-                }
-            }
-        });
-
-        async function inicializar() {
-            const urlParams = new URLSearchParams(window.location.search);
-            folioActual = urlParams.get('folio');
-            const loader = document.getElementById('loader');
-            const zonaAsignacion = document.getElementById('zona-asignacion');
-            const zonaLogin = document.getElementById('zona-login');
-            const mensajeFinal = document.getElementById('mensaje-final');
-            const folioDisplay = document.getElementById('folio-display');
-
-            zonaLogin.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            if (!folioActual) {
-                loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">Error: Folio no detectado.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
-            }
-
-            folioDisplay.innerText = `Folio: ${folioActual}`;
-
-            const { data: pedido, error: errorPedido } = await clienteSupabase.from('pedidos').select('estado').eq('folio', folioActual).single();
-
-            if (errorPedido || !pedido) {
-                loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">El pedido no existe.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
-            }
-
-            if (pedido.estado !== 'esperando_activacion' && pedido.estado !== 'pendiente') {
-                loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya está en curso.</span><br><span class="text-sm">Estado actual: ${pedido.estado}</span>`;
-                mensajeFinal.classList.remove('hidden');
-                document.getElementById('btn-cerrar').classList.remove('hidden');
-                return;
-            }
-
-            // Consultamos todos los datos del repartidor, incluyendo reputación
-            const { data: repartidores } = await clienteSupabase.from('repartidores')
-                .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
-                .eq('esta_activo', true)
-                .order('calificacion_promedio', { ascending: false });
-                
-            loader.classList.add('hidden');
-
-            if (!repartidores || repartidores.length === 0) {
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores conectados.</span><br><span class="text-xs mt-2 block">Llama a un repartidor y pídele que se ponga "Conectado" en su app.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
-            }
-
-            listaRepartidores = repartidores;
-            const select = document.getElementById('select-repartidor');
+        async function buscarPedido() {
+            let folio = document.getElementById('input-folio').value.trim().toUpperCase();
+            const msgError = document.getElementById('msg-error');
             
-            // Llenamos la lista visualmente detallada
-            select.innerHTML = repartidores.map((r, i) => 
-                `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
-                    ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
-                </option>`
-            ).join('');
+            if(!folio) {
+                msgError.innerText = "Ingresa un folio válido.";
+                msgError.classList.remove('hidden');
+                return;
+            }
+
+            msgError.classList.add('hidden');
             
-            zonaAsignacion.classList.remove('hidden');
+            const { data, error } = await clienteSupabase.from('pedidos')
+                .select('*, repartidores(nombre)')
+                .eq('folio', folio).single();
+
+            if (error || !data) {
+                msgError.innerText = "No se encontró el folio. Verifica que sea correcto.";
+                msgError.classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('pantalla-busqueda').classList.add('hidden');
+            document.getElementById('pantalla-estado').classList.remove('hidden');
+            
+            document.getElementById('info-folio-display').innerText = data.folio;
+            
+            actualizarInterfazPedido(data);
+            escucharActualizacionesEnVivo(folio);
         }
 
-        async function asignarPedido() {
-            const repartidorId = document.getElementById('select-repartidor').value;
-            const repartidorSeleccionado = listaRepartidores.find(r => r.id === repartidorId);
-            const esPagado = document.querySelector('input[name="pago"]:checked').value === "true";
-            const btn = document.getElementById('btn-asignar');
+        function actualizarInterfazPedido(pedido) {
+            document.getElementById('info-total').innerText = `$${pedido.total}`;
+            document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Aún buscando...";
 
-            btn.innerText = "Procesando..."; 
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            
-            document.getElementById('mensaje-final').classList.add('hidden');
+            // Guardamos datos temporalmente por si necesita calificar
+            idPedidoActual = pedido.id;
+            idRepartidorActual = pedido.repartidor_id;
 
-            // Llamada a tu Edge Function en Supabase
-            const { data, error } = await clienteSupabase.functions.invoke('asignar-pedido', {
-                body: {
-                    folio: folioActual,
-                    repartidor_id: repartidorId,
-                    es_pagado: esPagado
+            // Logica Visual de Colores del Timeline
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`icon-step-${i}`).classList.remove('bg-tm-dorado', 'text-white', 'border-yellow-200', 'bg-green-500', 'border-green-200');
+                document.getElementById(`icon-step-${i}`).classList.add('bg-slate-200', 'text-slate-500', 'border-white');
+            }
+
+            const setActivo = (stepId, colorClase, borderClase) => {
+                const el = document.getElementById(stepId);
+                el.classList.remove('bg-slate-200', 'text-slate-500', 'border-white');
+                el.classList.add(colorClase, 'text-white', borderClase);
+            };
+
+            if (pedido.estado === 'esperando_activacion' || pedido.estado === 'pendiente' || pedido.estado === 'asignado') {
+                setActivo('icon-step-1', 'bg-tm-dorado', 'border-yellow-200');
+            } 
+            else if (pedido.estado === 'aceptado') {
+                setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-2', 'bg-tm-dorado', 'border-yellow-200');
+            } 
+            else if (pedido.estado === 'en_camino') {
+                setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-3', 'bg-tm-dorado', 'border-yellow-200');
+            } 
+            else if (pedido.estado === 'entregado') {
+                setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-3', 'bg-green-500', 'border-green-200');
+                setActivo('icon-step-4', 'bg-green-500', 'border-green-200');
+
+                // LÓGICA DE CALIFICACIÓN: Mostrar solo si no se ha calificado
+                if (pedido.calificacion_repartidor === null && pedido.repartidor_id) {
+                    document.getElementById('zona-calificacion').classList.remove('hidden');
+                } else if (pedido.calificacion_repartidor !== null) {
+                    document.getElementById('zona-calificacion').classList.add('hidden');
+                    document.getElementById('mensaje-gracias').classList.remove('hidden');
                 }
+            }
+        }
+
+        // --- FUNCIONES PARA LA INTERFAZ DE ESTRELLAS ---
+        function iluminarEstrellas(cantidad) {
+            const estrellas = document.querySelectorAll('.star-btn');
+            estrellas.forEach((e, idx) => {
+                e.style.color = idx < cantidad ? '#d4af37' : '#e2e8f0';
+            });
+        }
+
+        function limpiarEstrellas() {
+            iluminarEstrellas(estrellasSeleccionadas);
+        }
+
+        function seleccionarEstrella(cantidad) {
+            estrellasSeleccionadas = cantidad;
+            iluminarEstrellas(cantidad);
+            // Mostrar el botón de enviar
+            const btn = document.getElementById('btn-enviar-calificacion');
+            btn.classList.remove('hidden');
+            btn.classList.add('animate-pulse-once'); // Pequeño rebote al aparecer
+        }
+
+        async function enviarCalificacion() {
+            const btn = document.getElementById('btn-enviar-calificacion');
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+
+            // Ejecutamos nuestra función de Base de Datos
+            const { error } = await clienteSupabase.rpc('calificar_repartidor', {
+                p_pedido_id: idPedidoActual,
+                p_repartidor_id: idRepartidorActual,
+                p_estrellas: estrellasSeleccionadas
             });
 
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-
-            if (error || !data?.success) {
-                const mensajeError = error?.message || data?.error || "Error desconocido al procesar la solicitud.";
-                
-                document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-left mt-4 animate-pulse">
-                        <span class="text-red-600 font-black text-lg block mb-1">⚠️ Ocurrió un problema</span>
-                        <span class="font-bold text-sm text-red-500">${mensajeError}</span>
-                    </div>
-                `;
-                document.getElementById('mensaje-final').classList.remove('hidden');
-                
-                btn.innerText = "Reintentar"; 
+            if(error) {
+                alert("Hubo un error al calificar. Intenta de nuevo.");
+                btn.innerText = "Enviar Calificación";
                 btn.disabled = false;
-            } else {
-                document.getElementById('zona-asignacion').classList.add('hidden');
-                document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl mt-4">
-                        <span class="text-green-600 font-black text-2xl block mb-1">¡Asignado! ✅</span>
-                        <span class="font-bold text-sm text-green-700">Se abrirá WhatsApp para avisarle al repartidor.</span>
-                    </div>
-                `;
-                document.getElementById('mensaje-final').classList.remove('hidden');
-                document.getElementById('btn-cerrar').classList.remove('hidden');
-
-                // ENVIAR WHATSAPP AL REPARTIDOR
-                const numeroLimpio = repartidorSeleccionado.telefono.replace(/\D/g,'');
-                const mensajeWa = `¡Hola ${repartidorSeleccionado.nombre.split(' ')[0]}! Tienes un nuevo pedido asignado en *${nombreNegocioSesion}*.\n\nPor favor entra a tu panel de repartidor para aceptarlo.`;
-                window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensajeWa)}`, '_blank');
+                console.error(error);
+                return;
             }
+
+            // Éxito: Ocultar zona de calificar y mostrar agradecimiento
+            document.getElementById('zona-calificacion').classList.add('hidden');
+            document.getElementById('mensaje-gracias').classList.remove('hidden');
         }
+
+        function escucharActualizacionesEnVivo(folio) {
+            suscripcionEstado = clienteSupabase.channel('rastreo-cliente')
+                .on('postgres_changes', { 
+                    event: 'UPDATE', 
+                    schema: 'public', 
+                    table: 'pedidos', 
+                    filter: `folio=eq.${folio}` 
+                }, async (payload) => {
+                    const datosNuevos = payload.new;
+                    
+                    if(!datosNuevos.repartidores) {
+                        const { data } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('id', datosNuevos.id).single();
+                        if(data) actualizarInterfazPedido(data);
+                    } else {
+                        actualizarInterfazPedido(datosNuevos);
+                    }
+                }).subscribe();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const folioEnUrl = urlParams.get('folio');
+            
+            if (folioEnUrl) {
+                document.getElementById('input-folio').value = folioEnUrl;
+                buscarPedido(); 
+            }
+        });
     </script>
 </body>
 </html>
