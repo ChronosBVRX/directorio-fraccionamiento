@@ -12,7 +12,7 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
     <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
-        <h1 class="text-2xl font-black text-[#143653] mb-2">Asignar Repartidor</h1>
+        <h1 class="text-2xl font-black text-[#143653] mb-2">Directorio de Repartidores</h1>
         <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
         
         <div id="loader" class="my-6 flex justify-center">
@@ -69,91 +69,121 @@
         let listaRepartidores = [];
         let nombreNegocioSesion = "Un negocio";
 
-        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
-            usuarioActual = session ? session.user : null;
-            if (usuarioActual) {
-                const { data: negocioInfo } = await clienteSupabase.from('anuncios').select('nombre_negocio').eq('user_id', usuarioActual.id).maybeSingle();
-                if(negocioInfo) nombreNegocioSesion = negocioInfo.nombre_negocio;
+        // 1. FUNCIÓN DE ARRANQUE DIRECTO (Evita que se quede congelado)
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                // Preguntamos directamente a Supabase si hay sesión
+                const { data: { session }, error } = await clienteSupabase.auth.getSession();
                 
-                inicializar();
-            } else {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('zona-asignacion').classList.add('hidden');
-                document.getElementById('zona-login').classList.remove('hidden');
-                document.getElementById('folio-display').innerText = 'Acceso Denegado';
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const folioParam = urlParams.get('folio');
-                if (folioParam) {
-                    const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioParam}`);
-                    document.getElementById('btn-ir-login').href = `login.html?returnTo=${rutaRegreso}`;
+                usuarioActual = session ? session.user : null;
+
+                if (usuarioActual) {
+                    // Si hay usuario, tratamos de sacar el nombre de su negocio
+                    const { data: negocioInfo } = await clienteSupabase.from('anuncios').select('nombre_negocio').eq('user_id', usuarioActual.id).maybeSingle();
+                    if (negocioInfo) nombreNegocioSesion = negocioInfo.nombre_negocio;
+                    
+                    // Procedemos a cargar el pedido
+                    await inicializar();
                 } else {
-                    document.getElementById('btn-ir-login').href = 'login.html';
+                    // Si no hay usuario, mostramos el login directamente
+                    mostrarZonaLogin();
                 }
+            } catch (error) {
+                console.error("Error al arrancar:", error);
+                document.getElementById('folio-display').innerText = 'Error de conexión';
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('mensaje-final').innerHTML = `<span class="text-red-500 font-bold">Ocurrió un error al verificar tu sesión. Recarga la página.</span>`;
+                document.getElementById('mensaje-final').classList.remove('hidden');
             }
         });
 
-        async function inicializar() {
+        // Función para mostrar la zona de login y configurar la URL de retorno
+        function mostrarZonaLogin() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('zona-asignacion').classList.add('hidden');
+            document.getElementById('zona-login').classList.remove('hidden');
+            document.getElementById('folio-display').innerText = 'Requiere Acceso';
+            
             const urlParams = new URLSearchParams(window.location.search);
-            folioActual = urlParams.get('folio');
-            const loader = document.getElementById('loader');
-            const zonaAsignacion = document.getElementById('zona-asignacion');
-            const zonaLogin = document.getElementById('zona-login');
-            const mensajeFinal = document.getElementById('mensaje-final');
-            const folioDisplay = document.getElementById('folio-display');
-
-            zonaLogin.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            if (!folioActual) {
-                loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">Error: Folio no detectado.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
+            const folioParam = urlParams.get('folio');
+            if (folioParam) {
+                const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioParam}`);
+                document.getElementById('btn-ir-login').href = `login.html?returnTo=${rutaRegreso}`;
+            } else {
+                document.getElementById('btn-ir-login').href = 'login.html';
             }
+        }
 
-            folioDisplay.innerText = `Folio: ${folioActual}`;
+        async function inicializar() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                folioActual = urlParams.get('folio');
+                const loader = document.getElementById('loader');
+                const zonaAsignacion = document.getElementById('zona-asignacion');
+                const zonaLogin = document.getElementById('zona-login');
+                const mensajeFinal = document.getElementById('mensaje-final');
+                const folioDisplay = document.getElementById('folio-display');
 
-            const { data: pedido, error: errorPedido } = await clienteSupabase.from('pedidos').select('estado').eq('folio', folioActual).single();
+                zonaLogin.classList.add('hidden');
+                loader.classList.remove('hidden');
 
-            if (errorPedido || !pedido) {
+                if (!folioActual) {
+                    loader.classList.add('hidden');
+                    folioDisplay.innerText = 'Sin Folio';
+                    mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">Error: No se detectó ningún folio en el enlace.</span>`;
+                    mensajeFinal.classList.remove('hidden');
+                    return;
+                }
+
+                folioDisplay.innerText = `Folio: ${folioActual}`;
+
+                const { data: pedido, error: errorPedido } = await clienteSupabase.from('pedidos').select('estado').eq('folio', folioActual).single();
+
+                if (errorPedido || !pedido) {
+                    loader.classList.add('hidden');
+                    mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">El pedido no existe o fue eliminado.</span>`;
+                    mensajeFinal.classList.remove('hidden');
+                    return;
+                }
+
+                if (pedido.estado !== 'esperando_activacion' && pedido.estado !== 'pendiente') {
+                    loader.classList.add('hidden');
+                    mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya está en curso.</span><br><span class="text-sm">Estado actual: ${pedido.estado}</span>`;
+                    mensajeFinal.classList.remove('hidden');
+                    document.getElementById('btn-cerrar').classList.remove('hidden');
+                    return;
+                }
+
+                const { data: repartidores } = await clienteSupabase.from('repartidores')
+                    .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
+                    .eq('esta_activo', true)
+                    .order('calificacion_promedio', { ascending: false });
+                    
                 loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">El pedido no existe.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
-            }
 
-            if (pedido.estado !== 'esperando_activacion' && pedido.estado !== 'pendiente') {
-                loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya está en curso.</span><br><span class="text-sm">Estado actual: ${pedido.estado}</span>`;
-                mensajeFinal.classList.remove('hidden');
-                document.getElementById('btn-cerrar').classList.remove('hidden');
-                return;
-            }
+                if (!repartidores || repartidores.length === 0) {
+                    mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores conectados.</span><br><span class="text-xs mt-2 block">Llama a un repartidor y pídele que se ponga "Conectado" en su app.</span>`;
+                    mensajeFinal.classList.remove('hidden');
+                    return;
+                }
 
-            const { data: repartidores } = await clienteSupabase.from('repartidores')
-                .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
-                .eq('esta_activo', true)
-                .order('calificacion_promedio', { ascending: false });
+                listaRepartidores = repartidores;
+                const select = document.getElementById('select-repartidor');
                 
-            loader.classList.add('hidden');
+                select.innerHTML = repartidores.map((r, i) => 
+                    `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
+                        ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
+                    </option>`
+                ).join('');
+                
+                zonaAsignacion.classList.remove('hidden');
 
-            if (!repartidores || repartidores.length === 0) {
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores conectados.</span><br><span class="text-xs mt-2 block">Llama a un repartidor y pídele que se ponga "Conectado" en su app.</span>`;
-                mensajeFinal.classList.remove('hidden');
-                return;
+            } catch (err) {
+                console.error("Error al inicializar la vista:", err);
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('mensaje-final').innerHTML = `<span class="text-red-500 font-bold">Hubo un problema al cargar los datos. Intenta recargar.</span>`;
+                document.getElementById('mensaje-final').classList.remove('hidden');
             }
-
-            listaRepartidores = repartidores;
-            const select = document.getElementById('select-repartidor');
-            
-            select.innerHTML = repartidores.map((r, i) => 
-                `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
-                    ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
-                </option>`
-            ).join('');
-            
-            zonaAsignacion.classList.remove('hidden');
         }
 
         async function cerrarYLoguear() {
@@ -163,10 +193,8 @@
                 btn.disabled = true;
             }
             
-            // Cerramos la sesión incorrecta
             await clienteSupabase.auth.signOut();
             
-            // Redirigimos al login con el folio guardado en memoria
             const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioActual}`);
             window.location.href = `login.html?returnTo=${rutaRegreso}`;
         }
@@ -198,7 +226,7 @@
                 
                 let botonInyectado = '';
                 
-                // Si el error detecta que no es el dueño, le agregamos el botón de cambiar cuenta
+                // Botón inteligente si el error es por no ser el dueño
                 if(mensajeError.toLowerCase().includes('dueño') || mensajeError.toLowerCase().includes('logueado')) {
                     botonInyectado = `
                         <div class="mt-4 pt-4 border-t border-red-200">
