@@ -248,24 +248,26 @@
 
         const CATEGORIAS_TIENDA = ["Alimentos", "Restaurante", "Postres", "Abarrotes", "Hogar", "Ropa", "Otro Producto"];
 
-        const STRIPE_PRICE_IDS = {
-            tienda: {
+        // SEGURIDAD FRONTEND: Congelamos los precios para evitar que los cambien en la consola
+        const STRIPE_PRICE_IDS = Object.freeze({
+            tienda: Object.freeze({
                 1: "price_1TItPTGtW4zuRQv9RMSEOnnn",
                 2: "price_1TItQaGtW4zuRQv9gyQOTaC5"
-            },
-            servicio: {
+            }),
+            servicio: Object.freeze({
                 1: "price_1TItPTGtW4zuRQv9RMSEOnnn",
                 2: "price_1TItQaGtW4zuRQv9gyQOTaC5"
-            }
-        };
+            })
+        });
 
-        const PLANES_CONFIG = {
-            tienda: {
+        // SEGURIDAD FRONTEND: Congelamos la configuración
+        const PLANES_CONFIG = Object.freeze({
+            tienda: Object.freeze({
                 badge: "Productos y comida",
                 titulo: "Planes para tiendas y comida",
                 subtitulo: "Desde presencia básica en texto hasta una vitrina interactiva para vender mejor.",
-                planes: [
-                    {
+                planes: Object.freeze([
+                    Object.freeze({
                         nivel: 0,
                         nombre: "Básico",
                         precio: "Gratis",
@@ -275,7 +277,7 @@
                         fondo: "from-gray-50 via-white to-gray-100",
                         borde: "border-gray-200",
                         boton: "bg-gray-900 hover:bg-black text-white",
-                        previewImg: null, // Nivel 0 sin imagen
+                        previewImg: null,
                         previewTitle: "Ejemplo Básico",
                         previewDesc: "Presencia en texto. Título, descripción y todos tus enlaces de contacto directo.",
                         beneficios: [
@@ -284,8 +286,8 @@
                             "Puedes tener todos tus contactos activos a la vez",
                             "Modo texto (Sin imágenes ni menú visual)"
                         ]
-                    },
-                    {
+                    }),
+                    Object.freeze({
                         nivel: 1,
                         nombre: "Nivel 1",
                         precio: "$150",
@@ -305,8 +307,8 @@
                             "Catálogo de productos estático (Solo visualización)",
                             "Muestra tus precios de forma clara"
                         ]
-                    },
-                    {
+                    }),
+                    Object.freeze({
                         nivel: 2,
                         nombre: "Nivel 2",
                         precio: "$300",
@@ -326,15 +328,15 @@
                             "Autocompletado de carrito y datos de envío del cliente",
                             "Micrositio exclusivo para tu marca"
                         ]
-                    }
-                ]
-            },
-            servicio: {
+                    })
+                ])
+            }),
+            servicio: Object.freeze({
                 badge: "Consultorios y servicios",
                 titulo: "Planes para consultorios y servicios",
                 subtitulo: "Ideal para profesionales que quieren mostrar autoridad y facilitar agendar citas.",
-                planes: [
-                    {
+                planes: Object.freeze([
+                    Object.freeze({
                         nivel: 0,
                         nombre: "Básico",
                         precio: "Gratis",
@@ -344,7 +346,7 @@
                         fondo: "from-gray-50 via-white to-gray-100",
                         borde: "border-gray-200",
                         boton: "bg-gray-900 hover:bg-black text-white",
-                        previewImg: null, // Nivel 0 sin imagen
+                        previewImg: null,
                         previewTitle: "Dr. Ejemplo (Básico)",
                         previewDesc: "Presencia en texto. Título, descripción y todos tus enlaces de contacto directo.",
                         beneficios: [
@@ -353,8 +355,8 @@
                             "Puedes tener todos tus contactos activos a la vez",
                             "Modo texto (Sin foto ni lista de precios)"
                         ]
-                    },
-                    {
+                    }),
+                    Object.freeze({
                         nivel: 1,
                         nombre: "Nivel 1",
                         precio: "$150",
@@ -374,8 +376,8 @@
                             "Catálogo de servicios estático (Solo visualización)",
                             "Muestra el costo de tus consultas o terapias"
                         ]
-                    },
-                    {
+                    }),
+                    Object.freeze({
                         nivel: 2,
                         nombre: "Nivel 2",
                         precio: "$300",
@@ -395,10 +397,10 @@
                             "Integración de agenda, horarios y reservas de pacientes",
                             "Micrositio elegante y profesional VIP"
                         ]
-                    }
-                ]
-            }
-        };
+                    })
+                ])
+            })
+        });
 
         function escapeHtml(valor) {
             return String(valor ?? "")
@@ -963,7 +965,6 @@
         }
 
         function renderPlanCard(plan, rubro) {
-            // Evaluamos si el plan tiene imagen para renderizarla, o renderizar modo texto
             const bloqueImagen = plan.previewImg 
                 ? `
                     <div class="h-28 w-full overflow-hidden relative">
