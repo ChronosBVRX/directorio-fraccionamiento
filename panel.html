@@ -719,14 +719,6 @@
 
                 const { accessToken } = await obtenerSesionValidaStripe();
 
-                const payload = {
-                    nombre_completo: document.getElementById("perfil-nombre").value.trim(),
-                    telefono: document.getElementById("perfil-telefono").value.trim(),
-                    direccion: document.getElementById("perfil-direccion").value.trim(),
-                    latitud: document.getElementById("perfil-lat").value || null,
-                    longitud: document.getElementById("perfil-lng").value || null
-                };
-
                 // Reemplazamos 'invoke' por un fetch nativo para ser invulnerables a los bugs del SDK
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/panel-gestionar`, {
                     method: "POST",
@@ -735,7 +727,13 @@
                         "Authorization": `Bearer ${accessToken}`,
                         "apikey": SUPABASE_KEY
                     },
-                    body: JSON.stringify({ accion: "guardar_perfil", payload })
+                    body: JSON.stringify({ accion: "guardar_perfil", payload: {
+                        nombre_completo: document.getElementById("perfil-nombre").value.trim(),
+                        telefono: document.getElementById("perfil-telefono").value.trim(),
+                        direccion: document.getElementById("perfil-direccion").value.trim(),
+                        latitud: document.getElementById("perfil-lat").value || null,
+                        longitud: document.getElementById("perfil-lng").value || null
+                    } })
                 });
 
                 const data = await response.json();
@@ -984,6 +982,11 @@
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
                 const { email, accessToken } = await obtenerSesionValidaStripe();
+                
+                // --- INICIO CORRECCIÓN DE DIAGNÓSTICO DEL PROGRAMADOR ---
+                console.log("ℹ️ [Debug Programador] AccessToken enviado a Supabase:", accessToken);
+                // --------------------------------------------------------
+
                 const returnUrl = construirReturnUrlStripe();
 
                 // 🚀 ADIÓS A LOS BUGS DE INVOKE. USAMOS FETCH NATIVO PARA CONTROL TOTAL DE HEADERS
@@ -1047,6 +1050,10 @@
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
                 const { accessToken } = await obtenerSesionValidaStripe();
+                
+                // --- INICIO CORRECCIÓN DE DIAGNÓSTICO DEL PROGRAMADOR ---
+                console.log("ℹ️ [Debug Programador] AccessToken enviado para confirmar:", accessToken);
+                // --------------------------------------------------------
 
                 // 🚀 USAMOS FETCH NATIVO
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/confirm-checkout`, {
