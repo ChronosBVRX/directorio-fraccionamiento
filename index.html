@@ -493,6 +493,25 @@
                 let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
+                // LOGICA DE CALIFICACIONES (Estrellas en el Directorio)
+                let badgeCalificacion = '';
+                if (a.total_calificaciones && a.total_calificaciones > 0) {
+                    badgeCalificacion = `
+                        <div class="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 shadow-sm shrink-0">
+                            <span class="text-[10px] sm:text-xs">⭐</span>
+                            <span class="text-[10px] sm:text-xs font-black text-yellow-700">${Number(a.calificacion_promedio).toFixed(1)}</span>
+                            <span class="text-[8px] sm:text-[9px] text-yellow-600 font-bold">(${a.total_calificaciones})</span>
+                        </div>
+                    `;
+                } else {
+                    badgeCalificacion = `
+                        <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 shadow-sm shrink-0">
+                            <span class="text-[10px] sm:text-xs grayscale opacity-50">⭐</span>
+                            <span class="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-wider">Nuevo</span>
+                        </div>
+                    `;
+                }
+
                 let botones = '';
                 if(tieneMenu) {
                     if(usaComida) {
@@ -523,8 +542,11 @@
                     <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80 grayscale-[30%]' : ''}">
                         ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
-                            <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
-                            <h3 class="mt-2 font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap gap-1">
+                            <div class="flex justify-between items-start mb-2 gap-2">
+                                <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
+                                ${badgeCalificacion}
+                            </div>
+                            <h3 class="font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap gap-1">
                                 ${a.nombre_negocio} ${badgeVerificado} ${badgeCerrado} ${badgeAntiguedad}
                             </h3>
                             <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
@@ -980,18 +1002,13 @@
 
         // === NUEVAS FUNCIONES PARA DOCUMENTOS LEGALES ===
         function abrirDocumentoLegal(url, titulo) {
-            // Ponemos el título en el modal
             document.getElementById('modal-legal-titulo').innerText = titulo;
-            // Le decimos al iframe qué página cargar
             document.getElementById('iframe-documento-legal').src = url;
-            // Mostramos el modal
             document.getElementById('modal-documento-legal').classList.remove('hidden');
         }
 
         function cerrarDocumentoLegal() {
-            // Ocultamos el modal
             document.getElementById('modal-documento-legal').classList.add('hidden');
-            // Limpiamos el iframe para que no consuma memoria
             document.getElementById('iframe-documento-legal').src = '';
         }
     </script>
