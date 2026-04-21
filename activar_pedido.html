@@ -12,7 +12,7 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
     <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
-        <h1 class="text-2xl font-black text-[#143653] mb-2">Asignar Repartidor</h1>
+        <h1 class="text-2xl font-black text-[#143653] mb-2">Directorio de Repartidores</h1>
         <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
         
         <div id="loader" class="my-6 flex justify-center">
@@ -46,12 +46,12 @@
                 </div>
             </div>
 
-            <label class="block text-sm font-bold text-gray-700 mb-2">Selecciona Repartidor:</label>
-            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6 font-bold text-sm">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Elige un Repartidor Conectado:</label>
+            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6 font-bold text-xs h-32" size="4">
                 </select>
 
             <button onclick="asignarPedido()" id="btn-asignar" class="w-full bg-[#22527b] text-white font-bold py-4 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
-                Confirmar y Activar
+                Confirmar y Enviar WhatsApp
             </button>
         </div>
 
@@ -66,11 +66,16 @@
 
         let folioActual = null;
         let usuarioActual = null;
+        let listaRepartidores = [];
+        let nombreNegocioSesion = "Un negocio";
 
-        // Escuchar el estado de la sesión y crear la ruta de regreso
-        clienteSupabase.auth.onAuthStateChange((event, session) => {
+        clienteSupabase.auth.onAuthStateChange(async (event, session) => {
             usuarioActual = session ? session.user : null;
             if (usuarioActual) {
+                // Sacar el nombre del negocio para usarlo en el mensaje de whatsapp
+                const { data: negocioInfo } = await clienteSupabase.from('anuncios').select('nombre_negocio').eq('user_id', usuarioActual.id).maybeSingle();
+                if(negocioInfo) nombreNegocioSesion = negocioInfo.nombre_negocio;
+                
                 inicializar();
             } else {
                 document.getElementById('loader').classList.add('hidden');
@@ -78,7 +83,6 @@
                 document.getElementById('zona-login').classList.remove('hidden');
                 document.getElementById('folio-display').innerText = 'Acceso Denegado';
                 
-                // Extraer folio y generar ruta de regreso para el login
                 const urlParams = new URLSearchParams(window.location.search);
                 const folioParam = urlParams.get('folio');
                 if (folioParam) {
@@ -120,30 +124,44 @@
                 return;
             }
 
-            if (pedido.estado !== 'esperando_activacion') {
+            if (pedido.estado !== 'esperando_activacion' && pedido.estado !== 'pendiente') {
                 loader.classList.add('hidden');
-                mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya fue activado.</span><br><span class="text-sm">Estado: ${pedido.estado}</span>`;
+                mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya está en curso.</span><br><span class="text-sm">Estado actual: ${pedido.estado}</span>`;
                 mensajeFinal.classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
                 return;
             }
 
-            const { data: repartidores } = await clienteSupabase.from('repartidores').select('id, nombre, vehiculo').eq('esta_activo', true);
+            // Consultamos todos los datos del repartidor, incluyendo reputación
+            const { data: repartidores } = await clienteSupabase.from('repartidores')
+                .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
+                .eq('esta_activo', true)
+                .order('calificacion_promedio', { ascending: false });
+                
             loader.classList.add('hidden');
 
             if (!repartidores || repartidores.length === 0) {
-                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores en línea.</span><br><span class="text-xs mt-2 block">Pídeles que abran su app y se conecten.</span>`;
+                mensajeFinal.innerHTML = `<span class="text-red-500 font-bold text-lg">⚠️ No hay repartidores conectados.</span><br><span class="text-xs mt-2 block">Llama a un repartidor y pídele que se ponga "Conectado" en su app.</span>`;
                 mensajeFinal.classList.remove('hidden');
                 return;
             }
 
+            listaRepartidores = repartidores;
             const select = document.getElementById('select-repartidor');
-            select.innerHTML = repartidores.map(r => `<option value="${r.id}">🛵 ${r.nombre} (${r.vehiculo})</option>`).join('');
+            
+            // Llenamos la lista visualmente detallada
+            select.innerHTML = repartidores.map((r, i) => 
+                `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
+                    ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
+                </option>`
+            ).join('');
+            
             zonaAsignacion.classList.remove('hidden');
         }
 
         async function asignarPedido() {
             const repartidorId = document.getElementById('select-repartidor').value;
+            const repartidorSeleccionado = listaRepartidores.find(r => r.id === repartidorId);
             const esPagado = document.querySelector('input[name="pago"]:checked').value === "true";
             const btn = document.getElementById('btn-asignar');
 
@@ -153,6 +171,7 @@
             
             document.getElementById('mensaje-final').classList.add('hidden');
 
+            // Llamada a tu Edge Function en Supabase
             const { data, error } = await clienteSupabase.functions.invoke('asignar-pedido', {
                 body: {
                     folio: folioActual,
@@ -163,29 +182,34 @@
 
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-            if (error || !data.success) {
+            if (error || !data?.success) {
                 const mensajeError = error?.message || data?.error || "Error desconocido al procesar la solicitud.";
                 
                 document.getElementById('mensaje-final').innerHTML = `
                     <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-left mt-4 animate-pulse">
-                        <span class="text-red-600 font-black text-lg block mb-1">⚠️ Acceso Denegado</span>
+                        <span class="text-red-600 font-black text-lg block mb-1">⚠️ Ocurrió un problema</span>
                         <span class="font-bold text-sm text-red-500">${mensajeError}</span>
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 
-                btn.innerText = "Confirmar y Activar"; 
+                btn.innerText = "Reintentar"; 
                 btn.disabled = false;
             } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
                 document.getElementById('mensaje-final').innerHTML = `
                     <div class="bg-green-50 border border-green-200 p-4 rounded-xl mt-4">
-                        <span class="text-green-600 font-black text-2xl block mb-1">¡Activado! ✅</span>
-                        <span class="font-bold text-sm text-green-700">El repartidor ha recibido la alerta.</span>
+                        <span class="text-green-600 font-black text-2xl block mb-1">¡Asignado! ✅</span>
+                        <span class="font-bold text-sm text-green-700">Se abrirá WhatsApp para avisarle al repartidor.</span>
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
+
+                // ENVIAR WHATSAPP AL REPARTIDOR
+                const numeroLimpio = repartidorSeleccionado.telefono.replace(/\D/g,'');
+                const mensajeWa = `¡Hola ${repartidorSeleccionado.nombre.split(' ')[0]}! Tienes un nuevo pedido asignado en *${nombreNegocioSesion}*.\n\nPor favor entra a tu panel de repartidor para aceptarlo.`;
+                window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensajeWa)}`, '_blank');
             }
         }
     </script>
