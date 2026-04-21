@@ -21,12 +21,13 @@
             </button>
         </div>
         <div class="flex items-center gap-3">
+            <button onclick="recargarFeedManual()" class="text-lg hover:scale-110 transition bg-white/10 rounded-full w-8 h-8 flex items-center justify-center shadow-sm" title="Recargar Viajes">🔄</button>
             <span id="estado-texto" class="font-bold text-sm text-red-300">Desconectado</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-estado" class="sr-only peer" onchange="cambiarEstado()">
                 <div class="w-11 h-6 bg-gray-400 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
             </label>
-            <button onclick="cerrarSesion()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded font-bold">Salir</button>
+            <button onclick="cerrarSesion()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded font-bold shadow">Salir</button>
         </div>
     </header>
 
@@ -35,7 +36,7 @@
         <div id="vista-ruta" class="block pb-20">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-gray-500 font-bold uppercase text-sm">Mis Viajes</h2>
-                <div class="text-xs font-bold text-tm-dorado bg-yellow-50 px-2 py-1 rounded-lg shadow-sm">
+                <div class="text-xs font-bold text-tm-dorado bg-yellow-50 px-2 py-1 rounded-lg shadow-sm border border-yellow-100">
                     ⭐ <span id="stats-reputacion">5.0 (0 viajes)</span>
                 </div>
             </div>
@@ -49,12 +50,12 @@
             <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm">Mis Datos Personales</h2>
             <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-tm-dorado">
                 <form id="form-editar-perfil" class="space-y-4">
-                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre</label><input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></div>
-                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label><input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></div>
-                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo</label><select id="edit-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"><option value="Moto">Motocicleta</option><option value="Bici">Bicicleta</option><option value="Auto">Automóvil</option></select></div>
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nombre</label><input type="text" id="edit-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">WhatsApp</label><input type="tel" id="edit-telefono" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-tm-azul"></div>
+                    <div><label class="block text-xs font-bold uppercase text-gray-500 mb-1">Vehículo</label><select id="edit-vehiculo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-tm-azul"><option value="Moto">Motocicleta</option><option value="Bici">Bicicleta</option><option value="Auto">Automóvil</option></select></div>
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="cerrarPerfil()" class="flex-1 bg-gray-200 font-bold py-3 rounded-lg">Cancelar</button>
-                        <button type="submit" class="flex-1 bg-tm-azul text-white font-bold py-3 rounded-lg">Guardar</button>
+                        <button type="submit" class="flex-1 bg-tm-azul text-white font-bold py-3 rounded-lg shadow">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -103,10 +104,9 @@
         async function cambiarEstado() {
             const toggle = document.getElementById('toggle-estado');
             if (toggle.checked) {
-                // Sin GPS, solo actualizamos el estado en base de datos
                 await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
                 marcarConectadoUI();
-                cargarTodosLosPedidos();
+                await cargarTodosLosPedidos();
             } else {
                 if(pedidosActivos.length > 0) { 
                     alert("Tienes pedidos en curso. Termínalos antes de desconectarte."); 
@@ -127,16 +127,37 @@
             pedidosActivos = [];
         }
 
+        async function recargarFeedManual() {
+            const toggle = document.getElementById('toggle-estado');
+            if(!toggle.checked) return alert("Conéctate primero para buscar viajes.");
+            
+            const contenedor = document.getElementById('contenedor-pedidos');
+            contenedor.innerHTML = '<p class="text-center text-tm-azul mt-10 text-sm font-bold animate-pulse">Buscando viajes nuevos...</p>';
+            
+            await cargarTodosLosPedidos(true);
+        }
+
         async function cargarTodosLosPedidos(forzarRender = true) {
             const toggle = document.getElementById('toggle-estado');
             if(!toggle.checked && forzarRender) return;
 
-            const { data } = await clienteSupabase.from('pedidos')
+            // Bloque a prueba de errores
+            const { data, error } = await clienteSupabase.from('pedidos')
                 .select('*, anuncios(nombre_negocio, direccion, enlace_whatsapp)')
                 .eq('repartidor_id', usuarioId)
                 .in('estado', ['asignado', 'aceptado', 'en_camino'])
                 .order('creado_en', { ascending: false });
             
+            if (error) {
+                console.error("Error crítico de Base de Datos:", error);
+                document.getElementById('contenedor-pedidos').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-center mt-4">
+                        <span class="text-red-600 font-black block mb-1">Error de Lectura</span>
+                        <span class="text-xs text-red-500">${error.message}</span>
+                    </div>`;
+                return;
+            }
+
             pedidosActivos = data || [];
             if(forzarRender) renderizarFeed();
         }
@@ -154,7 +175,6 @@
                     : `<div class="bg-red-100 text-red-700 p-2 rounded text-center font-black text-[11px] mb-2 uppercase">⚠️ Cobrar $${p.total} EN EFECTIVO</div>`;
 
                 if (p.estado === 'asignado') {
-                    // Extraemos el numero de whatsapp del enlace (limpiamos todo lo que no sea numero)
                     const waNegocio = p.anuncios?.enlace_whatsapp ? p.anuncios.enlace_whatsapp.replace(/\D/g,'') : '';
                     return `
                     <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-l-yellow-400 mb-4 animate-pulse-once">
@@ -183,7 +203,7 @@
                         <p class="text-xs text-blue-700 mb-4">📍 ${p.anuncios?.direccion}</p>
                         
                         <div class="flex gap-2">
-                            <button onclick="abrirMapa('${p.anuncios?.direccion}')" class="w-12 bg-blue-200 hover:bg-blue-300 text-blue-800 rounded-lg font-bold flex justify-center items-center">📍</button>
+                            <button onclick="abrirMapa('${p.anuncios?.direccion}')" class="w-12 bg-blue-200 hover:bg-blue-300 text-blue-800 rounded-lg font-bold flex justify-center items-center shadow-sm">📍</button>
                             <button onclick="actualizarEstadoPedido('${p.id}', 'en_camino')" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-black text-xs uppercase shadow">📦 Ya lo recogí</button>
                         </div>
                     </div>`;
@@ -199,10 +219,10 @@
                         <p class="text-xs text-green-800 mb-4">📍 ${p.cliente_direccion}</p>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <button onclick="abrirMapa('${p.cliente_direccion}')" class="bg-green-200 text-green-800 py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1">📍 Mapa</button>
-                            <a href="tel:${p.cliente_telefono}" class="bg-green-200 text-green-800 py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1">📞 Llamar</a>
+                            <button onclick="abrirMapa('${p.cliente_direccion}')" class="bg-green-200 text-green-800 py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1 shadow-sm">📍 Mapa</button>
+                            <a href="tel:${p.cliente_telefono}" class="bg-green-200 text-green-800 py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1 shadow-sm">📞 Llamar</a>
                         </div>
-                        <button onclick="finalizarPedido('${p.id}')" class="w-full bg-green-600 text-white py-3 rounded-lg font-black text-xs uppercase shadow mt-1">✅ Finalizar Viaje</button>
+                        <button onclick="finalizarPedido('${p.id}')" class="w-full bg-green-600 text-white py-3 rounded-lg font-black text-xs uppercase shadow mt-1 hover:bg-green-700">✅ Finalizar Viaje</button>
                     </div>`;
                 }
             }).join('');
@@ -222,7 +242,6 @@
         async function rechazarPedido(id, folio, waNegocio) {
             if(!confirm("¿Rechazar viaje? Se avisará al negocio para que asigne a otro repartidor.")) return;
             
-            // Regresamos el pedido a pendiente y le quitamos el repartidor
             await clienteSupabase.from('pedidos').update({ estado: 'esperando_activacion', repartidor_id: null }).eq('id', id);
             
             if(waNegocio) {
@@ -237,14 +256,11 @@
         async function finalizarPedido(id) {
             if(!confirm("¿Confirmas que ya entregaste el pedido y recibiste el dinero (si aplicaba)?")) return;
             
-            // Marcamos como entregado
             await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', id);
-            
-            // Sumamos 1 viaje al historial del repartidor usando nuestra nueva función SQL
             await clienteSupabase.rpc('incrementar_viaje_repartidor', { repartidor_uuid: usuarioId });
             
             alert("¡Excelente trabajo! Viaje finalizado. Se ha sumado a tus estadísticas.");
-            await init(); // Recargamos para actualizar el contador en la interfaz
+            await init(); 
         }
 
         function reproducirBeep() {
