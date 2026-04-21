@@ -717,10 +717,6 @@
                 btn.innerText = "Guardando...";
                 btn.disabled = true;
 
-                // Recuperamos explícitamente el token de acceso
-                const { data: sessionData } = await clienteSupabase.auth.getSession();
-                const accessToken = sessionData?.session?.access_token;
-
                 const payload = {
                     nombre_completo: document.getElementById("perfil-nombre").value.trim(),
                     telefono: document.getElementById("perfil-telefono").value.trim(),
@@ -729,10 +725,9 @@
                     longitud: document.getElementById("perfil-lng").value || null
                 };
 
-                // Inyectamos el header explícito aquí también
+                // Removemos la inyección manual. El SDK de Supabase lo maneja solo.
                 const { data, error } = await clienteSupabase.functions.invoke("panel-gestionar", {
-                    body: { accion: "guardar_perfil", payload },
-                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
+                    body: { accion: "guardar_perfil", payload }
                 });
 
                 if (error || !data?.success) {
@@ -978,10 +973,10 @@
             try {
                 mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
 
-                // AQUI SACAMOS EL ACCESSTOKEN DE LA FUNCIÓN CORREGIDA
-                const { email, accessToken } = await obtenerSesionValidaStripe();
+                const { email } = await obtenerSesionValidaStripe();
                 const returnUrl = construirReturnUrlStripe();
 
+                // Sin inyección manual de headers para evitar duplicar el token
                 const { data, error } = await clienteSupabase.functions.invoke("create-checkout", {
                     body: {
                         nivel,
@@ -990,9 +985,7 @@
                         returnUrl,
                         userId: usuarioActual.id,
                         userEmail: email
-                    },
-                    // INYECTAMOS EL TOKEN MANUALMENTE AQUÍ:
-                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
+                    }
                 });
 
                 if (error) {
@@ -1035,13 +1028,11 @@
             try {
                 mostrarOverlay("Validando tu pago y preparando tu panel...");
 
-                // AQUI SACAMOS EL ACCESSTOKEN DE LA FUNCIÓN CORREGIDA
-                const { accessToken } = await obtenerSesionValidaStripe();
+                await obtenerSesionValidaStripe();
 
+                // Sin inyección manual de headers para evitar duplicar el token
                 const { data, error } = await clienteSupabase.functions.invoke("confirm-checkout", {
-                    body: { sessionId },
-                    // INYECTAMOS EL TOKEN MANUALMENTE AQUÍ TAMBIÉN:
-                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
+                    body: { sessionId }
                 });
 
                 if (error) {
@@ -1070,19 +1061,24 @@
         }
 
         async function obtenerSesionValidaStripe() {
-            const { data: sessionData, error: sessionError } = await clienteSupabase.auth.getSession();
-            if (sessionError || !sessionData?.session) {
-                throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
-            }
-
-            const session = sessionData.session;
+            // AQUÍ ESTÁ LA MAGIA REAL: Forzamos la regeneración de la sesión. 
+            // Si el token estaba cerca de expirar, pedimos uno nuevo al servidor 
+            // asegurándonos de que nunca falle por caducidad.
+            const { data, error } = await clienteSupabase.auth.refreshSession();
             
-            // ELIMINAMOS clienteSupabase.functions.setAuth(session.access_token); PORQUE NO ES UN ESTÁNDAR SEGURO ACTUALMENTE
-            // EN SU LUGAR, EXPORTAMOS EL ACCESSTOKEN PARA USARLO EN LOS HEADERS DIRECTAMENTE:
+            let session = data?.session;
+
+            // Si el refresh falla, como plan de respaldo, buscamos la sesión normal
+            if (error || !session) {
+                const fallback = await clienteSupabase.auth.getSession();
+                if (fallback.error || !fallback.data?.session) {
+                    throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
+                }
+                session = fallback.data.session;
+            }
 
             return {
                 session,
-                accessToken: session.access_token,
                 email: session.user?.email || usuarioActual?.email || null
             };
         }
