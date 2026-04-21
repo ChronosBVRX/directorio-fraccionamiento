@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panel Profesional - Vive Tres Marías</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,53 +41,22 @@
             min-height: 650px;
             border: 1px solid #e5e7eb;
         }
+        .fc-event { cursor: pointer; border: none !important; padding: 4px 6px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+        .fc .fc-button-primary { background-color: #22527b !important; border: none; font-weight: bold; border-radius: 10px; box-shadow: none !important; }
+        .fc .fc-button-primary:disabled { opacity: .5; }
+        .fc .fc-toolbar-title { font-size: 1.15rem !important; font-weight: 900; color: #143653; }
 
-        .fc-event {
-            cursor: pointer;
-            border: none !important;
-            padding: 4px 6px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-        }
+        .modo-btn-activo { background: #143653; color: white; box-shadow: 0 10px 20px rgba(20, 54, 83, 0.12); }
+        .modo-btn-inactivo { background: #f3f4f6; color: #6b7280; }
+        .input-disabled { opacity: .5; pointer-events: none; background: #f3f4f6; }
 
-        .fc .fc-button-primary {
-            background-color: #22527b !important;
-            border: none;
-            font-weight: bold;
-            border-radius: 10px;
-            box-shadow: none !important;
-        }
-
-        .fc .fc-button-primary:disabled {
-            opacity: .5;
-        }
-
-        .fc .fc-toolbar-title {
-            font-size: 1.15rem !important;
-            font-weight: 900;
-            color: #143653;
-        }
-
-        .modo-btn-activo {
-            background: #143653;
-            color: white;
-            box-shadow: 0 10px 20px rgba(20, 54, 83, 0.12);
-        }
-
-        .modo-btn-inactivo {
-            background: #f3f4f6;
-            color: #6b7280;
-        }
-
-        .input-disabled {
-            opacity: .5;
-            pointer-events: none;
-            background: #f3f4f6;
-        }
+        .tab-main-activa { border-bottom: 4px solid #d4af37; color: #143653; font-weight: 900; }
+        .tab-main-inactiva { color: #6b7280; font-weight: 600; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-tm-gris p-3 sm:p-4 md:p-8 min-h-screen">
+<body class="bg-gray-50 font-sans text-tm-gris relative min-h-screen flex flex-col">
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[110] flex flex-col gap-2 pointer-events-none"></div>
 
     <div id="overlay-proceso" class="hidden fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl px-8 py-7 max-w-md w-full text-center">
@@ -95,289 +66,322 @@
         </div>
     </div>
 
-    <div id="toast-container" class="fixed top-4 right-4 z-[110] flex flex-col gap-2 pointer-events-none"></div>
-
     <div id="no-auth" class="hidden flex flex-col items-center justify-center h-[70vh] text-center px-4">
         <h2 class="text-2xl font-bold text-tm-azul-oscuro mb-2">Acceso Denegado</h2>
         <p class="text-gray-500 mb-6">Inicia sesión para administrar tu consultorio.</p>
         <a href="login.html" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold hover:bg-tm-azul-oscuro transition">Ir a Iniciar Sesión</a>
     </div>
 
-    <div id="si-auth" class="hidden max-w-7xl mx-auto">
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
-            <div>
-                <h2 class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Panel de Consultorio 🩺</h2>
-                <p class="text-sm text-gray-500 mt-1">Administra tus servicios, agenda y presencia profesional.</p>
+    <div id="si-auth" class="hidden flex flex-col min-h-screen">
+        
+        <header class="bg-tm-azul text-white p-4 shadow-md z-20 shrink-0">
+            <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+                <div>
+                    <a href="panel.html" class="text-xs text-blue-200 hover:text-white transition flex items-center gap-1 mb-1">← Volver a mis espacios</a>
+                    <h1 id="header-nombre-negocio" class="font-black text-xl sm:text-2xl leading-tight truncate">Cargando...</h1>
+                </div>
+                
+                <div class="flex items-center gap-3 bg-tm-azul-oscuro px-4 py-2 rounded-xl border border-blue-800 shadow-inner">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] text-blue-200 uppercase font-bold tracking-wider">Estado de Agenda</p>
+                        <p id="texto-estado-tienda" class="text-sm font-black text-green-400">Recibiendo Citas</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shadow-sm">
+                        <input type="checkbox" id="global-toggle-abierto" class="sr-only peer" onchange="cambiarEstadoTiendaGlobal()">
+                        <div class="w-14 h-7 bg-red-400 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full border-2 border-transparent"></div>
+                    </label>
+                </div>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition">🏠 Inicio</a>
-                <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-tm-azul-oscuro transition">👤 Mi Perfil</a>
+        </header>
+
+        <div class="bg-white shadow-sm border-b z-10 shrink-0 sticky top-0">
+            <div class="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto scrollbar-hide">
+                <button onclick="cambiarTabPrincipal('hoy')" id="tab-main-hoy" class="tab-main-activa py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2">
+                    🔥 Citas de Hoy <span id="badge-citas-hoy" class="bg-tm-azul text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
+                <button onclick="cambiarTabPrincipal('calendario')" id="tab-main-calendario" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
+                    📅 Mi Calendario
+                </button>
+                <button onclick="cambiarTabPrincipal('config')" id="tab-main-config" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
+                    ⚙️ Mi Consultorio (Config)
+                </button>
+                <button onclick="cambiarTabPrincipal('metricas')" id="tab-main-metricas" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
+                    📊 Métricas
+                </button>
             </div>
         </div>
 
-        <div id="estado-panel" class="hidden bg-white border border-gray-200 rounded-3xl shadow-sm p-8 text-center max-w-3xl mx-auto"></div>
+        <div id="estado-panel" class="hidden bg-white border border-gray-200 rounded-3xl shadow-sm p-8 text-center max-w-3xl mx-auto mt-8"></div>
 
-        <div id="si-panel" class="hidden bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
-
-            <div class="w-full lg:w-5/12 flex flex-col border-r bg-gray-50/30">
-                <div class="bg-tm-azul-oscuro text-white p-5 flex items-start justify-between gap-4">
-                    <div>
-                        <h3 id="admin-titulo" class="text-2xl font-black">Configuración de Consultorio</h3>
-                        <p id="admin-nivel-badge" class="inline-block mt-2 text-xs font-black bg-white text-tm-azul-oscuro px-3 py-1 rounded-full">
-                            Nivel Actual: Básico
-                        </p>
-                    </div>
+        <main class="flex-grow p-4 max-w-7xl mx-auto w-full">
+            
+            <div id="vista-main-hoy" class="block space-y-4">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-tm-azul-oscuro font-black text-xl">Tu agenda de hoy</h2>
+                    <button onclick="cargarCitasDeHoy()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
                 </div>
-
-                <div class="flex gap-1 p-4 border-b bg-white overflow-x-auto scrollbar-hide">
-                    <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap transition">Datos</button>
-                    <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Diseño 🔒</button>
-                    <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
-                    <button onclick="cambiarPestana('agenda')" id="tab-agenda" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Agenda 🔒</button>
-                    <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
+                <div id="contenedor-citas-hoy" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-gray-400 text-sm py-10 text-center col-span-full">Cargando citas de hoy...</p>
                 </div>
+            </div>
 
-                <div class="p-6 flex-grow overflow-y-auto">
-                    <input type="hidden" id="admin-negocio-id">
-
-                    <div id="panel-basico" class="space-y-5">
-                        <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
-                            <div>
-                                <h4 class="font-bold text-[10px] uppercase tracking-widest text-red-600">Estado Operativo</h4>
-                                <p class="text-[10px] text-gray-500">Cierra tu consultorio temporalmente.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" id="admin-estado-apertura" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                            </label>
-                        </div>
-
-                        <div>
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial *</label>
-                            <input type="text" id="admin-nombre" onkeyup="actualizarPreviewProfesional()" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                        </div>
-
-                        <div>
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp *</label>
-                            <input type="tel" id="admin-wa" onkeyup="actualizarPreviewProfesional()" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="Ej: 4431234567">
-                        </div>
-
-                        <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
-                            <div class="flex items-center justify-between gap-4 mb-4">
-                                <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Horarios</h4>
-                                <button type="button" onclick="copiarHorarioATodos()" class="text-[10px] font-black px-3 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
-                                    Copiar a todos
-                                </button>
-                            </div>
-                            <div id="contenedor-horarios" class="space-y-3"></div>
-                        </div>
-
-                        <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="w-full bg-tm-dorado hover:bg-yellow-600 transition text-white py-5 rounded-2xl font-black shadow-xl">
-                            GUARDAR CAMBIOS
+            <div id="vista-main-calendario" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <h2 class="text-tm-azul-oscuro font-black text-xl">Gestión de Calendario</h2>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="flex-1 sm:flex-none bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
+                            🛑 Bloquear Horario
+                        </button>
+                        <button onclick="abrirModalAgenda({ modo: 'manual' })" class="flex-1 sm:flex-none bg-tm-azul hover:bg-tm-azul-oscuro transition text-white px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
+                            ➕ Cita Manual
                         </button>
                     </div>
+                </div>
 
-                    <div id="panel-diseno" class="hidden space-y-4">
-                        <div id="bloqueo-diseno" class="rounded-[2rem] border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
-                                    <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea imagen y mejor presencia</h4>
-                                    <p class="text-sm text-gray-600">Sube foto o logotipo para transmitir más confianza y hacer que tu perfil se vea mucho más profesional.</p>
-                                </div>
-                                <div class="text-5xl">🖼️</div>
+                <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed shadow-sm mb-4">
+                    <b class="text-tm-azul-oscuro">Tip:</b> Da clic o arrastra directamente sobre el calendario para abrir el formulario con fecha y hora precargadas.
+                </div>
+
+                <div id="calendar" class="w-full"></div>
+            </div>
+
+            <div id="vista-main-metricas" class="hidden">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Reputación</p>
+                        <p class="text-3xl font-black text-tm-dorado" id="stat-estrellas">5.0</p>
+                        <p class="text-[10px] text-gray-500 mt-1"><span id="stat-resenas">0</span> Reseñas</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Ingresos Est.</p>
+                        <p class="text-3xl font-black text-green-600" id="stat-ingresos">$0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Por citas completadas</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Atendidos</p>
+                        <p class="text-3xl font-black text-tm-azul" id="stat-completados">0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Pacientes/Clientes</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cancelaciones</p>
+                        <p class="text-3xl font-black text-red-500" id="stat-cancelados">0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Histórico</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-main-config" class="hidden">
+                <div id="si-panel" class="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[750px]">
+
+                    <div class="w-full lg:w-5/12 flex flex-col border-r bg-gray-50/30">
+                        <div class="bg-tm-azul-oscuro text-white p-5 flex items-start justify-between gap-4">
+                            <div>
+                                <h3 id="admin-titulo" class="text-xl font-black">Editar Perfil Profesional</h3>
+                                <p id="admin-nivel-badge" class="inline-block mt-2 text-[10px] font-black bg-white text-tm-azul-oscuro px-3 py-1 rounded-full">
+                                    Nivel Actual: Básico
+                                </p>
                             </div>
-                            <a href="panel.html" class="inline-block mt-5 bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">
-                                Ver planes en Mi Perfil
-                            </a>
-                        </div>
-
-                        <div id="contenido-diseno" class="hidden bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
-                            <h4 class="font-bold text-sm text-tm-azul-oscuro mb-2">Imagen Principal</h4>
-                            <p class="text-xs text-gray-500 mb-4">Sube una foto de tu consultorio o un logotipo profesional.</p>
-
-                            <div id="contenedor-preview-imagen" class="hidden mb-6 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative h-48 sm:h-64 bg-gray-100">
-                                <img id="preview-imagen" src="" alt="Vista previa" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                                    <span class="text-white font-black text-sm drop-shadow-md">Vista previa de tu anuncio</span>
-                                </div>
-                            </div>
-
-                            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
-                                <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg, image/webp" class="hidden" onchange="procesarSubidaImagen(event)">
-                                <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold inline-block transition shadow hover:bg-tm-azul-oscuro">
-                                    Seleccionar Imagen
-                                </label>
-                                <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold">Las imágenes se optimizarán automáticamente para ahorrar espacio.</p>
-                            </div>
-
-                            <input type="hidden" id="admin-imagen-url">
-
-                            <button onclick="guardarNegocioSeguro()" class="w-full bg-tm-dorado hover:bg-yellow-600 transition text-white py-5 rounded-2xl font-black shadow-xl mt-6">
-                                GUARDAR DISEÑO
+                            <button onclick="guardarNegocioSeguro()" id="btn-guardar-admin" class="bg-tm-dorado hover:bg-yellow-600 px-4 py-2 rounded-xl text-sm font-bold transition shadow text-center">
+                                Guardar
                             </button>
                         </div>
+
+                        <div class="flex gap-1 p-4 border-b bg-white overflow-x-auto scrollbar-hide">
+                            <button onclick="cambiarPestana('basico')" id="tab-basico" class="font-bold text-sm text-tm-azul border-b-2 border-tm-azul px-4 py-2 whitespace-nowrap transition">Datos</button>
+                            <button onclick="cambiarPestana('diseno')" id="tab-diseno" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Diseño 🔒</button>
+                            <button onclick="cambiarPestana('servicios')" id="tab-servicios" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-tm-azul transition">Servicios 🔒</button>
+                            <button onclick="cambiarPestana('verif')" id="tab-verif" class="font-bold text-sm text-gray-400 px-4 py-2 whitespace-nowrap hover:text-blue-500 transition">Verificación 🛡️</button>
+                        </div>
+
+                        <div class="p-6 flex-grow overflow-y-auto">
+                            <input type="hidden" id="admin-negocio-id">
+
+                            <div id="panel-basico" class="space-y-5">
+                                <input type="checkbox" id="admin-estado-apertura" class="hidden">
+
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial / Profesional *</label>
+                                    <input type="text" id="admin-nombre" onkeyup="actualizarPreviewProfesional()" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp *</label>
+                                    <input type="tel" id="admin-wa" onkeyup="actualizarPreviewProfesional()" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="Ej: 4431234567">
+                                </div>
+
+                                <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
+                                    <div class="flex items-center justify-between gap-4 mb-4">
+                                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Horarios de Atención</h4>
+                                        <button type="button" onclick="copiarHorarioATodos()" class="text-[10px] font-black px-3 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                                            Copiar a todos
+                                        </button>
+                                    </div>
+                                    <div id="contenedor-horarios" class="space-y-3"></div>
+                                </div>
+                            </div>
+
+                            <div id="panel-diseno" class="hidden space-y-4">
+                                <div id="bloqueo-diseno" class="rounded-[2rem] border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
+                                            <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea imagen y mejor presencia</h4>
+                                            <p class="text-sm text-gray-600">Sube foto o logotipo para transmitir más confianza y hacer que tu perfil se vea mucho más profesional.</p>
+                                        </div>
+                                        <div class="text-5xl">🖼️</div>
+                                    </div>
+                                    <a href="panel.html" class="inline-block mt-5 bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">
+                                        Ver planes en Mi Perfil
+                                    </a>
+                                </div>
+
+                                <div id="contenido-diseno" class="hidden bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
+                                    <h4 class="font-bold text-sm text-tm-azul-oscuro mb-2">Imagen Principal</h4>
+                                    <p class="text-xs text-gray-500 mb-4">Sube una foto de tu consultorio o un logotipo profesional.</p>
+
+                                    <div id="contenedor-preview-imagen" class="hidden mb-6 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative h-48 sm:h-64 bg-gray-100">
+                                        <img id="preview-imagen" src="" alt="Vista previa" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                                            <span class="text-white font-black text-sm drop-shadow-md">Vista previa de tu anuncio</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
+                                        <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg, image/webp" class="hidden" onchange="procesarSubidaImagen(event)">
+                                        <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold inline-block transition shadow hover:bg-tm-azul-oscuro">
+                                            Seleccionar Imagen
+                                        </label>
+                                        <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold">Las imágenes se optimizarán automáticamente para ahorrar espacio.</p>
+                                    </div>
+
+                                    <input type="hidden" id="admin-imagen-url">
+                                </div>
+                            </div>
+
+                            <div id="panel-servicios" class="hidden space-y-6">
+                                <div id="bloqueo-servicios" class="rounded-[2rem] border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
+                                            <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea tu catálogo de servicios</h4>
+                                            <p class="text-sm text-gray-600">Crea tratamientos, consultas o paquetes con duración y precio para que tu perfil sea mucho más claro.</p>
+                                        </div>
+                                        <div class="text-5xl">📋</div>
+                                    </div>
+                                    <a href="panel.html" class="inline-block mt-5 bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">
+                                        Ver planes en Mi Perfil
+                                    </a>
+                                </div>
+
+                                <div id="contenido-servicios" class="hidden">
+                                    <div id="aviso-nivel-1-servicios" class="hidden mb-5 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-4 rounded-xl flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-bold text-tm-azul-oscuro">Lista de Servicios Estática (Nivel 1)</p>
+                                            <p class="text-xs text-gray-600 mt-1">Tus pacientes pueden ver tus servicios aquí. <a href="panel.html" class="font-bold text-tm-dorado underline hover:text-yellow-600">Sube a Nivel 2</a> para habilitar tu agenda y reservas online.</p>
+                                        </div>
+                                        <span class="text-3xl ml-3">🚀</span>
+                                    </div>
+
+                                    <div class="bg-tm-azul-oscuro p-6 rounded-[2rem] text-white">
+                                        <h4 class="font-bold mb-4">✨ Crear Servicio</h4>
+
+                                        <div class="grid grid-cols-2 gap-3 mb-3">
+                                            <input type="text" id="serv-nombre" placeholder="Nombre" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60">
+                                            <input type="number" id="serv-precio" placeholder="Precio $" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60">
+                                        </div>
+
+                                        <input type="number" id="serv-duracion" placeholder="Minutos (Ej: 60)" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-sm mb-4 outline-none text-white placeholder-white/60">
+
+                                        <button onclick="agregarServicio()" class="w-full bg-tm-dorado hover:bg-yellow-500 transition text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase">
+                                            Añadir
+                                        </button>
+                                    </div>
+
+                                    <div id="lista-servicios" class="space-y-3 mt-6"></div>
+                                </div>
+                            </div>
+
+                            <div id="panel-verif" class="hidden space-y-4">
+                                <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-200 mb-4 shadow-sm">
+                                    <h3 class="font-black text-blue-800 mb-2 text-lg">🛡️ Sello de Confianza</h3>
+                                    <p class="text-xs text-blue-700 leading-relaxed">Destaca tu perfil profesional enviando tus documentos de acreditación.</p>
+                                </div>
+
+                                <form id="form-verif" class="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm" onsubmit="solicitarVerificacion(event)">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Completo Profesional *</label>
+                                            <input type="text" id="verif-nombre" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Cédula Profesional o Acreditación *</label>
+                                            <input type="text" id="verif-cedula" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none" placeholder="Número de registro">
+                                        </div>
+                                    </div>
+                                    <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-5 rounded-2xl font-black mt-6 shadow-xl uppercase text-sm">
+                                        Enviar para Revisión
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
                     </div>
 
-                    <div id="panel-servicios" class="hidden space-y-6">
-                        <div id="bloqueo-servicios" class="rounded-[2rem] border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
-                                    <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea tu catálogo de servicios</h4>
-                                    <p class="text-sm text-gray-600">Crea tratamientos, consultas o paquetes con duración y precio para que tu perfil sea mucho más claro.</p>
+                    <div class="w-full lg:w-7/12 bg-gray-50/50 p-4 md:p-8 flex flex-col relative">
+                        <div id="panel-preview-derecho" class="flex flex-col items-center justify-center h-full">
+                            <div class="w-full max-w-md">
+                                <div class="mb-5 text-center">
+                                    <p class="text-xs font-black uppercase tracking-[0.25em] text-tm-dorado mb-2">Vista previa profesional</p>
+                                    <h3 class="text-2xl font-black text-tm-azul-oscuro">Así se verá tu perfil</h3>
+                                    <p class="text-sm text-gray-500 mt-2">Ideal para que veas cómo luce tu presencia antes de publicarla.</p>
                                 </div>
-                                <div class="text-5xl">📋</div>
+
+                                <div class="bg-white rounded-[2rem] shadow-2xl border border-gray-200 overflow-hidden">
+                                    <div id="preview-top-image-wrap" class="hidden h-52 bg-gray-100">
+                                        <img id="preview-top-image" src="" alt="Imagen principal" class="w-full h-full object-cover">
+                                    </div>
+
+                                    <div class="p-6">
+                                        <span class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">Consultorio / Servicio</span>
+                                        <h4 id="preview-nombre" class="text-2xl font-black text-tm-azul-oscuro mt-4">Nombre del consultorio</h4>
+                                        <p id="preview-nivel" class="text-sm font-bold text-gray-500 mt-1">Plan básico</p>
+
+                                        <div class="mt-5 grid grid-cols-1 gap-3">
+                                            <div class="rounded-2xl bg-gray-50 p-4 border">
+                                                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Contacto</p>
+                                                <p id="preview-wa" class="text-sm font-bold text-gray-700">Sin WhatsApp configurado</p>
+                                            </div>
+
+                                            <div class="rounded-2xl bg-gray-50 p-4 border">
+                                                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Estado visual</p>
+                                                <div class="flex items-center justify-between text-xs">
+                                                    <span class="font-bold text-gray-700">Imagen principal</span>
+                                                    <span id="preview-estado-imagen" class="font-black text-gray-400">Bloqueado</span>
+                                                </div>
+                                                <div class="flex items-center justify-between text-xs mt-2">
+                                                    <span class="font-bold text-gray-700">Servicios</span>
+                                                    <span id="preview-estado-servicios" class="font-black text-gray-400">Bloqueado</span>
+                                                </div>
+                                                <div class="flex items-center justify-between text-xs mt-2">
+                                                    <span class="font-bold text-gray-700">Agenda</span>
+                                                    <span id="preview-estado-agenda" class="font-black text-gray-400">Bloqueado</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-5">
+                                            <button class="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold cursor-default">Contactar por WhatsApp</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <a href="panel.html" class="inline-block mt-5 bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">
-                                Ver planes en Mi Perfil
-                            </a>
                         </div>
-
-                        <div id="contenido-servicios" class="hidden">
-                            <div id="aviso-nivel-1-servicios" class="hidden mb-5 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-4 rounded-xl flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-bold text-tm-azul-oscuro">Lista de Servicios Estática (Nivel 1)</p>
-                                    <p class="text-xs text-gray-600 mt-1">Tus pacientes pueden ver tus servicios aquí. <a href="panel.html" class="font-bold text-tm-dorado underline hover:text-yellow-600">Sube a Nivel 2</a> para habilitar tu agenda y reservas online.</p>
-                                </div>
-                                <span class="text-3xl ml-3">🚀</span>
-                            </div>
-
-                            <div class="bg-tm-azul-oscuro p-6 rounded-[2rem] text-white">
-                                <h4 class="font-bold mb-4">✨ Crear Servicio</h4>
-
-                                <div class="grid grid-cols-2 gap-3 mb-3">
-                                    <input type="text" id="serv-nombre" placeholder="Nombre" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60">
-                                    <input type="number" id="serv-precio" placeholder="Precio $" class="p-4 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60">
-                                </div>
-
-                                <input type="number" id="serv-duracion" placeholder="Minutos (Ej: 60)" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-sm mb-4 outline-none text-white placeholder-white/60">
-
-                                <button onclick="agregarServicio()" class="w-full bg-tm-dorado hover:bg-yellow-500 transition text-tm-azul-oscuro py-4 rounded-xl font-black text-sm uppercase">
-                                    Añadir
-                                </button>
-                            </div>
-
-                            <div id="lista-servicios" class="space-y-3 mt-6"></div>
-                        </div>
-                    </div>
-
-                    <div id="panel-agenda" class="hidden space-y-4">
-                        <div id="bloqueo-agenda" class="rounded-[2rem] border border-yellow-200 bg-gradient-to-br from-yellow-50 via-white to-orange-50 p-6">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-black uppercase tracking-[0.25em] text-yellow-600 mb-2">Nivel 2</p>
-                                    <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea agenda y calendario</h4>
-                                    <p class="text-sm text-gray-600">Administra citas, bloqueos de horario y visualiza toda tu semana en el calendario profesional.</p>
-                                </div>
-                                <div class="text-5xl">📅</div>
-                            </div>
-                            <a href="panel.html" class="inline-block mt-5 bg-tm-dorado text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-yellow-600 transition">
-                                Ver planes en Mi Perfil
-                            </a>
-                        </div>
-
-                        <div id="contenido-agenda" class="hidden space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button onclick="abrirModalAgenda({ modo: 'manual' })" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro transition text-white p-5 rounded-[2rem] font-black shadow-lg">
-                                    ➕ NUEVA CITA MANUAL
-                                </button>
-
-                                <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="w-full bg-red-500 hover:bg-red-600 transition text-white p-5 rounded-[2rem] font-black shadow-lg">
-                                    🛑 BLOQUEAR HORARIO
-                                </button>
-                            </div>
-
-                            <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed shadow-sm">
-                                <b class="text-tm-azul-oscuro">Tip:</b> también puedes dar clic o arrastrar directamente sobre el calendario para abrir el formulario con fecha y hora precargadas.
-                            </div>
-
-                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-6 ml-1">Próximas Citas</h4>
-                            <div id="lista-citas-negocio" class="space-y-2"></div>
-                        </div>
-                    </div>
-
-                    <div id="panel-verif" class="hidden space-y-4">
-                        <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-200 mb-4 shadow-sm">
-                            <h3 class="font-black text-blue-800 mb-2 text-lg">🛡️ Sello de Confianza</h3>
-                            <p class="text-xs text-blue-700 leading-relaxed">Destaca tu perfil profesional enviando tus documentos de acreditación.</p>
-                        </div>
-
-                        <form id="form-verif" class="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm" onsubmit="solicitarVerificacion(event)">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Completo Profesional *</label>
-                                    <input type="text" id="verif-nombre" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Cédula Profesional o Acreditación *</label>
-                                    <input type="text" id="verif-cedula" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none" placeholder="Número de registro">
-                                </div>
-                            </div>
-                            <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-5 rounded-2xl font-black mt-6 shadow-xl uppercase text-sm">
-                                Enviar para Revisión
-                            </button>
-                        </form>
                     </div>
 
                 </div>
             </div>
 
-            <div class="w-full lg:w-7/12 bg-gray-50/50 p-4 md:p-8 flex flex-col relative">
-                <div id="panel-preview-derecho" class="flex flex-col items-center justify-center h-full">
-                    <div class="w-full max-w-md">
-                        <div class="mb-5 text-center">
-                            <p class="text-xs font-black uppercase tracking-[0.25em] text-tm-dorado mb-2">Vista previa profesional</p>
-                            <h3 class="text-2xl font-black text-tm-azul-oscuro">Así se verá tu perfil</h3>
-                            <p class="text-sm text-gray-500 mt-2">Ideal para que veas cómo luce tu presencia antes de publicarla.</p>
-                        </div>
-
-                        <div class="bg-white rounded-[2rem] shadow-2xl border border-gray-200 overflow-hidden">
-                            <div id="preview-top-image-wrap" class="hidden h-52 bg-gray-100">
-                                <img id="preview-top-image" src="" alt="Imagen principal" class="w-full h-full object-cover">
-                            </div>
-
-                            <div class="p-6">
-                                <span class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">Consultorio / Servicio</span>
-                                <h4 id="preview-nombre" class="text-2xl font-black text-tm-azul-oscuro mt-4">Nombre del consultorio</h4>
-                                <p id="preview-nivel" class="text-sm font-bold text-gray-500 mt-1">Plan básico</p>
-
-                                <div class="mt-5 grid grid-cols-1 gap-3">
-                                    <div class="rounded-2xl bg-gray-50 p-4 border">
-                                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Contacto</p>
-                                        <p id="preview-wa" class="text-sm font-bold text-gray-700">Sin WhatsApp configurado</p>
-                                    </div>
-
-                                    <div class="rounded-2xl bg-gray-50 p-4 border">
-                                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Estado visual</p>
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-bold text-gray-700">Imagen principal</span>
-                                            <span id="preview-estado-imagen" class="font-black text-gray-400">Bloqueado</span>
-                                        </div>
-                                        <div class="flex items-center justify-between text-xs mt-2">
-                                            <span class="font-bold text-gray-700">Servicios</span>
-                                            <span id="preview-estado-servicios" class="font-black text-gray-400">Bloqueado</span>
-                                        </div>
-                                        <div class="flex items-center justify-between text-xs mt-2">
-                                            <span class="font-bold text-gray-700">Agenda</span>
-                                            <span id="preview-estado-agenda" class="font-black text-gray-400">Bloqueado</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-5">
-                                    <button class="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold">Contactar por WhatsApp</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="panel-calendario-derecho" class="hidden h-full">
-                    <div id="calendar" class="h-full"></div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <div id="modal-bloqueo" class="hidden fixed inset-0 bg-tm-azul-oscuro/80 z-[90] flex items-center justify-center p-4 backdrop-blur-md">
@@ -407,29 +411,24 @@
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Paciente</label>
                         <input type="text" id="manual-paciente" placeholder="Nombre del paciente" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Servicio</label>
                         <select id="manual-servicio" onchange="actualizarHoraFinManual()" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                             <option value="">Selecciona un servicio</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fecha</label>
                         <input type="date" id="manual-fecha" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hora inicio</label>
                         <input type="time" id="manual-inicio" onchange="actualizarHoraFinManual()" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hora fin</label>
                         <input type="time" id="manual-fin" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div class="md:col-span-2">
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Notas</label>
                         <textarea id="manual-notas" rows="3" placeholder="Observaciones opcionales" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none resize-none"></textarea>
@@ -443,24 +442,20 @@
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Motivo</label>
                         <input type="text" id="bloqueo-titulo" placeholder="Ej: Consulta externa / descanso / evento" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fecha</label>
                         <input type="date" id="bloqueo-fecha" onchange="sincronizarBloqueoTodoElDia()" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div class="flex items-end">
                         <label class="flex items-center gap-3 p-4 border rounded-2xl bg-gray-50 w-full cursor-pointer hover:bg-gray-100 transition">
                             <input type="checkbox" id="bloqueo-todo-dia" onchange="sincronizarBloqueoTodoElDia()" class="w-5 h-5 rounded text-tm-azul">
                             <span class="font-bold text-sm text-tm-azul-oscuro">Bloquear toda la jornada</span>
                         </label>
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hora inicio</label>
                         <input type="time" id="bloqueo-inicio" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hora fin</label>
                         <input type="time" id="bloqueo-fin" class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none">
@@ -479,7 +474,7 @@
         </div>
     </div>
 
-    <div id="modal-notificacion" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+    <div id="modal-notificacion" class="hidden fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative text-center">
             <div id="noti-icono" class="text-5xl mb-3"></div>
             <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
@@ -493,39 +488,219 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const RUTAS = {
-            login: 'login.html',
-            home: 'index.html',
-            perfil: 'panel.html',
-            profesional: 'panel-profesional.html'
-        };
+        const RUTAS = { login: 'login.html', home: 'index.html', perfil: 'panel.html', profesional: 'panel-profesional.html' };
 
         let usuarioActual = null;
         let calendar = null;
         let serviciosActuales = [];
         let horariosActuales = {};
-        let estadoPanel = {
-            anuncioId: null,
-            modoNuevo: false,
-            nivelActual: 0,
-            subscriptionStatus: 'free'
-        };
+        let infoNegocio = null;
+        let estadoPanel = { anuncioId: null, modoNuevo: false, nivelActual: 0, subscriptionStatus: 'free' };
 
-        const DIAS = {
-            0: 'Domingo',
-            1: 'Lunes',
-            2: 'Martes',
-            3: 'Miércoles',
-            4: 'Jueves',
-            5: 'Viernes',
-            6: 'Sábado'
-        };
+        const DIAS = { 0: 'Domingo', 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado' };
 
+        // --- UTILIDADES ---
         async function obtenerTokenUsuario() {
             const { data } = await clienteSupabase.auth.getSession();
             return data?.session?.access_token || null;
         }
+        function hoyISO() { return new Date().toISOString().slice(0, 10); }
+        function normalizarHora(hora) { return (!hora) ? '00:00:00' : (hora.length === 5 ? `${hora}:00` : hora); }
+        function horaHHMM(hora) { return (!hora) ? '00:00' : hora.substring(0, 5); }
+        function sumarMinutos(hora, minutos) {
+            const [h, m] = hora.split(':').map(Number);
+            const total = (h * 60) + m + minutos;
+            return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+        }
+        function compararFechaHora(fecha, hora) { return new Date(`${fecha}T${hora.length === 5 ? hora + ':00' : hora}`); }
+        function obtenerDiaDeFecha(fecha) { return new Date(`${fecha}T12:00:00`).getDay(); }
+        function obtenerHorarioPorFecha(fecha) { const dia = obtenerDiaDeFecha(fecha); return horariosActuales?.[dia] || null; }
 
+        // --- MANEJO DE TABS GLOBALES (Súper App Layer) ---
+        function cambiarTabPrincipal(tabId) {
+            const tabs = ['hoy', 'calendario', 'config', 'metricas'];
+            tabs.forEach(t => {
+                document.getElementById(`vista-main-${t}`).classList.add('hidden');
+                let classNameInactiva = 'tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
+                // Solo remover colores, mantener badges si existen
+                document.getElementById(`tab-main-${t}`).className = classNameInactiva;
+            });
+
+            document.getElementById(`vista-main-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-main-${tabId}`).className = 'tab-main-activa py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
+
+            // Arreglar problema visual de FullCalendar si estaba oculto
+            if (tabId === 'calendario' && calendar) {
+                setTimeout(() => calendar.updateSize(), 100);
+            }
+        }
+
+        // --- MANEJO DEL HEADER Y APERTURA GLOBAL ---
+        async function cambiarEstadoTiendaGlobal() {
+            if (!estadoPanel.anuncioId) return;
+            const abierto = document.getElementById('global-toggle-abierto').checked;
+            
+            document.getElementById('admin-estado-apertura').checked = abierto; // sinc intera
+            const txt = document.getElementById('texto-estado-tienda');
+            
+            if(abierto) {
+                txt.innerText = 'Recibiendo Citas'; txt.className = 'text-sm font-black text-green-400 tracking-widest';
+            } else {
+                txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
+            }
+
+            await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
+        }
+
+        // --- NUEVA LÓGICA: CITAS DE HOY E HISTORIAL ---
+        async function cargarCitasDeHoy() {
+            if (!estadoPanel.anuncioId) return;
+            const hoy = hoyISO();
+            
+            // Cargar TODAS las citas para repartirlas en las pestañas "Hoy" e "Historial"
+            const { data, error } = await clienteSupabase.from('citas')
+                .select('*, perfiles:cliente_id(nombre_completo, telefono), servicios:servicio_id(nombre, precio)')
+                .eq('anuncio_id', estadoPanel.anuncioId)
+                .order('fecha_cita', { ascending: false })
+                .order('hora_inicio', { ascending: true });
+
+            if (error) return;
+
+            const citas = data || [];
+            
+            // Filtrar citas del día de hoy (que no sean bloqueos)
+            const citasHoy = citas.filter(c => c.fecha_cita === hoy && c.estado !== 'bloqueado' && c.estado !== 'cancelada');
+            
+            // Filtrar historial (completadas, o pasadas)
+            const historial = citas.filter(c => c.estado === 'completada' || c.estado === 'cancelada' || (c.fecha_cita < hoy && c.estado !== 'bloqueado'));
+
+            renderizarCitasHoy(citasHoy);
+            renderizarHistorialCitas(historial);
+            cargarMetricasProfesional(citas);
+        }
+
+        function renderizarCitasHoy(citas) {
+            const contenedor = document.getElementById('contenedor-citas-hoy');
+            const badge = document.getElementById('badge-citas-hoy');
+            
+            if(citas.length > 0) {
+                badge.innerText = citas.length; badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                contenedor.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center col-span-full border-2 border-dashed border-gray-200 rounded-2xl">No tienes pacientes agendados para hoy.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = citas.map(c => {
+                const nombreCliente = c.perfiles?.nombre_completo || c.notas?.replace(/^Paciente manual:\s*/i, '').trim() || 'Paciente Manual';
+                const telefono = c.perfiles?.telefono || '';
+                const servicio = c.servicios?.nombre || 'Consulta General';
+                const precio = c.servicios?.precio ? `$${c.servicios.precio}` : '';
+                const completada = c.estado === 'completada';
+
+                let botones = '';
+                if (!completada) {
+                    const waBtn = telefono ? `<a href="https://wa.me/${telefono.replace(/\D/g,'')}" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-center text-xs shadow-sm transition">WhatsApp</a>` : '';
+                    botones = `
+                        <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
+                            ${waBtn}
+                            <button onclick="marcarCitaCompletada('${c.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white font-bold py-2 rounded-lg text-xs shadow-sm transition">Completar ✅</button>
+                        </div>
+                    `;
+                }
+
+                return `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 ${completada ? 'border-gray-300 opacity-70' : 'border-tm-azul'} flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black px-2 py-1 rounded bg-blue-50 text-tm-azul uppercase">${horaHHMM(c.hora_inicio)} - ${horaHHMM(c.hora_fin)}</span>
+                            <span class="font-black text-gray-800">${precio}</span>
+                        </div>
+                        <h4 class="font-black text-lg text-tm-azul-oscuro mt-1">${nombreCliente}</h4>
+                        <p class="text-xs font-bold text-gray-500 mt-1">${servicio}</p>
+                        ${c.notas ? `<p class="text-xs text-gray-400 mt-2 italic">💬 ${c.notas}</p>` : ''}
+                    </div>
+                    ${botones}
+                </div>`;
+            }).join('');
+        }
+
+        function renderizarHistorialCitas(citas) {
+            const contenedor = document.getElementById('contenedor-historial');
+            if(citas.length === 0) {
+                contenedor.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center col-span-full border-2 border-dashed border-gray-200 rounded-2xl">Tu historial aparecerá aquí.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = citas.map(c => {
+                const nombreCliente = c.perfiles?.nombre_completo || c.notas?.replace(/^Paciente manual:\s*/i, '').trim() || 'Paciente Manual';
+                const fechaFormat = new Date(`${c.fecha_cita}T12:00:00`).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+                const completada = c.estado === 'completada';
+
+                return `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex justify-between items-center opacity-80 hover:opacity-100 transition">
+                    <div>
+                        <p class="font-black text-gray-800 text-sm">${nombreCliente}</p>
+                        <p class="text-[10px] text-gray-500">${fechaFormat} • ${horaHHMM(c.hora_inicio)}</p>
+                        <span class="${completada ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} text-[10px] font-bold px-2 py-0.5 rounded mt-1 inline-block uppercase">${c.estado}</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 font-bold">${c.servicios?.nombre || 'Consulta'}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function marcarCitaCompletada(citaId) {
+            if(!confirm("¿Confirmas que ya atendiste esta cita?")) return;
+            mostrarOverlay('Actualizando...');
+            await clienteSupabase.from('citas').update({ estado: 'completada' }).eq('id', citaId);
+            ocultarOverlay();
+            mostrarToast('Cita completada con éxito.', 'success');
+            cargarCitasDeHoy();
+        }
+
+        function cargarMetricasProfesional(citas) {
+            if (!infoNegocio) return;
+            document.getElementById('stat-estrellas').innerText = Number(infoNegocio.calificacion_promedio || 5).toFixed(1);
+            document.getElementById('stat-resenas').innerText = infoNegocio.total_calificaciones || 0;
+
+            let ingresos = 0; let completados = 0; let cancelados = 0;
+            citas.forEach(c => {
+                if(c.estado === 'completada') { 
+                    completados++; 
+                    if(c.servicios?.precio) ingresos += Number(c.servicios.precio);
+                }
+                if(c.estado === 'cancelada') { cancelados++; }
+            });
+            document.getElementById('stat-ingresos').innerText = `$${ingresos}`;
+            document.getElementById('stat-completados').innerText = completados;
+            document.getElementById('stat-cancelados').innerText = cancelados;
+        }
+
+        function suscribirseRealtimeConsultorio() {
+            // Escuchar cambios en citas
+            clienteSupabase.channel('citas-consultorio')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `anuncio_id=eq.${estadoPanel.anuncioId}` }, payload => {
+                    cargarCitasDeHoy();
+                    if(estadoPanel.nivelActual >= 2) cargarAgendaYCalendario(estadoPanel.anuncioId, horariosActuales);
+                    
+                    if (payload.eventType === 'INSERT' && payload.new.estado !== 'bloqueado') {
+                        if(navigator.vibrate) navigator.vibrate([1000,500,1000]);
+                        mostrarToast("¡NUEVA CITA RECIBIDA!", "success");
+                    }
+                }).subscribe();
+        }
+
+        // --- CÓDIGO ORIGINAL (NOTIFICACIONES, COMPRESIÓN, HORARIOS, CALENDARIO, ETC) ---
+        function mostrarToast(mensaje, tipo = 'exito') {
+            const c = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg`;
+            el.innerText = mensaje;
+            c.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
         function comprimirImagenAWebP(file, maxWidth = 1080) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -535,164 +710,18 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
+                        let width = img.width; let height = img.height;
+                        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
-                        canvas.toBlob(blob => {
-                            resolve(blob);
-                        }, 'image/webp', 0.8); 
+                        canvas.toBlob(blob => { resolve(blob); }, 'image/webp', 0.8); 
                     };
                     img.onerror = error => reject(error);
                 };
                 reader.onerror = error => reject(error);
             });
         }
-
-        function mostrarToast(mensaje, tipo = 'exito') {
-            const c = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            el.className = `${tipo === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-3 rounded-lg shadow-lg`;
-            el.innerText = mensaje;
-            c.appendChild(el);
-            setTimeout(() => el.remove(), 3500);
-        }
-
-        function mostrarOverlay(texto = 'Un momento...') {
-            document.getElementById('texto-overlay').innerText = texto;
-            document.getElementById('overlay-proceso').classList.remove('hidden');
-        }
-
-        function ocultarOverlay() {
-            document.getElementById('overlay-proceso').classList.add('hidden');
-        }
-
-        function mostrarEstadoPanel(html) {
-            document.getElementById('si-panel').classList.add('hidden');
-            const box = document.getElementById('estado-panel');
-            box.innerHTML = html;
-            box.classList.remove('hidden');
-        }
-
-        function mostrarPanel() {
-            document.getElementById('estado-panel').classList.add('hidden');
-            document.getElementById('si-panel').classList.remove('hidden');
-        }
-
-        function nivelTexto(nivel) {
-            if (nivel >= 2) return 'Nivel 2 (Interactivo)';
-            if (nivel >= 1) return 'Nivel 1 (Estático)';
-            return 'Básico';
-        }
-
-        function esSuscripcionValida(anuncio) {
-            const nivel = Number(anuncio?.nivel_pago || 0);
-            if (nivel === 0) return true;
-            return anuncio?.subscription_status === 'active';
-        }
-
-        function normalizarWhatsApp(valor) {
-            return (valor || '').replace(/\D/g, '').trim();
-        }
-
-        function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('modal-notificacion');
-                const icono = document.getElementById('noti-icono');
-                const tituloEl = document.getElementById('noti-titulo');
-                const mensajeEl = document.getElementById('noti-mensaje');
-                const botonesCont = document.getElementById('noti-botones');
-
-                tituloEl.innerText = titulo;
-                mensajeEl.innerText = mensaje;
-
-                let iconEmoji = 'ℹ️';
-                if (tipo === 'success') iconEmoji = '✅';
-                if (tipo === 'error') iconEmoji = '❌';
-                if (tipo === 'warning') iconEmoji = '⚠️';
-                icono.innerText = iconEmoji;
-
-                botonesCont.innerHTML = '';
-
-                if (esConfirmacion) {
-                    const btnCancelar = document.createElement('button');
-                    btnCancelar.className = "flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200 transition border border-gray-200";
-                    btnCancelar.innerText = "Cancelar";
-                    btnCancelar.onclick = () => { modal.classList.add('hidden'); resolve(false); };
-
-                    const btnConfirmar = document.createElement('button');
-                    btnConfirmar.className = "flex-1 bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
-                    btnConfirmar.innerText = "Confirmar";
-                    btnConfirmar.onclick = () => { modal.classList.add('hidden'); resolve(true); };
-
-                    botonesCont.appendChild(btnCancelar);
-                    botonesCont.appendChild(btnConfirmar);
-                } else {
-                    const btnEntendido = document.createElement('button');
-                    btnEntendido.className = "w-full bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
-                    btnEntendido.innerText = "Entendido";
-                    btnEntendido.onclick = () => { modal.classList.add('hidden'); resolve(true); };
-                    botonesCont.appendChild(btnEntendido);
-                }
-
-                modal.classList.remove('hidden');
-            });
-        }
-
-        function actualizarVistaAuth() {
-            if (usuarioActual) {
-                document.getElementById('no-auth').classList.add('hidden');
-                document.getElementById('si-auth').classList.remove('hidden');
-            } else {
-                document.getElementById('si-auth').classList.add('hidden');
-                document.getElementById('no-auth').classList.remove('hidden');
-            }
-        }
-
-        function hoyISO() {
-            return new Date().toISOString().slice(0, 10);
-        }
-
-        function normalizarHora(hora) {
-            if (!hora) return '00:00:00';
-            return hora.length === 5 ? `${hora}:00` : hora;
-        }
-
-        function horaHHMM(hora) {
-            if (!hora) return '00:00';
-            return hora.substring(0, 5);
-        }
-
-        function sumarMinutos(hora, minutos) {
-            const [h, m] = hora.split(':').map(Number);
-            const total = (h * 60) + m + minutos;
-            const hh = String(Math.floor(total / 60)).padStart(2, '0');
-            const mm = String(total % 60).padStart(2, '0');
-            return `${hh}:${mm}`;
-        }
-
-        function compararFechaHora(fecha, hora) {
-            return new Date(`${fecha}T${hora.length === 5 ? hora + ':00' : hora}`);
-        }
-
-        function obtenerDiaDeFecha(fecha) {
-            return new Date(`${fecha}T12:00:00`).getDay();
-        }
-
-        function obtenerHorarioPorFecha(fecha) {
-            const dia = obtenerDiaDeFecha(fecha);
-            return horariosActuales?.[dia] || null;
-        }
-
         function renderizarUIHorarios() {
             document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
                 <div data-dia="${d}" class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border">
@@ -707,7 +736,6 @@
                 </div>
             `).join('');
         }
-
         function toggleHorarioDia(checkbox) {
             const row = checkbox.closest('[data-dia]');
             const inputs = row.querySelectorAll('.hora-abre, .hora-cierra');
@@ -716,7 +744,6 @@
                 input.classList.toggle('input-disabled', !checkbox.checked);
             });
         }
-
         function setearHorariosUI(hJSON) {
             document.querySelectorAll('#contenedor-horarios > div[data-dia]').forEach(row => {
                 const d = row.dataset.dia;
@@ -728,7 +755,6 @@
                 toggleHorarioDia(row.querySelector('.dia-abierto'));
             });
         }
-
         function obtenerHorariosDesdeUI() {
             const h = {};
             document.querySelectorAll('#contenedor-horarios > div[data-dia]').forEach(row => {
@@ -741,74 +767,31 @@
             });
             return h;
         }
-
         async function copiarHorarioATodos() {
             const primerRow = document.querySelector('#contenedor-horarios > div[data-dia="1"]');
             if (!primerRow) return;
-
             const abierto = primerRow.querySelector('.dia-abierto').checked;
             const abre = primerRow.querySelector('.hora-abre').value;
             const cierra = primerRow.querySelector('.hora-cierra').value;
-
             document.querySelectorAll('#contenedor-horarios > div[data-dia]').forEach(row => {
                 row.querySelector('.dia-abierto').checked = abierto;
                 row.querySelector('.hora-abre').value = abre;
                 row.querySelector('.hora-cierra').value = cierra;
                 toggleHorarioDia(row.querySelector('.dia-abierto'));
             });
-
             await lanzarNotificacion("Horarios Copiados", "Se han copiado los horarios del Lunes a todos los días.", "success");
         }
 
+        // Calendario Original 
         function construirConfigCalendario(horarios) {
-            const abiertos = Object.entries(horarios || {}).filter(([_, valor]) =>
-                valor && valor.abierto && valor.abre && valor.cierra && valor.abre < valor.cierra
-            );
-
-            const hiddenDays = [0,1,2,3,4,5,6].filter(dia =>
-                !abiertos.some(([d]) => Number(d) === dia)
-            );
-
-            const businessHours = abiertos.map(([dia, valor]) => ({
-                daysOfWeek: [Number(dia)],
-                startTime: normalizarHora(valor.abre),
-                endTime: normalizarHora(valor.cierra)
-            }));
-
+            const abiertos = Object.entries(horarios || {}).filter(([_, valor]) => valor && valor.abierto && valor.abre && valor.cierra && valor.abre < valor.cierra);
+            const hiddenDays = [0,1,2,3,4,5,6].filter(dia => !abiertos.some(([d]) => Number(d) === dia));
+            const businessHours = abiertos.map(([dia, valor]) => ({ daysOfWeek: [Number(dia)], startTime: normalizarHora(valor.abre), endTime: normalizarHora(valor.cierra) }));
             const aperturas = abiertos.map(([_, valor]) => valor.abre);
             const cierres = abiertos.map(([_, valor]) => valor.cierra);
-
             const slotMinTime = aperturas.length ? normalizarHora(aperturas.sort()[0]) : '06:00:00';
             const slotMaxTime = cierres.length ? normalizarHora(cierres.sort().slice(-1)[0]) : '22:00:00';
-
-            return {
-                hiddenDays,
-                businessHours,
-                slotMinTime,
-                slotMaxTime
-            };
-        }
-
-        function aplicarConfiguracionCalendario(horarios) {
-            horariosActuales = horarios || {};
-            if (!calendar) return;
-
-            const cfg = construirConfigCalendario(horariosActuales);
-            calendar.setOption('hiddenDays', cfg.hiddenDays);
-            calendar.setOption('businessHours', cfg.businessHours);
-            calendar.setOption('slotMinTime', cfg.slotMinTime);
-            calendar.setOption('slotMaxTime', cfg.slotMaxTime);
-            setTimeout(() => calendar.updateSize(), 120);
-        }
-
-        function renderVistaDerecha() {
-            const mostrarCalendario = estadoPanel.nivelActual >= 2 && !!estadoPanel.anuncioId;
-            document.getElementById('panel-preview-derecho').classList.toggle('hidden', mostrarCalendario);
-            document.getElementById('panel-calendario-derecho').classList.toggle('hidden', !mostrarCalendario);
-
-            if (mostrarCalendario && calendar) {
-                setTimeout(() => calendar.updateSize(), 120);
-            }
+            return { hiddenDays, businessHours, slotMinTime, slotMaxTime };
         }
 
         function actualizarPreviewProfesional() {
@@ -849,8 +832,6 @@
                 document.getElementById('preview-estado-agenda').innerText = 'Bloqueado';
                 document.getElementById('preview-estado-agenda').className = 'font-black text-gray-400';
             }
-
-            renderVistaDerecha();
         }
 
         function configurarPermisos(nivel) {
@@ -863,13 +844,8 @@
                 document.getElementById('contenido-diseno').classList.remove('hidden');
                 document.getElementById('bloqueo-servicios').classList.add('hidden');
                 document.getElementById('contenido-servicios').classList.remove('hidden');
-                
-                // Mostrar aviso a los usuarios Nivel 1
-                if (nivel === 1) {
-                    document.getElementById('aviso-nivel-1-servicios').classList.remove('hidden');
-                } else {
-                    document.getElementById('aviso-nivel-1-servicios').classList.add('hidden');
-                }
+                if (nivel === 1) document.getElementById('aviso-nivel-1-servicios').classList.remove('hidden');
+                else document.getElementById('aviso-nivel-1-servicios').classList.add('hidden');
             } else {
                 document.getElementById('tab-diseno').innerText = 'Diseño 🔒';
                 document.getElementById('tab-servicios').innerText = 'Servicios 🔒';
@@ -879,44 +855,22 @@
                 document.getElementById('contenido-servicios').classList.add('hidden');
                 document.getElementById('aviso-nivel-1-servicios').classList.add('hidden');
             }
-
-            if (nivel >= 2) {
-                document.getElementById('tab-agenda').innerText = 'Mi Calendario';
-                document.getElementById('bloqueo-agenda').classList.add('hidden');
-                document.getElementById('contenido-agenda').classList.remove('hidden');
-            } else {
-                document.getElementById('tab-agenda').innerText = 'Agenda 🔒';
-                document.getElementById('bloqueo-agenda').classList.remove('hidden');
-                document.getElementById('contenido-agenda').classList.add('hidden');
-            }
-
             actualizarPreviewProfesional();
         }
 
         function cambiarPestana(tab) {
-            ['basico', 'diseno', 'servicios', 'agenda', 'verif'].forEach(t => {
+            ['basico', 'diseno', 'servicios', 'verif'].forEach(t => {
                 const panel = document.getElementById('panel-' + t);
                 const boton = document.getElementById('tab-' + t);
-
                 if (panel) panel.classList.add('hidden');
-                if (boton) {
-                    boton.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul');
-                    boton.classList.add('text-gray-400');
-                }
+                if (boton) { boton.classList.remove('text-tm-azul', 'border-b-2', 'border-tm-azul'); boton.classList.add('text-gray-400'); }
             });
 
             const pActivo = document.getElementById('panel-' + tab);
             const bActivo = document.getElementById('tab-' + tab);
 
             if (pActivo) pActivo.classList.remove('hidden');
-            if (bActivo) {
-                bActivo.classList.remove('text-gray-400');
-                bActivo.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul');
-            }
-
-            if (calendar && tab === 'agenda' && estadoPanel.nivelActual >= 2) {
-                setTimeout(() => calendar.updateSize(), 120);
-            }
+            if (bActivo) { bActivo.classList.remove('text-gray-400'); bActivo.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
         }
 
         async function init() {
@@ -927,19 +881,14 @@
             usuarioActual = session?.user || null;
             actualizarVistaAuth();
 
-            if (usuarioActual) {
-                await resolverEntradaPanel();
-            }
+            if (usuarioActual) await resolverEntradaPanel();
 
             clienteSupabase.auth.onAuthStateChange(async (_event, sessionNueva) => {
                 const nuevoUsuario = sessionNueva?.user || null;
                 const cambio = nuevoUsuario?.id !== usuarioActual?.id;
                 usuarioActual = nuevoUsuario;
                 actualizarVistaAuth();
-
-                if (usuarioActual && cambio) {
-                    await resolverEntradaPanel();
-                }
+                if (usuarioActual && cambio) await resolverEntradaPanel();
             });
         }
 
@@ -949,30 +898,16 @@
             const plan = parseInt(params.get('plan') || '0', 10);
             const modo = params.get('modo') || '';
 
-            if (anuncioId) {
-                await cargarTodo(anuncioId);
-                return;
-            }
-
-            if (plan === 0 || modo === 'nuevo') {
-                prepararConsultorioNuevo();
-                return;
-            }
+            if (anuncioId) { await cargarTodo(anuncioId); return; }
+            if (plan === 0 || modo === 'nuevo') { prepararConsultorioNuevo(); return; }
 
             mostrarEstadoPanel(`
                 <div class="max-w-xl mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
                     <h3 class="text-2xl font-black text-tm-azul-oscuro mb-3">Acceso aún no habilitado</h3>
-                    <p class="text-gray-500 mb-6">
-                        Los planes pagados se habilitan después de validar el pago. Regresa a tu panel principal y entra desde ahí.
-                    </p>
+                    <p class="text-gray-500 mb-6">Los planes pagados se habilitan después de validar el pago. Regresa a tu panel principal y entra desde ahí.</p>
                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <a href="${RUTAS.perfil}" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold hover:bg-tm-azul-oscuro transition">
-                            Volver a Mi Perfil
-                        </a>
-                        <a href="${RUTAS.home}" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
-                            Ir al inicio
-                        </a>
+                        <a href="${RUTAS.perfil}" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold hover:bg-tm-azul-oscuro transition">Volver a Mi Perfil</a>
                     </div>
                 </div>
             `);
@@ -981,131 +916,92 @@
         async function cargarTodo(id) {
             try {
                 mostrarOverlay('Cargando tu consultorio...');
+                const { data: n, error } = await clienteSupabase.from('anuncios').select('*').eq('id', id).maybeSingle();
 
-                const { data: n, error } = await clienteSupabase
-                    .from('anuncios')
-                    .select('*')
-                    .eq('id', id)
-                    .maybeSingle();
+                if (error || !n) throw new Error('No se encontró el consultorio.');
+                if (n.user_id !== usuarioActual.id) throw new Error('No tienes permiso para entrar a este panel.');
+                if (!esSuscripcionValida(n)) throw new Error('Tu suscripción no está activa.');
 
-                if (error || !n) {
-                    throw new Error('No se encontró el consultorio.');
-                }
-
-                if (n.user_id !== usuarioActual.id) {
-                    throw new Error('No tienes permiso para entrar a este panel.');
-                }
-
-                if (!esSuscripcionValida(n)) {
-                    throw new Error('Tu suscripción no está activa.');
-                }
-
+                infoNegocio = n;
                 estadoPanel.anuncioId = n.id;
                 estadoPanel.modoNuevo = false;
                 estadoPanel.nivelActual = Number(n.nivel_pago || 0);
                 estadoPanel.subscriptionStatus = n.subscription_status || 'free';
 
+                document.getElementById('header-nombre-negocio').innerText = n.nombre_negocio;
+                document.getElementById('global-toggle-abierto').checked = n.esta_abierto !== false;
+                document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false; // interno
+                
+                const txt = document.getElementById('texto-estado-tienda');
+                if(n.esta_abierto !== false) {
+                    txt.innerText = 'Recibiendo Citas'; txt.className = 'text-sm font-black text-green-400 tracking-widest';
+                } else {
+                    txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
+                }
+
                 document.getElementById('admin-negocio-id').value = n.id;
-                document.getElementById('admin-titulo').innerText = 'Configuración de Consultorio';
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 document.getElementById('admin-imagen-url').value = n.imagen_url || '';
-                document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false;
-                document.getElementById('estado-subida').innerText = n.imagen_url ? '✅ Imagen cargada previamente' : '';
 
                 if (n.horarios && typeof n.horarios === 'object') {
-                    horariosActuales = n.horarios;
-                    setearHorariosUI(n.horarios);
+                    horariosActuales = n.horarios; setearHorariosUI(n.horarios);
                 } else {
                     horariosActuales = obtenerHorariosDesdeUI();
                 }
 
                 configurarPermisos(estadoPanel.nivelActual);
-                mostrarPanel();
+                document.getElementById('estado-panel').classList.add('hidden');
+                
+                // Mostrar primer pestaña "Hoy" por defecto
+                cambiarTabPrincipal('hoy');
                 cambiarPestana('basico');
                 actualizarPreviewProfesional();
 
-                if (estadoPanel.nivelActual >= 1) {
-                    await cargarServicios(n.id);
-                }
+                await cargarCitasDeHoy();
+                if (estadoPanel.nivelActual >= 1) await cargarServicios(n.id);
+                if (estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(n.id, horariosActuales);
+                else destruirCalendarioSiExiste();
 
-                if (estadoPanel.nivelActual >= 2) {
-                    await cargarAgendaYCalendario(n.id, horariosActuales);
-                } else {
-                    destruirCalendarioSiExiste();
-                }
+                suscribirseRealtimeConsultorio();
 
             } catch (err) {
                 mostrarEstadoPanel(`
-                    <div class="max-w-xl mx-auto">
-                        <div class="text-6xl mb-4">⚠️</div>
-                        <h3 class="text-2xl font-black text-tm-azul-oscuro mb-3">No fue posible abrir este panel</h3>
-                        <p class="text-gray-500 mb-6">${err.message}</p>
-                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <a href="${RUTAS.perfil}" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold hover:bg-tm-azul-oscuro transition">
-                                Volver a Mi Perfil
-                            </a>
-                            <a href="${RUTAS.home}" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
-                                Ir al inicio
-                            </a>
-                        </div>
-                    </div>
+                    <div class="max-w-xl mx-auto"><div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-2xl font-black text-tm-azul-oscuro mb-3">No fue posible abrir este panel</h3>
+                    <p class="text-gray-500 mb-6">${err.message}</p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center"><a href="${RUTAS.perfil}" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold hover:bg-tm-azul-oscuro transition">Volver a Mi Perfil</a></div></div>
                 `);
-            } finally {
-                ocultarOverlay();
-            }
+            } finally { ocultarOverlay(); }
         }
 
         function prepararConsultorioNuevo() {
-            estadoPanel.anuncioId = null;
-            estadoPanel.modoNuevo = true;
-            estadoPanel.nivelActual = 0;
-            estadoPanel.subscriptionStatus = 'free';
-
+            estadoPanel.anuncioId = null; estadoPanel.modoNuevo = true; estadoPanel.nivelActual = 0; estadoPanel.subscriptionStatus = 'free';
             document.getElementById('admin-negocio-id').value = '';
-            document.getElementById('admin-titulo').innerText = 'Crear Nuevo Consultorio';
             document.getElementById('admin-nombre').value = '';
             document.getElementById('admin-wa').value = '';
             document.getElementById('admin-imagen-url').value = '';
             document.getElementById('admin-estado-apertura').checked = true;
-            document.getElementById('estado-subida').innerText = 'Las imágenes se optimizarán automáticamente para ahorrar espacio.';
-            document.getElementById('preview-top-image-wrap').classList.add('hidden');
-            document.getElementById('contenedor-preview-imagen').classList.add('hidden');
-
-            horariosActuales = {};
-            setearHorariosUI(null);
-            configurarPermisos(0);
-            mostrarPanel();
-            cambiarPestana('basico');
-            destruirCalendarioSiExiste();
-            actualizarPreviewProfesional();
+            document.getElementById('global-toggle-abierto').checked = true;
+            horariosActuales = {}; setearHorariosUI(null); configurarPermisos(0);
+            document.getElementById('estado-panel').classList.add('hidden');
+            
+            cambiarTabPrincipal('config'); // Forzar config si es nuevo
+            cambiarPestana('basico'); destruirCalendarioSiExiste(); actualizarPreviewProfesional();
         }
 
         function destruirCalendarioSiExiste() {
-            if (calendar) {
-                calendar.destroy();
-                calendar = null;
-            }
+            if (calendar) { calendar.destroy(); calendar = null; }
         }
 
         async function procesarSubidaImagen(e) {
-            const f = e.target.files[0];
-            const estado = document.getElementById('estado-subida');
+            const f = e.target.files[0]; const estado = document.getElementById('estado-subida');
             if (!f) return;
-
-            if (estadoPanel.nivelActual < 1) {
-                await lanzarNotificacion('Acceso restringido', 'Tu plan actual no incluye imagen principal.', 'warning');
-                return;
-            }
-
-            if (f.size > 5 * 1024 * 1024) {
-                await lanzarNotificacion('Archivo muy grande', 'La imagen no debe superar 5 MB.', 'warning');
-                return;
-            }
+            if (estadoPanel.nivelActual < 1) return await lanzarNotificacion('Acceso restringido', 'Tu plan actual no incluye imagen principal.', 'warning');
+            if (f.size > 5 * 1024 * 1024) return await lanzarNotificacion('Archivo muy grande', 'La imagen no debe superar 5 MB.', 'warning');
 
             try {
                 estado.innerText = 'Optimizando y subiendo imagen al servidor... ⏳';
-
                 const previewUrlLocal = URL.createObjectURL(f);
                 document.getElementById('preview-imagen').src = previewUrlLocal;
                 document.getElementById('contenedor-preview-imagen').classList.remove('hidden');
@@ -1113,21 +1009,16 @@
                 const blobOptimizado = await comprimirImagenAWebP(f, 1080);
                 const nombreArchivo = `${usuarioActual.id}/profesional_${Date.now()}.webp`;
 
-                const { error } = await clienteSupabase.storage
-                    .from('negocios')
-                    .upload(nombreArchivo, blobOptimizado, { contentType: 'image/webp', upsert: false });
-
+                const { error } = await clienteSupabase.storage.from('negocios').upload(nombreArchivo, blobOptimizado, { contentType: 'image/webp', upsert: false });
                 if (error) throw error;
 
                 const pubUrl = clienteSupabase.storage.from('negocios').getPublicUrl(nombreArchivo).data.publicUrl;
                 document.getElementById('admin-imagen-url').value = pubUrl;
                 document.getElementById('preview-imagen').src = pubUrl;
-                estado.className = "text-[11px] text-green-600 mt-4 font-bold";
-                estado.innerText = '✅ Imagen optimizada y cargada correctamente';
+                estado.className = "text-[11px] text-green-600 mt-4 font-bold"; estado.innerText = '✅ Imagen optimizada y cargada correctamente';
                 actualizarPreviewProfesional();
             } catch (err) {
-                estado.className = "text-[11px] text-red-500 mt-4 font-bold";
-                estado.innerText = '❌ Error al subir. Intenta de nuevo.';
+                estado.className = "text-[11px] text-red-500 mt-4 font-bold"; estado.innerText = '❌ Error al subir. Intenta de nuevo.';
                 await lanzarNotificacion('Error', 'No se pudo subir la imagen.', 'error');
             }
         }
@@ -1138,135 +1029,73 @@
 
             try {
                 const horarios = obtenerHorariosDesdeUI();
-
                 for (const [dia, valor] of Object.entries(horarios)) {
-                    if (valor.abierto && (!valor.abre || !valor.cierra || valor.abre >= valor.cierra)) {
-                        return await lanzarNotificacion('Revisa el horario', `Por favor verifica los horarios del día ${DIAS[dia]}`, 'warning');
-                    }
+                    if (valor.abierto && (!valor.abre || !valor.cierra || valor.abre >= valor.cierra)) return await lanzarNotificacion('Revisa el horario', `Por favor verifica los horarios del día ${DIAS[dia]}`, 'warning');
                 }
 
                 const payload = {
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
                     enlace_whatsapp: normalizarWhatsApp(document.getElementById('admin-wa').value),
                     imagen_url: document.getElementById('admin-imagen-url').value || '',
-                    esta_abierto: document.getElementById('admin-estado-apertura').checked,
+                    esta_abierto: document.getElementById('global-toggle-abierto').checked,
                     horarios,
                     categoria: 'Consultorio'
                 };
 
-                if (!payload.nombre_negocio) {
-                    return await lanzarNotificacion('Faltan datos', 'Escribe el nombre del consultorio.', 'warning');
-                }
+                if (!payload.nombre_negocio) return await lanzarNotificacion('Faltan datos', 'Escribe el nombre del consultorio.', 'warning');
+                if (!payload.enlace_whatsapp || payload.enlace_whatsapp.length < 10) return await lanzarNotificacion('Faltan datos', 'Ingresa un WhatsApp válido.', 'warning');
 
-                if (!payload.enlace_whatsapp || payload.enlace_whatsapp.length < 10) {
-                    return await lanzarNotificacion('Faltan datos', 'Ingresa un WhatsApp válido.', 'warning');
-                }
-
-                btn.disabled = true;
-                btn.innerText = 'GUARDANDO...';
-                mostrarOverlay('Guardando tu consultorio...');
-
+                btn.disabled = true; btn.innerText = 'GUARDANDO...'; mostrarOverlay('Guardando tu consultorio...');
                 const token = await obtenerTokenUsuario();
-
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/panel-gestionar`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'apikey': SUPABASE_KEY
-                    },
-                    body: JSON.stringify({
-                        accion: 'guardar_negocio',
-                        id_negocio: id,
-                        payload
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ accion: 'guardar_negocio', id_negocio: id, payload })
                 });
 
                 const data = await response.json();
-
-                if (!response.ok || !data?.success) {
-                    throw new Error(data?.error || 'No se pudo guardar el consultorio.');
-                }
+                if (!response.ok || !data?.success) throw new Error(data?.error || 'No se pudo guardar el consultorio.');
 
                 const nuevoId = data.id_negocio || id;
-
                 if (!estadoPanel.anuncioId && nuevoId) {
-                    estadoPanel.anuncioId = nuevoId;
-                    estadoPanel.modoNuevo = false;
+                    estadoPanel.anuncioId = nuevoId; estadoPanel.modoNuevo = false;
                     document.getElementById('admin-negocio-id').value = nuevoId;
-                    document.getElementById('admin-titulo').innerText = 'Configuración de Consultorio';
-
                     const nuevaUrl = `${RUTAS.profesional}?id=${encodeURIComponent(nuevoId)}`;
                     window.history.replaceState({}, '', nuevaUrl);
+                    suscribirseRealtimeConsultorio();
                 }
 
-                horariosActuales = horarios;
-                actualizarPreviewProfesional();
-                mostrarToast('Consultorio guardado correctamente.');
+                horariosActuales = horarios; actualizarPreviewProfesional(); mostrarToast('Consultorio guardado correctamente.');
 
-                if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 1) {
-                    await cargarServicios(estadoPanel.anuncioId);
-                }
+                if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 1) await cargarServicios(estadoPanel.anuncioId);
+                if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(estadoPanel.anuncioId, horariosActuales);
 
-                if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 2) {
-                    await cargarAgendaYCalendario(estadoPanel.anuncioId, horariosActuales);
-                }
-
-            } catch (err) {
-                await lanzarNotificacion('Error', err.message || 'No se pudieron guardar los cambios.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'GUARDAR CAMBIOS';
-                ocultarOverlay();
-            }
+            } catch (err) { await lanzarNotificacion('Error', err.message || 'No se pudieron guardar los cambios.', 'error');
+            } finally { btn.disabled = false; btn.innerText = 'GUARDAR'; ocultarOverlay(); }
         }
 
         async function cargarServicios(idN) {
             if (!idN || estadoPanel.nivelActual < 1) return;
-
             try {
-                const { data, error } = await clienteSupabase
-                    .from('servicios')
-                    .select('*')
-                    .eq('anuncio_id', idN)
-                    .order('nombre', { ascending: true });
-
+                const { data, error } = await clienteSupabase.from('servicios').select('*').eq('anuncio_id', idN).order('nombre', { ascending: true });
                 if (error) throw error;
-
                 serviciosActuales = data || [];
-
                 document.getElementById('lista-servicios').innerHTML = serviciosActuales.length
                     ? serviciosActuales.map(s => `
                         <div class="flex justify-between items-center p-5 bg-white border rounded-2xl shadow-sm gap-3">
-                            <div>
-                                <p class="font-bold text-tm-azul-oscuro">${s.nombre}</p>
-                                <p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p>
-                            </div>
-                            <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">
-                                Borrar
-                            </button>
-                        </div>
-                    `).join('')
+                            <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p></div>
+                            <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">Borrar</button>
+                        </div>`).join('')
                     : `<div class="bg-white border rounded-2xl p-5 text-sm text-gray-500">Aún no tienes servicios registrados.</div>`;
 
                 const select = document.getElementById('manual-servicio');
-                select.innerHTML = `
-                    <option value="">Selecciona un servicio</option>
-                    ${serviciosActuales.map(s => `
-                        <option value="${s.id}">${s.nombre} · ${s.duracion_minutos} min · $${s.precio}</option>
-                    `).join('')}
-                `;
-            } catch (err) {
-                await lanzarNotificacion('Error', 'No se pudieron cargar los servicios.', 'error');
-            }
+                select.innerHTML = `<option value="">Selecciona un servicio</option>` + serviciosActuales.map(s => `<option value="${s.id}">${s.nombre} · ${s.duracion_minutos} min · $${s.precio}</option>`).join('');
+            } catch (err) { await lanzarNotificacion('Error', 'No se pudieron cargar los servicios.', 'error'); }
         }
 
         async function agregarServicio() {
             try {
-                if (estadoPanel.nivelActual < 1) {
-                    return await lanzarNotificacion('Acceso restringido', 'Tu plan actual no incluye catálogo de servicios.', 'warning');
-                }
-
+                if (estadoPanel.nivelActual < 1) return await lanzarNotificacion('Acceso restringido', 'Tu plan actual no incluye catálogo de servicios.', 'warning');
                 const idN = document.getElementById('admin-negocio-id').value;
                 const nombre = document.getElementById('serv-nombre').value.trim();
                 const precio = parseFloat(document.getElementById('serv-precio').value) || 0;
@@ -1276,40 +1105,23 @@
                 if (!nombre) return await lanzarNotificacion('Faltan datos', 'Escribe el nombre del servicio.', 'warning');
                 if (duracion <= 0) return await lanzarNotificacion('Faltan datos', 'La duración debe ser mayor a 0.', 'warning');
 
-                const payload = {
-                    anuncio_id: idN,
-                    nombre,
-                    precio,
-                    duracion_minutos: duracion
-                };
-
+                const payload = { anuncio_id: idN, nombre, precio, duracion_minutos: duracion };
                 const { error } = await clienteSupabase.from('servicios').insert([payload]);
                 if (error) throw error;
 
-                document.getElementById('serv-nombre').value = '';
-                document.getElementById('serv-precio').value = '';
-                document.getElementById('serv-duracion').value = '';
-
-                await lanzarNotificacion('¡Éxito!', 'Servicio creado correctamente.', 'success');
-                await cargarServicios(idN);
-            } catch (err) {
-                await lanzarNotificacion('Error', 'No se pudo crear el servicio.', 'error');
-            }
+                document.getElementById('serv-nombre').value = ''; document.getElementById('serv-precio').value = ''; document.getElementById('serv-duracion').value = '';
+                await lanzarNotificacion('¡Éxito!', 'Servicio creado correctamente.', 'success'); await cargarServicios(idN);
+            } catch (err) { await lanzarNotificacion('Error', 'No se pudo crear el servicio.', 'error'); }
         }
 
         async function eliminarServicio(idServicio) {
             try {
                 const confirmado = await lanzarNotificacion('Eliminar Servicio', '¿Seguro que quieres borrar este servicio?', 'warning', true);
                 if (!confirmado) return;
-
                 const { error } = await clienteSupabase.from('servicios').delete().eq('id', idServicio);
                 if (error) throw error;
-
-                await lanzarNotificacion('Eliminado', 'Servicio eliminado correctamente.', 'success');
-                await cargarServicios(document.getElementById('admin-negocio-id').value);
-            } catch (err) {
-                await lanzarNotificacion('Error', 'No se pudo eliminar el servicio.', 'error');
-            }
+                await lanzarNotificacion('Eliminado', 'Servicio eliminado correctamente.', 'success'); await cargarServicios(document.getElementById('admin-negocio-id').value);
+            } catch (err) { await lanzarNotificacion('Error', 'No se pudo eliminar el servicio.', 'error'); }
         }
 
         function obtenerTituloCita(c) {
@@ -1319,83 +1131,19 @@
             return 'Cita manual';
         }
 
-        function renderizarListaCitas(citas) {
-            const contenedor = document.getElementById('lista-citas-negocio');
-
-            if (!citas || !citas.length) {
-                contenedor.innerHTML = `<div class="bg-white border rounded-2xl p-5 text-sm text-gray-500">No hay citas próximas registradas.</div>`;
-                return;
-            }
-
-            const ahora = new Date();
-            const futuras = [...citas]
-                .filter(c => compararFechaHora(c.fecha_cita, horaHHMM(c.hora_inicio)) >= new Date(ahora.getTime() - 5 * 60 * 1000))
-                .sort((a, b) => compararFechaHora(a.fecha_cita, horaHHMM(a.hora_inicio)) - compararFechaHora(b.fecha_cita, horaHHMM(b.hora_inicio)))
-                .slice(0, 12);
-
-            contenedor.innerHTML = futuras.length
-                ? futuras.map(c => {
-                    const esBloqueo = c.estado === 'bloqueado';
-                    const titulo = obtenerTituloCita(c);
-                    const fecha = new Date(`${c.fecha_cita}T12:00:00`).toLocaleDateString('es-MX', {
-                        weekday: 'short',
-                        day: '2-digit',
-                        month: 'short'
-                    });
-                    const servicio = c.servicios?.nombre ? `<div class="text-[10px] text-gray-400 font-bold mt-1">${c.servicios.nombre}</div>` : '';
-                    return `
-                        <div class="bg-white border rounded-2xl p-4 shadow-sm flex justify-between gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-[10px] font-black px-2 py-1 rounded-full ${esBloqueo ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-tm-azul'}">
-                                        ${esBloqueo ? 'BLOQUEO' : 'CITA'}
-                                    </span>
-                                    <span class="text-[10px] font-black text-gray-400 uppercase">${fecha}</span>
-                                </div>
-                                <p class="font-black text-tm-azul-oscuro">${titulo}</p>
-                                <p class="text-xs text-gray-500 font-bold">${horaHHMM(c.hora_inicio)} - ${horaHHMM(c.hora_fin)}</p>
-                                ${servicio}
-                            </div>
-                            <div class="flex items-center">
-                                <button onclick="cancelarCitaOwner('${c.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">
-                                    ${esBloqueo ? 'Quitar' : 'Cancelar'}
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('')
-                : `<div class="bg-white border rounded-2xl p-5 text-sm text-gray-500">No hay citas próximas registradas.</div>`;
-        }
-
         async function cargarAgendaYCalendario(idN, horariosOverride = null) {
             if (!idN || estadoPanel.nivelActual < 2) return;
-
             try {
-                const { data, error } = await clienteSupabase
-                    .from('citas')
-                    .select('*, perfiles:cliente_id(nombre_completo), servicios:servicio_id(nombre)')
-                    .eq('anuncio_id', idN)
-                    .neq('estado', 'cancelada')
-                    .order('fecha_cita', { ascending: true })
-                    .order('hora_inicio', { ascending: true });
-
+                const { data, error } = await clienteSupabase.from('citas').select('*, perfiles:cliente_id(nombre_completo), servicios:servicio_id(nombre)')
+                    .eq('anuncio_id', idN).neq('estado', 'cancelada').order('fecha_cita', { ascending: true }).order('hora_inicio', { ascending: true });
                 if (error) throw error;
 
                 const citas = data || [];
-                renderizarListaCitas(citas);
-
                 const eventos = citas.map(c => ({
-                    id: c.id,
-                    title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Bloqueo'}` : `✅ ${obtenerTituloCita(c)}`,
-                    start: `${c.fecha_cita}T${horaHHMM(c.hora_inicio)}:00`,
-                    end: `${c.fecha_cita}T${horaHHMM(c.hora_fin)}:00`,
+                    id: c.id, title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Bloqueo'}` : `✅ ${obtenerTituloCita(c)}`,
+                    start: `${c.fecha_cita}T${horaHHMM(c.hora_inicio)}:00`, end: `${c.fecha_cita}T${horaHHMM(c.hora_fin)}:00`,
                     backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
-                    extendedProps: {
-                        estado: c.estado,
-                        notas: c.notas || '',
-                        servicio: c.servicios?.nombre || '',
-                        nombre: obtenerTituloCita(c)
-                    }
+                    extendedProps: { estado: c.estado, notas: c.notas || '', servicio: c.servicios?.nombre || '', nombre: obtenerTituloCita(c) }
                 }));
 
                 const horariosParaPintar = horariosOverride || horariosActuales || {};
@@ -1404,183 +1152,92 @@
                 if (calendar) calendar.destroy();
 
                 calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                    locale: 'es',
-                    initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'timeGridDay,timeGridWeek,dayGridMonth'
-                    },
-                    events: eventos,
-                    selectable: true,
-                    selectMirror: true,
-                    nowIndicator: true,
-                    allDaySlot: false,
-                    weekends: true,
-                    expandRows: true,
-                    height: 'auto',
-                    slotMinTime: cfg.slotMinTime,
-                    slotMaxTime: cfg.slotMaxTime,
-                    businessHours: cfg.businessHours,
-                    hiddenDays: cfg.hiddenDays,
-                    slotDuration: '00:30:00',
-                    snapDuration: '00:15:00',
-
+                    locale: 'es', initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridDay,timeGridWeek,dayGridMonth' },
+                    events: eventos, selectable: true, selectMirror: true, nowIndicator: true, allDaySlot: false, weekends: true, expandRows: true, height: 'auto',
+                    slotMinTime: cfg.slotMinTime, slotMaxTime: cfg.slotMaxTime, businessHours: cfg.businessHours, hiddenDays: cfg.hiddenDays, slotDuration: '00:30:00', snapDuration: '00:15:00',
                     select: (info) => {
-                        const fecha = info.startStr.slice(0, 10);
-                        const horaInicio = info.startStr.slice(11, 16);
-                        const horaFin = info.endStr.slice(11, 16);
+                        const fecha = info.startStr.slice(0, 10); const horaInicio = info.startStr.slice(11, 16); const horaFin = info.endStr.slice(11, 16);
                         abrirModalAgenda({ modo: 'manual', fecha, horaInicio, horaFin });
                     },
-
                     dateClick: (info) => {
-                        const fecha = info.dateStr.slice(0, 10);
-                        let horaInicio = '09:00';
-                        let horaFin = '10:00';
-
-                        if (info.view.type.includes('timeGrid')) {
-                            horaInicio = info.date.toTimeString().slice(0, 5);
-                            horaFin = sumarMinutos(horaInicio, 60);
-                        }
-
+                        const fecha = info.dateStr.slice(0, 10); let horaInicio = '09:00'; let horaFin = '10:00';
+                        if (info.view.type.includes('timeGrid')) { horaInicio = info.date.toTimeString().slice(0, 5); horaFin = sumarMinutos(horaInicio, 60); }
                         abrirModalAgenda({ modo: 'manual', fecha, horaInicio, horaFin });
                     },
-
                     eventClick: async (info) => {
                         const tipo = info.event.extendedProps.estado === 'bloqueado' ? 'este bloqueo' : 'esta cita';
                         const confirmado = await lanzarNotificacion('Eliminar Registro', `¿Deseas eliminar ${tipo}?`, 'warning', true);
-                        if (confirmado) {
-                            cancelarCitaOwner(info.event.id);
-                        }
+                        if (confirmado) { cancelarCitaOwner(info.event.id); }
                     },
-
                     eventDidMount: (info) => {
                         const servicio = info.event.extendedProps.servicio ? `\nServicio: ${info.event.extendedProps.servicio}` : '';
                         info.el.title = `${info.event.title}${servicio}`;
                     }
                 });
-
                 calendar.render();
-                renderVistaDerecha();
-
-            } catch (err) {
-                await lanzarNotificacion('Error', 'Error al cargar agenda.', 'error');
-            }
+            } catch (err) { await lanzarNotificacion('Error', 'Error al cargar agenda.', 'error'); }
         }
 
         async function cancelarCitaOwner(id) {
             try {
                 if (estadoPanel.nivelActual < 2) return;
-
                 const token = await obtenerTokenUsuario();
-
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'apikey': SUPABASE_KEY
-                    },
-                    body: JSON.stringify({
-                        accion: 'cancelar_cita',
-                        payload: { cita_id: id }
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ accion: 'cancelar_cita', payload: { cita_id: id } })
                 });
-
                 const data = await response.json();
-
-                if (!response.ok || data?.error) {
-                    throw new Error(data?.error || 'No se pudo eliminar el registro.');
-                }
-
+                if (!response.ok || data?.error) throw new Error(data?.error || 'No se pudo eliminar el registro.');
                 await lanzarNotificacion('Eliminado', 'Registro eliminado correctamente.', 'success');
                 await cargarAgendaYCalendario(document.getElementById('admin-negocio-id').value, horariosActuales);
-            } catch (err) {
-                await lanzarNotificacion('Error', err.message || 'No se pudo eliminar el registro.', 'error');
-            }
+            } catch (err) { await lanzarNotificacion('Error', err.message || 'No se pudo eliminar el registro.', 'error'); }
         }
 
         function abrirModalAgenda({ modo = 'manual', fecha = '', horaInicio = '', horaFin = '' } = {}) {
             if (estadoPanel.nivelActual < 2 || !estadoPanel.anuncioId) return;
-
-            const fechaBase = fecha || hoyISO();
-            const horarioDelDia = obtenerHorarioPorFecha(fechaBase);
-
+            const fechaBase = fecha || hoyISO(); const horarioDelDia = obtenerHorarioPorFecha(fechaBase);
             let inicioDefault = horaInicio || (horarioDelDia?.abre ? horaHHMM(horarioDelDia.abre) : '09:00');
             let finDefault = horaFin || (horarioDelDia?.abre ? sumarMinutos(horaHHMM(horarioDelDia.abre), 60) : '10:00');
-
-            document.getElementById('manual-fecha').value = fechaBase;
-            document.getElementById('manual-inicio').value = inicioDefault;
-            document.getElementById('manual-fin').value = finDefault;
-
-            document.getElementById('bloqueo-fecha').value = fechaBase;
-            document.getElementById('bloqueo-inicio').value = inicioDefault;
-            document.getElementById('bloqueo-fin').value = finDefault;
-            document.getElementById('bloqueo-todo-dia').checked = false;
-
-            document.getElementById('modal-bloqueo').classList.remove('hidden');
-            cambiarModoReserva(modo);
+            document.getElementById('manual-fecha').value = fechaBase; document.getElementById('manual-inicio').value = inicioDefault; document.getElementById('manual-fin').value = finDefault;
+            document.getElementById('bloqueo-fecha').value = fechaBase; document.getElementById('bloqueo-inicio').value = inicioDefault; document.getElementById('bloqueo-fin').value = finDefault; document.getElementById('bloqueo-todo-dia').checked = false;
+            document.getElementById('modal-bloqueo').classList.remove('hidden'); cambiarModoReserva(modo);
         }
 
-        function cerrarModalAgenda() {
-            document.getElementById('modal-bloqueo').classList.add('hidden');
-        }
+        function cerrarModalAgenda() { document.getElementById('modal-bloqueo').classList.add('hidden'); }
 
         function cambiarModoReserva(modo) {
             document.getElementById('modal-modo').value = modo;
-
-            const btnManual = document.getElementById('btn-modo-manual');
-            const btnBloqueo = document.getElementById('btn-modo-bloqueo');
-            const panelManual = document.getElementById('panel-modal-manual');
-            const panelBloqueo = document.getElementById('panel-modal-bloqueo');
-            const titulo = document.getElementById('modal-titulo');
-            const btnConfirmar = document.getElementById('btn-confirmar-modal');
+            const btnManual = document.getElementById('btn-modo-manual'); const btnBloqueo = document.getElementById('btn-modo-bloqueo');
+            const panelManual = document.getElementById('panel-modal-manual'); const panelBloqueo = document.getElementById('panel-modal-bloqueo');
+            const titulo = document.getElementById('modal-titulo'); const btnConfirmar = document.getElementById('btn-confirmar-modal');
 
             if (modo === 'manual') {
-                btnManual.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition';
-                btnBloqueo.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition';
-                panelManual.classList.remove('hidden');
-                panelBloqueo.classList.add('hidden');
-                titulo.textContent = 'Nueva cita manual 👤';
-                btnConfirmar.textContent = 'Guardar cita';
+                btnManual.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition'; btnBloqueo.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition';
+                panelManual.classList.remove('hidden'); panelBloqueo.classList.add('hidden');
+                titulo.textContent = 'Nueva cita manual 👤'; btnConfirmar.textContent = 'Guardar cita';
             } else {
-                btnManual.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition';
-                btnBloqueo.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition';
-                panelManual.classList.add('hidden');
-                panelBloqueo.classList.remove('hidden');
-                titulo.textContent = 'Bloquear horario 🛑';
-                btnConfirmar.textContent = 'Guardar bloqueo';
+                btnManual.className = 'modo-btn-inactivo py-4 rounded-2xl font-black text-sm transition'; btnBloqueo.className = 'modo-btn-activo py-4 rounded-2xl font-black text-sm transition';
+                panelManual.classList.add('hidden'); panelBloqueo.classList.remove('hidden');
+                titulo.textContent = 'Bloquear horario 🛑'; btnConfirmar.textContent = 'Guardar bloqueo';
             }
         }
 
         function sincronizarBloqueoTodoElDia() {
-            const check = document.getElementById('bloqueo-todo-dia');
-            const fecha = document.getElementById('bloqueo-fecha').value;
-            const horario = fecha ? obtenerHorarioPorFecha(fecha) : null;
-
-            const inicio = document.getElementById('bloqueo-inicio');
-            const fin = document.getElementById('bloqueo-fin');
-
+            const check = document.getElementById('bloqueo-todo-dia'); const fecha = document.getElementById('bloqueo-fecha').value;
+            const horario = fecha ? obtenerHorarioPorFecha(fecha) : null; const inicio = document.getElementById('bloqueo-inicio'); const fin = document.getElementById('bloqueo-fin');
             if (check.checked) {
-                inicio.value = horario?.abre ? horaHHMM(horario.abre) : '09:00';
-                fin.value = horario?.cierra ? horaHHMM(horario.cierra) : '18:00';
-                inicio.disabled = true;
-                fin.disabled = true;
-                inicio.classList.add('input-disabled');
-                fin.classList.add('input-disabled');
+                inicio.value = horario?.abre ? horaHHMM(horario.abre) : '09:00'; fin.value = horario?.cierra ? horaHHMM(horario.cierra) : '18:00';
+                inicio.disabled = true; fin.disabled = true; inicio.classList.add('input-disabled'); fin.classList.add('input-disabled');
             } else {
-                inicio.disabled = false;
-                fin.disabled = false;
-                inicio.classList.remove('input-disabled');
-                fin.classList.remove('input-disabled');
+                inicio.disabled = false; fin.disabled = false; inicio.classList.remove('input-disabled'); fin.classList.remove('input-disabled');
             }
         }
 
         function actualizarHoraFinManual() {
-            const servicioId = document.getElementById('manual-servicio').value;
-            const inicio = document.getElementById('manual-inicio').value;
+            const servicioId = document.getElementById('manual-servicio').value; const inicio = document.getElementById('manual-inicio').value;
             if (!inicio) return;
-
             const servicio = serviciosActuales.find(s => String(s.id) === String(servicioId));
             const duracion = servicio?.duracion_minutos || 60;
             document.getElementById('manual-fin').value = sumarMinutos(inicio, duracion);
@@ -1588,127 +1245,57 @@
 
         async function guardarDesdeModalAgenda() {
             const modo = document.getElementById('modal-modo').value;
-            if (modo === 'bloqueo') {
-                await guardarBloqueo();
-            } else {
-                await guardarCitaManual();
-            }
+            if (modo === 'bloqueo') { await guardarBloqueo(); } else { await guardarCitaManual(); }
         }
 
         async function guardarBloqueo() {
             try {
-                const idN = document.getElementById('admin-negocio-id').value;
-                if (!idN) return;
-
+                const idN = document.getElementById('admin-negocio-id').value; if (!idN) return;
                 const payload = {
-                    anuncio_id: idN,
-                    fecha: document.getElementById('bloqueo-fecha').value,
-                    hora_inicio: document.getElementById('bloqueo-inicio').value,
-                    hora_fin: document.getElementById('bloqueo-fin').value,
+                    anuncio_id: idN, fecha: document.getElementById('bloqueo-fecha').value,
+                    hora_inicio: document.getElementById('bloqueo-inicio').value, hora_fin: document.getElementById('bloqueo-fin').value,
                     titulo: document.getElementById('bloqueo-titulo').value.trim() || 'Bloqueo Manual'
                 };
-
-                if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) {
-                    return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario del bloqueo.', 'warning');
-                }
-
+                if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario del bloqueo.', 'warning');
                 const token = await obtenerTokenUsuario();
-
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'apikey': SUPABASE_KEY
-                    },
-                    body: JSON.stringify({
-                        accion: 'bloquear_espacio',
-                        payload
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ accion: 'bloquear_espacio', payload })
                 });
-
                 const data = await response.json();
-
-                if (!response.ok || data?.error) {
-                    throw new Error(data?.error || 'No se pudo registrar el bloqueo.');
-                }
-
-                await lanzarNotificacion('¡Guardado!', 'Bloqueo registrado correctamente.', 'success');
-                cerrarModalAgenda();
-                await cargarAgendaYCalendario(idN, horariosActuales);
-            } catch (err) {
-                await lanzarNotificacion('Error', err?.message || 'No se pudo registrar el bloqueo.', 'error');
-            }
+                if (!response.ok || data?.error) throw new Error(data?.error || 'No se pudo registrar el bloqueo.');
+                await lanzarNotificacion('¡Guardado!', 'Bloqueo registrado correctamente.', 'success'); cerrarModalAgenda(); await cargarAgendaYCalendario(idN, horariosActuales);
+            } catch (err) { await lanzarNotificacion('Error', err?.message || 'No se pudo registrar el bloqueo.', 'error'); }
         }
 
         async function guardarCitaManual() {
             try {
-                const idN = document.getElementById('admin-negocio-id').value;
-                if (!idN) return;
-
+                const idN = document.getElementById('admin-negocio-id').value; if (!idN) return;
                 const payload = {
-                    anuncio_id: idN,
-                    paciente: document.getElementById('manual-paciente').value.trim(),
-                    servicio_id: document.getElementById('manual-servicio').value || null,
-                    fecha: document.getElementById('manual-fecha').value,
-                    hora_inicio: document.getElementById('manual-inicio').value,
-                    hora_fin: document.getElementById('manual-fin').value,
-                    notas: document.getElementById('manual-notas').value.trim() || null
+                    anuncio_id: idN, paciente: document.getElementById('manual-paciente').value.trim(), servicio_id: document.getElementById('manual-servicio').value || null,
+                    fecha: document.getElementById('manual-fecha').value, hora_inicio: document.getElementById('manual-inicio').value,
+                    hora_fin: document.getElementById('manual-fin').value, notas: document.getElementById('manual-notas').value.trim() || null
                 };
-
                 if (!payload.paciente) return await lanzarNotificacion('Faltan datos', 'Escribe el nombre del paciente.', 'warning');
-                if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) {
-                    return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario de la cita.', 'warning');
-                }
-
+                if (!payload.fecha || !payload.hora_inicio || !payload.hora_fin) return await lanzarNotificacion('Faltan datos', 'Completa fecha y horario de la cita.', 'warning');
                 const token = await obtenerTokenUsuario();
-
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/gestionar-agendas`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'apikey': SUPABASE_KEY
-                    },
-                    body: JSON.stringify({
-                        accion: 'crear_cita_manual',
-                        payload
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ accion: 'crear_cita_manual', payload })
                 });
-
                 const data = await response.json();
-
-                if (!response.ok || data?.error) {
-                    throw new Error(data?.error || 'No se pudo registrar la cita.');
-                }
-
-                await lanzarNotificacion('¡Guardado!', 'Cita manual registrada correctamente.', 'success');
-                cerrarModalAgenda();
-
-                document.getElementById('manual-paciente').value = '';
-                document.getElementById('manual-servicio').value = '';
-                document.getElementById('manual-fecha').value = '';
-                document.getElementById('manual-inicio').value = '';
-                document.getElementById('manual-fin').value = '';
-                document.getElementById('manual-notas').value = '';
-
+                if (!response.ok || data?.error) throw new Error(data?.error || 'No se pudo registrar la cita.');
+                await lanzarNotificacion('¡Guardado!', 'Cita manual registrada correctamente.', 'success'); cerrarModalAgenda();
+                document.getElementById('manual-paciente').value = ''; document.getElementById('manual-servicio').value = ''; document.getElementById('manual-fecha').value = ''; document.getElementById('manual-inicio').value = ''; document.getElementById('manual-fin').value = ''; document.getElementById('manual-notas').value = '';
                 await cargarAgendaYCalendario(idN, horariosActuales);
-            } catch (err) {
-                await lanzarNotificacion('Error', err?.message || 'No se pudo registrar la cita manual.', 'error');
-            }
+            } catch (err) { await lanzarNotificacion('Error', err?.message || 'No se pudo registrar la cita manual.', 'error'); }
         }
 
         async function solicitarVerificacion(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-enviar-verif');
-            btn.disabled = true;
-            btn.innerText = 'Enviando documentos...';
-
+            e.preventDefault(); const btn = document.getElementById('btn-enviar-verif'); btn.disabled = true; btn.innerText = 'Enviando documentos...';
             setTimeout(async () => {
                 await lanzarNotificacion('¡Enviado!', 'Tus documentos han sido enviados a revisión exitosamente.', 'success');
-                document.getElementById('form-verif').reset();
-                btn.disabled = false;
-                btn.innerText = 'Enviar para Revisión';
+                document.getElementById('form-verif').reset(); btn.disabled = false; btn.innerText = 'Enviar para Revisión';
             }, 1200);
         }
 
