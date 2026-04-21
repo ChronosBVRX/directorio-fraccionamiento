@@ -791,6 +791,33 @@
             }, 300);
         }
 
+        // --- FUNCIÓN PARA ELIMINAR NEGOCIO ---
+        async function eliminarNegocio(id, nombre) {
+            const confirmacion = confirm(`¿Estás seguro de que deseas eliminar "${nombre}"? Esta acción no se puede deshacer y perderás toda la información del negocio.`);
+            
+            if (!confirmacion) return;
+
+            try {
+                mostrarOverlay("Eliminando espacio...");
+                
+                const { error } = await clienteSupabase
+                    .from("anuncios")
+                    .delete()
+                    .eq("id", id)
+                    .eq("user_id", usuarioActual.id); // Seguridad extra
+
+                if (error) throw error;
+
+                mostrarNotificacion("Espacio eliminado correctamente.");
+                await cargarMisNegocios(); // Recargar la lista
+            } catch (err) {
+                console.error("Error eliminando negocio:", err);
+                mostrarNotificacion("No se pudo eliminar el espacio.", "error");
+            } finally {
+                ocultarOverlay();
+            }
+        }
+
         async function cargarMisNegocios() {
             const contenedor = document.getElementById("contenedor-mis-negocios");
             contenedor.innerHTML = `
@@ -806,9 +833,7 @@
                     .eq("user_id", usuarioActual.id)
                     .order("id", { ascending: false });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 if (!data || data.length === 0) {
                     contenedor.innerHTML = `
@@ -827,9 +852,8 @@
                         ? `panel-tienda.html?id=${n.id}`
                         : `panel-profesional.html?id=${n.id}`;
 
-                    // Se agrega el botón para Cambiar Plan
                     return `
-                        <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
+                        <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition group">
                             <div class="flex justify-between items-start mb-4 gap-4">
                                 <div class="flex gap-3">
                                     <span class="text-2xl">${esTienda ? "🛒" : "🩺"}</span>
@@ -841,9 +865,16 @@
                                         </div>
                                     </div>
                                 </div>
-                                <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
-                                    ${activo ? "ACTIVO" : "PENDIENTE"}
-                                </span>
+                                <div class="flex flex-col items-end gap-2">
+                                    <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
+                                        ${activo ? "ACTIVO" : "PENDIENTE"}
+                                    </span>
+                                    <button onclick="eliminarNegocio('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Eliminar este espacio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                             <div class="flex gap-2 w-full mt-2">
                                 <button onclick="iniciarCambioPlan('${n.id}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
@@ -867,17 +898,16 @@
         }
 
         function iniciarCreacionEspacio() {
-            document.getElementById("anuncio-existente-id").value = ""; // Limpiamos ID existente para crear nuevo
+            document.getElementById("anuncio-existente-id").value = ""; 
             document.getElementById("modal-nuevo-espacio").classList.remove("hidden");
             document.getElementById("paso-1-rubro").classList.remove("hidden");
             document.getElementById("paso-2-planes").classList.add("hidden");
         }
 
-        // Nueva función para iniciar el cambio de plan de un negocio existente
         function iniciarCambioPlan(idAnuncio, rubro) {
             document.getElementById("anuncio-existente-id").value = idAnuncio;
             document.getElementById("modal-nuevo-espacio").classList.remove("hidden");
-            document.getElementById("btn-volver-rubro").classList.add("hidden"); // Ocultamos volver porque ya tiene rubro
+            document.getElementById("btn-volver-rubro").classList.add("hidden"); 
             mostrarPlanes(rubro);
         }
 
@@ -973,10 +1003,8 @@
                 return;
             }
 
-            // Si es plan gratuito
             if (nivel === 0) {
                 if (anuncioIdExistente) {
-                    // Si el programador necesita manejar un "Downgrade" a plan gratuito para un negocio existente
                     mostrarNotificacion("El cambio a plan gratuito debe gestionarse con soporte.", "error");
                     return;
                 }
@@ -989,8 +1017,8 @@
             }
 
             const priceId = STRIPE_PRICE_IDS?.[rubro]?.[nivel];
-            if (!priceId || priceId.includes("_AQUI")) {
-                mostrarNotificacion("Falta configurar el Price ID de Stripe para este plan.", "error");
+            if (!priceId) {
+                mostrarNotificacion("Falta configurar el Price ID de Stripe.", "error");
                 return;
             }
 
@@ -998,10 +1026,8 @@
                 mostrarOverlay("Preparando el área de pago seguro...");
 
                 const { email, accessToken } = await obtenerSesionValidaStripe();
-                
                 const returnUrl = construirReturnUrlStripe();
 
-                // Enviamos anuncioId si existe, para que el backend actualice el negocio actual
                 const payloadCheckout = {
                     nivel,
                     priceId,
@@ -1009,10 +1035,8 @@
                     returnUrl,
                     userId: usuarioActual.id,
                     userEmail: email,
-                    anuncioId: anuncioIdExistente || null // 👈 ESTO ES CLAVE PARA EL UPGRADE
+                    anuncioId: anuncioIdExistente || null 
                 };
-
-                console.log("Enviando a crear checkout:", payloadCheckout);
 
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
                     method: "POST",
@@ -1026,14 +1050,8 @@
 
                 const data = await response.json();
 
-                if (!response.ok) {
-                    console.error("Error del servidor backend:", data);
-                    throw new Error(data?.error || "El servidor rechazó la petición. Revisa el backend.");
-                }
-
-                if (!data?.success || !data?.url) {
-                    throw new Error(data?.error || "No se pudo crear la sesión de pago.");
-                }
+                if (!response.ok) throw new Error(data?.error || "Error al conectar con el servidor.");
+                if (!data?.success || !data?.url) throw new Error("No se pudo crear la sesión de pago.");
 
                 window.location.href = data.url;
             } catch (err) {
@@ -1079,26 +1097,19 @@
 
                 const data = await response.json();
 
-                if (!response.ok) {
-                    console.error("Error explícito del servidor backend:", data);
-                    throw new Error(data?.error || "El servidor rechazó la validación del pago.");
-                }
-
-                if (!data?.success) {
-                    throw new Error(data?.error || "No se pudo validar el pago.");
-                }
+                if (!response.ok) throw new Error(data?.error || "Error al validar el pago.");
 
                 const destino = data.rubro === "tienda"
                     ? `panel-tienda.html?id=${data.anuncioId}`
                     : `panel-profesional.html?id=${data.anuncioId}`;
 
-                mostrarNotificacion("Pago validado correctamente. Entrando a tu panel...");
+                mostrarNotificacion("Pago validado correctamente.");
                 limpiarQueryString();
                 window.location.href = destino;
             } catch (err) {
                 console.error("Error confirmando checkout:", err);
                 ocultarOverlay();
-                mostrarNotificacion(err.message || "Ocurrió un problema al validar el pago.", "error");
+                mostrarNotificacion(err.message || "Problema al validar el pago.", "error");
                 limpiarQueryString();
             }
         }
@@ -1110,7 +1121,7 @@
             if (error || !session) {
                 const fallback = await clienteSupabase.auth.getSession();
                 if (fallback.error || !fallback.data?.session) {
-                    throw new Error("Tu sesión es inválida o expiró. Inicia sesión de nuevo.");
+                    throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
                 }
                 session = fallback.data.session;
             }
@@ -1123,11 +1134,10 @@
         }
 
         function construirReturnUrlStripe() {
-            if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+            if (window.location.protocol.startsWith("http")) {
                 return `${window.location.origin}${window.location.pathname}`;
             }
-
-            throw new Error("El checkout de Stripe requiere abrirse desde una URL http/https.");
+            throw new Error("Stripe requiere protocolo http/https.");
         }
     </script>
 </body>
