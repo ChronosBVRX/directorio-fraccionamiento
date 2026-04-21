@@ -52,7 +52,7 @@
             <p class="text-gray-500 text-sm mb-6">Estás a punto de desactivar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. El negocio ya no será visible en el directorio público.</p>
             <div class="flex gap-3">
                 <button onclick="cerrarModalEliminar()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Cancelar</button>
-                <button onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, desactivar</button>
+                <button id="btn-confirmar-desactivar" onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, desactivar</button>
             </div>
         </div>
     </div>
@@ -246,9 +246,6 @@
         let panelCargando = false;
         let panelListo = false;
         
-        // Variables para la lógica del modal de desactivación
-        let idEspacioAEliminar = null;
-
         const CATEGORIAS_TIENDA = ["Alimentos", "Restaurante", "Postres", "Abarrotes", "Hogar", "Ropa", "Otro Producto"];
 
         const STRIPE_PRICE_IDS = {
@@ -808,26 +805,38 @@
             }, 300);
         }
 
-        // --- CORRECCIÓN DEL BUG 400 (NULL) Y ACTUALIZACIÓN DE TEXTOS ---
+        // --- SOLUCIÓN A PRUEBA DE BALAS PARA LA DESACTIVACIÓN ---
         function abrirModalEliminar(id, nombre) {
-            // Candado de seguridad: Evita que el ID sea la palabra literal 'null' o indefinido
+            // Validación extra: Si por algún motivo el ID no es real, frenamos antes de hablar con Supabase.
             if (!id || id === 'null' || id === 'undefined') {
-                mostrarNotificacion("Error de sistema: No se pudo identificar el espacio a desactivar.", "error");
+                mostrarNotificacion("Error de sistema: No pudimos identificar tu negocio. Intenta recargar la página.", "error");
                 return;
             }
 
-            idEspacioAEliminar = id;
+            // Aquí está la magia: incrustamos el ID directamente en el botón del HTML. 
+            // Esto evita que JavaScript "olvide" o "sobreescriba" la variable.
+            const btnConfirmar = document.getElementById("btn-confirmar-desactivar");
+            btnConfirmar.dataset.anuncioId = id;
+
             document.getElementById("nombre-espacio-eliminar").innerText = nombre;
             document.getElementById("modal-confirmacion-eliminar").classList.remove("hidden");
         }
 
         function cerrarModalEliminar() {
-            idEspacioAEliminar = null;
+            // Limpiamos el botón por seguridad
+            document.getElementById("btn-confirmar-desactivar").dataset.anuncioId = "";
             document.getElementById("modal-confirmacion-eliminar").classList.add("hidden");
         }
 
         async function ejecutarEliminacion() {
-            if (!idEspacioAEliminar || idEspacioAEliminar === 'null') return;
+            // Recuperamos el ID directamente del botón que el usuario acaba de presionar
+            const btnConfirmar = document.getElementById("btn-confirmar-desactivar");
+            const idAnuncioReal = btnConfirmar.dataset.anuncioId;
+
+            if (!idAnuncioReal || idAnuncioReal === 'null' || idAnuncioReal === 'undefined') {
+                mostrarNotificacion("Error: El ID del negocio se perdió.", "error");
+                return;
+            }
 
             cerrarModalEliminar();
             mostrarOverlay("Desactivando espacio...");
@@ -836,7 +845,7 @@
                 const { error } = await clienteSupabase
                     .from("anuncios")
                     .update({ activo: false })
-                    .eq("id", idEspacioAEliminar)
+                    .eq("id", idAnuncioReal) // <-- Aquí le pasamos el ID correcto y asegurado
                     .eq("user_id", usuarioActual.id); 
 
                 if (error) throw error;
@@ -850,7 +859,7 @@
                 ocultarOverlay();
             }
         }
-        // ------------------------------------------------------------------
+        // --------------------------------------------------------
 
         async function cargarMisNegocios() {
             const contenedor = document.getElementById("contenedor-mis-negocios");
@@ -887,7 +896,6 @@
                         ? `panel-tienda.html?id=${n.id}`
                         : `panel-profesional.html?id=${n.id}`;
 
-                    // Añadimos un fallback n.id || '' por seguridad adicional
                     return `
                         <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition group">
                             <div class="flex justify-between items-start mb-4 gap-4">
@@ -905,13 +913,13 @@
                                     <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
                                         ${activo ? "ACTIVO" : "PENDIENTE"}
                                     </span>
-                                    <button onclick="abrirModalEliminar('${n.id || ''}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Desactivar este espacio">
+                                    <button onclick="abrirModalEliminar('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Desactivar este espacio">
                                         <span class="text-lg leading-none">⏸️</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="flex gap-2 w-full mt-2">
-                                <button onclick="iniciarCambioPlan('${n.id || ''}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
+                                <button onclick="iniciarCambioPlan('${n.id}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
                                     Cambiar Plan ⭐
                                 </button>
                                 <a href="${enlacePanel}" class="flex-1 bg-white/10 text-white text-center py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/20 transition">
