@@ -12,7 +12,7 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
     <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
-        <h1 class="text-2xl font-black text-[#143653] mb-2">Directorio de Repartidores</h1>
+        <h1 class="text-2xl font-black text-[#143653] mb-2">Asignar Repartidor</h1>
         <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
         
         <div id="loader" class="my-6 flex justify-center">
@@ -72,7 +72,6 @@
         clienteSupabase.auth.onAuthStateChange(async (event, session) => {
             usuarioActual = session ? session.user : null;
             if (usuarioActual) {
-                // Sacar el nombre del negocio para usarlo en el mensaje de whatsapp
                 const { data: negocioInfo } = await clienteSupabase.from('anuncios').select('nombre_negocio').eq('user_id', usuarioActual.id).maybeSingle();
                 if(negocioInfo) nombreNegocioSesion = negocioInfo.nombre_negocio;
                 
@@ -132,7 +131,6 @@
                 return;
             }
 
-            // Consultamos todos los datos del repartidor, incluyendo reputación
             const { data: repartidores } = await clienteSupabase.from('repartidores')
                 .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
                 .eq('esta_activo', true)
@@ -149,7 +147,6 @@
             listaRepartidores = repartidores;
             const select = document.getElementById('select-repartidor');
             
-            // Llenamos la lista visualmente detallada
             select.innerHTML = repartidores.map((r, i) => 
                 `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
                     ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
@@ -157,6 +154,21 @@
             ).join('');
             
             zonaAsignacion.classList.remove('hidden');
+        }
+
+        async function cerrarYLoguear() {
+            const btn = document.getElementById('btn-cambiar-cuenta');
+            if(btn) {
+                btn.innerText = "Cerrando sesión...";
+                btn.disabled = true;
+            }
+            
+            // Cerramos la sesión incorrecta
+            await clienteSupabase.auth.signOut();
+            
+            // Redirigimos al login con el folio guardado en memoria
+            const rutaRegreso = encodeURIComponent(`activar_pedido.html?folio=${folioActual}`);
+            window.location.href = `login.html?returnTo=${rutaRegreso}`;
         }
 
         async function asignarPedido() {
@@ -171,7 +183,6 @@
             
             document.getElementById('mensaje-final').classList.add('hidden');
 
-            // Llamada a tu Edge Function en Supabase
             const { data, error } = await clienteSupabase.functions.invoke('asignar-pedido', {
                 body: {
                     folio: folioActual,
@@ -185,15 +196,30 @@
             if (error || !data?.success) {
                 const mensajeError = error?.message || data?.error || "Error desconocido al procesar la solicitud.";
                 
+                let botonInyectado = '';
+                
+                // Si el error detecta que no es el dueño, le agregamos el botón de cambiar cuenta
+                if(mensajeError.toLowerCase().includes('dueño') || mensajeError.toLowerCase().includes('logueado')) {
+                    botonInyectado = `
+                        <div class="mt-4 pt-4 border-t border-red-200">
+                            <p class="text-[10px] font-bold uppercase text-red-700 mb-2">¿Iniciaste sesión con la cuenta equivocada?</p>
+                            <button id="btn-cambiar-cuenta" onclick="cerrarYLoguear()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-lg shadow-md transition uppercase tracking-widest text-xs">
+                                🔄 Cambiar de Cuenta
+                            </button>
+                        </div>
+                    `;
+                }
+                
                 document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-left mt-4 animate-pulse">
-                        <span class="text-red-600 font-black text-lg block mb-1">⚠️ Ocurrió un problema</span>
-                        <span class="font-bold text-sm text-red-500">${mensajeError}</span>
+                    <div class="bg-red-50 border-2 border-red-200 p-5 rounded-2xl text-left mt-4">
+                        <span class="text-red-600 font-black text-xl block mb-2">⚠️ Acceso Denegado</span>
+                        <span class="font-bold text-sm text-red-500 block leading-snug">${mensajeError}</span>
+                        ${botonInyectado}
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 
-                btn.innerText = "Reintentar"; 
+                btn.innerText = "Reintentar Asignación"; 
                 btn.disabled = false;
             } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
@@ -206,7 +232,6 @@
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 document.getElementById('btn-cerrar').classList.remove('hidden');
 
-                // ENVIAR WHATSAPP AL REPARTIDOR
                 const numeroLimpio = repartidorSeleccionado.telefono.replace(/\D/g,'');
                 const mensajeWa = `¡Hola ${repartidorSeleccionado.nombre.split(' ')[0]}! Tienes un nuevo pedido asignado en *${nombreNegocioSesion}*.\n\nPor favor entra a tu panel de repartidor para aceptarlo.`;
                 window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensajeWa)}`, '_blank');
