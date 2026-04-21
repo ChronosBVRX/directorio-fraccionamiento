@@ -14,8 +14,8 @@
     </script>
     <style>
         /* Animaciones para las estrellas */
-        .star-btn:hover, .star-btn.active { color: #d4af37; transform: scale(1.1); }
-        .star-btn { transition: all 0.2s; color: #e2e8f0; cursor: pointer; }
+        .star-rep:hover, .star-neg:hover { transform: scale(1.15); }
+        .star-rep, .star-neg { transition: all 0.2s; color: #e2e8f0; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-gray-50 font-sans h-screen flex flex-col">
@@ -56,24 +56,44 @@
             </div>
         </div>
 
-        <div id="zona-calificacion" class="hidden bg-gradient-to-br from-[#143653] to-[#22527b] p-6 rounded-2xl shadow-lg mb-8 text-center text-white transform transition-all scale-100">
-            <h3 class="font-black text-lg mb-1">¡Pedido Entregado! 🎉</h3>
-            <p class="text-xs text-blue-200 mb-4">¿Cómo calificarías el servicio de tu repartidor?</p>
+        <div id="contenedor-calificaciones" class="hidden space-y-4 mb-8">
             
-            <div class="flex justify-center gap-2 mb-4 text-4xl" id="contenedor-estrellas">
-                <button class="star-btn" onmouseover="iluminarEstrellas(1)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(1)">★</button>
-                <button class="star-btn" onmouseover="iluminarEstrellas(2)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(2)">★</button>
-                <button class="star-btn" onmouseover="iluminarEstrellas(3)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(3)">★</button>
-                <button class="star-btn" onmouseover="iluminarEstrellas(4)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(4)">★</button>
-                <button class="star-btn" onmouseover="iluminarEstrellas(5)" onmouseout="limpiarEstrellas()" onclick="seleccionarEstrella(5)">★</button>
+            <div id="card-calificar-rep" class="hidden bg-gradient-to-br from-[#143653] to-[#22527b] p-6 rounded-2xl shadow-lg text-center text-white">
+                <h3 class="font-black text-lg mb-1">Tu Repartidor 🛵</h3>
+                <p class="text-xs text-blue-200 mb-4">¿Cómo calificarías a <span id="nombre-repartidor-calif" class="font-bold">tu repartidor</span>?</p>
+                
+                <div class="flex justify-center gap-2 mb-4 text-4xl">
+                    <button class="star-rep" onmouseover="iluminarRep(1)" onmouseout="limpiarRep()" onclick="seleccionarRep(1)">★</button>
+                    <button class="star-rep" onmouseover="iluminarRep(2)" onmouseout="limpiarRep()" onclick="seleccionarRep(2)">★</button>
+                    <button class="star-rep" onmouseover="iluminarRep(3)" onmouseout="limpiarRep()" onclick="seleccionarRep(3)">★</button>
+                    <button class="star-rep" onmouseover="iluminarRep(4)" onmouseout="limpiarRep()" onclick="seleccionarRep(4)">★</button>
+                    <button class="star-rep" onmouseover="iluminarRep(5)" onmouseout="limpiarRep()" onclick="seleccionarRep(5)">★</button>
+                </div>
+                
+                <button id="btn-enviar-rep" onclick="enviarCalificacionRepartidor()" class="hidden w-full bg-white text-tm-azul hover:bg-gray-100 font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Calificar Repartidor</button>
             </div>
-            
-            <button id="btn-enviar-calificacion" onclick="enviarCalificacion()" class="hidden w-full bg-tm-dorado hover:bg-yellow-500 text-white font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Enviar Calificación</button>
+
+            <div id="card-calificar-neg" class="hidden bg-gradient-to-br from-[#d4af37] to-[#b3912a] p-6 rounded-2xl shadow-lg text-center text-white">
+                <h3 class="font-black text-lg mb-1">Tu Pedido 🍔</h3>
+                <p class="text-xs text-yellow-100 mb-4">¿Qué te pareció lo que pediste en <span id="nombre-negocio-calif" class="font-bold border-b border-yellow-200">el negocio</span>?</p>
+                
+                <div class="flex justify-center gap-2 mb-4 text-4xl">
+                    <button class="star-neg" onmouseover="iluminarNeg(1)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(1)">★</button>
+                    <button class="star-neg" onmouseover="iluminarNeg(2)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(2)">★</button>
+                    <button class="star-neg" onmouseover="iluminarNeg(3)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(3)">★</button>
+                    <button class="star-neg" onmouseover="iluminarNeg(4)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(4)">★</button>
+                    <button class="star-neg" onmouseover="iluminarNeg(5)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(5)">★</button>
+                </div>
+                
+                <button id="btn-enviar-neg" onclick="enviarCalificacionNegocio()" class="hidden w-full bg-white text-[#b3912a] hover:bg-gray-100 font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Calificar Negocio</button>
+            </div>
+
         </div>
 
-        <div id="mensaje-gracias" class="hidden bg-green-50 border border-green-200 p-4 rounded-xl text-center mb-8">
-            <p class="text-green-600 font-black text-lg">¡Gracias por calificar! ⭐</p>
-            <p class="text-xs text-green-700 font-bold mt-1">Ayudas a mejorar nuestra comunidad.</p>
+        <div id="mensaje-gracias-completo" class="hidden bg-green-50 border border-green-200 p-6 rounded-2xl text-center mb-8 shadow-sm">
+            <span class="text-4xl block mb-2">🎉</span>
+            <p class="text-green-600 font-black text-xl mb-1">¡Gracias por calificar!</p>
+            <p class="text-xs text-green-700 font-bold leading-relaxed">Tus opiniones ayudan a mantener la calidad de Vive Tres Marías en lo más alto.</p>
         </div>
 
         <h3 class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4 ml-2">Línea de Tiempo</h3>
@@ -122,10 +142,13 @@
 
         let suscripcionEstado = null;
         
-        // Variables globales para guardar temporalmente la info al calificar
+        // Variables globales para la calificación
         let idPedidoActual = null;
         let idRepartidorActual = null;
-        let estrellasSeleccionadas = 0;
+        let idNegocioActual = null;
+        
+        let estrellasRep = 0;
+        let estrellasNeg = 0;
 
         async function buscarPedido() {
             let folio = document.getElementById('input-folio').value.trim().toUpperCase();
@@ -139,8 +162,9 @@
 
             msgError.classList.add('hidden');
             
+            // Ahora solicitamos la info del negocio también (anuncios)
             const { data, error } = await clienteSupabase.from('pedidos')
-                .select('*, repartidores(nombre)')
+                .select('*, repartidores(nombre), anuncios(id, nombre_negocio)')
                 .eq('folio', folio).single();
 
             if (error || !data) {
@@ -151,7 +175,6 @@
 
             document.getElementById('pantalla-busqueda').classList.add('hidden');
             document.getElementById('pantalla-estado').classList.remove('hidden');
-            
             document.getElementById('info-folio-display').innerText = data.folio;
             
             actualizarInterfazPedido(data);
@@ -162,11 +185,16 @@
             document.getElementById('info-total').innerText = `$${pedido.total}`;
             document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Aún buscando...";
 
-            // Guardamos datos temporalmente por si necesita calificar
+            // Guardar IDs temporalmente
             idPedidoActual = pedido.id;
             idRepartidorActual = pedido.repartidor_id;
+            idNegocioActual = pedido.negocio_id;
 
-            // Logica Visual de Colores del Timeline
+            // Inyectar nombres en las tarjetas de calificación
+            if(pedido.repartidores) document.getElementById('nombre-repartidor-calif').innerText = pedido.repartidores.nombre.split(' ')[0];
+            if(pedido.anuncios) document.getElementById('nombre-negocio-calif').innerText = pedido.anuncios.nombre_negocio;
+
+            // Lógica Visual del Timeline
             for(let i=1; i<=4; i++) {
                 document.getElementById(`icon-step-${i}`).classList.remove('bg-tm-dorado', 'text-white', 'border-yellow-200', 'bg-green-500', 'border-green-200');
                 document.getElementById(`icon-step-${i}`).classList.add('bg-slate-200', 'text-slate-500', 'border-white');
@@ -180,105 +208,104 @@
 
             if (pedido.estado === 'esperando_activacion' || pedido.estado === 'pendiente' || pedido.estado === 'asignado') {
                 setActivo('icon-step-1', 'bg-tm-dorado', 'border-yellow-200');
-            } 
-            else if (pedido.estado === 'aceptado') {
+            } else if (pedido.estado === 'aceptado') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-2', 'bg-tm-dorado', 'border-yellow-200');
-            } 
-            else if (pedido.estado === 'en_camino') {
+            } else if (pedido.estado === 'en_camino') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-3', 'bg-tm-dorado', 'border-yellow-200');
-            } 
-            else if (pedido.estado === 'entregado') {
+            } else if (pedido.estado === 'entregado') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-3', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-4', 'bg-green-500', 'border-green-200');
 
-                // LÓGICA DE CALIFICACIÓN: Mostrar solo si no se ha calificado
-                if (pedido.calificacion_repartidor === null && pedido.repartidor_id) {
-                    document.getElementById('zona-calificacion').classList.remove('hidden');
-                } else if (pedido.calificacion_repartidor !== null) {
-                    document.getElementById('zona-calificacion').classList.add('hidden');
-                    document.getElementById('mensaje-gracias').classList.remove('hidden');
+                // LÓGICA DE CALIFICACIONES DOBLES
+                const contCalif = document.getElementById('contenedor-calificaciones');
+                const cardRep = document.getElementById('card-calificar-rep');
+                const cardNeg = document.getElementById('card-calificar-neg');
+                const msgGracias = document.getElementById('mensaje-gracias-completo');
+                
+                let calificacionesPendientes = 0;
+                contCalif.classList.remove('hidden');
+                msgGracias.classList.add('hidden');
+
+                // Validar si falta calificar al Repartidor
+                if (pedido.repartidor_id && pedido.calificacion_repartidor === null) {
+                    cardRep.classList.remove('hidden');
+                    calificacionesPendientes++;
+                } else {
+                    cardRep.classList.add('hidden');
+                }
+
+                // Validar si falta calificar al Negocio
+                if (pedido.negocio_id && pedido.calificacion_negocio === null) {
+                    cardNeg.classList.remove('hidden');
+                    calificacionesPendientes++;
+                } else {
+                    cardNeg.classList.add('hidden');
+                }
+
+                // Si ya calificó TODO lo correspondiente
+                if (calificacionesPendientes === 0) {
+                    contCalif.classList.add('hidden');
+                    msgGracias.classList.remove('hidden');
                 }
             }
         }
 
-        // --- FUNCIONES PARA LA INTERFAZ DE ESTRELLAS ---
-        function iluminarEstrellas(cantidad) {
-            const estrellas = document.querySelectorAll('.star-btn');
-            estrellas.forEach((e, idx) => {
-                e.style.color = idx < cantidad ? '#d4af37' : '#e2e8f0';
-            });
+        // --- LÓGICA DE ESTRELLAS: REPARTIDOR ---
+        function iluminarRep(cantidad) {
+            document.querySelectorAll('.star-rep').forEach((e, idx) => e.style.color = idx < cantidad ? '#d4af37' : 'rgba(255,255,255,0.3)');
+        }
+        function limpiarRep() { iluminarRep(estrellasRep); }
+        function seleccionarRep(cantidad) {
+            estrellasRep = cantidad; iluminarRep(cantidad);
+            document.getElementById('btn-enviar-rep').classList.remove('hidden');
+            document.getElementById('btn-enviar-rep').classList.add('animate-pulse-once');
+        }
+        async function enviarCalificacionRepartidor() {
+            const btn = document.getElementById('btn-enviar-rep');
+            btn.innerText = "Enviando..."; btn.disabled = true;
+            const { error } = await clienteSupabase.rpc('calificar_repartidor', { p_pedido_id: idPedidoActual, p_repartidor_id: idRepartidorActual, p_estrellas: estrellasRep });
+            if(error) { alert("Error al calificar."); btn.innerText = "Calificar Repartidor"; btn.disabled = false; return; }
+            // Al actualizar la base de datos, el Realtime se dispara y oculta esta tarjeta automáticamente
         }
 
-        function limpiarEstrellas() {
-            iluminarEstrellas(estrellasSeleccionadas);
+        // --- LÓGICA DE ESTRELLAS: NEGOCIO ---
+        function iluminarNeg(cantidad) {
+            document.querySelectorAll('.star-neg').forEach((e, idx) => e.style.color = idx < cantidad ? '#ffffff' : 'rgba(255,255,255,0.3)');
+        }
+        function limpiarNeg() { iluminarNeg(estrellasNeg); }
+        function seleccionarNeg(cantidad) {
+            estrellasNeg = cantidad; iluminarNeg(cantidad);
+            document.getElementById('btn-enviar-neg').classList.remove('hidden');
+            document.getElementById('btn-enviar-neg').classList.add('animate-pulse-once');
+        }
+        async function enviarCalificacionNegocio() {
+            const btn = document.getElementById('btn-enviar-neg');
+            btn.innerText = "Enviando..."; btn.disabled = true;
+            const { error } = await clienteSupabase.rpc('calificar_negocio', { p_pedido_id: idPedidoActual, p_negocio_id: idNegocioActual, p_estrellas: estrellasNeg });
+            if(error) { alert("Error al calificar."); btn.innerText = "Calificar Negocio"; btn.disabled = false; return; }
+            // Al actualizar la base de datos, el Realtime se dispara y oculta esta tarjeta automáticamente
         }
 
-        function seleccionarEstrella(cantidad) {
-            estrellasSeleccionadas = cantidad;
-            iluminarEstrellas(cantidad);
-            // Mostrar el botón de enviar
-            const btn = document.getElementById('btn-enviar-calificacion');
-            btn.classList.remove('hidden');
-            btn.classList.add('animate-pulse-once'); // Pequeño rebote al aparecer
-        }
-
-        async function enviarCalificacion() {
-            const btn = document.getElementById('btn-enviar-calificacion');
-            btn.innerText = "Enviando...";
-            btn.disabled = true;
-
-            // Ejecutamos nuestra función de Base de Datos
-            const { error } = await clienteSupabase.rpc('calificar_repartidor', {
-                p_pedido_id: idPedidoActual,
-                p_repartidor_id: idRepartidorActual,
-                p_estrellas: estrellasSeleccionadas
-            });
-
-            if(error) {
-                alert("Hubo un error al calificar. Intenta de nuevo.");
-                btn.innerText = "Enviar Calificación";
-                btn.disabled = false;
-                console.error(error);
-                return;
-            }
-
-            // Éxito: Ocultar zona de calificar y mostrar agradecimiento
-            document.getElementById('zona-calificacion').classList.add('hidden');
-            document.getElementById('mensaje-gracias').classList.remove('hidden');
-        }
-
+        // --- REALTIME ---
         function escucharActualizacionesEnVivo(folio) {
             suscripcionEstado = clienteSupabase.channel('rastreo-cliente')
-                .on('postgres_changes', { 
-                    event: 'UPDATE', 
-                    schema: 'public', 
-                    table: 'pedidos', 
-                    filter: `folio=eq.${folio}` 
-                }, async (payload) => {
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos', filter: `folio=eq.${folio}` }, 
+                async (payload) => {
                     const datosNuevos = payload.new;
-                    
-                    if(!datosNuevos.repartidores) {
-                        const { data } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('id', datosNuevos.id).single();
-                        if(data) actualizarInterfazPedido(data);
-                    } else {
-                        actualizarInterfazPedido(datosNuevos);
-                    }
+                    const { data } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre), anuncios(id, nombre_negocio)').eq('id', datosNuevos.id).single();
+                    if(data) actualizarInterfazPedido(data);
                 }).subscribe();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             const urlParams = new URLSearchParams(window.location.search);
             const folioEnUrl = urlParams.get('folio');
-            
-            if (folioEnUrl) {
-                document.getElementById('input-folio').value = folioEnUrl;
-                buscarPedido(); 
-            }
+            if (folioEnUrl) { document.getElementById('input-folio').value = folioEnUrl; buscarPedido(); }
         });
     </script>
 </body>
