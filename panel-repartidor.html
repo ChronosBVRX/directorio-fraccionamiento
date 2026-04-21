@@ -33,14 +33,15 @@
     <main class="flex-grow p-4 overflow-y-auto w-full max-w-md mx-auto relative">
         
         <div id="vista-ruta" class="block pb-20">
-            <h2 class="text-gray-500 font-bold mb-4 uppercase text-sm flex items-center justify-between">
-                <span>Mi Ruta Activa</span>
-                <span class="relative flex h-3 w-3" id="indicador-actividad">
-                  </span>
-            </h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-gray-500 font-bold uppercase text-sm">Mis Viajes</h2>
+                <div class="text-xs font-bold text-tm-dorado bg-yellow-50 px-2 py-1 rounded-lg shadow-sm">
+                    ⭐ <span id="stats-reputacion">5.0 (0 viajes)</span>
+                </div>
+            </div>
             
             <div id="contenedor-pedidos" class="space-y-4">
-                <p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir viajes...</p>
+                <p class="text-center text-gray-400 mt-10 text-sm">Conéctate para aparecer disponible a los negocios...</p>
             </div>
         </div>
 
@@ -66,10 +67,6 @@
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioId = null;
-        let watchId = null;
-        let ultimaVezEnviado = 0;
-        
-        // Ahora manejamos un ARREGLO de pedidos
         let pedidosActivos = [];
 
         async function init() {
@@ -77,16 +74,18 @@
             if (!session) return window.location.href = 'login-repartidor.html';
             usuarioId = session.user.id;
             
-            const { data: perf } = await clienteSupabase.from('repartidores').select('nombre, esta_activo').eq('id', usuarioId).maybeSingle();
-            if (perf?.nombre) document.getElementById('nombre-repartidor').innerText = `Hola, ${perf.nombre.split(' ')[0]}`;
+            const { data: perf } = await clienteSupabase.from('repartidores').select('nombre, esta_activo, calificacion_promedio, viajes_completados').eq('id', usuarioId).maybeSingle();
+            
+            if (perf?.nombre) {
+                document.getElementById('nombre-repartidor').innerText = `Hola, ${perf.nombre.split(' ')[0]}`;
+                document.getElementById('stats-reputacion').innerText = `${perf.calificacion_promedio} (${perf.viajes_completados} viajes)`;
+            }
 
-            // Cargamos TODOS los pedidos que le pertenecen y no están entregados
             await cargarTodosLosPedidos(false);
 
             if (pedidosActivos.length > 0) {
                 document.getElementById('toggle-estado').checked = true;
                 marcarConectadoUI();
-                iniciarRastreoInteligente();
             } else if (perf?.esta_activo) {
                 document.getElementById('toggle-estado').checked = true;
                 cambiarEstado();
@@ -99,20 +98,15 @@
             document.getElementById('estado-texto').innerText = 'Conectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-green-400';
             document.getElementById('toggle-estado').disabled = false;
-            document.getElementById('indicador-actividad').innerHTML = `
-                <span class="animate-ping absolute h-full w-full rounded-full bg-tm-dorado opacity-75"></span>
-                <span class="relative rounded-full h-3 w-3 bg-tm-dorado"></span>`;
         }
 
         async function cambiarEstado() {
             const toggle = document.getElementById('toggle-estado');
             if (toggle.checked) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
-                    marcarConectadoUI();
-                    cargarTodosLosPedidos();
-                    iniciarRastreoInteligente();
-                }, () => { alert("GPS obligatorio."); forzarDesconexion(); }, { enableHighAccuracy: true });
+                // Sin GPS, solo actualizamos el estado en base de datos
+                await clienteSupabase.from('repartidores').update({ esta_activo: true }).eq('id', usuarioId);
+                marcarConectadoUI();
+                cargarTodosLosPedidos();
             } else {
                 if(pedidosActivos.length > 0) { 
                     alert("Tienes pedidos en curso. Termínalos antes de desconectarte."); 
@@ -127,38 +121,12 @@
             document.getElementById('toggle-estado').checked = false;
             document.getElementById('estado-texto').innerText = 'Desconectado';
             document.getElementById('estado-texto').className = 'font-bold text-sm text-red-300';
-            document.getElementById('indicador-actividad').innerHTML = '';
-            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para recibir viajes...</p>';
+            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Conéctate para aparecer disponible a los negocios...</p>';
             
-            if(watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
             if(usuarioId) await clienteSupabase.from('repartidores').update({ esta_activo: false }).eq('id', usuarioId);
             pedidosActivos = [];
         }
 
-        function iniciarRastreoInteligente() {
-            if (watchId) navigator.geolocation.clearWatch(watchId);
-            watchId = navigator.geolocation.watchPosition(async (pos) => {
-                if (pedidosActivos.length === 0) return;
-                
-                const ahora = Date.now();
-                if (ahora - ultimaVezEnviado > 10000) {
-                    // Actualizar repartidor
-                    await clienteSupabase.from('repartidores').update({ latitud: pos.coords.latitude, longitud: pos.coords.longitude }).eq('id', usuarioId);
-                    
-                    // Filtrar SOLO los pedidos que ya están en camino para actualizar su GPS en lote
-                    const ordenesEnCamino = pedidosActivos.filter(p => p.estado === 'en_camino').map(p => p.id);
-                    
-                    if (ordenesEnCamino.length > 0) {
-                        await clienteSupabase.from('pedidos')
-                            .update({ repartidor_lat: pos.coords.latitude, repartidor_lng: pos.coords.longitude })
-                            .in('id', ordenesEnCamino);
-                    }
-                    ultimaVezEnviado = ahora;
-                }
-            }, null, { enableHighAccuracy: true });
-        }
-
-        // CARGA PRINCIPAL QUE DIBUJA EL FEED
         async function cargarTodosLosPedidos(forzarRender = true) {
             const toggle = document.getElementById('toggle-estado');
             if(!toggle.checked && forzarRender) return;
@@ -176,7 +144,7 @@
         function renderizarFeed() {
             const contenedor = document.getElementById('contenedor-pedidos');
             if(pedidosActivos.length === 0) { 
-                contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">No tienes viajes activos. Esperando asignaciones...</p>'; 
+                contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Estás en línea. Esperando que un negocio te asigne un viaje...</p>'; 
                 return; 
             }
             
@@ -185,8 +153,9 @@
                     ? `<div class="bg-green-100 text-green-700 p-2 rounded text-center font-black text-[11px] mb-2 uppercase">✅ Pagado - NO COBRAR</div>`
                     : `<div class="bg-red-100 text-red-700 p-2 rounded text-center font-black text-[11px] mb-2 uppercase">⚠️ Cobrar $${p.total} EN EFECTIVO</div>`;
 
-                // 1. TARJETA ASIGNADO (NUEVO)
                 if (p.estado === 'asignado') {
+                    // Extraemos el numero de whatsapp del enlace (limpiamos todo lo que no sea numero)
+                    const waNegocio = p.anuncios?.enlace_whatsapp ? p.anuncios.enlace_whatsapp.replace(/\D/g,'') : '';
                     return `
                     <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-l-yellow-400 mb-4 animate-pulse-once">
                         <span class="bg-yellow-100 text-yellow-800 text-[10px] font-black px-2 py-1 rounded uppercase">⭐ Nueva Solicitud</span>
@@ -195,13 +164,12 @@
                         <p class="text-xs text-gray-500 mb-3 line-clamp-1">📍 ${p.cliente_direccion}</p>
                         ${pagoTag}
                         <div class="flex gap-2 mt-3">
-                            <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${p.anuncios?.enlace_whatsapp}')" class="flex-1 bg-gray-100 px-2 py-2.5 rounded-lg font-bold text-xs">Rechazar</button>
+                            <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${waNegocio}')" class="flex-1 bg-gray-100 px-2 py-2.5 rounded-lg font-bold text-xs">Rechazar</button>
                             <button onclick="actualizarEstadoPedido('${p.id}', 'aceptado')" class="flex-1 bg-yellow-400 text-yellow-900 px-2 py-2.5 rounded-lg font-black text-xs uppercase shadow">Aceptar</button>
                         </div>
                     </div>`;
                 }
                 
-                // 2. TARJETA ACEPTADO (IR AL NEGOCIO)
                 if (p.estado === 'aceptado') {
                     return `
                     <div class="bg-blue-50 p-4 rounded-xl shadow-sm border-l-4 border-l-blue-500 mb-4">
@@ -221,11 +189,9 @@
                     </div>`;
                 }
 
-                // 3. TARJETA EN CAMINO (IR AL CLIENTE)
                 if (p.estado === 'en_camino') {
                     return `
                     <div class="bg-green-50 p-4 rounded-xl shadow-md border-l-4 border-l-green-500 mb-4 relative overflow-hidden">
-                        <div class="absolute -right-6 top-4 bg-green-500 text-white text-[9px] font-black px-8 py-1 rotate-45 uppercase tracking-widest shadow">GPS ON</div>
                         <span class="bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase mb-2 inline-block">Fase 2: Entrega</span>
                         ${pagoTag}
                         <p class="text-[10px] text-green-700 font-bold uppercase mt-2">Entregar a:</p>
@@ -244,36 +210,41 @@
 
         function abrirMapa(direccion) {
             const dirEncoded = encodeURIComponent(`${direccion}, Sahuayo, Michoacan`);
-            window.open(`https://maps.google.com/?q=${dirEncoded}`, '_blank');
+            window.open(`https://maps.google.com/?q=$${dirEncoded}`, '_blank');
         }
 
-        // MOTOR CENTRAL DE ACTUALIZACIÓN DE ESTADOS
         async function actualizarEstadoPedido(id, nuevoEstado) {
             const { error } = await clienteSupabase.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
             if(error) { alert("Error al actualizar: " + error.message); return; }
-            
-            if(nuevoEstado === 'en_camino') alert("¡GPS Activado para este pedido!\nEl cliente ya puede rastrear tu ubicación.");
-            
-            await cargarTodosLosPedidos(); // Recargamos el feed
+            await cargarTodosLosPedidos();
         }
 
-        async function rechazarPedido(id, folio, wa) {
-            if(!confirm("¿Rechazar viaje?")) return;
+        async function rechazarPedido(id, folio, waNegocio) {
+            if(!confirm("¿Rechazar viaje? Se avisará al negocio para que asigne a otro repartidor.")) return;
+            
+            // Regresamos el pedido a pendiente y le quitamos el repartidor
             await clienteSupabase.from('pedidos').update({ estado: 'esperando_activacion', repartidor_id: null }).eq('id', id);
             
-            if(wa) {
-                const ruta = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                const msg = `No puedo aceptar el pedido *${folio}*. Asígnalo de nuevo aquí:\n${ruta}/activar_pedido.html?folio=${folio}`;
-                window.open(`https://wa.me/${wa.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+            if(waNegocio) {
+                const msg = `Hola, no puedo realizar el pedido *${folio}*. Por favor asígnalo a otro repartidor disponible.`;
+                window.open(`https://wa.me/${waNegocio}?text=${encodeURIComponent(msg)}`, '_blank');
+            } else {
+                alert("Pedido rechazado correctamente.");
             }
             await cargarTodosLosPedidos();
         }
 
         async function finalizarPedido(id) {
             if(!confirm("¿Confirmas que ya entregaste el pedido y recibiste el dinero (si aplicaba)?")) return;
+            
+            // Marcamos como entregado
             await clienteSupabase.from('pedidos').update({ estado: 'entregado' }).eq('id', id);
-            alert("¡Excelente trabajo! Viaje finalizado.");
-            await cargarTodosLosPedidos();
+            
+            // Sumamos 1 viaje al historial del repartidor usando nuestra nueva función SQL
+            await clienteSupabase.rpc('incrementar_viaje_repartidor', { repartidor_uuid: usuarioId });
+            
+            alert("¡Excelente trabajo! Viaje finalizado. Se ha sumado a tus estadísticas.");
+            await init(); // Recargamos para actualizar el contador en la interfaz
         }
 
         function reproducirBeep() {
@@ -290,16 +261,13 @@
 
         function suscribirseAPedidos() {
             clienteSupabase.channel('peds').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, payload => {
-                // Recargamos el feed siempre que haya un cambio en la DB
                 cargarTodosLosPedidos();
-                
                 if (payload.new.estado === 'asignado' && payload.new.repartidor_id === usuarioId) {
                     reproducirBeep(); if(navigator.vibrate) navigator.vibrate([500,200,500]);
                 }
             }).subscribe();
         }
 
-        // FUNCIONES DEL PERFIL
         async function abrirPerfil() {
             if (pedidosActivos.length > 0) return alert("No puedes editar tu perfil mientras tienes pedidos en curso.");
             document.getElementById('vista-ruta').classList.add('hidden');
@@ -311,10 +279,12 @@
                 document.getElementById('edit-vehiculo').value = data.vehiculo || 'Moto';
             }
         }
+
         function cerrarPerfil() {
             document.getElementById('vista-perfil').classList.add('hidden');
             document.getElementById('vista-ruta').classList.remove('hidden');
         }
+
         document.getElementById('form-editar-perfil').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
