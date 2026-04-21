@@ -133,6 +133,8 @@
             <div class="bg-white rounded-3xl w-full max-w-7xl p-6 sm:p-10 shadow-2xl relative max-h-[95vh] overflow-y-auto">
                 <button onclick="cerrarCreacionEspacio()" class="absolute top-4 right-5 text-4xl leading-none text-gray-400 hover:text-gray-800">&times;</button>
 
+                <input type="hidden" id="anuncio-existente-id" value="" />
+
                 <div id="paso-1-rubro">
                     <div class="text-center mb-8">
                         <p class="text-sm uppercase tracking-[0.25em] text-tm-dorado font-bold mb-2">Empieza tu espacio</p>
@@ -203,7 +205,7 @@
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
                         <div>
                             <div class="flex items-center gap-3 mb-2">
-                                <button onclick="volverARubro()" class="bg-gray-100 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button>
+                                <button onclick="volverARubro()" id="btn-volver-rubro" class="bg-gray-100 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-200">← Volver</button>
                                 <span id="badge-rubro" class="text-xs font-black uppercase tracking-wider bg-gray-100 text-gray-600 px-3 py-2 rounded-full">Rubro</span>
                             </div>
                             <h2 id="titulo-planes" class="text-3xl sm:text-4xl font-black text-tm-azul-oscuro">Selecciona tu plan</h2>
@@ -247,26 +249,26 @@
             tienda: {
                 badge: "Productos y comida",
                 titulo: "Planes para tiendas y comida",
-                subtitulo: "Desde un catálogo básico hasta una vitrina premium para vender mejor y lucir más profesional.",
+                subtitulo: "Desde un catálogo básico hasta una vitrina premium interactiva para vender mejor.",
                 planes: [
                     {
                         nivel: 0,
                         nombre: "Básico",
                         precio: "Gratis",
-                        cta: "Empezar gratis",
+                        cta: "Elegir Plan Gratuito",
                         destacado: false,
                         etiqueta: "Para arrancar",
                         fondo: "from-gray-50 via-white to-gray-100",
                         borde: "border-gray-200",
                         boton: "bg-gray-900 hover:bg-black text-white",
-                        demoEmoji: "🛍️",
-                        demoTitulo: "Ejemplo básico",
-                        demoTexto: "Ficha simple del negocio con datos esenciales y presencia dentro del directorio.",
+                        previewImg: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80",
+                        previewTitle: "Ejemplo Básico",
+                        previewDesc: "Datos de contacto y ubicación.",
                         beneficios: [
                             "Apareces en el directorio",
                             "Datos básicos del negocio",
-                            "Ubicación y contacto",
-                            "Ideal para empezar"
+                            "Ubicación y enlace a WhatsApp",
+                            "Logo simple en listados"
                         ]
                     },
                     {
@@ -274,20 +276,20 @@
                         nombre: "Nivel 1",
                         precio: "$150",
                         periodo: "/mes",
-                        cta: "Ir a pago seguro",
+                        cta: "Contratar Nivel 1",
                         destacado: true,
                         etiqueta: "Más elegido",
                         fondo: "from-blue-50 via-white to-cyan-50",
                         borde: "border-blue-300",
                         boton: "bg-blue-600 hover:bg-blue-700 text-white",
-                        demoEmoji: "🍔",
-                        demoTitulo: "Ejemplo con catálogo",
-                        demoTexto: "Menú visual, productos mejor organizados y un escaparate mucho más atractivo.",
+                        previewImg: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80",
+                        previewTitle: "Menú Interactivo",
+                        previewDesc: "Catálogo completo y pedidos directos.",
                         beneficios: [
                             "Todo lo del plan básico",
-                            "Mayor presencia visual",
-                            "Catálogo más vistoso",
-                            "Mejor conversión de visitas"
+                            "Catálogo de productos con precios",
+                            "Recepción de pedidos organizados",
+                            "Mayor visibilidad en el directorio"
                         ]
                     },
                     {
@@ -295,20 +297,20 @@
                         nombre: "Nivel 2",
                         precio: "$300",
                         periodo: "/mes",
-                        cta: "Ir a pago premium",
+                        cta: "Contratar Premium",
                         destacado: false,
-                        etiqueta: "Mayor alcance",
+                        etiqueta: "Experiencia Total",
                         fondo: "from-yellow-50 via-white to-orange-50",
                         borde: "border-yellow-400",
                         boton: "bg-tm-dorado hover:bg-yellow-600 text-white",
-                        demoEmoji: "🚀",
-                        demoTitulo: "Ejemplo premium",
-                        demoTexto: "Imagen más potente, mejor presentación, mayor confianza y sensación de marca sólida.",
+                        previewImg: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80",
+                        previewTitle: "Micrositio Premium",
+                        previewDesc: "Galería de alta calidad, reservas y estatus pro.",
                         beneficios: [
                             "Todo lo del nivel 1",
-                            "Imagen premium del negocio",
-                            "Mayor prioridad visual",
-                            "Experiencia más profesional"
+                            "Micrositio exclusivo para tu marca",
+                            "Galería de imágenes optimizada",
+                            "Prioridad #1 en búsquedas locales"
                         ]
                     }
                 ]
@@ -316,26 +318,26 @@
             servicio: {
                 badge: "Consultorios y servicios",
                 titulo: "Planes para consultorios y servicios",
-                subtitulo: "Ideal para profesionales que quieren mostrar autoridad, facilitar citas y verse realmente profesionales.",
+                subtitulo: "Ideal para profesionales que quieren mostrar autoridad y facilitar agendar citas.",
                 planes: [
                     {
                         nivel: 0,
                         nombre: "Básico",
                         precio: "Gratis",
-                        cta: "Empezar gratis",
+                        cta: "Elegir Plan Gratuito",
                         destacado: false,
                         etiqueta: "Para iniciar",
                         fondo: "from-gray-50 via-white to-gray-100",
                         borde: "border-gray-200",
                         boton: "bg-gray-900 hover:bg-black text-white",
-                        demoEmoji: "📇",
-                        demoTitulo: "Ejemplo básico",
-                        demoTexto: "Perfil simple con nombre, especialidad, dirección y contacto.",
+                        previewImg: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
+                        previewTitle: "Dr. Ejemplo (Básico)",
+                        previewDesc: "Especialidad y teléfono.",
                         beneficios: [
                             "Apareces en el directorio",
                             "Perfil básico profesional",
-                            "Información esencial",
-                            "Presencia inicial"
+                            "Información esencial de contacto",
+                            "Ubicación en el mapa"
                         ]
                     },
                     {
@@ -343,20 +345,20 @@
                         nombre: "Nivel 1",
                         precio: "$150",
                         periodo: "/mes",
-                        cta: "Ir a pago seguro",
+                        cta: "Contratar Nivel 1",
                         destacado: true,
                         etiqueta: "Más elegido",
                         fondo: "from-blue-50 via-white to-cyan-50",
                         borde: "border-blue-300",
                         boton: "bg-blue-600 hover:bg-blue-700 text-white",
-                        demoEmoji: "📅",
-                        demoTitulo: "Ejemplo con agenda",
-                        demoTexto: "Presentación más sólida y percepción de orden con mejor experiencia para pedir cita.",
+                        previewImg: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80",
+                        previewTitle: "Agenda Inteligente",
+                        previewDesc: "Citas automáticas y listado de servicios.",
                         beneficios: [
                             "Todo lo del plan básico",
-                            "Perfil con mejor presencia",
-                            "Más confianza al usuario",
-                            "Experiencia más atractiva"
+                            "Sistema de agendamiento online",
+                            "Configuración de horarios de atención",
+                            "Catálogo de servicios"
                         ]
                     },
                     {
@@ -364,20 +366,20 @@
                         nombre: "Nivel 2",
                         precio: "$300",
                         periodo: "/mes",
-                        cta: "Ir a pago premium",
+                        cta: "Contratar Premium",
                         destacado: false,
-                        etiqueta: "Imagen premium",
+                        etiqueta: "Imagen Autoridad",
                         fondo: "from-yellow-50 via-white to-orange-50",
                         borde: "border-yellow-400",
                         boton: "bg-tm-dorado hover:bg-yellow-600 text-white",
-                        demoEmoji: "🏥",
-                        demoTitulo: "Ejemplo premium",
-                        demoTexto: "Marca personal o de consultorio mucho más elegante, confiable y memorable.",
+                        previewImg: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80",
+                        previewTitle: "Micrositio Médico/Pro",
+                        previewDesc: "Clínica virtual, galería optimizada y testimonios.",
                         beneficios: [
                             "Todo lo del nivel 1",
-                            "Imagen más premium",
-                            "Mayor percepción de valor",
-                            "Panel pensado para crecer"
+                            "Micrositio elegante y profesional",
+                            "Galería de instalaciones optimizada",
+                            "Posicionamiento destacado VIP"
                         ]
                     }
                 ]
@@ -528,8 +530,6 @@
             }
 
             try {
-                console.log("Cargando panel para usuario:", usuarioActual.id);
-
                 const { data: perfil, error: perfilError } = await clienteSupabase
                     .from("perfiles")
                     .select("*")
@@ -584,8 +584,6 @@
                 if (!intentoRelacion.error) {
                     pedidos = intentoRelacion.data || [];
                 } else {
-                    console.warn("Falló la consulta relacional de pedidos, uso fallback:", intentoRelacion.error);
-
                     const fallback = await clienteSupabase
                         .from("pedidos")
                         .select("*")
@@ -593,9 +591,7 @@
                         .order("creado_en", { ascending: false })
                         .limit(5);
 
-                    if (fallback.error) {
-                        throw fallback.error;
-                    }
+                    if (fallback.error) throw fallback.error;
 
                     pedidos = fallback.data || [];
 
@@ -650,8 +646,6 @@
                 if (!intentoRelacion.error) {
                     citas = intentoRelacion.data || [];
                 } else {
-                    console.warn("Falló la consulta relacional de citas, uso fallback:", intentoRelacion.error);
-
                     const fallback = await clienteSupabase
                         .from("citas")
                         .select("*")
@@ -660,9 +654,7 @@
                         .order("fecha_cita", { ascending: true })
                         .limit(5);
 
-                    if (fallback.error) {
-                        throw fallback.error;
-                    }
+                    if (fallback.error) throw fallback.error;
 
                     citas = fallback.data || [];
 
@@ -719,7 +711,6 @@
 
                 const { accessToken } = await obtenerSesionValidaStripe();
 
-                // Reemplazamos 'invoke' por un fetch nativo para ser invulnerables a los bugs del SDK
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/panel-gestionar`, {
                     method: "POST",
                     headers: {
@@ -830,11 +821,13 @@
 
                 contenedor.innerHTML = data.map(n => {
                     const esTienda = CATEGORIAS_TIENDA.includes(n.categoria) || n.categoria === "Restaurante";
+                    const rubroActual = esTienda ? 'tienda' : 'servicio';
                     const activo = Number(n.nivel_pago || 0) === 0 || n.subscription_status === "active";
                     const enlacePanel = esTienda
                         ? `panel-tienda.html?id=${n.id}`
                         : `panel-profesional.html?id=${n.id}`;
 
+                    // Se agrega el botón para Cambiar Plan
                     return `
                         <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
                             <div class="flex justify-between items-start mb-4 gap-4">
@@ -842,16 +835,24 @@
                                     <span class="text-2xl">${esTienda ? "🛒" : "🩺"}</span>
                                     <div>
                                         <h3 class="font-bold text-white text-lg">${escapeHtml(n.nombre_negocio || "Nuevo espacio")}</h3>
-                                        <p class="text-[10px] text-gray-300 uppercase">${escapeHtml(n.categoria || "Sin categoría")}</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <p class="text-[10px] text-gray-300 uppercase">${escapeHtml(n.categoria || "Sin categoría")}</p>
+                                            <span class="text-[10px] px-2 rounded-full bg-tm-dorado/20 text-tm-dorado border border-tm-dorado/30">Nivel ${n.nivel_pago || 0}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
                                     ${activo ? "ACTIVO" : "PENDIENTE"}
                                 </span>
                             </div>
-                            <a href="${enlacePanel}" class="w-full bg-white/10 text-white text-center py-2.5 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/20">
-                                Gestionar →
-                            </a>
+                            <div class="flex gap-2 w-full mt-2">
+                                <button onclick="iniciarCambioPlan('${n.id}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
+                                    Cambiar Plan ⭐
+                                </button>
+                                <a href="${enlacePanel}" class="flex-1 bg-white/10 text-white text-center py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/20 transition">
+                                    Gestionar →
+                                </a>
+                            </div>
                         </div>
                     `;
                 }).join("");
@@ -866,13 +867,23 @@
         }
 
         function iniciarCreacionEspacio() {
+            document.getElementById("anuncio-existente-id").value = ""; // Limpiamos ID existente para crear nuevo
             document.getElementById("modal-nuevo-espacio").classList.remove("hidden");
             document.getElementById("paso-1-rubro").classList.remove("hidden");
             document.getElementById("paso-2-planes").classList.add("hidden");
         }
 
+        // Nueva función para iniciar el cambio de plan de un negocio existente
+        function iniciarCambioPlan(idAnuncio, rubro) {
+            document.getElementById("anuncio-existente-id").value = idAnuncio;
+            document.getElementById("modal-nuevo-espacio").classList.remove("hidden");
+            document.getElementById("btn-volver-rubro").classList.add("hidden"); // Ocultamos volver porque ya tiene rubro
+            mostrarPlanes(rubro);
+        }
+
         function cerrarCreacionEspacio() {
             document.getElementById("modal-nuevo-espacio").classList.add("hidden");
+            document.getElementById("btn-volver-rubro").classList.remove("hidden");
         }
 
         function volverARubro() {
@@ -882,7 +893,7 @@
 
         function renderPlanCard(plan, rubro) {
             return `
-                <div class="relative overflow-hidden rounded-[30px] border ${plan.borde} bg-gradient-to-br ${plan.fondo} shadow-sm hover:shadow-2xl transition duration-300 hover:-translate-y-1">
+                <div class="relative overflow-hidden rounded-[30px] border ${plan.borde} bg-gradient-to-br ${plan.fondo} shadow-sm hover:shadow-2xl transition duration-300 hover:-translate-y-1 flex flex-col h-full">
                     ${plan.destacado ? `
                         <div class="absolute top-4 right-4 z-20 bg-blue-600 text-white text-[10px] uppercase font-black tracking-wider px-3 py-2 rounded-full shadow-lg">
                             ${plan.etiqueta}
@@ -903,21 +914,19 @@
                             </div>
                         </div>
 
-                        <div class="rounded-[24px] bg-white/80 backdrop-blur border border-white shadow-sm p-4 mb-5">
-                            <div class="rounded-[20px] h-40 bg-gradient-to-br ${plan.fondo} border border-white flex items-center justify-center text-center p-5 shadow-inner">
-                                <div>
-                                    <div class="text-6xl mb-3">${plan.demoEmoji}</div>
-                                    <div class="text-sm font-black text-tm-azul-oscuro uppercase tracking-wider">${plan.demoTitulo}</div>
-                                    <div class="text-xs text-gray-500 mt-1">Vista ilustrativa del plan</div>
-                                </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6 group cursor-default">
+                            <div class="h-28 w-full overflow-hidden relative">
+                                <img src="${plan.previewImg}" alt="Previsualización" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <p class="absolute bottom-2 left-3 text-white font-bold text-sm shadow-sm">${plan.previewTitle}</p>
                             </div>
-                            <div class="mt-4">
-                                <p class="text-sm font-bold text-gray-800">${plan.demoTitulo}</p>
-                                <p class="text-xs text-gray-500 mt-1">${plan.demoTexto}</p>
+                            <div class="p-3 bg-white/80 backdrop-blur">
+                                <p class="text-xs text-gray-600">${plan.previewDesc}</p>
+                                ${plan.nivel > 0 ? `<div class="mt-2 flex gap-1"><span class="bg-tm-dorado/10 text-tm-dorado text-[9px] px-2 py-1 rounded font-bold uppercase tracking-wide">Beneficios Premium Incluidos</span></div>` : ''}
                             </div>
                         </div>
 
-                        <div class="mb-6">
+                        <div class="mb-6 flex-grow">
                             <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-bold mb-3">Lo que incluye</p>
                             <div class="space-y-3">
                                 ${plan.beneficios.map(b => `
@@ -952,6 +961,7 @@
 
         async function seleccionarPlan(nivel) {
             const rubro = document.getElementById("rubro-seleccionado-memoria").value;
+            const anuncioIdExistente = document.getElementById("anuncio-existente-id").value;
 
             if (!rubro) {
                 mostrarNotificacion("Primero selecciona el tipo de espacio.", "error");
@@ -963,7 +973,13 @@
                 return;
             }
 
+            // Si es plan gratuito
             if (nivel === 0) {
+                if (anuncioIdExistente) {
+                    // Si el programador necesita manejar un "Downgrade" a plan gratuito para un negocio existente
+                    mostrarNotificacion("El cambio a plan gratuito debe gestionarse con soporte.", "error");
+                    return;
+                }
                 const destino = rubro === "tienda"
                     ? "panel-tienda.html?plan=0&modo=nuevo"
                     : "panel-profesional.html?plan=0&modo=nuevo";
@@ -979,17 +995,25 @@
             }
 
             try {
-                mostrarOverlay("Te estamos llevando al checkout seguro de Stripe...");
+                mostrarOverlay("Preparando el área de pago seguro...");
 
                 const { email, accessToken } = await obtenerSesionValidaStripe();
                 
-                // --- INICIO CORRECCIÓN DE DIAGNÓSTICO DEL PROGRAMADOR ---
-                console.log("ℹ️ [Debug Programador] AccessToken enviado a Supabase:", accessToken);
-                // --------------------------------------------------------
-
                 const returnUrl = construirReturnUrlStripe();
 
-                // 🚀 ADIÓS A LOS BUGS DE INVOKE. USAMOS FETCH NATIVO PARA CONTROL TOTAL DE HEADERS
+                // Enviamos anuncioId si existe, para que el backend actualice el negocio actual
+                const payloadCheckout = {
+                    nivel,
+                    priceId,
+                    rubro,
+                    returnUrl,
+                    userId: usuarioActual.id,
+                    userEmail: email,
+                    anuncioId: anuncioIdExistente || null // 👈 ESTO ES CLAVE PARA EL UPGRADE
+                };
+
+                console.log("Enviando a crear checkout:", payloadCheckout);
+
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
                     method: "POST",
                     headers: {
@@ -997,20 +1021,13 @@
                         "Authorization": `Bearer ${accessToken}`,
                         "apikey": SUPABASE_KEY
                     },
-                    body: JSON.stringify({
-                        nivel,
-                        priceId,
-                        rubro,
-                        returnUrl,
-                        userId: usuarioActual.id,
-                        userEmail: email
-                    })
+                    body: JSON.stringify(payloadCheckout)
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    console.error("Error explícito del servidor backend:", data);
+                    console.error("Error del servidor backend:", data);
                     throw new Error(data?.error || "El servidor rechazó la petición. Revisa el backend.");
                 }
 
@@ -1022,7 +1039,6 @@
             } catch (err) {
                 console.error("Error creando checkout:", err);
                 ocultarOverlay();
-                // Ahora si falla, te mostrará el texto EXACTO del problema que envíe tu servidor.
                 mostrarNotificacion(err.message || "Error al iniciar el pago.", "error");
             }
         }
@@ -1051,11 +1067,6 @@
 
                 const { accessToken } = await obtenerSesionValidaStripe();
                 
-                // --- INICIO CORRECCIÓN DE DIAGNÓSTICO DEL PROGRAMADOR ---
-                console.log("ℹ️ [Debug Programador] AccessToken enviado para confirmar:", accessToken);
-                // --------------------------------------------------------
-
-                // 🚀 USAMOS FETCH NATIVO
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/confirm-checkout`, {
                     method: "POST",
                     headers: {
