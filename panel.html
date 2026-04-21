@@ -45,14 +45,14 @@
 
     <div id="modal-confirmacion-eliminar" class="hidden fixed inset-0 z-[400] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center relative transform transition-all">
-            <div class="w-16 h-16 bg-orange-50 rounded-full border-4 border-orange-100 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">👁️‍🗨️</span>
+            <div class="w-16 h-16 bg-red-50 rounded-full border-4 border-red-100 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">⏸️</span>
             </div>
             <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">¿Desactivar espacio?</h3>
-            <p class="text-gray-500 text-sm mb-6">Estás a punto de ocultar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. El negocio ya no será visible en el directorio, pero no perderás tu historial de citas ni pedidos.</p>
+            <p class="text-gray-500 text-sm mb-6">Estás a punto de desactivar <strong id="nombre-espacio-eliminar" class="text-gray-800"></strong>. El negocio ya no será visible en el directorio público.</p>
             <div class="flex gap-3">
                 <button onclick="cerrarModalEliminar()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Cancelar</button>
-                <button onclick="ejecutarEliminacion()" class="flex-1 bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/30 transition">Sí, ocultar</button>
+                <button onclick="ejecutarEliminacion()" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition">Sí, desactivar</button>
             </div>
         </div>
     </div>
@@ -808,8 +808,14 @@
             }, 300);
         }
 
-        // --- ACTUALIZADO: AHORA OCULTA (SOFT DELETE) EN LUGAR DE BORRAR ---
+        // --- CORRECCIÓN DEL BUG 400 (NULL) Y ACTUALIZACIÓN DE TEXTOS ---
         function abrirModalEliminar(id, nombre) {
+            // Candado de seguridad: Evita que el ID sea la palabra literal 'null' o indefinido
+            if (!id || id === 'null' || id === 'undefined') {
+                mostrarNotificacion("Error de sistema: No se pudo identificar el espacio a desactivar.", "error");
+                return;
+            }
+
             idEspacioAEliminar = id;
             document.getElementById("nombre-espacio-eliminar").innerText = nombre;
             document.getElementById("modal-confirmacion-eliminar").classList.remove("hidden");
@@ -821,25 +827,24 @@
         }
 
         async function ejecutarEliminacion() {
-            if (!idEspacioAEliminar) return;
+            if (!idEspacioAEliminar || idEspacioAEliminar === 'null') return;
 
             cerrarModalEliminar();
-            mostrarOverlay("Ocultando espacio de forma segura...");
+            mostrarOverlay("Desactivando espacio...");
 
             try {
-                // Ahora actualizamos la columna activo = false en lugar de eliminar la fila
                 const { error } = await clienteSupabase
                     .from("anuncios")
-                    .update({ activo: false }) // Este es el cambio clave
+                    .update({ activo: false })
                     .eq("id", idEspacioAEliminar)
-                    .eq("user_id", usuarioActual.id); // Validamos que solo el dueño pueda hacerlo
+                    .eq("user_id", usuarioActual.id); 
 
                 if (error) throw error;
 
                 mostrarNotificacion("Espacio desactivado correctamente.");
                 await cargarMisNegocios(); // Recarga la lista para que desaparezca
             } catch (err) {
-                console.error("Error ocultando negocio:", err);
+                console.error("Error desactivando negocio:", err);
                 mostrarNotificacion("No se pudo desactivar el espacio.", "error");
             } finally {
                 ocultarOverlay();
@@ -856,13 +861,11 @@
             `;
 
             try {
-                // IMPORTANTE: Ahora filtramos para solo traer los negocios activos (.eq("activo", true))
-                // Si la columna es nueva, los nulos cuentan como inactivos, por lo que te pedí poner default 'true' en Supabase.
                 const { data, error } = await clienteSupabase
                     .from("anuncios")
                     .select("*")
                     .eq("user_id", usuarioActual.id)
-                    .eq("activo", true) // Este filtro garantiza que no se muestren los que "borraste"
+                    .eq("activo", true) 
                     .order("id", { ascending: false });
 
                 if (error) throw error;
@@ -884,6 +887,7 @@
                         ? `panel-tienda.html?id=${n.id}`
                         : `panel-profesional.html?id=${n.id}`;
 
+                    // Añadimos un fallback n.id || '' por seguridad adicional
                     return `
                         <div class="bg-white/5 rounded-2xl p-5 border border-white/10 flex flex-col justify-between hover:bg-white/10 transition group">
                             <div class="flex justify-between items-start mb-4 gap-4">
@@ -901,13 +905,13 @@
                                     <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
                                         ${activo ? "ACTIVO" : "PENDIENTE"}
                                     </span>
-                                    <button onclick="abrirModalEliminar('${n.id}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-orange-400 transition-colors p-1" title="Ocultar este espacio">
-                                        <span class="text-lg leading-none">👁️‍🗨️</span>
+                                    <button onclick="abrirModalEliminar('${n.id || ''}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Desactivar este espacio">
+                                        <span class="text-lg leading-none">⏸️</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="flex gap-2 w-full mt-2">
-                                <button onclick="iniciarCambioPlan('${n.id}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
+                                <button onclick="iniciarCambioPlan('${n.id || ''}', '${rubroActual}')" class="flex-1 bg-tm-dorado/20 text-tm-dorado text-center py-2.5 rounded-xl text-xs font-bold border border-tm-dorado/30 hover:bg-tm-dorado/40 transition">
                                     Cambiar Plan ⭐
                                 </button>
                                 <a href="${enlacePanel}" class="flex-1 bg-white/10 text-white text-center py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/20 transition">
