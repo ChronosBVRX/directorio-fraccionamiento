@@ -742,6 +742,16 @@
             });
         }
 
+        // FUNCIONES OVERLAY FALTANTES
+        function mostrarOverlay(texto = 'Un momento...') {
+            document.getElementById('texto-overlay').innerText = texto;
+            document.getElementById('overlay-proceso').classList.remove('hidden');
+        }
+        
+        function ocultarOverlay() { 
+            document.getElementById('overlay-proceso').classList.add('hidden'); 
+        }
+
         function comprimirImagenAWebP(file, maxWidth = 1080) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
