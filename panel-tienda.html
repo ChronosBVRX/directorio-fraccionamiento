@@ -94,53 +94,77 @@
     <main class="flex-grow p-4 max-w-7xl mx-auto w-full">
         
         <div id="vista-main-en-vivo" class="block space-y-4">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-gray-400 font-bold uppercase tracking-wider text-xs">Por atender hoy</h2>
-                <button onclick="cargarPedidosGenerales()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
+            <div id="en-vivo-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                <div class="text-6xl mb-4">🔥</div>
+                <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Pedidos Directos Bloqueados</h3>
+                <p class="text-gray-500 max-w-md mx-auto mb-6">El sistema de pedidos interactivo con carritos de compra y envíos a WhatsApp está disponible a partir del Nivel 2 (Premium).</p>
+                <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
             </div>
-            <div id="contenedor-activos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <p class="text-gray-400 text-sm py-10 text-center col-span-full">Cargando pedidos en curso...</p>
+            <div id="en-vivo-contenido">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-gray-400 font-bold uppercase tracking-wider text-xs">Por atender hoy</h2>
+                    <button onclick="cargarPedidosGenerales()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
+                </div>
+                <div id="contenedor-activos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-gray-400 text-sm py-10 text-center col-span-full">Cargando pedidos en curso...</p>
+                </div>
             </div>
         </div>
 
         <div id="vista-main-historial" class="hidden space-y-4">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-gray-400 font-bold uppercase tracking-wider text-xs">Entregados y Cancelados</h2>
+            <div id="historial-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                <div class="text-6xl mb-4">📚</div>
+                <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Historial Bloqueado</h3>
+                <p class="text-gray-500 max-w-md mx-auto mb-6">Sube a Nivel 2 (Premium) para llevar un registro automático y detallado de todos los pedidos entregados y cancelados.</p>
+                <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
             </div>
-            <div id="contenedor-historial" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <p class="text-gray-400 text-sm py-10 text-center col-span-full">No hay historial aún.</p>
+            <div id="historial-contenido">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-gray-400 font-bold uppercase tracking-wider text-xs">Entregados y Cancelados</h2>
+                </div>
+                <div id="contenedor-historial" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-gray-400 text-sm py-10 text-center col-span-full">No hay historial aún.</p>
+                </div>
             </div>
         </div>
 
         <div id="vista-main-metricas" class="hidden">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Reputación</p>
-                    <p class="text-3xl font-black text-tm-dorado" id="stat-estrellas">5.0</p>
-                    <p class="text-[10px] text-gray-500 mt-1"><span id="stat-resenas">0</span> Reseñas</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Ventas App</p>
-                    <p class="text-3xl font-black text-green-600" id="stat-ingresos">$0</p>
-                    <p class="text-[10px] text-gray-500 mt-1">Histórico</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Completados</p>
-                    <p class="text-3xl font-black text-tm-azul" id="stat-completados">0</p>
-                    <p class="text-[10px] text-gray-500 mt-1">Pedidos entregados</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cancelados</p>
-                    <p class="text-3xl font-black text-red-500" id="stat-cancelados">0</p>
-                    <p class="text-[10px] text-gray-500 mt-1">Pedidos perdidos</p>
-                </div>
+            <div id="metricas-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                <div class="text-6xl mb-4">📊</div>
+                <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Métricas Bloqueadas</h3>
+                <p class="text-gray-500 max-w-md mx-auto mb-6">Con el Nivel 2 (Premium) podrás visualizar tus ingresos estimados, el volumen de tus pedidos y las reseñas de clientes.</p>
+                <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
             </div>
-            
-            <div class="bg-gray-900 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-tm-dorado/20 blur-2xl rounded-full"></div>
-                <h3 class="font-black text-xl mb-2 text-tm-dorado">Soporte y Ayuda</h3>
-                <p class="text-sm text-gray-300 mb-4 max-w-md mx-auto">¿Tienes problemas con un pedido, un repartidor o necesitas soporte de plataforma?</p>
-                <a href="#" class="inline-block bg-white text-gray-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">Contactar a Soporte 📞</a>
+            <div id="metricas-contenido">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Reputación</p>
+                        <p class="text-3xl font-black text-tm-dorado" id="stat-estrellas">5.0</p>
+                        <p class="text-[10px] text-gray-500 mt-1"><span id="stat-resenas">0</span> Reseñas</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Ventas App</p>
+                        <p class="text-3xl font-black text-green-600" id="stat-ingresos">$0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Histórico</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Completados</p>
+                        <p class="text-3xl font-black text-tm-azul" id="stat-completados">0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Pedidos entregados</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cancelados</p>
+                        <p class="text-3xl font-black text-red-500" id="stat-cancelados">0</p>
+                        <p class="text-[10px] text-gray-500 mt-1">Pedidos perdidos</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-900 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-tm-dorado/20 blur-2xl rounded-full"></div>
+                    <h3 class="font-black text-xl mb-2 text-tm-dorado">Soporte y Ayuda</h3>
+                    <p class="text-sm text-gray-300 mb-4 max-w-md mx-auto">¿Tienes problemas con un pedido, un repartidor o necesitas soporte de plataforma?</p>
+                    <a href="#" class="inline-block bg-white text-gray-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">Contactar a Soporte 📞</a>
+                </div>
             </div>
         </div>
 
@@ -188,27 +212,27 @@
                     </div>
 
                     <div>
-                        <label class="text-xs font-bold text-gray-500">Nombre de la Tienda / Restaurante *</label>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre de la Tienda / Restaurante *</label>
                         <input type="text" id="admin-nombre" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
                     </div>
 
                     <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Horarios de Apertura</h4>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Horarios de Apertura</h4>
                         <div id="contenedor-horarios"></div>
                     </div>
 
                     <div>
-                        <label class="text-xs font-bold text-gray-500">Descripción Corta *</label>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descripción Corta *</label>
                         <textarea id="admin-desc" onkeyup="actualizarPreview()" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                        <label class="text-xs font-bold text-gray-500">WhatsApp Pedidos *</label>
-                        <input type="text" id="admin-wa" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="4431234567">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Pedidos *</label>
+                        <input type="tel" id="admin-wa" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="4431234567">
                         </div>
                         <div>
-                        <label class="text-xs font-bold text-gray-500">Giro Comercial *</label>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Giro Comercial *</label>
                         <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
                             <option value="Alimentos">Comida / Alimentos</option>
                             <option value="Restaurante">Restaurante</option>
@@ -223,7 +247,7 @@
                     </div>
 
                     <div id="panel-diseno" class="hidden space-y-4">
-                    <div id="bloqueo-diseno" class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
+                    <div id="bloqueo-diseno" class="rounded-[2rem] border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6">
                         <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
@@ -233,7 +257,7 @@
                         <div class="text-5xl">🖼️</div>
                         </div>
                         <div class="mt-5 rounded-2xl bg-white border border-blue-100 p-4 shadow-sm">
-                        <p class="text-xs font-bold uppercase text-gray-400 mb-2">Ejemplo visual</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Ejemplo visual</p>
                         <div class="h-28 rounded-2xl bg-gradient-to-r from-blue-200 via-cyan-100 to-blue-50 flex items-center justify-center text-center">
                             <div>
                             <div class="text-3xl mb-1">🍕</div>
@@ -247,21 +271,23 @@
                         </a>
                     </div>
 
-                    <div id="contenido-diseno" class="hidden">
-                        <label class="text-sm font-bold text-gray-700">Banner / Foto Principal</label>
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-white hover:bg-gray-50 transition">
+                    <div id="contenido-diseno" class="hidden bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
+                        <h4 class="font-bold text-sm text-tm-azul-oscuro mb-2">Banner / Foto Principal</h4>
+                        <p class="text-xs text-gray-500 mb-4">Sube una foto llamativa para tu tienda o restaurante.</p>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
                         <input type="file" id="admin-imagen-file" accept="image/png, image/jpeg, image/webp" class="hidden" onchange="procesarSubidaImagen(event)">
-                        <label for="admin-imagen-file" class="cursor-pointer bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-bold inline-block transition hover:bg-gray-300">
+                        <label for="admin-imagen-file" class="cursor-pointer bg-tm-azul text-white px-6 py-3 rounded-xl text-sm font-bold inline-block transition hover:bg-tm-azul-oscuro">
                             Subir Imagen
                         </label>
-                        <p id="estado-subida" class="text-xs text-tm-azul mt-3 font-bold">Las imágenes se optimizarán automáticamente para ahorrar espacio.</p>
+                        <p id="estado-subida" class="text-[11px] text-tm-azul mt-4 font-bold">Las imágenes se optimizarán automáticamente para ahorrar espacio.</p>
                         </div>
                         <input type="hidden" id="admin-imagen-url">
                     </div>
                     </div>
 
                     <div id="panel-menu" class="hidden space-y-4">
-                    <div id="bloqueo-menu" class="rounded-2xl border border-yellow-200 bg-gradient-to-br from-yellow-50 via-white to-orange-50 p-6">
+                    <div id="bloqueo-menu" class="rounded-[2rem] border border-yellow-200 bg-gradient-to-br from-yellow-50 via-white to-orange-50 p-6">
                         <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-black uppercase tracking-[0.25em] text-yellow-600 mb-2">Desbloquea tu catálogo</p>
@@ -271,7 +297,7 @@
                         <div class="text-5xl">🛒</div>
                         </div>
                         <div class="mt-5 rounded-2xl bg-white border border-yellow-100 p-4 shadow-sm">
-                        <p class="text-xs font-bold uppercase text-gray-400 mb-2">Ejemplo visual</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Ejemplo visual</p>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="rounded-2xl border bg-gray-50 p-3">
                             <div class="text-2xl mb-1">🍔</div>
@@ -300,20 +326,20 @@
                         <span class="text-3xl ml-3">🚀</span>
                         </div>
 
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-                        <h4 class="font-bold text-sm mb-3 text-tm-azul-oscuro">Nuevo Producto</h4>
+                        <div class="bg-tm-azul-oscuro p-6 rounded-[2rem] text-white mb-5">
+                        <h4 class="font-bold text-sm mb-3">✨ Nuevo Producto</h4>
                         <div class="grid grid-cols-2 gap-3 mb-3">
-                            <input type="text" id="prod-nombre" placeholder="Nombre" class="p-2 border border-gray-300 rounded text-sm outline-none focus:ring-2 focus:ring-tm-azul">
-                            <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-2 border border-gray-300 rounded text-sm outline-none focus:ring-2 focus:ring-tm-azul">
+                            <input type="text" id="prod-nombre" placeholder="Nombre" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60 focus:ring-2 focus:ring-tm-dorado">
+                            <input type="number" id="prod-precio" placeholder="Precio ($)" class="p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none text-white placeholder-white/60 focus:ring-2 focus:ring-tm-dorado">
                         </div>
-                        <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-2 border border-gray-300 rounded text-sm outline-none mb-3 focus:ring-2 focus:ring-tm-azul"></textarea>
+                        <textarea id="prod-desc" placeholder="Ingredientes o descripción" rows="2" class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-sm outline-none mb-3 text-white placeholder-white/60 focus:ring-2 focus:ring-tm-dorado"></textarea>
                         
                         <div class="mb-4">
-                            <label class="text-xs font-bold text-gray-500">Foto del producto (Opcional)</label>
-                            <input type="file" id="prod-imagen-file" accept="image/*" class="w-full text-xs mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <label class="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1">Foto del producto (Opcional)</label>
+                            <input type="file" id="prod-imagen-file" accept="image/*" class="w-full text-xs mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-tm-azul-oscuro hover:file:bg-gray-100">
                         </div>
 
-                        <button onclick="agregarProductoSeguro()" id="btn-agregar-producto" class="w-full bg-tm-azul text-white py-2.5 rounded font-bold text-sm shadow hover:bg-tm-azul-oscuro transition">
+                        <button onclick="agregarProductoSeguro()" id="btn-agregar-producto" class="w-full bg-tm-dorado text-white py-3 rounded-xl font-black text-sm shadow hover:bg-yellow-600 transition uppercase">
                             Añadir al Catálogo
                         </button>
                         </div>
@@ -324,17 +350,17 @@
                     </div>
 
                     <div id="panel-verif" class="hidden space-y-4">
-                    <div class="bg-blue-50 p-5 rounded-xl border border-blue-200">
-                        <h3 class="font-black text-blue-800 mb-1">🛡️ Sello de Confianza</h3>
-                        <p class="text-sm text-blue-700">Este módulo puede servir para verificar a negocios serios dentro del fraccionamiento.</p>
+                    <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-200 mb-4 shadow-sm">
+                        <h3 class="font-black text-blue-800 mb-2 text-lg">🛡️ Sello de Confianza</h3>
+                        <p class="text-xs text-blue-700 leading-relaxed">Este módulo sirve para verificar a negocios serios dentro de la zona y generar más confianza.</p>
                     </div>
 
-                    <form id="form-verif" class="bg-white p-5 rounded-xl border border-gray-200" onsubmit="event.preventDefault(); solicitarVerificacion();">
+                    <form id="form-verif" class="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm" onsubmit="event.preventDefault(); solicitarVerificacion();">
                         <div>
-                        <label class="text-xs font-bold text-gray-500">Nombre Responsable *</label>
-                        <input type="text" id="verif-nombre" required class="w-full p-3 bg-gray-50 border rounded-lg mt-1 outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Responsable *</label>
+                        <input type="text" id="verif-nombre" required class="w-full p-4 bg-gray-50 border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 transition">
+                        <button type="submit" id="btn-enviar-verif" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black mt-6 shadow hover:bg-blue-700 transition uppercase text-sm">
                         Enviar Solicitud
                         </button>
                     </form>
@@ -368,35 +394,35 @@
                         Nombre de la Tienda
                         </h3>
 
-                        <p id="preview-desc" class="text-xs text-gray-500 mt-2">
+                        <p id="preview-desc" class="text-xs text-gray-500 mt-2 leading-relaxed">
                         Descripción...
                         </p>
 
                         <div class="mt-5 pt-4 border-t border-gray-100">
-                        <button class="w-full bg-[#25D366] text-white py-2 rounded-lg text-xs font-bold">
-                            WhatsApp
-                        </button>
+                            <button id="preview-wa-btn" class="w-full bg-[#25D366] text-white py-2.5 rounded-lg text-xs font-bold transition cursor-default">
+                                Contactar por WhatsApp
+                            </button>
                         </div>
 
                         <div class="mt-2">
-                        <button id="preview-btn-menu" class="hidden w-full text-white py-2.5 rounded-lg text-xs font-bold transition">
+                        <button id="preview-btn-menu" class="hidden w-full text-white py-2.5 rounded-lg text-xs font-bold transition cursor-default">
                             </button>
                         </div>
                     </div>
                     </div>
 
                     <div class="mt-5 w-full max-w-[320px] rounded-2xl bg-white/80 backdrop-blur shadow border border-white p-4">
-                    <p class="text-xs font-bold uppercase text-gray-400 mb-2">Lo que ve tu cliente</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Lo que ve tu cliente</p>
                     <div class="space-y-2">
-                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 border border-gray-100">
                         <span class="text-xs font-bold text-gray-700">Nombre atractivo</span>
                         <span class="text-[10px] text-green-600 font-black">Visible</span>
                         </div>
-                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 border border-gray-100">
                         <span class="text-xs font-bold text-gray-700">Foto principal</span>
                         <span id="preview-estado-banner" class="text-[10px] text-gray-400 font-black">Bloqueado</span>
                         </div>
-                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+                        <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 border border-gray-100">
                         <span class="text-xs font-bold text-gray-700">Catálogo</span>
                         <span id="preview-estado-catalogo" class="text-[10px] text-gray-400 font-black">Bloqueado</span>
                         </div>
@@ -604,7 +630,6 @@
             }).subscribe();
     }
 
-    // --- TU CÓDIGO ORIGINAL DE CONFIGURACIÓN MODIFICADO ---
     function mostrarEstadoPanel(html) {
       document.getElementById('seccion-admin-negocio').classList.add('hidden');
       const box = document.getElementById('estado-panel');
@@ -661,12 +686,12 @@
         <div class="flex items-center justify-between gap-2 p-1.5" data-dia="${dia.key}">
           <label class="flex items-center gap-2 w-28 cursor-pointer">
             <input type="checkbox" class="dia-abierto w-4 h-4 text-tm-azul rounded" onchange="toggleInputsHorario(this)">
-            <span class="text-sm font-bold text-gray-700">${dia.label}</span>
+            <span class="text-[11px] font-black text-tm-azul-oscuro uppercase">${dia.label}</span>
           </label>
           <div class="flex items-center gap-1 flex-grow">
-            <input type="time" class="hora-abre p-1.5 border border-gray-300 rounded text-xs w-full">
+            <input type="time" class="hora-abre p-2 border border-gray-300 rounded-lg text-xs w-full outline-none focus:ring-1 focus:ring-tm-azul">
             <span class="text-gray-400 text-xs">a</span>
-            <input type="time" class="hora-cierra p-1.5 border border-gray-300 rounded text-xs w-full">
+            <input type="time" class="hora-cierra p-2 border border-gray-300 rounded-lg text-xs w-full outline-none focus:ring-1 focus:ring-tm-azul">
           </div>
         </div>
       `).join('');
@@ -724,6 +749,24 @@
 
     function configurarPermisos(nivel) {
       document.getElementById('admin-nivel-badge').innerText = `Nivel Actual: ${nivelTexto(nivel)}`;
+
+      // Bloqueos de Súper App (Pedidos, Historial, Métricas) - Requieren Nivel 2
+      if (nivel >= 2) {
+          document.getElementById('en-vivo-bloqueado')?.classList.add('hidden');
+          document.getElementById('en-vivo-contenido')?.classList.remove('hidden');
+          document.getElementById('historial-bloqueado')?.classList.add('hidden');
+          document.getElementById('historial-contenido')?.classList.remove('hidden');
+          document.getElementById('metricas-bloqueado')?.classList.add('hidden');
+          document.getElementById('metricas-contenido')?.classList.remove('hidden');
+      } else {
+          document.getElementById('en-vivo-bloqueado')?.classList.remove('hidden');
+          document.getElementById('en-vivo-contenido')?.classList.add('hidden');
+          document.getElementById('historial-bloqueado')?.classList.remove('hidden');
+          document.getElementById('historial-contenido')?.classList.add('hidden');
+          document.getElementById('metricas-bloqueado')?.classList.remove('hidden');
+          document.getElementById('metricas-contenido')?.classList.add('hidden');
+      }
+
       if (nivel >= 1) {
         document.getElementById('tab-diseno').innerText = 'Banner & Foto';
         document.getElementById('bloqueo-diseno').classList.add('hidden');
@@ -740,6 +783,7 @@
         document.getElementById('tab-menu').innerText = 'Catálogo 🔒';
         document.getElementById('bloqueo-menu').classList.remove('hidden');
         document.getElementById('contenido-menu').classList.add('hidden');
+        document.getElementById('aviso-nivel-1-menu').classList.add('hidden');
       }
       actualizarPreview();
     }
@@ -749,10 +793,22 @@
       const categoria = document.getElementById('admin-cat').value || 'Categoría';
       const descripcion = document.getElementById('admin-desc').value || 'Descripción...';
       const imagen = document.getElementById('admin-imagen-url').value || '';
+      const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
 
       document.getElementById('preview-nombre').innerText = nombre;
       document.getElementById('preview-cat').innerText = categoria;
       document.getElementById('preview-desc').innerText = descripcion;
+
+      const btnWa = document.getElementById('preview-wa-btn');
+      if (btnWa) {
+          if (wa) {
+              btnWa.innerText = 'Contactar por WhatsApp';
+              btnWa.className = 'w-full bg-[#25D366] text-white py-2.5 rounded-lg text-xs font-bold transition cursor-default';
+          } else {
+              btnWa.innerText = 'Sin WhatsApp configurado';
+              btnWa.className = 'w-full bg-gray-200 text-gray-500 py-2.5 rounded-lg text-xs font-bold transition cursor-default';
+          }
+      }
 
       if (estadoPanel.nivelActual >= 1 && imagen) {
         document.getElementById('preview-banner').src = imagen;
@@ -773,10 +829,10 @@
         btnMenu.classList.remove('hidden');
         if (estadoPanel.nivelActual >= 2) {
             btnMenu.innerText = '🛒 Ver Tienda y Pedir';
-            btnMenu.classList.remove('bg-gray-500', 'hover:bg-gray-600'); btnMenu.classList.add('bg-tm-azul', 'hover:bg-tm-azul-oscuro');
+            btnMenu.className = 'w-full bg-tm-azul text-white py-2.5 rounded-lg text-xs font-bold transition cursor-default mt-2';
         } else {
             btnMenu.innerText = '👁️ Ver Menú';
-            btnMenu.classList.remove('bg-tm-azul', 'hover:bg-tm-azul-oscuro'); btnMenu.classList.add('bg-gray-500', 'hover:bg-gray-600');
+            btnMenu.className = 'w-full bg-gray-500 text-white py-2.5 rounded-lg text-xs font-bold transition cursor-default mt-2';
         }
       } else {
         btnMenu.classList.add('hidden');
@@ -829,7 +885,6 @@
         return;
       }
 
-      // Este fallback ya rara vez se mostrará porque todo se gestiona con la variable de pago al día.
       mostrarEstadoPanel(`
         <div class="max-w-xl mx-auto">
           <div class="text-6xl mb-4">🔒</div>
@@ -886,7 +941,7 @@
         
         // Las pestañas se bloquearán solas si nivelEfectivo es 0
         configurarPermisos(estadoPanel.nivelActual);
-        actualizarPreview();
+        document.getElementById('estado-panel').classList.add('hidden');
         mostrarPanelAdmin();
 
         if (estadoPanel.nivelActual >= 1) await cargarProductosMenu(data.id);
@@ -895,7 +950,7 @@
         await cargarPedidosGenerales();
         await cargarMetricas();
         suscribirseRealtimeNegocio();
-        cambiarTabPrincipal('en-vivo'); // Abir pedidos por defecto
+        cambiarTabPrincipal('mi-tienda'); // Abir configuracion por defecto en tienda
 
       } catch (err) {
         mostrarEstadoPanel(`
@@ -924,7 +979,7 @@
       configurarPermisos(0);
       cambiarPestana('basico');
       cambiarTabPrincipal('mi-tienda'); // Si es nueva, forzar que vea configuración
-      actualizarPreview();
+      document.getElementById('estado-panel').classList.add('hidden');
       mostrarPanelAdmin();
     }
 
@@ -942,6 +997,7 @@
 
       if (!payload.nombre_negocio) { mostrarNotificacion('Escribe el nombre del negocio.', 'error'); return; }
       if (!payload.enlace_whatsapp || payload.enlace_whatsapp.length < 10) { mostrarNotificacion('Ingresa un WhatsApp válido.', 'error'); return; }
+      if (!payload.descripcion) { mostrarNotificacion('Escribe una descripción.', 'error'); return; }
 
       btn.disabled = true; btn.innerText = 'Guardando...';
 
