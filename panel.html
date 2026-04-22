@@ -327,7 +327,7 @@
                         boton: "bg-blue-600 hover:bg-blue-700 text-white",
                         previewImg: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80",
                         previewTitle: "Menú Visual",
-                        previewDesc: "Agrega tu imagen y muestra tu catálogo de productos con precios.",
+                        previewDesc: "Agrega tu image y muestra tu catálogo de productos con precios.",
                         beneficios: [
                             "Todo lo del plan básico",
                             "Sube 1 imagen destacada (Logo o producto)",
@@ -677,7 +677,7 @@
                     .select("*, anuncios(nombre_negocio), repartidores(nombre)")
                     .eq("cliente_id", usuarioActual.id)
                     .order("creado_en", { ascending: false })
-                    .limit(15); // Ampliado a 15 para un buen historial
+                    .limit(15);
 
                 if (!intentoRelacion.error) {
                     pedidos = intentoRelacion.data || [];
@@ -710,7 +710,6 @@
                 contenedor.innerHTML = pedidos.map(p => {
                     let seccionCalificacion = '';
 
-                    // Si el pedido está entregado, mostramos sección de calificación
                     if (p.estado === 'entregado') {
                         let htmlNegocio = p.calificacion_negocio 
                             ? `<span class="text-yellow-500 text-[10px]">Negocio: ${'★'.repeat(p.calificacion_negocio)}${'☆'.repeat(5-p.calificacion_negocio)}</span>`
@@ -988,7 +987,13 @@
                 contenedor.innerHTML = data.map(n => {
                     const esTienda = CATEGORIAS_TIENDA.includes(n.categoria) || n.categoria === "Restaurante";
                     const rubroActual = esTienda ? 'tienda' : 'servicio';
-                    const activo = Number(n.nivel_pago || 0) === 0 || n.subscription_status === "active";
+                    
+                    // LÓGICA DE CORRECCIÓN APLICADA:
+                    const pagoAlDia = Number(n.nivel_pago || 0) === 0 || ["active", "trialing"].includes(n.subscription_status);
+                    
+                    // Si el pago no está al día, visualmente lo tratamos como Nivel 0 (Básico)
+                    const nivelEfectivo = pagoAlDia ? (n.nivel_pago || 0) : 0;
+                    
                     const enlacePanel = esTienda
                         ? `panel-tienda.html?id=${n.id}`
                         : `panel-profesional.html?id=${n.id}`;
@@ -1002,13 +1007,13 @@
                                         <h3 class="font-bold text-white text-lg">${escapeHtml(n.nombre_negocio || "Nuevo espacio")}</h3>
                                         <div class="flex items-center gap-2 mt-1">
                                             <p class="text-[10px] text-gray-300 uppercase">${escapeHtml(n.categoria || "Sin categoría")}</p>
-                                            <span class="text-[10px] px-2 rounded-full bg-tm-dorado/20 text-tm-dorado border border-tm-dorado/30">Nivel ${n.nivel_pago || 0}</span>
+                                            <span class="text-[10px] px-2 rounded-full bg-tm-dorado/20 text-tm-dorado border border-tm-dorado/30">Nivel ${nivelEfectivo}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-2">
-                                    <span class="${activo ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300"} text-[9px] font-black px-2 py-1 rounded">
-                                        ${activo ? "ACTIVO" : "PENDIENTE"}
+                                    <span class="${pagoAlDia ? "bg-green-500/15 text-green-300" : "bg-yellow-500/15 text-yellow-500"} text-[9px] font-black px-2 py-1 rounded">
+                                        ${pagoAlDia ? "ACTIVO" : "PAGO PENDIENTE"}
                                     </span>
                                     <button onclick="abrirModalEliminar('${n.id || ''}', '${escapeHtml(n.nombre_negocio)}')" class="text-gray-500 hover:text-red-400 transition-colors p-1" title="Eliminar este espacio">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
