@@ -466,8 +466,10 @@
             }
 
             lista.forEach(a => {
-                const esGratis = a.nivel_pago === 0;
-                const tieneMenu = a.nivel_pago >= 2;
+                const nivel = Number(a.nivel_pago || 0);
+                const pagoAlDia = nivel === 0 || ["active", "trialing"].includes(a.subscription_status);
+                const nivelEfectivo = pagoAlDia ? nivel : 0; // Usar nivel efectivo para consistencia
+
                 const estaAbierto = estaAbiertoAhora(a);
                 const textoHorario = stringHorarioHoy(a.horarios);
                 
@@ -490,7 +492,6 @@
                 let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
-                // --- AQUI INYECTAMOS EL BADGE DE CALIFICACION ---
                 let badgeCalificacion = '';
                 if (a.total_calificaciones && a.total_calificaciones > 0) {
                     badgeCalificacion = `
@@ -509,35 +510,40 @@
                     `;
                 }
 
+                // LOGICA DE BOTONES BASADA EN NIVEL EFECTIVO
                 let botones = '';
-                if(tieneMenu) {
-                    if(usaComida) {
-                        if (estaAbierto) {
-                            botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`;
-                        } else {
-                            botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Tienda (Cerrado)</button>`;
-                        }
+                let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
+                
+                // Botón Básico de Contacto (Visible en todos los niveles)
+                const botonContacto = estaAbierto 
+                    ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
+                    : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+
+                if (nivelEfectivo >= 2) {
+                    // Nivel 2: Pedidos directos o Agenda + Contacto
+                    if (usaComida) {
+                        botones = estaAbierto 
+                            ? `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
+                            : `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
                     } else if (usaAgenda) {
-                        botones = `<button onclick='abrirAgenda(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar Cita</button>`;
+                        botones = estaAbierto
+                            ? `<button onclick='abrirAgenda(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
+                            : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
                     }
-                } else if(a.nivel_pago === 1) {
-                    if (usaAgenda) {
-                        botones = `<button onclick='abrirAgenda(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Servicios</button>`;
-                    } else {
-                        botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver Productos</button>`;
-                    }
+                    // Siempre agregar botón de contacto al lado de las funciones premium
+                    botones += botonContacto;
+                } else if (nivelEfectivo === 1) {
+                    // Nivel 1: Catálogo visual estático + Contacto
+                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
+                    botones += botonContacto;
                 } else {
-                    let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
-                    if (estaAbierto) {
-                        botones = `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`;
-                    } else {
-                        botones = `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
-                    }
+                    // Nivel 0 (o con pago pendiente): Solo contacto
+                    botones = botonContacto;
                 }
 
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border ${esGratis ? 'border-gray-200' : (tieneMenu ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80 grayscale-[30%]' : ''}">
-                        ${!esGratis && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
+                    <div class="bg-white rounded-xl shadow-sm border ${nivelEfectivo === 0 ? 'border-gray-200' : (nivelEfectivo >= 2 ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80 grayscale-[30%]' : ''}">
+                        ${nivelEfectivo >= 1 && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
                         <div class="p-4 sm:p-5 flex flex-col flex-grow">
                             <div class="flex justify-between items-start mb-2 gap-2">
                                 <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
