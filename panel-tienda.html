@@ -498,7 +498,34 @@
         await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
     }
 
-    // CARGAR PEDIDOS Y MÉTRICAS (NUEVO)
+    // NUEVA FUNCION: AVANZAR PEDIDOS DIRECTOS (SIN REPARTIDOR)
+    async function avanzarPedidoDirecto(pedidoId, nuevoEstado) {
+        let mensajeConfirmacion = nuevoEstado === 'en_camino' 
+            ? '¿Confirmas que este pedido ya está listo o va en camino al cliente?' 
+            : '¿Confirmas que el pedido ya fue entregado exitosamente y recibiste el pago (si aplicaba)?';
+            
+        if(!confirm(mensajeConfirmacion)) return;
+        
+        try {
+            mostrarOverlay('Actualizando pedido...');
+            const { error } = await clienteSupabase.from('pedidos').update({ estado: nuevoEstado }).eq('id', pedidoId);
+            
+            if (error) throw error;
+            mostrarNotificacion('¡Estado del pedido actualizado!');
+            
+            // Si es Nivel Entregado o Cancelado, refrescamos fuerte porque cambia de pestaña
+            if(nuevoEstado === 'entregado' || nuevoEstado === 'cancelada') {
+                await cargarPedidosGenerales();
+                await cargarMetricas();
+            }
+        } catch (err) {
+            mostrarNotificacion('Error: ' + err.message, 'error');
+        } finally {
+            ocultarOverlay();
+        }
+    }
+
+    // CARGAR PEDIDOS Y MÉTRICAS (MODIFICADO PARA SOPORTAR GESTION DIRECTA)
     async function cargarPedidosGenerales() {
         if (!estadoPanel.anuncioId) return;
         const { data, error } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('negocio_id', estadoPanel.anuncioId).order('creado_en', { ascending: false });
@@ -533,10 +560,11 @@
             let txtEstado = 'Pendiente';
             let botonAccion = '';
 
+            // LOGICA MODIFICADA PARA DETECTAR GESTION PROPIA O CON REPARTIDOR
             if (p.estado === 'esperando_activacion' || p.estado === 'pendiente') {
                 colorBorde = 'border-red-400 ring-2 ring-red-400/20';
-                txtEstado = '⚠️ SIN REPARTIDOR (ASIGNA UNO)';
-                botonAccion = `<a href="activar_pedido.html?folio=${p.folio}" target="_blank" class="block text-center w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-lg shadow uppercase text-xs">Asignar Repartidor</a>`;
+                txtEstado = '⚠️ SIN ASIGNAR';
+                botonAccion = `<a href="activar_pedido.html?folio=${p.folio}" target="_blank" class="block text-center w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-lg shadow uppercase text-xs">Asignar Repartidor o Yo</a>`;
             } 
             else if (p.estado === 'asignado') {
                 colorBorde = 'border-yellow-400';
@@ -544,14 +572,30 @@
                 botonAccion = `<button class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-lg text-xs cursor-wait" disabled>Esperando que acepte...</button>`;
             }
             else if (p.estado === 'aceptado') {
-                colorBorde = 'border-blue-400';
-                txtEstado = '👨‍🍳 PREPARANDO (El repartidor va para allá)';
-                botonAccion = `<div class="bg-blue-50 text-blue-800 p-2 rounded text-xs font-bold text-center">Viene: ${p.repartidores?.nombre || 'Repartidor'}</div>`;
+                if (p.repartidor_id) {
+                    // Hay repartidor, él controla el flujo
+                    colorBorde = 'border-blue-400';
+                    txtEstado = '👨‍🍳 PREPARANDO (El repartidor va para allá)';
+                    botonAccion = `<div class="bg-blue-50 text-blue-800 p-2 rounded text-xs font-bold text-center">Viene: ${p.repartidores?.nombre || 'Repartidor'}</div>`;
+                } else {
+                    // No hay repartidor, el negocio controla el flujo
+                    colorBorde = 'border-blue-400';
+                    txtEstado = '👨‍🍳 PREPARANDO (Gestión Propia)';
+                    botonAccion = `<button onclick="avanzarPedidoDirecto('${p.id}', 'en_camino')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-lg shadow text-xs uppercase transition tracking-wider">🟢 Marcar En Camino / Listo</button>`;
+                }
             }
             else if (p.estado === 'en_camino') {
-                colorBorde = 'border-green-400';
-                txtEstado = '🛵 EN CAMINO AL CLIENTE';
-                botonAccion = `<div class="bg-green-50 text-green-800 p-2 rounded text-xs font-bold text-center">Viaje en curso</div>`;
+                if (p.repartidor_id) {
+                    // Hay repartidor, él entregará
+                    colorBorde = 'border-green-400';
+                    txtEstado = '🛵 EN CAMINO AL CLIENTE';
+                    botonAccion = `<div class="bg-green-50 text-green-800 p-2 rounded text-xs font-bold text-center">Viaje en curso</div>`;
+                } else {
+                    // No hay repartidor, el negocio lo entrega
+                    colorBorde = 'border-green-400';
+                    txtEstado = '🛵 LISTO PARA ENTREGAR / EN CAMINO';
+                    botonAccion = `<button onclick="avanzarPedidoDirecto('${p.id}', 'entregado')" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3 rounded-lg shadow text-xs uppercase transition tracking-wider">✅ Marcar como Entregado</button>`;
+                }
             }
 
             return `
