@@ -216,7 +216,7 @@
             <div id="noti-icono" class="text-5xl mb-3"></div>
             <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
             <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
-            <div id="noti-botones" class="flex gap-3 justify-center">
+            <div id="noti-botones" class="flex flex-col sm:flex-row gap-3 justify-center w-full">
                 </div>
         </div>
     </div>
@@ -293,7 +293,8 @@
             return [error.message, error.details, error.hint, error.code].filter(Boolean).join(' | ');
         }
 
-        function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
+        // --- FUNCIÓN LANZAR NOTIFICACIÓN MODIFICADA PARA MEJORAR UX ---
+        function lanzarNotificacion(titulo, mensaje, tipo = 'info', modoBotones = 'entendido', urlRastreo = null) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-notificacion');
                 const icono = document.getElementById('noti-icono');
@@ -311,8 +312,9 @@
                 icono.innerText = iconEmoji;
 
                 botonesCont.innerHTML = '';
+                botonesCont.className = modoBotones === 'rastreo' ? "flex flex-col gap-2 w-full" : "flex gap-3 justify-center w-full";
 
-                if (esConfirmacion) {
+                if (modoBotones === 'confirmacion') {
                     const btnCancelar = document.createElement('button');
                     btnCancelar.className = "flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200 transition border border-gray-200";
                     btnCancelar.innerText = "Cancelar";
@@ -325,7 +327,23 @@
 
                     botonesCont.appendChild(btnCancelar);
                     botonesCont.appendChild(btnConfirmar);
-                } else {
+                } 
+                else if (modoBotones === 'rastreo' && urlRastreo) {
+                    // Botón gigante para ir al rastreo inmediatamente
+                    const btnRastrear = document.createElement('a');
+                    btnRastrear.href = urlRastreo;
+                    btnRastrear.className = "w-full block bg-tm-dorado text-white py-3 rounded-xl font-black text-sm hover:bg-yellow-600 transition shadow-lg uppercase tracking-widest text-center";
+                    btnRastrear.innerText = "📍 Rastrear mi pedido ahora";
+
+                    const btnCerrar = document.createElement('button');
+                    btnCerrar.className = "w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200 transition border border-gray-200";
+                    btnCerrar.innerText = "Cerrar / Seguir Viendo";
+                    btnCerrar.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+
+                    botonesCont.appendChild(btnRastrear);
+                    botonesCont.appendChild(btnCerrar);
+                }
+                else {
                     const btnEntendido = document.createElement('button');
                     btnEntendido.className = "w-full bg-tm-azul text-white py-2.5 rounded-xl font-bold text-sm hover:bg-tm-azul-oscuro transition shadow-md";
                     btnEntendido.innerText = "Entendido";
@@ -468,7 +486,7 @@
             lista.forEach(a => {
                 const nivel = Number(a.nivel_pago || 0);
                 const pagoAlDia = nivel === 0 || ["active", "trialing"].includes(a.subscription_status);
-                const nivelEfectivo = pagoAlDia ? nivel : 0; // Usar nivel efectivo para consistencia
+                const nivelEfectivo = pagoAlDia ? nivel : 0; 
 
                 const estaAbierto = estaAbiertoAhora(a);
                 const textoHorario = stringHorarioHoy(a.horarios);
@@ -510,17 +528,14 @@
                     `;
                 }
 
-                // LOGICA DE BOTONES BASADA EN NIVEL EFECTIVO
                 let botones = '';
                 let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
                 
-                // Botón Básico de Contacto (Visible en todos los niveles)
                 const botonContacto = estaAbierto 
                     ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
                     : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
 
                 if (nivelEfectivo >= 2) {
-                    // Nivel 2: Pedidos directos o Agenda + Contacto
                     if (usaComida) {
                         botones = estaAbierto 
                             ? `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
@@ -530,14 +545,11 @@
                             ? `<button onclick='abrirAgenda(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
                             : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
                     }
-                    // Siempre agregar botón de contacto al lado de las funciones premium
                     botones += botonContacto;
                 } else if (nivelEfectivo === 1) {
-                    // Nivel 1: Catálogo visual estático + Contacto
                     botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
                     botones += botonContacto;
                 } else {
-                    // Nivel 0 (o con pago pendiente): Solo contacto
                     botones = botonContacto;
                 }
 
@@ -676,7 +688,7 @@
             const notas = document.getElementById('cliente-notas').value.trim();
 
             if (!nombre || !telefono || !direccion) {
-                await lanzarNotificacion("Faltan Datos", "Por favor, llena todos tus datos de envío.", "warning");
+                await lanzarNotificacion("Faltan Datos", "Por favor, llena todos tus datos de envío.", "warning", "entendido");
                 return;
             }
 
@@ -697,7 +709,7 @@
             }
 
             if(detallesPedido.length === 0) {
-                await lanzarNotificacion("Carrito Vacío", "Por favor agrega productos a tu pedido.", "warning");
+                await lanzarNotificacion("Carrito Vacío", "Por favor agrega productos a tu pedido.", "warning", "entendido");
                 return;
             }
             if (notas) textoPedido += `\n*Anotaciones del Cliente:*\n_💬 "${notas}"_\n`;
@@ -713,7 +725,7 @@
             btn.innerHTML = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             if (error || !data.success) {
-                await lanzarNotificacion("Error", "Hubo un error al generar tu pedido. Intenta nuevamente.", "error");
+                await lanzarNotificacion("Error", "Hubo un error al generar tu pedido. Intenta nuevamente.", "error", "entendido");
                 return;
             }
 
@@ -721,22 +733,33 @@
             textoPedido += `\n*TOTAL A PAGAR: $${total.toFixed(2)}*\n*Folio:* ${folioVenta}\n\n`;
             
             const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para solicitar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+            
+            // MODIFICACIÓN DEL TEXTO QUE LE LLEGA AL VENDEDOR PARA ADAPTARSE AL NUEVO FLUJO
+            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para gestionar la entrega o asignar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
 
             let numeroVendedor = negocioActualPedido.enlace_whatsapp ? negocioActualPedido.enlace_whatsapp.replace(/\D/g,'') : '';
             if(numeroVendedor) {
                 window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoPedido)}`, '_blank');
             } else {
-                await lanzarNotificacion("Atención", "El negocio no tiene un número configurado. Guarda este Folio para aclaraciones:\n\n" + folioVenta, "warning");
+                await lanzarNotificacion("Atención", "El negocio no tiene un número configurado. Guarda este Folio para aclaraciones:\n\n" + folioVenta, "warning", "entendido");
             }
 
-            await lanzarNotificacion("¡Pedido Generado!", "Tu folio es: " + folioVenta + "\n\nGuárdalo para rastrear a tu repartidor.", "success");
+            // MODIFICACIÓN UX: Llamar a la notificación con modo 'rastreo' y darle la URL dinámica
+            const urlRastreo = `rastreo.html?folio=${folioVenta}`;
+            await lanzarNotificacion(
+                "¡Pedido Generado con Éxito!", 
+                `Tu folio es: ${folioVenta}\n\nDa clic abajo para ver el estado de tu orden en tiempo real y calificar el servicio cuando termine.`, 
+                "success", 
+                "rastreo", 
+                urlRastreo
+            );
+            
             cerrarMenu();
         }
 
         async function abrirAgenda(negocio) {
             if (!usuarioActual) {
-                await lanzarNotificacion("Inicia Sesión", "Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.", "warning");
+                await lanzarNotificacion("Inicia Sesión", "Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.", "warning", "entendido");
                 window.location.href = 'login.html';
                 return;
             }
@@ -876,12 +899,12 @@
             const negocioId = limpiarIdIndex(document.getElementById('reserva-negocio-id-index').value);
 
             if (!usuarioActual?.id) {
-                await lanzarNotificacion('Inicia Sesión', 'Necesitas iniciar sesión para reservar una cita.', 'warning');
+                await lanzarNotificacion('Inicia Sesión', 'Necesitas iniciar sesión para reservar una cita.', 'warning', 'entendido');
                 window.location.href = 'login.html';
                 return;
             }
 
-            const confirmado = await lanzarNotificacion('Confirmar Reserva', `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, 'info', true);
+            const confirmado = await lanzarNotificacion('Confirmar Reserva', `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, 'info', 'confirmacion');
             if (!confirmado) return;
 
             const cont = document.getElementById('contenedor-horarios-libres-index');
@@ -952,21 +975,21 @@
 
                     if (insertError) {
                         console.error('Error al insertar cita directamente:', detalleErrorSupabase(insertError), insertError);
-                        await lanzarNotificacion('Horario Ocupado', 'Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.', 'error');
+                        await lanzarNotificacion('Horario Ocupado', 'Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.', 'error', 'entendido');
                         buscarHorariosIndex();
                     } else {
                         await reservaExitosa();
                     }
                 } catch (insertErr) {
                     console.error('Error final al guardar la cita:', insertErr);
-                    await lanzarNotificacion('Error', 'No se pudo guardar la cita. Revisa la consola y la Edge Function.', 'error');
+                    await lanzarNotificacion('Error', 'No se pudo guardar la cita. Revisa la consola y la Edge Function.', 'error', 'entendido');
                     buscarHorariosIndex();
                 }
             }
         }
 
         async function reservaExitosa() {
-            await lanzarNotificacion("¡Cita Agendada!", "¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.", "success");
+            await lanzarNotificacion("¡Cita Agendada!", "¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.", "success", "entendido");
             cerrarAgenda(); 
         }
 
