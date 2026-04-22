@@ -604,7 +604,7 @@
             }).subscribe();
     }
 
-    // --- TU CÓDIGO ORIGINAL DE CONFIGURACIÓN ---
+    // --- TU CÓDIGO ORIGINAL DE CONFIGURACIÓN MODIFICADO ---
     function mostrarEstadoPanel(html) {
       document.getElementById('seccion-admin-negocio').classList.add('hidden');
       const box = document.getElementById('estado-panel');
@@ -616,11 +616,14 @@
       document.getElementById('seccion-admin-negocio').classList.remove('hidden');
     }
     function normalizarWhatsApp(valor) { return (valor || '').replace(/\D/g, '').trim(); }
+    
+    // Función de validación de pago actualizada para ser más robusta
     function esSuscripcionValida(anuncio) {
       const nivel = Number(anuncio?.nivel_pago || 0);
       if (nivel === 0) return true;
-      return anuncio?.subscription_status === 'active';
+      return ["active", "trialing"].includes(anuncio?.subscription_status);
     }
+
     function nivelTexto(nivel) {
       if (nivel >= 2) return 'Premium';
       if (nivel >= 1) return 'Nivel 1';
@@ -826,6 +829,7 @@
         return;
       }
 
+      // Este fallback ya rara vez se mostrará porque todo se gestiona con la variable de pago al día.
       mostrarEstadoPanel(`
         <div class="max-w-xl mx-auto">
           <div class="text-6xl mb-4">🔒</div>
@@ -845,12 +849,16 @@
 
         if (error || !data) throw new Error('No se encontró el negocio.');
         if (data.user_id !== usuarioActual.id) throw new Error('No tienes permiso para entrar a este panel.');
-        if (!esSuscripcionValida(data)) throw new Error('Tu suscripción no está activa.');
+        
+        // --- AQUÍ ESTÁ LA MAGIA Y LA SOLUCIÓN AL CANDADO ---
+        // Evaluamos si el pago está al día. Si no lo está, forzamos el panel a Nivel 0 visualmente sin echarlos.
+        const pagoAlDia = Number(data.nivel_pago || 0) === 0 || ["active", "trialing"].includes(data.subscription_status);
+        const nivelEfectivo = pagoAlDia ? Number(data.nivel_pago || 0) : 0;
 
         infoNegocio = data;
         estadoPanel.anuncioId = data.id;
         estadoPanel.modoNuevo = false;
-        estadoPanel.nivelActual = Number(data.nivel_pago || 0);
+        estadoPanel.nivelActual = nivelEfectivo; // Aplicamos el Nivel Efectivo aquí
         estadoPanel.subscriptionStatus = data.subscription_status || 'free';
 
         // Setear Global Header
@@ -875,6 +883,8 @@
         document.getElementById('admin-imagen-url').value = data.imagen_url || '';
 
         setearHorariosUI(data.horarios || null);
+        
+        // Las pestañas se bloquearán solas si nivelEfectivo es 0
         configurarPermisos(estadoPanel.nivelActual);
         actualizarPreview();
         mostrarPanelAdmin();
