@@ -111,16 +111,16 @@
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                 <div id="icon-step-2" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">👨‍🍳</div>
                 <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm">Preparando / Asignado</div>
-                    <div class="text-xs text-slate-500">Ya tenemos un repartidor asignado. Está recolectando tus productos.</div>
+                    <div class="font-bold text-slate-900 text-sm" id="text-step-2-title">Preparando / Asignado</div>
+                    <div class="text-xs text-slate-500" id="text-step-2-desc">Tu pedido está siendo preparado y organizando la entrega.</div>
                 </div>
             </div>
 
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                 <div id="icon-step-3" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">🛵</div>
                 <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm">En Camino</div>
-                    <div class="text-xs text-slate-500">El repartidor va hacia tu domicilio. ¡Prepárate para recibirlo!</div>
+                    <div class="font-bold text-slate-900 text-sm" id="text-step-3-title">En Camino / Listo</div>
+                    <div class="text-xs text-slate-500" id="text-step-3-desc">El pedido va hacia tu domicilio o está listo para que pases por él.</div>
                 </div>
             </div>
 
@@ -162,7 +162,6 @@
 
             msgError.classList.add('hidden');
             
-            // Ahora solicitamos la info del negocio también (anuncios)
             const { data, error } = await clienteSupabase.from('pedidos')
                 .select('*, repartidores(nombre), anuncios(id, nombre_negocio)')
                 .eq('folio', folio).single();
@@ -183,7 +182,21 @@
 
         function actualizarInterfazPedido(pedido) {
             document.getElementById('info-total').innerText = `$${pedido.total}`;
-            document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Aún buscando...";
+            
+            // MODIFICACIÓN AQUI: Lógica condicional por si el pedido no tiene repartidor asignado pero ya fue aceptado
+            if (pedido.repartidor_id) {
+                document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Asignando...";
+                document.getElementById('text-step-2-desc').innerText = "Ya tenemos un repartidor asignado. Está recolectando tus productos.";
+                document.getElementById('text-step-3-title').innerText = "En Camino";
+                document.getElementById('text-step-3-desc').innerText = "El repartidor va hacia tu domicilio. ¡Prepárate para recibirlo!";
+            } else if (pedido.estado !== 'pendiente' && pedido.estado !== 'esperando_activacion') {
+                document.getElementById('info-repartidor').innerText = "A cargo del Negocio";
+                document.getElementById('text-step-2-desc').innerText = "El negocio está preparando tu pedido directamente.";
+                document.getElementById('text-step-3-title').innerText = "Listo / En Camino";
+                document.getElementById('text-step-3-desc').innerText = "El negocio enviará tu pedido o ya puedes pasar a recogerlo según acordaron.";
+            } else {
+                document.getElementById('info-repartidor').innerText = "Pendiente...";
+            }
 
             // Guardar IDs temporalmente
             idPedidoActual = pedido.id;
@@ -221,7 +234,7 @@
                 setActivo('icon-step-3', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-4', 'bg-green-500', 'border-green-200');
 
-                // LÓGICA DE CALIFICACIONES DOBLES
+                // LÓGICA DE CALIFICACIONES
                 const contCalif = document.getElementById('contenedor-calificaciones');
                 const cardRep = document.getElementById('card-calificar-rep');
                 const cardNeg = document.getElementById('card-calificar-neg');
@@ -231,7 +244,7 @@
                 contCalif.classList.remove('hidden');
                 msgGracias.classList.add('hidden');
 
-                // Validar si falta calificar al Repartidor
+                // MODIFICACIÓN AQUI: Validar que EXISTA repartidor antes de pedir calificación
                 if (pedido.repartidor_id && pedido.calificacion_repartidor === null) {
                     cardRep.classList.remove('hidden');
                     calificacionesPendientes++;
@@ -270,7 +283,6 @@
             btn.innerText = "Enviando..."; btn.disabled = true;
             const { error } = await clienteSupabase.rpc('calificar_repartidor', { p_pedido_id: idPedidoActual, p_repartidor_id: idRepartidorActual, p_estrellas: estrellasRep });
             if(error) { alert("Error al calificar."); btn.innerText = "Calificar Repartidor"; btn.disabled = false; return; }
-            // Al actualizar la base de datos, el Realtime se dispara y oculta esta tarjeta automáticamente
         }
 
         // --- LÓGICA DE ESTRELLAS: NEGOCIO ---
@@ -288,7 +300,6 @@
             btn.innerText = "Enviando..."; btn.disabled = true;
             const { error } = await clienteSupabase.rpc('calificar_negocio', { p_pedido_id: idPedidoActual, p_negocio_id: idNegocioActual, p_estrellas: estrellasNeg });
             if(error) { alert("Error al calificar."); btn.innerText = "Calificar Negocio"; btn.disabled = false; return; }
-            // Al actualizar la base de datos, el Realtime se dispara y oculta esta tarjeta automáticamente
         }
 
         // --- REALTIME ---
