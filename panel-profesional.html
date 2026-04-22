@@ -474,15 +474,6 @@
         </div>
     </div>
 
-    <div id="modal-notificacion" class="hidden fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative text-center">
-            <div id="noti-icono" class="text-5xl mb-3"></div>
-            <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
-            <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
-            <div id="noti-botones" class="flex gap-3 justify-center"></div>
-        </div>
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
@@ -504,6 +495,20 @@
             const { data } = await clienteSupabase.auth.getSession();
             return data?.session?.access_token || null;
         }
+
+        // Lógica actualizada de validación
+        function esSuscripcionValida(anuncio) {
+            const nivel = Number(anuncio?.nivel_pago || 0);
+            if (nivel === 0) return true;
+            return ["active", "trialing"].includes(anuncio?.subscription_status);
+        }
+
+        function nivelTexto(nivel) {
+            if (nivel >= 2) return 'Premium';
+            if (nivel >= 1) return 'Nivel 1';
+            return 'Básico';
+        }
+
         function hoyISO() { return new Date().toISOString().slice(0, 10); }
         function normalizarHora(hora) { return (!hora) ? '00:00:00' : (hora.length === 5 ? `${hora}:00` : hora); }
         function horaHHMM(hora) { return (!hora) ? '00:00' : hora.substring(0, 5); }
@@ -701,6 +706,42 @@
             c.appendChild(el);
             setTimeout(() => el.remove(), 3500);
         }
+        
+        function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-notificacion');
+                const btnContainer = document.getElementById('noti-botones');
+                document.getElementById('noti-titulo').innerText = titulo;
+                document.getElementById('noti-mensaje').innerText = mensaje;
+                document.getElementById('noti-icono').innerText = tipo === 'success' ? '✅' : tipo === 'warning' ? '⚠️' : tipo === 'error' ? '❌' : 'ℹ️';
+                
+                btnContainer.innerHTML = '';
+                
+                if (esConfirmacion) {
+                    const btnCancel = document.createElement('button');
+                    btnCancel.innerText = 'Cancelar';
+                    btnCancel.className = 'bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-bold flex-1';
+                    btnCancel.onclick = () => { modal.classList.add('hidden'); resolve(false); };
+                    
+                    const btnOk = document.createElement('button');
+                    btnOk.innerText = 'Sí, continuar';
+                    btnOk.className = 'bg-tm-azul text-white px-4 py-2 rounded-xl font-bold flex-1';
+                    btnOk.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    
+                    btnContainer.appendChild(btnCancel);
+                    btnContainer.appendChild(btnOk);
+                } else {
+                    const btnOk = document.createElement('button');
+                    btnOk.innerText = 'Entendido';
+                    btnOk.className = 'bg-tm-azul text-white px-6 py-2 rounded-xl font-bold w-full';
+                    btnOk.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    btnContainer.appendChild(btnOk);
+                }
+                
+                modal.classList.remove('hidden');
+            });
+        }
+
         function comprimirImagenAWebP(file, maxWidth = 1080) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -796,7 +837,7 @@
 
         function actualizarPreviewProfesional() {
             const nombre = document.getElementById('admin-nombre').value || 'Nombre del consultorio';
-            const wa = normalizarWhatsApp(document.getElementById('admin-wa').value);
+            const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
             const imagen = document.getElementById('admin-imagen-url').value || '';
 
             document.getElementById('preview-nombre').innerText = nombre;
@@ -892,6 +933,16 @@
             });
         }
 
+        function actualizarVistaAuth() {
+            if (usuarioActual) {
+                document.getElementById('no-auth').classList.add('hidden');
+                document.getElementById('si-auth').classList.remove('hidden');
+            } else {
+                document.getElementById('si-auth').classList.add('hidden');
+                document.getElementById('no-auth').classList.remove('hidden');
+            }
+        }
+
         async function resolverEntradaPanel() {
             const params = new URLSearchParams(window.location.search);
             const anuncioId = params.get('id');
@@ -901,6 +952,7 @@
             if (anuncioId) { await cargarTodo(anuncioId); return; }
             if (plan === 0 || modo === 'nuevo') { prepararConsultorioNuevo(); return; }
 
+            // Este fallback ya rara vez se mostrará porque todo se gestiona con la variable de pago al día.
             mostrarEstadoPanel(`
                 <div class="max-w-xl mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
@@ -920,12 +972,16 @@
 
                 if (error || !n) throw new Error('No se encontró el consultorio.');
                 if (n.user_id !== usuarioActual.id) throw new Error('No tienes permiso para entrar a este panel.');
-                if (!esSuscripcionValida(n)) throw new Error('Tu suscripción no está activa.');
+                
+                // LÓGICA DE CORRECCIÓN APLICADA AQUÍ:
+                // Evaluamos si el pago está al día. Si no lo está, forzamos el panel a Nivel 0 visualmente sin echarlos.
+                const pagoAlDia = Number(n.nivel_pago || 0) === 0 || ["active", "trialing"].includes(n.subscription_status);
+                const nivelEfectivo = pagoAlDia ? Number(n.nivel_pago || 0) : 0;
 
                 infoNegocio = n;
                 estadoPanel.anuncioId = n.id;
                 estadoPanel.modoNuevo = false;
-                estadoPanel.nivelActual = Number(n.nivel_pago || 0);
+                estadoPanel.nivelActual = nivelEfectivo; // Nivel Efectivo para controlar la UI
                 estadoPanel.subscriptionStatus = n.subscription_status || 'free';
 
                 document.getElementById('header-nombre-negocio').innerText = n.nombre_negocio;
@@ -950,6 +1006,7 @@
                     horariosActuales = obtenerHorariosDesdeUI();
                 }
 
+                // Aquí configuro los permisos con base en el nivelEfectivo (0 si el pago falló)
                 configurarPermisos(estadoPanel.nivelActual);
                 document.getElementById('estado-panel').classList.add('hidden');
                 
@@ -1035,7 +1092,7 @@
 
                 const payload = {
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
-                    enlace_whatsapp: normalizarWhatsApp(document.getElementById('admin-wa').value),
+                    enlace_whatsapp: document.getElementById('admin-wa').value.replace(/\D/g, '').trim(),
                     imagen_url: document.getElementById('admin-imagen-url').value || '',
                     esta_abierto: document.getElementById('global-toggle-abierto').checked,
                     horarios,
@@ -1071,7 +1128,7 @@
                 if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(estadoPanel.anuncioId, horariosActuales);
 
             } catch (err) { await lanzarNotificacion('Error', err.message || 'No se pudieron guardar los cambios.', 'error');
-            } finally { btn.disabled = false; btn.innerText = 'GUARDAR'; ocultarOverlay(); }
+            } finally { btn.disabled = false; btn.innerText = 'Guardar'; ocultarOverlay(); }
         }
 
         async function cargarServicios(idN) {
@@ -1082,11 +1139,11 @@
                 serviciosActuales = data || [];
                 document.getElementById('lista-servicios').innerHTML = serviciosActuales.length
                     ? serviciosActuales.map(s => `
-                        <div class="flex justify-between items-center p-5 bg-white border rounded-2xl shadow-sm gap-3">
-                            <div><p class="font-bold text-tm-azul-oscuro">${s.nombre}</p><p class="text-[10px] text-gray-400 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p></div>
-                            <button onclick="eliminarServicio('${s.id}')" class="text-red-500 font-bold text-[10px] bg-red-50 hover:bg-red-100 transition px-4 py-2 rounded-xl">Borrar</button>
+                        <div class="flex justify-between items-center p-5 bg-white/10 border border-white/20 rounded-2xl gap-3">
+                            <div><p class="font-bold">${s.nombre}</p><p class="text-[10px] text-gray-300 font-bold">${s.duracion_minutos} MIN • $${s.precio}</p></div>
+                            <button onclick="eliminarServicio('${s.id}')" class="text-red-300 font-bold text-[10px] bg-red-500/20 hover:bg-red-500/40 transition px-4 py-2 rounded-xl border border-red-500/30">Borrar</button>
                         </div>`).join('')
-                    : `<div class="bg-white border rounded-2xl p-5 text-sm text-gray-500">Aún no tienes servicios registrados.</div>`;
+                    : `<div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-sm text-gray-400">Aún no tienes servicios registrados.</div>`;
 
                 const select = document.getElementById('manual-servicio');
                 select.innerHTML = `<option value="">Selecciona un servicio</option>` + serviciosActuales.map(s => `<option value="${s.id}">${s.nombre} · ${s.duracion_minutos} min · $${s.precio}</option>`).join('');
