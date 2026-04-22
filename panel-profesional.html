@@ -116,33 +116,51 @@
         <main class="flex-grow p-4 max-w-7xl mx-auto w-full">
             
             <div id="vista-main-hoy" class="block space-y-4">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-tm-azul-oscuro font-black text-xl">Tu agenda de hoy</h2>
-                    <button onclick="cargarCitasDeHoy()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
+                <div id="hoy-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                    <div class="text-6xl mb-4">🔥</div>
+                    <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Citas de Hoy Bloqueadas</h3>
+                    <p class="text-gray-500 max-w-md mx-auto mb-6">El sistema de reservas y agenda está disponible a partir del Nivel 2 (Premium).</p>
+                    <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
                 </div>
-                <div id="contenedor-citas-hoy" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <p class="text-gray-400 text-sm py-10 text-center col-span-full">Cargando citas de hoy...</p>
+                
+                <div id="hoy-contenido">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h2 class="text-tm-azul-oscuro font-black text-xl">Tu agenda de hoy</h2>
+                        <button onclick="cargarCitasDeHoy()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
+                    </div>
+                    <div id="contenedor-citas-hoy" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p class="text-gray-400 text-sm py-10 text-center col-span-full">Cargando citas de hoy...</p>
+                    </div>
                 </div>
             </div>
 
             <div id="vista-main-calendario" class="hidden space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                    <h2 class="text-tm-azul-oscuro font-black text-xl">Gestión de Calendario</h2>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="flex-1 sm:flex-none bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
-                            🛑 Bloquear Horario
-                        </button>
-                        <button onclick="abrirModalAgenda({ modo: 'manual' })" class="flex-1 sm:flex-none bg-tm-azul hover:bg-tm-azul-oscuro transition text-white px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
-                            ➕ Cita Manual
-                        </button>
+                <div id="calendario-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                    <div class="text-6xl mb-4">📅</div>
+                    <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Agenda Interactiva Bloqueada</h3>
+                    <p class="text-gray-500 max-w-md mx-auto mb-6">Sube a Nivel 2 (Premium) para habilitar tu calendario interactivo, recibir citas y gestionar bloqueos de horarios.</p>
+                    <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
+                </div>
+
+                <div id="calendario-contenido">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <h2 class="text-tm-azul-oscuro font-black text-xl">Gestión de Calendario</h2>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button onclick="abrirModalAgenda({ modo: 'bloqueo' })" class="flex-1 sm:flex-none bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
+                                🛑 Bloquear Horario
+                            </button>
+                            <button onclick="abrirModalAgenda({ modo: 'manual' })" class="flex-1 sm:flex-none bg-tm-azul hover:bg-tm-azul-oscuro transition text-white px-4 py-2 rounded-xl font-bold shadow-sm text-sm">
+                                ➕ Cita Manual
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed shadow-sm mb-4">
-                    <b class="text-tm-azul-oscuro">Tip:</b> Da clic o arrastra directamente sobre el calendario para abrir el formulario con fecha y hora precargadas.
-                </div>
+                    <div class="bg-white border rounded-[2rem] p-4 text-xs text-gray-500 leading-relaxed shadow-sm mb-4">
+                        <b class="text-tm-azul-oscuro">Tip:</b> Da clic o arrastra directamente sobre el calendario para abrir el formulario con fecha y hora precargadas.
+                    </div>
 
-                <div id="calendar" class="w-full"></div>
+                    <div id="calendar" class="w-full"></div>
+                </div>
             </div>
 
             <div id="vista-main-metricas" class="hidden">
@@ -176,7 +194,7 @@
                     <div class="w-full lg:w-5/12 flex flex-col border-r bg-gray-50/30">
                         <div class="bg-tm-azul-oscuro text-white p-5 flex items-start justify-between gap-4">
                             <div>
-                                <h3 id="admin-titulo" class="text-xl font-black">Editar Perfil Profesional</h3>
+                                <h3 id="admin-titulo" class="text-xl font-black">Editar Perfil</h3>
                                 <p id="admin-nivel-badge" class="inline-block mt-2 text-[10px] font-black bg-white text-tm-azul-oscuro px-3 py-1 rounded-full">
                                     Nivel Actual: Básico
                                 </p>
@@ -207,6 +225,11 @@
                                 <div>
                                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp *</label>
                                     <input type="tel" id="admin-wa" onkeyup="actualizarPreviewProfesional()" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="Ej: 4431234567">
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descripción corta *</label>
+                                    <textarea id="admin-desc" onkeyup="actualizarPreviewProfesional()" rows="3" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none resize-none focus:ring-2 focus:ring-tm-azul" placeholder="Describe tus servicios, especialidad o experiencia..."></textarea>
                                 </div>
 
                                 <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
@@ -344,7 +367,8 @@
                                     <div class="p-6">
                                         <span class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">Consultorio / Servicio</span>
                                         <h4 id="preview-nombre" class="text-2xl font-black text-tm-azul-oscuro mt-4">Nombre del consultorio</h4>
-                                        <p id="preview-nivel" class="text-sm font-bold text-gray-500 mt-1">Plan básico</p>
+                                        <p id="preview-desc" class="text-sm text-gray-600 mt-2 leading-relaxed">Descripción de tu perfil...</p>
+                                        <p id="preview-nivel" class="text-sm font-bold text-gray-500 mt-2">Plan básico</p>
 
                                         <div class="mt-5 grid grid-cols-1 gap-3">
                                             <div class="rounded-2xl bg-gray-50 p-4 border">
@@ -527,14 +551,12 @@
             tabs.forEach(t => {
                 document.getElementById(`vista-main-${t}`).classList.add('hidden');
                 let classNameInactiva = 'tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
-                // Solo remover colores, mantener badges si existen
                 document.getElementById(`tab-main-${t}`).className = classNameInactiva;
             });
 
             document.getElementById(`vista-main-${tabId}`).classList.remove('hidden');
             document.getElementById(`tab-main-${tabId}`).className = 'tab-main-activa py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
 
-            // Arreglar problema visual de FullCalendar si estaba oculto
             if (tabId === 'calendario' && calendar) {
                 setTimeout(() => calendar.updateSize(), 100);
             }
@@ -545,7 +567,7 @@
             if (!estadoPanel.anuncioId) return;
             const abierto = document.getElementById('global-toggle-abierto').checked;
             
-            document.getElementById('admin-estado-apertura').checked = abierto; // sinc intera
+            document.getElementById('admin-estado-apertura').checked = abierto;
             const txt = document.getElementById('texto-estado-tienda');
             
             if(abierto) {
@@ -562,7 +584,6 @@
             if (!estadoPanel.anuncioId) return;
             const hoy = hoyISO();
             
-            // Cargar TODAS las citas para repartirlas en las pestañas "Hoy" e "Historial"
             const { data, error } = await clienteSupabase.from('citas')
                 .select('*, perfiles:cliente_id(nombre_completo, telefono), servicios:servicio_id(nombre, precio)')
                 .eq('anuncio_id', estadoPanel.anuncioId)
@@ -572,11 +593,7 @@
             if (error) return;
 
             const citas = data || [];
-            
-            // Filtrar citas del día de hoy (que no sean bloqueos)
             const citasHoy = citas.filter(c => c.fecha_cita === hoy && c.estado !== 'bloqueado' && c.estado !== 'cancelada');
-            
-            // Filtrar historial (completadas, o pasadas)
             const historial = citas.filter(c => c.estado === 'completada' || c.estado === 'cancelada' || (c.fecha_cita < hoy && c.estado !== 'bloqueado'));
 
             renderizarCitasHoy(citasHoy);
@@ -684,7 +701,6 @@
         }
 
         function suscribirseRealtimeConsultorio() {
-            // Escuchar cambios en citas
             clienteSupabase.channel('citas-consultorio')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `anuncio_id=eq.${estadoPanel.anuncioId}` }, payload => {
                     cargarCitasDeHoy();
@@ -742,7 +758,6 @@
             });
         }
 
-        // FUNCIONES OVERLAY FALTANTES
         function mostrarOverlay(texto = 'Un momento...') {
             document.getElementById('texto-overlay').innerText = texto;
             document.getElementById('overlay-proceso').classList.remove('hidden');
@@ -847,10 +862,12 @@
 
         function actualizarPreviewProfesional() {
             const nombre = document.getElementById('admin-nombre').value || 'Nombre del consultorio';
+            const desc = document.getElementById('admin-desc').value || 'Descripción de tu perfil...';
             const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
             const imagen = document.getElementById('admin-imagen-url').value || '';
 
             document.getElementById('preview-nombre').innerText = nombre;
+            document.getElementById('preview-desc').innerText = desc;
             document.getElementById('preview-wa').innerText = wa ? wa : 'Sin WhatsApp configurado';
             document.getElementById('preview-nivel').innerText = nivelTexto(estadoPanel.nivelActual);
 
@@ -888,6 +905,20 @@
         function configurarPermisos(nivel) {
             document.getElementById('admin-nivel-badge').innerText = `Nivel Actual: ${nivelTexto(nivel)}`;
 
+            // Manejo de tabs de Calendario y Citas de Hoy (Bloqueos Súper App)
+            if (nivel >= 2) {
+                document.getElementById('calendario-bloqueado')?.classList.add('hidden');
+                document.getElementById('calendario-contenido')?.classList.remove('hidden');
+                document.getElementById('hoy-bloqueado')?.classList.add('hidden');
+                document.getElementById('hoy-contenido')?.classList.remove('hidden');
+            } else {
+                document.getElementById('calendario-bloqueado')?.classList.remove('hidden');
+                document.getElementById('calendario-contenido')?.classList.add('hidden');
+                document.getElementById('hoy-bloqueado')?.classList.remove('hidden');
+                document.getElementById('hoy-contenido')?.classList.add('hidden');
+            }
+
+            // Manejo de tabs de configuración interna
             if (nivel >= 1) {
                 document.getElementById('tab-diseno').innerText = 'Diseño & Foto';
                 document.getElementById('tab-servicios').innerText = 'Servicios';
@@ -962,7 +993,6 @@
             if (anuncioId) { await cargarTodo(anuncioId); return; }
             if (plan === 0 || modo === 'nuevo') { prepararConsultorioNuevo(); return; }
 
-            // Este fallback ya rara vez se mostrará porque todo se gestiona con la variable de pago al día.
             mostrarEstadoPanel(`
                 <div class="max-w-xl mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
@@ -983,15 +1013,13 @@
                 if (error || !n) throw new Error('No se encontró el consultorio.');
                 if (n.user_id !== usuarioActual.id) throw new Error('No tienes permiso para entrar a este panel.');
                 
-                // LÓGICA DE CORRECCIÓN APLICADA AQUÍ:
-                // Evaluamos si el pago está al día. Si no lo está, forzamos el panel a Nivel 0 visualmente sin echarlos.
                 const pagoAlDia = Number(n.nivel_pago || 0) === 0 || ["active", "trialing"].includes(n.subscription_status);
                 const nivelEfectivo = pagoAlDia ? Number(n.nivel_pago || 0) : 0;
 
                 infoNegocio = n;
                 estadoPanel.anuncioId = n.id;
                 estadoPanel.modoNuevo = false;
-                estadoPanel.nivelActual = nivelEfectivo; // Nivel Efectivo para controlar la UI
+                estadoPanel.nivelActual = nivelEfectivo;
                 estadoPanel.subscriptionStatus = n.subscription_status || 'free';
 
                 document.getElementById('header-nombre-negocio').innerText = n.nombre_negocio;
@@ -1007,6 +1035,7 @@
 
                 document.getElementById('admin-negocio-id').value = n.id;
                 document.getElementById('admin-nombre').value = n.nombre_negocio || '';
+                document.getElementById('admin-desc').value = n.descripcion || '';
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 document.getElementById('admin-imagen-url').value = n.imagen_url || '';
 
@@ -1016,11 +1045,9 @@
                     horariosActuales = obtenerHorariosDesdeUI();
                 }
 
-                // Aquí configuro los permisos con base en el nivelEfectivo (0 si el pago falló)
                 configurarPermisos(estadoPanel.nivelActual);
                 document.getElementById('estado-panel').classList.add('hidden');
                 
-                // Mostrar primer pestaña "Hoy" por defecto
                 cambiarTabPrincipal('hoy');
                 cambiarPestana('basico');
                 actualizarPreviewProfesional();
@@ -1046,6 +1073,7 @@
             estadoPanel.anuncioId = null; estadoPanel.modoNuevo = true; estadoPanel.nivelActual = 0; estadoPanel.subscriptionStatus = 'free';
             document.getElementById('admin-negocio-id').value = '';
             document.getElementById('admin-nombre').value = '';
+            document.getElementById('admin-desc').value = '';
             document.getElementById('admin-wa').value = '';
             document.getElementById('admin-imagen-url').value = '';
             document.getElementById('admin-estado-apertura').checked = true;
@@ -1102,6 +1130,7 @@
 
                 const payload = {
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
+                    descripcion: document.getElementById('admin-desc').value.trim(),
                     enlace_whatsapp: document.getElementById('admin-wa').value.replace(/\D/g, '').trim(),
                     imagen_url: document.getElementById('admin-imagen-url').value || '',
                     esta_abierto: document.getElementById('global-toggle-abierto').checked,
