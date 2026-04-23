@@ -293,7 +293,6 @@
             return [error.message, error.details, error.hint, error.code].filter(Boolean).join(' | ');
         }
 
-        // --- FUNCIÓN LANZAR NOTIFICACIÓN MODIFICADA PARA MEJORAR UX ---
         function lanzarNotificacion(titulo, mensaje, tipo = 'info', modoBotones = 'entendido', urlRastreo = null) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-notificacion');
@@ -329,7 +328,6 @@
                     botonesCont.appendChild(btnConfirmar);
                 } 
                 else if (modoBotones === 'rastreo' && urlRastreo) {
-                    // Botón gigante para ir al rastreo inmediatamente
                     const btnRastrear = document.createElement('a');
                     btnRastrear.href = urlRastreo;
                     btnRastrear.className = "w-full block bg-tm-dorado text-white py-3 rounded-xl font-black text-sm hover:bg-yellow-600 transition shadow-lg uppercase tracking-widest text-center";
@@ -511,12 +509,16 @@
                 const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
                 let badgeCalificacion = '';
-                if (a.total_calificaciones && a.total_calificaciones > 0) {
+                
+                const totalCalificaciones = Number(a.total_calificaciones) || 0;
+                const calificacionPromedio = Number(a.calificacion_promedio) || 0;
+
+                if (totalCalificaciones > 0) {
                     badgeCalificacion = `
                         <div class="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 shadow-sm shrink-0">
                             <span class="text-[10px] sm:text-xs">⭐</span>
-                            <span class="text-[10px] sm:text-xs font-black text-yellow-700">${Number(a.calificacion_promedio).toFixed(1)}</span>
-                            <span class="text-[8px] sm:text-[9px] text-yellow-600 font-bold">(${a.total_calificaciones})</span>
+                            <span class="text-[10px] sm:text-xs font-black text-yellow-700">${calificacionPromedio.toFixed(1)}</span>
+                            <span class="text-[8px] sm:text-[9px] text-yellow-600 font-bold">(${totalCalificaciones})</span>
                         </div>
                     `;
                 } else {
@@ -734,7 +736,6 @@
             
             const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             
-            // MODIFICACIÓN DEL TEXTO QUE LE LLEGA AL VENDEDOR PARA ADAPTARSE AL NUEVO FLUJO
             textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para gestionar la entrega o asignar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
 
             let numeroVendedor = negocioActualPedido.enlace_whatsapp ? negocioActualPedido.enlace_whatsapp.replace(/\D/g,'') : '';
@@ -744,7 +745,6 @@
                 await lanzarNotificacion("Atención", "El negocio no tiene un número configurado. Guarda este Folio para aclaraciones:\n\n" + folioVenta, "warning", "entendido");
             }
 
-            // MODIFICACIÓN UX: Llamar a la notificación con modo 'rastreo' y darle la URL dinámica
             const urlRastreo = `rastreo.html?folio=${folioVenta}`;
             await lanzarNotificacion(
                 "¡Pedido Generado con Éxito!", 
