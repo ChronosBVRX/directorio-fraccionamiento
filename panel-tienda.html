@@ -228,21 +228,32 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Pedidos *</label>
-                        <input type="tel" id="admin-wa" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="4431234567">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp Pedidos *</label>
+                            <input type="tel" id="admin-wa" onkeyup="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul" placeholder="4431234567">
                         </div>
                         <div>
-                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Giro Comercial *</label>
-                        <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
-                            <option value="Alimentos">Comida / Alimentos</option>
-                            <option value="Restaurante">Restaurante</option>
-                            <option value="Postres">Postres y Antojos</option>
-                            <option value="Abarrotes">Abarrotes y Tienda</option>
-                            <option value="Ropa">Ropa y Moda</option>
-                            <option value="Hogar">Artículos de Hogar</option>
-                            <option value="Otro Producto">Otro Producto</option>
-                        </select>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Giro Comercial *</label>
+                            <select id="admin-cat" onchange="actualizarPreview()" class="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1 outline-none focus:ring-2 focus:ring-tm-azul">
+                                <option value="Alimentos">Comida / Alimentos</option>
+                                <option value="Restaurante">Restaurante</option>
+                                <option value="Postres">Postres y Antojos</option>
+                                <option value="Abarrotes">Abarrotes y Tienda</option>
+                                <option value="Ropa">Ropa y Moda</option>
+                                <option value="Hogar">Artículos de Hogar</option>
+                                <option value="Otro Producto">Otro Producto</option>
+                            </select>
                         </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between mt-2">
+                        <div>
+                            <h4 class="font-bold text-sm text-tm-azul-oscuro flex items-center gap-1">🛵 Envío a Domicilio</h4>
+                            <p class="text-[10px] text-gray-500 leading-tight mt-1">¿Cuentas con la logística para enviar tus productos directo a la puerta de tu cliente?</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
+                            <input type="checkbox" id="admin-envio-domicilio" class="sr-only peer" onchange="actualizarPreview()">
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
+                        </label>
                     </div>
                     </div>
 
@@ -386,11 +397,14 @@
                     </div>
 
                     <div class="p-5 bg-white">
-                        <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase bg-yellow-50 px-2 py-0.5 rounded">
-                        Categoría
-                        </span>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span id="preview-cat" class="text-[9px] font-black text-tm-dorado uppercase bg-yellow-50 px-2 py-0.5 rounded">
+                            Categoría
+                            </span>
+                            <span id="preview-envio-badge" class="hidden bg-gray-100 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded uppercase">🚶 Pickup</span>
+                        </div>
 
-                        <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro mt-2 leading-tight">
+                        <h3 id="preview-nombre" class="text-xl font-black text-tm-azul-oscuro leading-tight">
                         Nombre de la Tienda
                         </h3>
 
@@ -838,10 +852,23 @@
       const descripcion = document.getElementById('admin-desc').value || 'Descripción...';
       const imagen = document.getElementById('admin-imagen-url').value || '';
       const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
+      const ofreceEnvio = document.getElementById('admin-envio-domicilio').checked;
 
       document.getElementById('preview-nombre').innerText = nombre;
       document.getElementById('preview-cat').innerText = categoria;
       document.getElementById('preview-desc').innerText = descripcion;
+
+      const badgeEnvio = document.getElementById('preview-envio-badge');
+      if (badgeEnvio) {
+          badgeEnvio.classList.remove('hidden');
+          if (ofreceEnvio) {
+              badgeEnvio.innerHTML = '🛵 A Domicilio';
+              badgeEnvio.className = 'bg-tm-dorado text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1';
+          } else {
+              badgeEnvio.innerHTML = '🚶 Pickup';
+              badgeEnvio.className = 'bg-gray-100 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1';
+          }
+      }
 
       const btnWa = document.getElementById('preview-wa-btn');
       if (btnWa) {
@@ -980,6 +1007,8 @@
         document.getElementById('admin-wa').value = data.enlace_whatsapp || '';
         document.getElementById('admin-cat').value = data.categoria || 'Alimentos';
         document.getElementById('admin-imagen-url').value = data.imagen_url || '';
+        // Cargar el toggle de envío
+        document.getElementById('admin-envio-domicilio').checked = data.ofrece_domicilio || false;
 
         setearHorariosUI(data.horarios || null);
         
@@ -1018,6 +1047,7 @@
       document.getElementById('admin-imagen-url').value = '';
       document.getElementById('admin-estado-apertura').checked = true;
       document.getElementById('global-toggle-abierto').checked = true;
+      document.getElementById('admin-envio-domicilio').checked = false;
       
       setearHorariosUI(null);
       configurarPermisos(0);
@@ -1036,7 +1066,8 @@
         categoria: document.getElementById('admin-cat').value,
         imagen_url: document.getElementById('admin-imagen-url').value || '',
         horarios: obtenerHorariosDeUI(),
-        esta_abierto: document.getElementById('global-toggle-abierto').checked
+        esta_abierto: document.getElementById('global-toggle-abierto').checked,
+        ofrece_domicilio: document.getElementById('admin-envio-domicilio').checked // AGREGADO
       };
 
       if (!payload.nombre_negocio) { mostrarNotificacion('Escribe el nombre del negocio.', 'error'); return; }
