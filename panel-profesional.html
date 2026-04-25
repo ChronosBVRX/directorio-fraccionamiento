@@ -655,11 +655,11 @@
             }
         }
 
-        // --- MANEJO DEL HEADER Y APERTURA GLOBAL ---
+        // --- CORRECCIÓN: MANEJO DEL HEADER Y APERTURA GLOBAL CON RESPUESTAS ---
         async function cambiarEstadoTiendaGlobal() {
-            if (!estadoPanel.anuncioId) return;
             const abierto = document.getElementById('global-toggle-abierto').checked;
             
+            // 1. Actualización visual Inmediata
             document.getElementById('admin-estado-apertura').checked = abierto;
             const txt = document.getElementById('texto-estado-tienda');
             
@@ -669,7 +669,35 @@
                 txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
             }
 
-            await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
+            // 2. Si es un consultorio nuevo que aún no existe en DB, detenemos aquí sin error.
+            if (!estadoPanel.anuncioId) return;
+
+            // 3. Petición a Supabase con control de fallos (RLS o red)
+            mostrarOverlay('Actualizando estatus...');
+            
+            const { error } = await clienteSupabase
+                .from('anuncios')
+                .update({ esta_abierto: abierto })
+                .eq('id', estadoPanel.anuncioId);
+                
+            ocultarOverlay();
+
+            if (error) {
+                console.error("Error en Supabase al actualizar estado:", error);
+                mostrarToast('Error de permisos o red. No se pudo cambiar el estado.', 'error');
+                
+                // 4. Revertimos la interfaz si la base de datos rechazó el cambio
+                document.getElementById('global-toggle-abierto').checked = !abierto;
+                document.getElementById('admin-estado-apertura').checked = !abierto;
+                
+                if(!abierto) {
+                    txt.innerText = 'Recibiendo Citas'; txt.className = 'text-sm font-black text-green-400 tracking-widest';
+                } else {
+                    txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
+                }
+            } else {
+                mostrarToast(abierto ? 'Consultorio marcado como Abierto' : 'Consultorio marcado como Cerrado', 'success');
+            }
         }
 
         // --- LÓGICA: CITAS DE HOY E HISTORIAL ---
