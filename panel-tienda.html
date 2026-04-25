@@ -193,22 +193,20 @@
                         <p class="text-xs text-gray-500 mb-4 text-center">Ideal para enviar por WhatsApp o subir a Facebook.</p>
                         
                         <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
-                            <div id="mk-diseño-tarjeta" class="bg-white shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
+                            <div id="mk-diseño-tarjeta" class="bg-tm-azul-oscuro shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
                                 <div class="absolute inset-0 z-0 bg-gray-900">
-                                   <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-30" crossorigin="anonymous">
+                                   <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-40" crossorigin="anonymous">
                                 </div>
-                                <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul/90 to-transparent z-10"></div>
-                                <div class="relative z-20 h-full flex items-center p-8 text-white">
-                                    <div class="flex-grow pr-4">
-                                        <span id="mk-tarjeta-cat" class="bg-tm-dorado text-tm-azul-oscuro text-xs font-black px-2 py-1 rounded uppercase tracking-wider mb-3 inline-block shadow">Categoría</span>
-                                        <h4 id="mk-tarjeta-nombre" class="text-4xl font-black leading-tight mb-2 tracking-tight">Nombre del Negocio</h4>
-                                        <p id="mk-tarjeta-desc" class="text-sm text-blue-100 max-w-xs line-clamp-2 mb-4">Descripción corta del negocio...</p>
-                                        <div class="flex items-center gap-2 font-bold text-sm bg-black/30 inline-block px-3 py-1.5 rounded-lg border border-white/10">
-                                            📞 <span id="mk-tarjeta-tel">Teléfono</span>
-                                        </div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul-oscuro/90 to-transparent z-10"></div>
+                                <div class="relative z-20 w-full h-full flex items-center px-10 text-white">
+                                    <div class="flex-1 pr-6 flex flex-col justify-center">
+                                        <div><span id="mk-tarjeta-cat" class="bg-tm-dorado text-tm-azul-oscuro text-xs font-black px-3 py-1 rounded uppercase tracking-wider mb-4 inline-block shadow">Categoría</span></div>
+                                        <h4 id="mk-tarjeta-nombre" class="text-4xl font-black leading-none mb-3">Nombre del Negocio</h4>
+                                        <p id="mk-tarjeta-desc" class="text-sm text-blue-100 max-w-[280px] overflow-hidden max-h-10 mb-5">Descripción corta del negocio...</p>
+                                        <div><span class="font-bold text-sm bg-black/40 px-4 py-2 rounded-lg border border-white/10 inline-flex items-center gap-2">📞 <span id="mk-tarjeta-tel">Teléfono</span></span></div>
                                     </div>
-                                    <div class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center justify-center shrink-0">
-                                        <div id="mk-tarjeta-qr" class="w-[112px] h-[112px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                    <div class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center justify-center shrink-0 w-[140px]">
+                                        <div id="mk-tarjeta-qr" class="w-[116px] h-[116px] bg-gray-100 flex items-center justify-center rounded"></div>
                                         <p class="text-[9px] text-tm-azul-oscuro font-black mt-2 text-center uppercase tracking-widest">Escanea y Pide</p>
                                     </div>
                                 </div>
@@ -224,21 +222,22 @@
                         <p class="text-xs text-gray-500 mb-4 text-center">Formato vertical perfecto para Estados de WhatsApp, Instagram y Facebook.</p>
                         
                         <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
-                            <div id="mk-diseño-story" class="bg-tm-azul-oscuro shadow-lg overflow-hidden relative flex flex-col" style="width: 360px; height: 640px; min-width: 360px;">
-                               <div class="h-1/2 relative">
-                                   <div class="absolute inset-0 bg-gray-900 z-0"></div>
-                                   <img id="mk-story-bg" src="" class="w-full h-full object-cover relative z-10 opacity-70" crossorigin="anonymous">
-                                   <div class="absolute inset-0 bg-gradient-to-t from-tm-azul-oscuro via-tm-azul-oscuro/50 to-transparent z-20"></div>
+                            <div id="mk-diseño-story" class="bg-tm-azul-oscuro shadow-lg overflow-hidden relative" style="width: 360px; height: 640px; min-width: 360px;">
+                               <div class="absolute inset-0 z-0 bg-gray-900">
+                                   <img id="mk-story-bg" src="" class="w-full h-[60%] object-cover opacity-50" crossorigin="anonymous">
+                                   <div class="absolute inset-0 bg-gradient-to-t from-tm-azul-oscuro via-tm-azul-oscuro/80 to-transparent"></div>
                                </div>
-                               <div class="h-1/2 flex flex-col items-center justify-start text-center px-6 -mt-16 relative z-30 text-white">
-                                   <span id="mk-story-cat" class="bg-tm-dorado text-tm-azul-oscuro text-xs font-black px-4 py-1 rounded-full uppercase tracking-wider mb-4 shadow-lg border-2 border-tm-azul-oscuro">Categoría</span>
-                                   <h4 id="mk-story-nombre" class="text-3xl font-black leading-tight mb-2">Nombre del Negocio</h4>
-                                   <p class="text-xs text-blue-200 mb-6 px-4 line-clamp-2">Haz tu pedido directo desde nuestra tienda en línea.</p>
+                               
+                               <div class="relative z-30 w-full h-full flex flex-col items-center justify-center text-center px-6 pt-10 text-white">
+                                   <span id="mk-story-cat" class="bg-tm-dorado text-tm-azul-oscuro text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider mb-5 shadow-lg border-2 border-tm-dorado/50">Categoría</span>
+                                   <h4 id="mk-story-nombre" class="text-4xl font-black leading-tight mb-3 text-white drop-shadow-lg">Nombre del Negocio</h4>
                                    
-                                   <div class="bg-white p-3 rounded-2xl shadow-2xl mb-4 border-4 border-tm-dorado/40">
-                                       <div id="mk-story-qr" class="w-[128px] h-[128px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                   <p class="text-sm text-blue-200 mb-8 px-2 max-h-[50px] overflow-hidden drop-shadow">Haz tu pedido directo desde nuestra tienda en línea.</p>
+                                   
+                                   <div class="bg-white p-3 rounded-3xl shadow-2xl mb-6 border-4 border-tm-dorado/40 shrink-0">
+                                       <div id="mk-story-qr" class="w-[140px] h-[140px] bg-gray-100 flex items-center justify-center rounded-xl"></div>
                                    </div>
-                                   <p class="text-[10px] text-white font-black uppercase tracking-widest bg-white/20 border border-white/30 px-5 py-2 rounded-xl backdrop-blur-sm shadow">¡Escanea para pedir!</p>
+                                   <p class="text-xs text-white font-black uppercase tracking-widest bg-white/10 border-2 border-white/20 px-6 py-3 rounded-xl backdrop-blur-sm shadow-lg">¡Escanea para pedir!</p>
                                </div>
                             </div>
                         </div>
@@ -549,11 +548,9 @@
     let infoNegocio = null;
     let estadoPanel = { anuncioId: null, modoNuevo: false, nivelActual: 0, subscriptionStatus: 'free' };
     
-    // Variables para Marketing
     let qrTarjeta = null;
     let qrStory = null;
 
-    // MÉTODOS DE UI BÁSICOS
     function mostrarNotificacion(mensaje, tipo = 'exito') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -568,7 +565,6 @@
     }
     function ocultarOverlay() { document.getElementById('overlay-proceso').classList.add('hidden'); }
 
-    // GESTIÓN DE TABS SUPERIORES (MODIFICADO PARA INCLUIR MARKETING)
     function cambiarTabPrincipal(tabId) {
         if (tabId === 'marketing' && !estadoPanel.anuncioId) {
             document.getElementById('marketing-bloqueado').classList.remove('hidden');
@@ -588,12 +584,9 @@
         document.getElementById(`tab-main-${tabId}`).className = 'tab-main-activa py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
     }
 
-    // BOTÓN DE APAGADOR GLOBAL
     async function cambiarEstadoTiendaGlobal() {
         if (!estadoPanel.anuncioId) return;
         const abierto = document.getElementById('global-toggle-abierto').checked;
-        
-        // Sincronizar con el checkbox original oculto
         document.getElementById('admin-estado-apertura').checked = abierto;
         
         const txt = document.getElementById('texto-estado-tienda');
@@ -602,11 +595,9 @@
         } else {
             txt.innerText = 'CERRADA'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
         }
-
         await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
     }
 
-    // AVANZAR PEDIDOS DIRECTOS
     async function avanzarPedidoDirecto(pedidoId, nuevoEstado) {
         let mensajeConfirmacion = nuevoEstado === 'en_camino' 
             ? '¿Confirmas que este pedido ya está listo o va en camino al cliente?' 
@@ -617,11 +608,9 @@
         try {
             mostrarOverlay('Actualizando pedido...');
             const { error } = await clienteSupabase.from('pedidos').update({ estado: nuevoEstado }).eq('id', pedidoId);
-            
             if (error) throw error;
             mostrarNotificacion('¡Estado del pedido actualizado!');
             
-            // Si es Nivel Entregado o Cancelado, refrescamos fuerte porque cambia de pestaña
             if(nuevoEstado === 'entregado' || nuevoEstado === 'cancelada') {
                 await cargarPedidosGenerales();
                 await cargarMetricas();
@@ -633,7 +622,6 @@
         }
     }
 
-    // CARGAR PEDIDOS Y MÉTRICAS
     async function cargarPedidosGenerales() {
         if (!estadoPanel.anuncioId) return;
         const { data, error } = await clienteSupabase.from('pedidos').select('*, repartidores(nombre)').eq('negocio_id', estadoPanel.anuncioId).order('creado_en', { ascending: false });
@@ -999,66 +987,66 @@
       }
     }
 
-    // NUEVA FUNCIÓN: PREPARAR DISEÑOS DE MARKETING
     function prepararMarketing(data) {
         if (!data || !data.id) return;
 
-        // Llenar datos de la tarjeta horizontal
         document.getElementById('mk-tarjeta-nombre').innerText = data.nombre_negocio || 'Mi Negocio';
         document.getElementById('mk-tarjeta-cat').innerText = data.categoria || 'Local';
         document.getElementById('mk-tarjeta-desc').innerText = data.descripcion || 'Conoce nuestros productos.';
         document.getElementById('mk-tarjeta-tel').innerText = data.enlace_whatsapp || 'Sin teléfono';
         
-        // Llenar datos de la story vertical
         document.getElementById('mk-story-nombre').innerText = data.nombre_negocio || 'Mi Negocio';
         document.getElementById('mk-story-cat').innerText = data.categoria || 'Local';
 
-        // Imágenes de fondo (si no tiene, usar un fallback elegante para que no se vea blanco)
         const bgUrl = data.imagen_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1080&auto=format&fit=crop';
         document.getElementById('mk-tarjeta-bg').src = bgUrl;
         document.getElementById('mk-story-bg').src = bgUrl;
 
-        // Generar URL para los códigos QR
         const baseUrl = 'https://chronosbvrx.github.io/directorio-fraccionamiento/index.html';
         const linkTienda = `${baseUrl}?id=${data.id}`;
 
-        // Limpiar QRs anteriores si existen
         document.getElementById('mk-tarjeta-qr').innerHTML = '';
         document.getElementById('mk-story-qr').innerHTML = '';
 
-        // Crear nuevos QRs
         qrTarjeta = new QRCode(document.getElementById("mk-tarjeta-qr"), {
             text: linkTienda,
-            width: 112,
-            height: 112,
+            width: 116,
+            height: 116,
             colorDark : "#143653",
-            colorLight : "#ffffff",
+            colorLight : "#f3f4f6",
             correctLevel : QRCode.CorrectLevel.H
         });
 
         qrStory = new QRCode(document.getElementById("mk-story-qr"), {
             text: linkTienda,
-            width: 128, 
-            height: 128,
+            width: 140, 
+            height: 140,
             colorDark : "#143653",
-            colorLight : "#ffffff",
+            colorLight : "#f3f4f6",
             correctLevel : QRCode.CorrectLevel.H
         });
     }
 
-    // NUEVA FUNCIÓN: DESCARGAR LA IMAGEN GENERADA
     async function descargarDiseño(elementoId, nombreArchivo) {
         mostrarOverlay('Generando tu imagen en alta calidad...');
         try {
+            // HACK: forzar el scroll hasta arriba y guardar temporalmente dónde estaba el usuario.
+            const originalScroll = window.scrollY;
+            window.scrollTo(0, 0);
+
             const elemento = document.getElementById(elementoId);
-            // Configuración useCORS permite que imagenes externas cruzadas no bloqueen el renderizado
             const canvas = await html2canvas(elemento, { 
-                scale: 2, // Mejora resolución
+                scale: 2, 
                 useCORS: true,
                 allowTaint: false,
-                backgroundColor: null
+                backgroundColor: null,
+                logging: false, // Ocultar mensajes innecesarios en consola
+                y: elemento.getBoundingClientRect().top // Reforzar el punto inicial para html2canvas
             });
             
+            // Regresar el scroll a donde estaba el usuario originalmente
+            window.scrollTo(0, originalScroll);
+
             const link = document.createElement('a');
             link.download = nombreArchivo;
             link.href = canvas.toDataURL('image/png');
@@ -1177,7 +1165,6 @@
         await cargarMetricas();
         suscribirseRealtimeNegocio();
         
-        // Cargar y Preparar datos para Marketing
         prepararMarketing(data);
         
         cambiarTabPrincipal('mi-tienda');
@@ -1257,7 +1244,6 @@
           suscribirseRealtimeNegocio();
         }
 
-        // Actualizamos los datos para que el panel de marketing también los reciba
         prepararMarketing({ id: estadoPanel.anuncioId, ...payload });
 
         mostrarNotificacion('Configuración guardada correctamente.');
@@ -1387,7 +1373,6 @@
         document.getElementById('admin-imagen-url').value = data.publicUrl;
         estado.className = "text-xs text-green-600 mt-3 font-bold"; estado.innerText = '✅ Imagen optimizada y lista';
         
-        // Actualizar visuales
         actualizarPreview();
         prepararMarketing({ 
             id: estadoPanel.anuncioId, 
