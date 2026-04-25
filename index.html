@@ -249,6 +249,7 @@
         let usuarioActual = null;
         let carritoActual = {}; 
         let negocioActualPedido = null;
+        let negocioActualAgenda = null; // <- VARIABLE AÑADIDA PARA WHATSAPP DE CITAS
         let perfilUsuarioActual = null;
 
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
@@ -457,7 +458,6 @@
         }
 
         async function cargarDatos() {
-            // PRECAUCIÓN DE SEGURIDAD: Asegurarnos de tener la sesión cargada primero
             const { data: sesionData } = await clienteSupabase.auth.getSession();
             if(!usuarioActual && sesionData?.session?.user) {
                 usuarioActual = sesionData.session.user;
@@ -477,7 +477,6 @@
                 filtrar('Todos');
             }
 
-            // NUEVO CÓDIGO PARA LECTURA DE QR: Abre automáticamente el negocio si viene desde un QR
             const params = new URLSearchParams(window.location.search);
             const negocioIdQr = params.get('id');
             
@@ -494,7 +493,6 @@
                         abrirAgenda(negocioQR);
                     }
 
-                    // Limpiar el parámetro de la URL para que no se reabra si el usuario refresca la página
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
@@ -792,6 +790,7 @@
         }
 
         async function abrirAgenda(negocio) {
+            negocioActualAgenda = negocio; // <-- ASIGNACIÓN AÑADIDA
             if (!usuarioActual) {
                 await lanzarNotificacion("Inicia Sesión", "Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.", "warning", "entendido");
                 window.location.href = 'login.html';
@@ -929,8 +928,13 @@
 
         async function confirmarCitaIndex(hora) {
             const fecha = document.getElementById('reserva-fecha-index').value;
-            const servicioId = limpiarIdIndex(document.getElementById('reserva-servicio-index').value);
+            const selectElement = document.getElementById('reserva-servicio-index');
+            const servicioId = limpiarIdIndex(selectElement.value);
             const negocioId = limpiarIdIndex(document.getElementById('reserva-negocio-id-index').value);
+
+            // Obtener nombre del servicio limpio para el mensaje de WhatsApp
+            const nombreServicioRaw = selectElement.options[selectElement.selectedIndex].text;
+            const nombreServicio = nombreServicioRaw.split(' (')[0]; 
 
             if (!usuarioActual?.id) {
                 await lanzarNotificacion('Inicia Sesión', 'Necesitas iniciar sesión para reservar una cita.', 'warning', 'entendido');
@@ -981,7 +985,7 @@
                     throw new Error(data?.error || 'La Edge Function no confirmó la reserva.');
                 }
 
-                await reservaExitosa();
+                await reservaExitosa(fecha, hora, nombreServicio); // <- ACTUALIZADO
             } catch (err) {
                 console.warn('La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...', err);
 
@@ -1012,7 +1016,7 @@
                         await lanzarNotificacion('Horario Ocupado', 'Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.', 'error', 'entendido');
                         buscarHorariosIndex();
                     } else {
-                        await reservaExitosa();
+                        await reservaExitosa(fecha, hora, nombreServicio); // <- ACTUALIZADO
                     }
                 } catch (insertErr) {
                     console.error('Error final al guardar la cita:', insertErr);
@@ -1022,7 +1026,26 @@
             }
         }
 
-        async function reservaExitosa() {
+        async function reservaExitosa(fecha, hora, nombreServicio) {
+            // LÓGICA AÑADIDA PARA ENVIAR WHATSAPP AL NEGOCIO
+            if (negocioActualAgenda && negocioActualAgenda.enlace_whatsapp) {
+                let numeroVendedor = negocioActualAgenda.enlace_whatsapp.replace(/\D/g, '');
+                
+                if (numeroVendedor) {
+                    let clienteNombre = perfilUsuarioActual ? (perfilUsuarioActual.nombre_completo || 'Un paciente') : 'Un paciente';
+                    
+                    let textoCita = `*NUEVA SOLICITUD DE CITA - VIVE TRES MARÍAS* 📅\n\n`;
+                    textoCita += `*Paciente:* ${clienteNombre}\n`;
+                    textoCita += `*Servicio:* ${nombreServicio}\n`;
+                    textoCita += `*Fecha:* ${fecha}\n`;
+                    textoCita += `*Hora:* ${hora}\n\n`;
+                    textoCita += `Por favor, confirma de enterado respondiendo a este mensaje y revisa tu panel para más detalles.`;
+
+                    // Abre la ventana de WhatsApp dirigida al profesional
+                    window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoCita)}`, '_blank');
+                }
+            }
+
             await lanzarNotificacion("¡Cita Agendada!", "¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.", "success", "entendido");
             cerrarAgenda(); 
         }
