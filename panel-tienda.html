@@ -1027,9 +1027,15 @@
         });
     }
 
+    // =========================================================================================
+    // CORRECCIONES PARA EL RENDERIZADO DEL MARKETING CON HTML2CANVAS
+    // =========================================================================================
     async function descargarDiseño(elementoId, nombreArchivo) {
         mostrarOverlay('Generando tu imagen en alta calidad...');
         try {
+            // Pausa extra para asegurar que las fuentes, QR e imágenes de fondo terminen de renderizarse.
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             // HACK: forzar el scroll hasta arriba y guardar temporalmente dónde estaba el usuario.
             const originalScroll = window.scrollY;
             window.scrollTo(0, 0);
@@ -1039,9 +1045,12 @@
                 scale: 2, 
                 useCORS: true,
                 allowTaint: false,
-                backgroundColor: null,
+                // Se agregó color de fondo sólido para evitar artefactos oscuros en zonas transparentes
+                backgroundColor: elementoId === 'mk-diseño-tarjeta' ? '#143653' : '#ffffff',
                 logging: false, // Ocultar mensajes innecesarios en consola
-                y: elemento.getBoundingClientRect().top // Reforzar el punto inicial para html2canvas
+                // Se eliminó la 'y' problemática y forzamos scroll a 0 para una captura perfecta
+                scrollX: 0,
+                scrollY: 0
             });
             
             // Regresar el scroll a donde estaba el usuario originalmente
@@ -1059,6 +1068,7 @@
             ocultarOverlay();
         }
     }
+    // =========================================================================================
 
     async function init() {
       renderizarUIHorarios();
