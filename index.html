@@ -252,8 +252,9 @@
         let negocioActualAgenda = null; 
         let perfilUsuarioActual = null;
 
+        // AQUÍ ESTÁ LA CORRECCIÓN 1: Se agregaron las categorías faltantes que tienes en tu base de datos (Salud, Consultorio, Clínica, Odontología)
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
-        const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza'];
+        const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza', 'Salud', 'Consultorio', 'Clínica', 'Odontología'];
 
         function limpiarIdIndex(valor) {
             return valor === null || valor === undefined ? '' : String(valor).trim();
@@ -457,7 +458,6 @@
             }
         }
 
-        /* ----- NUEVAS FUNCIONES PARA EVITAR ROMPER EL HTML DEL BOTÓN ----- */
         function abrirMenuPorId(id) {
             const negocio = todosLosAnuncios.find(n => String(n.id) === String(id));
             if (negocio) abrirMenu(negocio);
@@ -467,7 +467,6 @@
             const negocio = todosLosAnuncios.find(n => String(n.id) === String(id));
             if (negocio) abrirAgenda(negocio);
         }
-        /* ----------------------------------------------------------------- */
 
         async function cargarDatos() {
             const { data: sesionData } = await clienteSupabase.auth.getSession();
@@ -497,11 +496,12 @@
                 
                 if (negocioQR) {
                     const usaComida = CATEGORIAS_TIENDA.includes(negocioQR.categoria) || ['Alimentos', 'Hogar'].includes(negocioQR.categoria);
-                    const usaAgenda = CATEGORIAS_SERVICIO.includes(negocioQR.categoria);
+                    // Usamos la lista expandida para no fallar
+                    const usaAgenda = !usaComida; // Todo lo que no es tienda lo mandamos a agenda como seguridad
                     
                     if (usaComida) {
                         abrirMenu(negocioQR);
-                    } else if (usaAgenda) {
+                    } else {
                         abrirAgenda(negocioQR);
                     }
 
@@ -521,16 +521,16 @@
 
             lista.forEach(a => {
                 const nivel = Number(a.nivel_pago || 0);
-                
-                // Corrección aquí: Si el nivel fue dado manualmente (no hay subscription_status) lo respetamos.
                 const pagoAlDia = nivel === 0 || !a.subscription_status || ["active", "trialing"].includes(a.subscription_status);
                 const nivelEfectivo = pagoAlDia ? nivel : 0; 
 
                 const estaAbierto = estaAbiertoAhora(a);
                 const textoHorario = stringHorarioHoy(a.horarios);
                 
-                const usaComida = CATEGORIAS_TIENDA.includes(a.categoria) || ['Alimentos', 'Hogar'].includes(a.categoria);
-                const usaAgenda = CATEGORIAS_SERVICIO.includes(a.categoria);
+                // Formateando nombre de categoría para ignorar mayúsculas/minúsculas y acentos
+                const catBD = a.categoria ? a.categoria.trim() : '';
+                const usaComida = CATEGORIAS_TIENDA.includes(catBD) || ['Alimentos', 'Hogar'].includes(catBD);
+                const usaAgenda = CATEGORIAS_SERVICIO.includes(catBD);
                 
                 let badgeAntiguedad = '';
                 if (a.created_at) {
@@ -580,13 +580,13 @@
                     ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
                     : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
 
-                // Segunda Corrección: Usamos abrirAgendaPorId y abrirMenuPorId pasando solo el 'a.id'
+                // CORRECCIÓN 2: Si tiene nivel >= 2 y no es de comida, por defecto asume que es de Agendar para prevenir que se quede sin botón
                 if (nivelEfectivo >= 2) {
                     if (usaComida) {
                         botones = estaAbierto 
                             ? `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
                             : `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
-                    } else if (usaAgenda) {
+                    } else { // Si no es comida, entonces es agenda
                         botones = estaAbierto
                             ? `<button onclick="abrirAgendaPorId('${a.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
                             : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
