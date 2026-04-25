@@ -213,22 +213,20 @@
                             <p class="text-xs text-gray-500 mb-4 text-center">Ideal para enviar por WhatsApp a nuevos pacientes.</p>
                             
                             <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <div id="mk-diseño-tarjeta" class="bg-white shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
+                                <div id="mk-diseño-tarjeta" class="bg-tm-azul-oscuro shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
                                     <div class="absolute inset-0 z-0 bg-gray-900">
-                                       <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-30" crossorigin="anonymous">
+                                       <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-40" crossorigin="anonymous">
                                     </div>
-                                    <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul/90 to-transparent z-10"></div>
-                                    <div class="relative z-20 h-full flex items-center p-8 text-white">
-                                        <div class="flex-grow pr-4">
-                                            <span id="mk-tarjeta-cat" class="bg-white text-tm-azul-oscuro text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wider mb-3 inline-block shadow">Especialidad</span>
-                                            <h4 id="mk-tarjeta-nombre" class="text-4xl font-black leading-tight mb-2 tracking-tight">Nombre del Profesional</h4>
-                                            <p id="mk-tarjeta-desc" class="text-sm text-blue-100 max-w-xs line-clamp-2 mb-4">Descripción de servicios...</p>
-                                            <div class="flex items-center gap-2 font-bold text-sm bg-black/30 inline-block px-3 py-1.5 rounded-lg border border-white/10">
-                                                📞 <span id="mk-tarjeta-tel">Teléfono</span>
-                                            </div>
+                                    <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul-oscuro/90 to-transparent z-10"></div>
+                                    <div class="relative z-20 w-full h-full flex items-center px-10 text-white">
+                                        <div class="flex-1 pr-6 flex flex-col justify-center">
+                                            <div><span id="mk-tarjeta-cat" class="bg-white text-tm-azul-oscuro text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 inline-block shadow">Especialidad</span></div>
+                                            <h4 id="mk-tarjeta-nombre" class="text-4xl font-black leading-none mb-3">Nombre del Profesional</h4>
+                                            <p id="mk-tarjeta-desc" class="text-sm text-blue-100 max-w-[280px] overflow-hidden max-h-10 mb-5">Descripción de servicios...</p>
+                                            <div><span class="font-bold text-sm bg-black/40 px-4 py-2 rounded-lg border border-white/10 inline-flex items-center gap-2">📞 <span id="mk-tarjeta-tel">Teléfono</span></span></div>
                                         </div>
-                                        <div class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center justify-center shrink-0 border-b-4 border-tm-dorado">
-                                            <div id="mk-tarjeta-qr" class="w-[112px] h-[112px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                        <div class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center justify-center shrink-0 w-[140px] border-b-4 border-tm-dorado">
+                                            <div id="mk-tarjeta-qr" class="w-[116px] h-[116px] bg-gray-100 flex items-center justify-center rounded"></div>
                                             <p class="text-[9px] text-tm-azul-oscuro font-black mt-2 text-center uppercase tracking-widest">Escanea y Agenda</p>
                                         </div>
                                     </div>
@@ -244,23 +242,23 @@
                             <p class="text-xs text-gray-500 mb-4 text-center">Formato vertical perfecto para Estados de WhatsApp e Instagram.</p>
                             
                             <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <div id="mk-diseño-story" class="bg-white shadow-lg overflow-hidden relative flex flex-col" style="width: 360px; height: 640px; min-width: 360px;">
-                                   <div class="h-1/2 relative">
-                                       <div class="absolute inset-0 bg-gray-900 z-0"></div>
-                                       <img id="mk-story-bg" src="" class="w-full h-full object-cover relative z-10 opacity-60" crossorigin="anonymous">
-                                       <div class="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent z-20"></div>
+                                <div id="mk-diseño-story" class="bg-white shadow-lg overflow-hidden relative" style="width: 360px; height: 640px; min-width: 360px;">
+                                   <div class="absolute inset-0 z-0 bg-gray-900">
+                                       <img id="mk-story-bg" src="" class="w-full h-[60%] object-cover opacity-60" crossorigin="anonymous">
+                                       <div class="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
                                    </div>
-                                   <div class="h-1/2 flex flex-col items-center justify-start text-center px-6 -mt-16 relative z-30 text-tm-azul-oscuro">
-                                       <div class="bg-white p-3 rounded-2xl shadow-2xl mb-4 border-t-4 border-tm-dorado">
-                                           <div id="mk-story-qr" class="w-[128px] h-[128px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                   
+                                   <div class="relative z-30 w-full h-full flex flex-col items-center justify-center text-center px-6 pt-16 text-tm-azul-oscuro">
+                                       <div class="bg-white p-3 rounded-3xl shadow-2xl mb-6 border-t-4 border-tm-dorado shrink-0">
+                                           <div id="mk-story-qr" class="w-[140px] h-[140px] bg-gray-100 flex items-center justify-center rounded-xl"></div>
                                        </div>
                                        
-                                       <h4 id="mk-story-nombre" class="text-2xl font-black leading-tight mb-1 text-tm-azul-oscuro">Nombre Profesional</h4>
-                                       <span id="mk-story-cat" class="text-tm-dorado text-xs font-black uppercase tracking-wider mb-3 block">Especialidad</span>
+                                       <h4 id="mk-story-nombre" class="text-3xl font-black leading-tight mb-2 text-tm-azul-oscuro drop-shadow-md">Nombre Profesional</h4>
+                                       <span id="mk-story-cat" class="text-tm-dorado text-xs font-black uppercase tracking-wider mb-4 block">Especialidad</span>
                                        
-                                       <p class="text-xs text-gray-500 mb-4 px-2 line-clamp-2">Revisa mi disponibilidad y agenda tu cita fácilmente en línea.</p>
+                                       <p class="text-sm text-gray-600 mb-8 px-2 max-h-[50px] overflow-hidden drop-shadow font-semibold">Revisa mi disponibilidad y agenda tu cita fácilmente en línea.</p>
                                        
-                                       <p class="text-[10px] text-white font-black uppercase tracking-widest bg-tm-azul px-6 py-2.5 rounded-xl shadow-md">¡Escanea para Agendar!</p>
+                                       <p class="text-xs text-white font-black uppercase tracking-widest bg-tm-azul px-6 py-3 rounded-xl shadow-lg">¡Escanea para Agendar!</p>
                                    </div>
                                 </div>
                             </div>
@@ -1082,38 +1080,46 @@
             document.getElementById('mk-tarjeta-qr').innerHTML = '';
             document.getElementById('mk-story-qr').innerHTML = '';
 
-            // Crear QRs
+            // Crear QRs adaptados a este panel
             qrTarjeta = new QRCode(document.getElementById("mk-tarjeta-qr"), {
                 text: linkPerfil,
-                width: 112,
-                height: 112,
+                width: 116,
+                height: 116,
                 colorDark : "#143653",
-                colorLight : "#ffffff",
+                colorLight : "#f3f4f6",
                 correctLevel : QRCode.CorrectLevel.H
             });
 
             qrStory = new QRCode(document.getElementById("mk-story-qr"), {
                 text: linkPerfil,
-                width: 128, 
-                height: 128,
+                width: 140, 
+                height: 140,
                 colorDark : "#143653",
-                colorLight : "#ffffff",
+                colorLight : "#f3f4f6",
                 correctLevel : QRCode.CorrectLevel.H
             });
         }
 
-        // NUEVA FUNCIÓN: DESCARGAR LA IMAGEN
+        // NUEVA FUNCIÓN: DESCARGAR LA IMAGEN (Con el HACK corregido del scroll)
         async function descargarDiseño(elementoId, nombreArchivo) {
             mostrarOverlay('Generando tu imagen en alta calidad...');
             try {
+                // HACK para html2canvas: forzar scroll top a 0 temporalmente
+                const originalScroll = window.scrollY;
+                window.scrollTo(0, 0);
+
                 const elemento = document.getElementById(elementoId);
                 const canvas = await html2canvas(elemento, { 
                     scale: 2, 
                     useCORS: true,
                     allowTaint: false,
-                    backgroundColor: null
+                    backgroundColor: null,
+                    logging: false,
+                    y: elemento.getBoundingClientRect().top
                 });
                 
+                window.scrollTo(0, originalScroll); // Regresamos al usuario a donde estaba
+
                 const link = document.createElement('a');
                 link.download = nombreArchivo;
                 link.href = canvas.toDataURL('image/png');
