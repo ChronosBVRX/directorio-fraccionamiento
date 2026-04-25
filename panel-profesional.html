@@ -130,6 +130,15 @@
                 </div>
                 
                 <div id="hoy-contenido">
+                    
+                    <div id="seccion-pendientes" class="mb-8 hidden">
+                        <h2 class="text-tm-azul-oscuro font-black text-xl mb-4 border-b pb-2 flex items-center gap-2">
+                            ⏳ Solicitudes Pendientes <span id="badge-pendientes" class="bg-yellow-500 text-white text-[10px] px-2 py-0.5 rounded-full">0</span>
+                        </h2>
+                        <div id="contenedor-pendientes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
+                    </div>
+
                     <div class="flex justify-between items-center mb-4 border-b pb-2">
                         <h2 class="text-tm-azul-oscuro font-black text-xl">Tu agenda de hoy</h2>
                         <button onclick="cargarCitasDeHoy()" class="text-tm-azul text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">🔄 Recargar</button>
@@ -594,13 +603,11 @@
         let infoNegocio = null;
         let estadoPanel = { anuncioId: null, modoNuevo: false, nivelActual: 0, subscriptionStatus: 'free' };
 
-        // Variables para Marketing
         let qrTarjeta = null;
         let qrStory = null;
 
         const DIAS = { 0: 'Domingo', 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado' };
 
-        // --- UTILIDADES ---
         async function obtenerTokenUsuario() {
             const { data } = await clienteSupabase.auth.getSession();
             return data?.session?.access_token || null;
@@ -630,7 +637,6 @@
         function obtenerDiaDeFecha(fecha) { return new Date(`${fecha}T12:00:00`).getDay(); }
         function obtenerHorarioPorFecha(fecha) { const dia = obtenerDiaDeFecha(fecha); return horariosActuales?.[dia] || null; }
 
-        // --- MANEJO DE TABS GLOBALES ---
         function cambiarTabPrincipal(tabId) {
             if (tabId === 'marketing' && !estadoPanel.anuncioId) {
                 document.getElementById('marketing-bloqueado').classList.remove('hidden');
@@ -655,11 +661,10 @@
             }
         }
 
-        // --- CORRECCIÓN: MANEJO DEL HEADER Y APERTURA GLOBAL CON RESPUESTAS ---
         async function cambiarEstadoTiendaGlobal() {
+            if (!estadoPanel.anuncioId) return;
             const abierto = document.getElementById('global-toggle-abierto').checked;
             
-            // 1. Actualización visual Inmediata
             document.getElementById('admin-estado-apertura').checked = abierto;
             const txt = document.getElementById('texto-estado-tienda');
             
@@ -669,38 +674,9 @@
                 txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
             }
 
-            // 2. Si es un consultorio nuevo que aún no existe en DB, detenemos aquí sin error.
-            if (!estadoPanel.anuncioId) return;
-
-            // 3. Petición a Supabase con control de fallos (RLS o red)
-            mostrarOverlay('Actualizando estatus...');
-            
-            const { error } = await clienteSupabase
-                .from('anuncios')
-                .update({ esta_abierto: abierto })
-                .eq('id', estadoPanel.anuncioId);
-                
-            ocultarOverlay();
-
-            if (error) {
-                console.error("Error en Supabase al actualizar estado:", error);
-                mostrarToast('Error de permisos o red. No se pudo cambiar el estado.', 'error');
-                
-                // 4. Revertimos la interfaz si la base de datos rechazó el cambio
-                document.getElementById('global-toggle-abierto').checked = !abierto;
-                document.getElementById('admin-estado-apertura').checked = !abierto;
-                
-                if(!abierto) {
-                    txt.innerText = 'Recibiendo Citas'; txt.className = 'text-sm font-black text-green-400 tracking-widest';
-                } else {
-                    txt.innerText = 'CERRADO'; txt.className = 'text-sm font-black text-red-400 tracking-widest';
-                }
-            } else {
-                mostrarToast(abierto ? 'Consultorio marcado como Abierto' : 'Consultorio marcado como Cerrado', 'success');
-            }
+            await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
         }
 
-        // --- LÓGICA: CITAS DE HOY E HISTORIAL ---
         async function cargarCitasDeHoy() {
             if (!estadoPanel.anuncioId) return;
             const hoy = hoyISO();
@@ -708,18 +684,105 @@
             const { data, error } = await clienteSupabase.from('citas')
                 .select('*, perfiles:cliente_id(nombre_completo, telefono), servicios:servicio_id(nombre, precio)')
                 .eq('anuncio_id', estadoPanel.anuncioId)
-                .order('fecha_cita', { ascending: false })
+                .order('fecha_cita', { ascending: true }) 
                 .order('hora_inicio', { ascending: true });
 
             if (error) return;
 
             const citas = data || [];
-            const citasHoy = citas.filter(c => c.fecha_cita === hoy && c.estado !== 'bloqueado' && c.estado !== 'cancelada');
-            const historial = citas.filter(c => c.estado === 'completada' || c.estado === 'cancelada' || (c.fecha_cita < hoy && c.estado !== 'bloqueado'));
 
+            // AHORA filtramos en 3 grupos: pendientes (todas las fechas), hoy confirmadas, e historial
+            const pendientes = citas.filter(c => c.estado === 'pendiente');
+            const citasHoy = citas.filter(c => c.fecha_cita === hoy && c.estado === 'confirmada');
+            const historial = citas.filter(c => c.estado === 'completada' || c.estado === 'cancelada' || (c.fecha_cita < hoy && c.estado === 'confirmada'));
+
+            renderizarPendientes(pendientes);
             renderizarCitasHoy(citasHoy);
             renderizarHistorialCitas(historial);
             cargarMetricasProfesional(citas);
+        }
+
+        // NUEVA FUNCION: Renderiza la sección de Solicitudes Pendientes
+        function renderizarPendientes(citas) {
+            const seccion = document.getElementById('seccion-pendientes');
+            const contenedor = document.getElementById('contenedor-pendientes');
+            const badge = document.getElementById('badge-pendientes');
+
+            if (citas.length > 0) {
+                seccion.classList.remove('hidden');
+                badge.innerText = citas.length;
+            } else {
+                seccion.classList.add('hidden');
+                contenedor.innerHTML = '';
+                return;
+            }
+
+            contenedor.innerHTML = citas.map(c => {
+                const nombreCliente = c.perfiles?.nombre_completo || 'Paciente';
+                const telefono = c.perfiles?.telefono || '';
+                const servicio = c.servicios?.nombre || 'Consulta';
+                const fechaFormat = new Date(`${c.fecha_cita}T12:00:00`).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                return `
+                <div class="bg-yellow-50 p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black px-2 py-1 rounded bg-yellow-100 text-yellow-700 uppercase">Falta Confirmar</span>
+                            <span class="text-[10px] font-bold text-gray-500">${fechaFormat}</span>
+                        </div>
+                        <h4 class="font-black text-lg text-tm-azul-oscuro mt-1">${nombreCliente}</h4>
+                        <p class="text-xs font-bold text-gray-600 mt-1">${servicio} (${horaHHMM(c.hora_inicio)})</p>
+                    </div>
+                    <div class="flex gap-2 mt-4 pt-3 border-t border-yellow-200/50">
+                        <button onclick="rechazarSolicitud('${c.id}', '${telefono}', '${nombreCliente}', '${fechaFormat}', '${horaHHMM(c.hora_inicio)}')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2 rounded-lg text-xs shadow-sm transition border border-red-200">Rechazar ❌</button>
+                        <button onclick="aceptarSolicitud('${c.id}', '${telefono}', '${nombreCliente}', '${fechaFormat}', '${horaHHMM(c.hora_inicio)}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-xs shadow-sm transition">Aceptar ✅</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // NUEVAS FUNCIONES PARA LOS BOTONES
+        async function aceptarSolicitud(id, telefono, nombre, fecha, hora) {
+            mostrarOverlay('Aceptando cita...');
+            const { error } = await clienteSupabase.from('citas').update({ estado: 'confirmada' }).eq('id', id);
+            ocultarOverlay();
+            
+            if (error) {
+                mostrarToast('Error al aceptar la cita.', 'error');
+                return;
+            }
+            
+            mostrarToast('Cita Confirmada', 'success');
+            cargarCitasDeHoy();
+
+            if (telefono) {
+                const num = telefono.replace(/\D/g, '');
+                const msg = `¡Hola ${nombre}! 👋\n\nTu solicitud de cita para el *${fecha} a las ${hora}* ha sido *ACEPTADA* ✅.\n\n¡Te esperamos!`;
+                window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            }
+        }
+
+        async function rechazarSolicitud(id, telefono, nombre, fecha, hora) {
+            if(!confirm("¿Estás seguro de rechazar esta solicitud? El espacio en tu agenda volverá a estar disponible.")) return;
+            mostrarOverlay('Rechazando cita...');
+            
+            // Usamos cancelada para que automáticamente el calendario y la BD lo marquen como libre de nuevo
+            const { error } = await clienteSupabase.from('citas').update({ estado: 'cancelada' }).eq('id', id);
+            ocultarOverlay();
+            
+            if (error) {
+                mostrarToast('Error al rechazar la cita.', 'error');
+                return;
+            }
+            
+            mostrarToast('Cita Rechazada', 'success');
+            cargarCitasDeHoy();
+
+            if (telefono) {
+                const num = telefono.replace(/\D/g, '');
+                const msg = `Hola ${nombre}. Te informamos que, lamentablemente, no pudimos confirmar tu solicitud de cita para el *${fecha} a las ${hora}* ❌.\n\nPor favor, intenta agendar en otro horario o contáctanos para más información.`;
+                window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            }
         }
 
         function renderizarCitasHoy(citas) {
@@ -730,7 +793,7 @@
                 badge.innerText = citas.length; badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
-                contenedor.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center col-span-full border-2 border-dashed border-gray-200 rounded-2xl">No tienes pacientes agendados para hoy.</p>';
+                contenedor.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center col-span-full border-2 border-dashed border-gray-200 rounded-2xl">No tienes citas confirmadas para hoy.</p>';
                 return;
             }
 
@@ -1082,11 +1145,9 @@
             if (bActivo) { bActivo.classList.remove('text-gray-400'); bActivo.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
         }
 
-        // NUEVA FUNCIÓN: PREPARAR DISEÑOS DE MARKETING
         function prepararMarketing(data) {
             if (!data || !data.id) return;
 
-            // Llenar datos (Tarjetas y Stories)
             document.getElementById('mk-tarjeta-nombre').innerText = data.nombre_negocio || 'Profesional';
             document.getElementById('mk-tarjeta-cat').innerText = data.categoria || 'Consultorio';
             document.getElementById('mk-tarjeta-desc').innerText = data.descripcion || 'Conoce mis servicios.';
@@ -1095,20 +1156,16 @@
             document.getElementById('mk-story-nombre').innerText = data.nombre_negocio || 'Profesional';
             document.getElementById('mk-story-cat').innerText = data.categoria || 'Consultorio';
 
-            // Imágenes de fondo (usamos una más limpia/profesional por defecto si no hay)
             const bgUrl = data.imagen_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1080&auto=format&fit=crop';
             document.getElementById('mk-tarjeta-bg').src = bgUrl;
             document.getElementById('mk-story-bg').src = bgUrl;
 
-            // Generar URL para los códigos QR
             const baseUrl = 'https://chronosbvrx.github.io/directorio-fraccionamiento/index.html';
             const linkPerfil = `${baseUrl}?id=${data.id}`;
 
-            // Limpiar QRs anteriores si existen
             document.getElementById('mk-tarjeta-qr').innerHTML = '';
             document.getElementById('mk-story-qr').innerHTML = '';
 
-            // Crear QRs adaptados a este panel
             qrTarjeta = new QRCode(document.getElementById("mk-tarjeta-qr"), {
                 text: linkPerfil,
                 width: 116,
@@ -1128,11 +1185,9 @@
             });
         }
 
-        // NUEVA FUNCIÓN: DESCARGAR LA IMAGEN (Con el HACK corregido del scroll)
         async function descargarDiseño(elementoId, nombreArchivo) {
             mostrarOverlay('Generando tu imagen en alta calidad...');
             try {
-                // HACK para html2canvas: forzar scroll top a 0 temporalmente
                 const originalScroll = window.scrollY;
                 window.scrollTo(0, 0);
 
@@ -1146,7 +1201,7 @@
                     y: elemento.getBoundingClientRect().top
                 });
                 
-                window.scrollTo(0, originalScroll); // Regresamos al usuario a donde estaba
+                window.scrollTo(0, originalScroll); 
 
                 const link = document.createElement('a');
                 link.download = nombreArchivo;
@@ -1263,7 +1318,6 @@
                 if (estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(n.id, horariosActuales);
                 else destruirCalendarioSiExiste();
 
-                // Cargar datos para el Marketing
                 prepararMarketing(n);
 
                 suscribirseRealtimeConsultorio();
@@ -1458,10 +1512,12 @@
                 if (error) throw error;
 
                 const citas = data || [];
+                // ACTUALIZACIÓN: Renderizar citas en calendario con colores dependiendo de si están pendientes o confirmadas.
                 const eventos = citas.map(c => ({
-                    id: c.id, title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Bloqueo'}` : `✅ ${obtenerTituloCita(c)}`,
+                    id: c.id, 
+                    title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Bloqueo'}` : (c.estado === 'pendiente' ? `⏳ ${obtenerTituloCita(c)}` : `✅ ${obtenerTituloCita(c)}`),
                     start: `${c.fecha_cita}T${horaHHMM(c.hora_inicio)}:00`, end: `${c.fecha_cita}T${horaHHMM(c.hora_fin)}:00`,
-                    backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : '#22527b',
+                    backgroundColor: c.estado === 'bloqueado' ? '#ef4444' : (c.estado === 'pendiente' ? '#f59e0b' : '#22527b'),
                     extendedProps: { estado: c.estado, notas: c.notas || '', servicio: c.servicios?.nombre || '', nombre: obtenerTituloCita(c) }
                 }));
 
