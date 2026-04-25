@@ -249,7 +249,7 @@
         let usuarioActual = null;
         let carritoActual = {}; 
         let negocioActualPedido = null;
-        let negocioActualAgenda = null; // <- VARIABLE AÑADIDA PARA WHATSAPP DE CITAS
+        let negocioActualAgenda = null; 
         let perfilUsuarioActual = null;
 
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
@@ -457,6 +457,18 @@
             }
         }
 
+        /* ----- NUEVAS FUNCIONES PARA EVITAR ROMPER EL HTML DEL BOTÓN ----- */
+        function abrirMenuPorId(id) {
+            const negocio = todosLosAnuncios.find(n => String(n.id) === String(id));
+            if (negocio) abrirMenu(negocio);
+        }
+
+        function abrirAgendaPorId(id) {
+            const negocio = todosLosAnuncios.find(n => String(n.id) === String(id));
+            if (negocio) abrirAgenda(negocio);
+        }
+        /* ----------------------------------------------------------------- */
+
         async function cargarDatos() {
             const { data: sesionData } = await clienteSupabase.auth.getSession();
             if(!usuarioActual && sesionData?.session?.user) {
@@ -509,7 +521,9 @@
 
             lista.forEach(a => {
                 const nivel = Number(a.nivel_pago || 0);
-                const pagoAlDia = nivel === 0 || ["active", "trialing"].includes(a.subscription_status);
+                
+                // Corrección aquí: Si el nivel fue dado manualmente (no hay subscription_status) lo respetamos.
+                const pagoAlDia = nivel === 0 || !a.subscription_status || ["active", "trialing"].includes(a.subscription_status);
                 const nivelEfectivo = pagoAlDia ? nivel : 0; 
 
                 const estaAbierto = estaAbiertoAhora(a);
@@ -566,19 +580,20 @@
                     ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
                     : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
 
+                // Segunda Corrección: Usamos abrirAgendaPorId y abrirMenuPorId pasando solo el 'a.id'
                 if (nivelEfectivo >= 2) {
                     if (usaComida) {
                         botones = estaAbierto 
-                            ? `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
-                            : `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                            ? `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
+                            : `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
                     } else if (usaAgenda) {
                         botones = estaAbierto
-                            ? `<button onclick='abrirAgenda(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
+                            ? `<button onclick="abrirAgendaPorId('${a.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
                             : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
                     }
                     botones += botonContacto;
                 } else if (nivelEfectivo === 1) {
-                    botones = `<button onclick='abrirMenu(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
+                    botones = `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
                     botones += botonContacto;
                 } else {
                     botones = botonContacto;
@@ -790,7 +805,7 @@
         }
 
         async function abrirAgenda(negocio) {
-            negocioActualAgenda = negocio; // <-- ASIGNACIÓN AÑADIDA
+            negocioActualAgenda = negocio; 
             if (!usuarioActual) {
                 await lanzarNotificacion("Inicia Sesión", "Por favor, inicia sesión o crea una cuenta gratis para agendar tu cita.", "warning", "entendido");
                 window.location.href = 'login.html';
@@ -932,7 +947,6 @@
             const servicioId = limpiarIdIndex(selectElement.value);
             const negocioId = limpiarIdIndex(document.getElementById('reserva-negocio-id-index').value);
 
-            // Obtener nombre del servicio limpio para el mensaje de WhatsApp
             const nombreServicioRaw = selectElement.options[selectElement.selectedIndex].text;
             const nombreServicio = nombreServicioRaw.split(' (')[0]; 
 
@@ -985,7 +999,7 @@
                     throw new Error(data?.error || 'La Edge Function no confirmó la reserva.');
                 }
 
-                await reservaExitosa(fecha, hora, nombreServicio); // <- ACTUALIZADO
+                await reservaExitosa(fecha, hora, nombreServicio); 
             } catch (err) {
                 console.warn('La Edge Function falló. Intentando guardar la cita de manera directa en la base de datos...', err);
 
@@ -1008,7 +1022,7 @@
                         fecha_cita: fecha,
                         hora_inicio: `${hhmmIndex(hora)}:00`,
                         hora_fin: `${hhmmIndex(horaFin)}:00`,
-                        estado: 'pendiente' // <--- AHORA ENTRA COMO PENDIENTE INCLUSO SI FALLA LA EDGE FUNCTION
+                        estado: 'pendiente' 
                     }]);
 
                     if (insertError) {
@@ -1016,7 +1030,7 @@
                         await lanzarNotificacion('Horario Ocupado', 'Este horario acaba de ser ocupado o ha ocurrido un error. Por favor, selecciona otro.', 'error', 'entendido');
                         buscarHorariosIndex();
                     } else {
-                        await reservaExitosa(fecha, hora, nombreServicio); // <- ACTUALIZADO
+                        await reservaExitosa(fecha, hora, nombreServicio); 
                     }
                 } catch (insertErr) {
                     console.error('Error final al guardar la cita:', insertErr);
@@ -1027,7 +1041,6 @@
         }
 
         async function reservaExitosa(fecha, hora, nombreServicio) {
-            // LÓGICA AÑADIDA PARA ENVIAR WHATSAPP AL NEGOCIO
             if (negocioActualAgenda && negocioActualAgenda.enlace_whatsapp) {
                 let numeroVendedor = negocioActualAgenda.enlace_whatsapp.replace(/\D/g, '');
                 
@@ -1041,7 +1054,6 @@
                     textoCita += `*Hora:* ${hora}\n\n`;
                     textoCita += `Por favor, entra a tu panel profesional para ACEPTAR ✅ o RECHAZAR ❌ esta solicitud.`;
 
-                    // Abre la ventana de WhatsApp dirigida al profesional
                     window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoCita)}`, '_blank');
                 }
             }
@@ -1083,7 +1095,6 @@
         });
         window.addEventListener('appinstalled', () => btnInstalar.classList.add('hidden'));
 
-        // === NUEVAS FUNCIONES PARA DOCUMENTOS LEGALES ===
         function abrirDocumentoLegal(url, titulo) {
             document.getElementById('modal-legal-titulo').innerText = titulo;
             document.getElementById('iframe-documento-legal').src = url;
