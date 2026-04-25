@@ -12,6 +12,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -108,6 +111,9 @@
                 <button onclick="cambiarTabPrincipal('metricas')" id="tab-main-metricas" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
                     📊 Métricas
                 </button>
+                <button onclick="cambiarTabPrincipal('marketing')" id="tab-main-marketing" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
+                    📢 Marketing
+                </button>
             </div>
         </div>
 
@@ -184,6 +190,84 @@
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cancelaciones</p>
                         <p class="text-3xl font-black text-red-500" id="stat-cancelados">0</p>
                         <p class="text-[10px] text-gray-500 mt-1">Histórico</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-main-marketing" class="hidden space-y-6">
+                <div id="marketing-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-gray-200 shadow-sm">
+                    <div class="text-6xl mb-4">⚙️</div>
+                    <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Primero guarda tu consultorio</h3>
+                    <p class="text-gray-500 max-w-md mx-auto mb-6">Para generar tus diseños automáticos con códigos QR, primero necesitas terminar de crear tu perfil en la pestaña "Mi Consultorio".</p>
+                </div>
+                
+                <div id="marketing-contenido" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-200 text-center">
+                        <h2 class="text-2xl font-black text-tm-azul-oscuro mb-2">📢 Material Promocional</h2>
+                        <p class="text-gray-500 max-w-2xl mx-auto text-sm">Facilita que tus pacientes agenden contigo. Hemos generado estos diseños automáticamente para ti. Tu código QR envía a las personas directo a tu perfil y agenda en nuestra plataforma.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center overflow-hidden">
+                            <h3 class="font-bold text-lg text-tm-azul mb-2">Tarjeta de Presentación</h3>
+                            <p class="text-xs text-gray-500 mb-4 text-center">Ideal para enviar por WhatsApp a nuevos pacientes.</p>
+                            
+                            <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                <div id="mk-diseño-tarjeta" class="bg-white shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
+                                    <div class="absolute inset-0 z-0 bg-gray-900">
+                                       <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-30" crossorigin="anonymous">
+                                    </div>
+                                    <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul/90 to-transparent z-10"></div>
+                                    <div class="relative z-20 h-full flex items-center p-8 text-white">
+                                        <div class="flex-grow pr-4">
+                                            <span id="mk-tarjeta-cat" class="bg-white text-tm-azul-oscuro text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wider mb-3 inline-block shadow">Especialidad</span>
+                                            <h4 id="mk-tarjeta-nombre" class="text-4xl font-black leading-tight mb-2 tracking-tight">Nombre del Profesional</h4>
+                                            <p id="mk-tarjeta-desc" class="text-sm text-blue-100 max-w-xs line-clamp-2 mb-4">Descripción de servicios...</p>
+                                            <div class="flex items-center gap-2 font-bold text-sm bg-black/30 inline-block px-3 py-1.5 rounded-lg border border-white/10">
+                                                📞 <span id="mk-tarjeta-tel">Teléfono</span>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center justify-center shrink-0 border-b-4 border-tm-dorado">
+                                            <div id="mk-tarjeta-qr" class="w-[112px] h-[112px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                            <p class="text-[9px] text-tm-azul-oscuro font-black mt-2 text-center uppercase tracking-widest">Escanea y Agenda</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="descargarDiseño('mk-diseño-tarjeta', 'tarjeta_profesional.png')" class="mt-6 w-full sm:w-auto bg-tm-azul hover:bg-tm-azul-oscuro text-white px-8 py-4 rounded-xl font-black transition flex items-center justify-center gap-2 shadow-lg text-sm uppercase tracking-wider">
+                                ⬇️ Descargar Tarjeta
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center overflow-hidden">
+                            <h3 class="font-bold text-lg text-tm-azul mb-2">Historia para Redes</h3>
+                            <p class="text-xs text-gray-500 mb-4 text-center">Formato vertical perfecto para Estados de WhatsApp e Instagram.</p>
+                            
+                            <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                <div id="mk-diseño-story" class="bg-white shadow-lg overflow-hidden relative flex flex-col" style="width: 360px; height: 640px; min-width: 360px;">
+                                   <div class="h-1/2 relative">
+                                       <div class="absolute inset-0 bg-gray-900 z-0"></div>
+                                       <img id="mk-story-bg" src="" class="w-full h-full object-cover relative z-10 opacity-60" crossorigin="anonymous">
+                                       <div class="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent z-20"></div>
+                                   </div>
+                                   <div class="h-1/2 flex flex-col items-center justify-start text-center px-6 -mt-16 relative z-30 text-tm-azul-oscuro">
+                                       <div class="bg-white p-3 rounded-2xl shadow-2xl mb-4 border-t-4 border-tm-dorado">
+                                           <div id="mk-story-qr" class="w-[128px] h-[128px] bg-gray-100 flex items-center justify-center rounded"></div>
+                                       </div>
+                                       
+                                       <h4 id="mk-story-nombre" class="text-2xl font-black leading-tight mb-1 text-tm-azul-oscuro">Nombre Profesional</h4>
+                                       <span id="mk-story-cat" class="text-tm-dorado text-xs font-black uppercase tracking-wider mb-3 block">Especialidad</span>
+                                       
+                                       <p class="text-xs text-gray-500 mb-4 px-2 line-clamp-2">Revisa mi disponibilidad y agenda tu cita fácilmente en línea.</p>
+                                       
+                                       <p class="text-[10px] text-white font-black uppercase tracking-widest bg-tm-azul px-6 py-2.5 rounded-xl shadow-md">¡Escanea para Agendar!</p>
+                                   </div>
+                                </div>
+                            </div>
+                            <button onclick="descargarDiseño('mk-diseño-story', 'historia_whatsapp.png')" class="mt-6 w-full sm:w-auto bg-tm-dorado hover:bg-yellow-600 text-white px-8 py-4 rounded-xl font-black transition flex items-center justify-center gap-2 shadow-lg text-sm uppercase tracking-wider">
+                                ⬇️ Descargar Historia
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -512,6 +596,10 @@
         let infoNegocio = null;
         let estadoPanel = { anuncioId: null, modoNuevo: false, nivelActual: 0, subscriptionStatus: 'free' };
 
+        // Variables para Marketing
+        let qrTarjeta = null;
+        let qrStory = null;
+
         const DIAS = { 0: 'Domingo', 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado' };
 
         // --- UTILIDADES ---
@@ -520,7 +608,6 @@
             return data?.session?.access_token || null;
         }
 
-        // Lógica actualizada de validación
         function esSuscripcionValida(anuncio) {
             const nivel = Number(anuncio?.nivel_pago || 0);
             if (nivel === 0) return true;
@@ -545,9 +632,17 @@
         function obtenerDiaDeFecha(fecha) { return new Date(`${fecha}T12:00:00`).getDay(); }
         function obtenerHorarioPorFecha(fecha) { const dia = obtenerDiaDeFecha(fecha); return horariosActuales?.[dia] || null; }
 
-        // --- MANEJO DE TABS GLOBALES (Súper App Layer) ---
+        // --- MANEJO DE TABS GLOBALES ---
         function cambiarTabPrincipal(tabId) {
-            const tabs = ['hoy', 'calendario', 'config', 'metricas'];
+            if (tabId === 'marketing' && !estadoPanel.anuncioId) {
+                document.getElementById('marketing-bloqueado').classList.remove('hidden');
+                document.getElementById('marketing-contenido').classList.add('hidden');
+            } else if (tabId === 'marketing') {
+                document.getElementById('marketing-bloqueado').classList.add('hidden');
+                document.getElementById('marketing-contenido').classList.remove('hidden');
+            }
+
+            const tabs = ['hoy', 'calendario', 'config', 'metricas', 'marketing'];
             tabs.forEach(t => {
                 document.getElementById(`vista-main-${t}`).classList.add('hidden');
                 let classNameInactiva = 'tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
@@ -579,7 +674,7 @@
             await clienteSupabase.from('anuncios').update({ esta_abierto: abierto }).eq('id', estadoPanel.anuncioId);
         }
 
-        // --- NUEVA LÓGICA: CITAS DE HOY E HISTORIAL ---
+        // --- LÓGICA: CITAS DE HOY E HISTORIAL ---
         async function cargarCitasDeHoy() {
             if (!estadoPanel.anuncioId) return;
             const hoy = hoyISO();
@@ -649,6 +744,7 @@
 
         function renderizarHistorialCitas(citas) {
             const contenedor = document.getElementById('contenedor-historial');
+            if(!contenedor) return;
             if(citas.length === 0) {
                 contenedor.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center col-span-full border-2 border-dashed border-gray-200 rounded-2xl">Tu historial aparecerá aquí.</p>';
                 return;
@@ -713,7 +809,6 @@
                 }).subscribe();
         }
 
-        // --- CÓDIGO ORIGINAL (NOTIFICACIONES, COMPRESIÓN, HORARIOS, CALENDARIO, ETC) ---
         function mostrarToast(mensaje, tipo = 'exito') {
             const c = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -725,36 +820,40 @@
         
         function lanzarNotificacion(titulo, mensaje, tipo = 'info', esConfirmacion = false) {
             return new Promise((resolve) => {
-                const modal = document.getElementById('modal-notificacion');
-                const btnContainer = document.getElementById('noti-botones');
-                document.getElementById('noti-titulo').innerText = titulo;
-                document.getElementById('noti-mensaje').innerText = mensaje;
-                document.getElementById('noti-icono').innerText = tipo === 'success' ? '✅' : tipo === 'warning' ? '⚠️' : tipo === 'error' ? '❌' : 'ℹ️';
-                
-                btnContainer.innerHTML = '';
-                
+                const modal = document.createElement('div');
+                modal.className = "fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm";
+                modal.innerHTML = `
+                    <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-sm text-center">
+                        <div class="text-5xl mb-4">${tipo === 'success' ? '✅' : tipo === 'warning' ? '⚠️' : tipo === 'error' ? '❌' : 'ℹ️'}</div>
+                        <h3 class="text-xl font-black text-tm-azul-oscuro mb-2">${titulo}</h3>
+                        <p class="text-sm text-gray-500 mb-6">${mensaje}</p>
+                        <div id="dynamic-btn-container" class="flex gap-3"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                const btnContainer = modal.querySelector('#dynamic-btn-container');
+
                 if (esConfirmacion) {
                     const btnCancel = document.createElement('button');
                     btnCancel.innerText = 'Cancelar';
-                    btnCancel.className = 'bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-bold flex-1';
-                    btnCancel.onclick = () => { modal.classList.add('hidden'); resolve(false); };
+                    btnCancel.className = 'bg-gray-100 text-gray-600 px-4 py-3 rounded-xl font-bold flex-1 transition hover:bg-gray-200';
+                    btnCancel.onclick = () => { modal.remove(); resolve(false); };
                     
                     const btnOk = document.createElement('button');
                     btnOk.innerText = 'Sí, continuar';
-                    btnOk.className = 'bg-tm-azul text-white px-4 py-2 rounded-xl font-bold flex-1';
-                    btnOk.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    btnOk.className = 'bg-tm-azul hover:bg-tm-azul-oscuro text-white px-4 py-3 rounded-xl font-bold flex-1 transition';
+                    btnOk.onclick = () => { modal.remove(); resolve(true); };
                     
                     btnContainer.appendChild(btnCancel);
                     btnContainer.appendChild(btnOk);
                 } else {
                     const btnOk = document.createElement('button');
                     btnOk.innerText = 'Entendido';
-                    btnOk.className = 'bg-tm-azul text-white px-6 py-2 rounded-xl font-bold w-full';
-                    btnOk.onclick = () => { modal.classList.add('hidden'); resolve(true); };
+                    btnOk.className = 'bg-tm-azul hover:bg-tm-azul-oscuro text-white px-6 py-3 rounded-xl font-bold w-full transition';
+                    btnOk.onclick = () => { modal.remove(); resolve(true); };
                     btnContainer.appendChild(btnOk);
                 }
-                
-                modal.classList.remove('hidden');
             });
         }
 
@@ -788,6 +887,7 @@
                 reader.onerror = error => reject(error);
             });
         }
+
         function renderizarUIHorarios() {
             document.getElementById('contenedor-horarios').innerHTML = [1,2,3,4,5,6,0].map(d => `
                 <div data-dia="${d}" class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 rounded-xl border">
@@ -802,6 +902,7 @@
                 </div>
             `).join('');
         }
+
         function toggleHorarioDia(checkbox) {
             const row = checkbox.closest('[data-dia]');
             const inputs = row.querySelectorAll('.hora-abre, .hora-cierra');
@@ -810,6 +911,7 @@
                 input.classList.toggle('input-disabled', !checkbox.checked);
             });
         }
+
         function setearHorariosUI(hJSON) {
             document.querySelectorAll('#contenedor-horarios > div[data-dia]').forEach(row => {
                 const d = row.dataset.dia;
@@ -821,6 +923,7 @@
                 toggleHorarioDia(row.querySelector('.dia-abierto'));
             });
         }
+
         function obtenerHorariosDesdeUI() {
             const h = {};
             document.querySelectorAll('#contenedor-horarios > div[data-dia]').forEach(row => {
@@ -833,6 +936,7 @@
             });
             return h;
         }
+
         async function copiarHorarioATodos() {
             const primerRow = document.querySelector('#contenedor-horarios > div[data-dia="1"]');
             if (!primerRow) return;
@@ -848,7 +952,6 @@
             await lanzarNotificacion("Horarios Copiados", "Se han copiado los horarios del Lunes a todos los días.", "success");
         }
 
-        // Calendario Original 
         function construirConfigCalendario(horarios) {
             const abiertos = Object.entries(horarios || {}).filter(([_, valor]) => valor && valor.abierto && valor.abre && valor.cierra && valor.abre < valor.cierra);
             const hiddenDays = [0,1,2,3,4,5,6].filter(dia => !abiertos.some(([d]) => Number(d) === dia));
@@ -905,7 +1008,6 @@
         function configurarPermisos(nivel) {
             document.getElementById('admin-nivel-badge').innerText = `Nivel Actual: ${nivelTexto(nivel)}`;
 
-            // Manejo de tabs de Calendario y Citas de Hoy (Bloqueos Súper App)
             if (nivel >= 2) {
                 document.getElementById('calendario-bloqueado')?.classList.add('hidden');
                 document.getElementById('calendario-contenido')?.classList.remove('hidden');
@@ -918,7 +1020,6 @@
                 document.getElementById('hoy-contenido')?.classList.add('hidden');
             }
 
-            // Manejo de tabs de configuración interna
             if (nivel >= 1) {
                 document.getElementById('tab-diseno').innerText = 'Diseño & Foto';
                 document.getElementById('tab-servicios').innerText = 'Servicios';
@@ -953,6 +1054,77 @@
 
             if (pActivo) pActivo.classList.remove('hidden');
             if (bActivo) { bActivo.classList.remove('text-gray-400'); bActivo.classList.add('text-tm-azul', 'border-b-2', 'border-tm-azul'); }
+        }
+
+        // NUEVA FUNCIÓN: PREPARAR DISEÑOS DE MARKETING
+        function prepararMarketing(data) {
+            if (!data || !data.id) return;
+
+            // Llenar datos (Tarjetas y Stories)
+            document.getElementById('mk-tarjeta-nombre').innerText = data.nombre_negocio || 'Profesional';
+            document.getElementById('mk-tarjeta-cat').innerText = data.categoria || 'Consultorio';
+            document.getElementById('mk-tarjeta-desc').innerText = data.descripcion || 'Conoce mis servicios.';
+            document.getElementById('mk-tarjeta-tel').innerText = data.enlace_whatsapp || 'Sin teléfono';
+            
+            document.getElementById('mk-story-nombre').innerText = data.nombre_negocio || 'Profesional';
+            document.getElementById('mk-story-cat').innerText = data.categoria || 'Consultorio';
+
+            // Imágenes de fondo (usamos una más limpia/profesional por defecto si no hay)
+            const bgUrl = data.imagen_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1080&auto=format&fit=crop';
+            document.getElementById('mk-tarjeta-bg').src = bgUrl;
+            document.getElementById('mk-story-bg').src = bgUrl;
+
+            // Generar URL para los códigos QR
+            const baseUrl = 'https://chronosbvrx.github.io/directorio-fraccionamiento/index.html';
+            const linkPerfil = `${baseUrl}?id=${data.id}`;
+
+            // Limpiar QRs anteriores si existen
+            document.getElementById('mk-tarjeta-qr').innerHTML = '';
+            document.getElementById('mk-story-qr').innerHTML = '';
+
+            // Crear QRs
+            qrTarjeta = new QRCode(document.getElementById("mk-tarjeta-qr"), {
+                text: linkPerfil,
+                width: 112,
+                height: 112,
+                colorDark : "#143653",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            qrStory = new QRCode(document.getElementById("mk-story-qr"), {
+                text: linkPerfil,
+                width: 128, 
+                height: 128,
+                colorDark : "#143653",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // NUEVA FUNCIÓN: DESCARGAR LA IMAGEN
+        async function descargarDiseño(elementoId, nombreArchivo) {
+            mostrarOverlay('Generando tu imagen en alta calidad...');
+            try {
+                const elemento = document.getElementById(elementoId);
+                const canvas = await html2canvas(elemento, { 
+                    scale: 2, 
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: null
+                });
+                
+                const link = document.createElement('a');
+                link.download = nombreArchivo;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                mostrarToast('¡Imagen descargada exitosamente!', 'success');
+            } catch (error) {
+                console.error("Error al generar imagen:", error);
+                mostrarToast('Hubo un problema al generar la imagen.', 'error');
+            } finally {
+                ocultarOverlay();
+            }
         }
 
         async function init() {
@@ -1024,7 +1196,7 @@
 
                 document.getElementById('header-nombre-negocio').innerText = n.nombre_negocio;
                 document.getElementById('global-toggle-abierto').checked = n.esta_abierto !== false;
-                document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false; // interno
+                document.getElementById('admin-estado-apertura').checked = n.esta_abierto !== false;
                 
                 const txt = document.getElementById('texto-estado-tienda');
                 if(n.esta_abierto !== false) {
@@ -1057,6 +1229,9 @@
                 if (estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(n.id, horariosActuales);
                 else destruirCalendarioSiExiste();
 
+                // Cargar datos para el Marketing
+                prepararMarketing(n);
+
                 suscribirseRealtimeConsultorio();
 
             } catch (err) {
@@ -1081,7 +1256,7 @@
             horariosActuales = {}; setearHorariosUI(null); configurarPermisos(0);
             document.getElementById('estado-panel').classList.add('hidden');
             
-            cambiarTabPrincipal('config'); // Forzar config si es nuevo
+            cambiarTabPrincipal('config'); 
             cambiarPestana('basico'); destruirCalendarioSiExiste(); actualizarPreviewProfesional();
         }
 
@@ -1111,7 +1286,17 @@
                 document.getElementById('admin-imagen-url').value = pubUrl;
                 document.getElementById('preview-imagen').src = pubUrl;
                 estado.className = "text-[11px] text-green-600 mt-4 font-bold"; estado.innerText = '✅ Imagen optimizada y cargada correctamente';
+                
                 actualizarPreviewProfesional();
+                prepararMarketing({ 
+                    id: estadoPanel.anuncioId, 
+                    nombre_negocio: document.getElementById('admin-nombre').value,
+                    categoria: 'Consultorio',
+                    descripcion: document.getElementById('admin-desc').value,
+                    enlace_whatsapp: document.getElementById('admin-wa').value,
+                    imagen_url: pubUrl 
+                });
+
             } catch (err) {
                 estado.className = "text-[11px] text-red-500 mt-4 font-bold"; estado.innerText = '❌ Error al subir. Intenta de nuevo.';
                 await lanzarNotificacion('Error', 'No se pudo subir la imagen.', 'error');
@@ -1161,7 +1346,11 @@
                     suscribirseRealtimeConsultorio();
                 }
 
-                horariosActuales = horarios; actualizarPreviewProfesional(); mostrarToast('Consultorio guardado correctamente.');
+                horariosActuales = horarios; 
+                actualizarPreviewProfesional(); 
+                prepararMarketing({ id: estadoPanel.anuncioId, ...payload });
+
+                mostrarToast('Consultorio guardado correctamente.');
 
                 if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 1) await cargarServicios(estadoPanel.anuncioId);
                 if (estadoPanel.anuncioId && estadoPanel.nivelActual >= 2) await cargarAgendaYCalendario(estadoPanel.anuncioId, horariosActuales);
