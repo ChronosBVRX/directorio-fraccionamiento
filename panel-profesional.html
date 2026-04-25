@@ -224,7 +224,7 @@
                             <div class="w-full overflow-x-auto scrollbar-hide flex justify-start sm:justify-center bg-gray-50 rounded-xl p-4 border border-gray-100">
                                 <div id="mk-diseño-tarjeta" class="bg-tm-azul-oscuro shadow-lg overflow-hidden relative" style="width: 600px; height: 300px; min-width: 600px;">
                                     <div class="absolute inset-0 z-0 bg-gray-900">
-                                       <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-40" crossorigin="anonymous">
+                                        <img id="mk-tarjeta-bg" src="" class="w-full h-full object-cover opacity-40" crossorigin="anonymous">
                                     </div>
                                     <div class="absolute inset-0 bg-gradient-to-r from-tm-azul-oscuro via-tm-azul-oscuro/90 to-transparent z-10"></div>
                                     <div class="relative z-20 w-full h-full flex items-center px-10 text-white">
@@ -340,7 +340,7 @@
                                         <div>
                                             <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-500 mb-2">Nivel 1</p>
                                             <h4 class="font-black text-tm-azul-oscuro text-xl mb-2">Desbloquea imagen y mejor presencia</h4>
-                                            <p class="text-sm text-gray-600">Sube foto o logotipo para transmitir más confianza y hacer que tu perfil se vea mucho más profesional.</p>
+                                            <p class="text-sm text-gray-600">Sube foto o logotipo para transmitir más confianza y hacer que tu perfil se㮍 vea mucho más profesional.</p>
                                         </div>
                                         <div class="text-5xl">🖼️</div>
                                     </div>
@@ -702,7 +702,6 @@
             cargarMetricasProfesional(citas);
         }
 
-        // NUEVA FUNCION: Renderiza la sección de Solicitudes Pendientes
         function renderizarPendientes(citas) {
             const seccion = document.getElementById('seccion-pendientes');
             const contenedor = document.getElementById('contenedor-pendientes');
@@ -741,7 +740,6 @@
             }).join('');
         }
 
-        // NUEVAS FUNCIONES PARA LOS BOTONES
         async function aceptarSolicitud(id, telefono, nombre, fecha, hora) {
             mostrarOverlay('Aceptando cita...');
             const { error } = await clienteSupabase.from('citas').update({ estado: 'confirmada' }).eq('id', id);
@@ -766,7 +764,6 @@
             if(!confirm("¿Estás seguro de rechazar esta solicitud? El espacio en tu agenda volverá a estar disponible.")) return;
             mostrarOverlay('Rechazando cita...');
             
-            // Usamos cancelada para que automáticamente el calendario y la BD lo marquen como libre de nuevo
             const { error } = await clienteSupabase.from('citas').update({ estado: 'cancelada' }).eq('id', id);
             ocultarOverlay();
             
@@ -1185,20 +1182,31 @@
             });
         }
 
+        // =========================================================================================
+        // AQUI EMPIEZAN LAS CORRECCIONES PARA EL RENDERIZADO DEL MARKETING CON HTML2CANVAS
+        // =========================================================================================
         async function descargarDiseño(elementoId, nombreArchivo) {
             mostrarOverlay('Generando tu imagen en alta calidad...');
             try {
+                // Pausa extra para asegurar que las fuentes, QR e imágenes de fondo terminen de renderizarse.
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 const originalScroll = window.scrollY;
+                // Movemos la vista al inicio para evitar que html2canvas se confunda con el offset de scroll
                 window.scrollTo(0, 0);
 
                 const elemento = document.getElementById(elementoId);
+
                 const canvas = await html2canvas(elemento, { 
                     scale: 2, 
                     useCORS: true,
                     allowTaint: false,
-                    backgroundColor: null,
+                    // Se agregó color de fondo por defecto para evitar que partes transparentes salgan negras
+                    backgroundColor: elementoId === 'mk-diseño-tarjeta' ? '#143653' : '#ffffff',
                     logging: false,
-                    y: elemento.getBoundingClientRect().top
+                    // Se eliminó la variable "y" y se forzó scrollX e Y a 0 para que capture exactamente la caja sin recortes
+                    scrollX: 0,
+                    scrollY: 0
                 });
                 
                 window.scrollTo(0, originalScroll); 
@@ -1215,6 +1223,7 @@
                 ocultarOverlay();
             }
         }
+        // =========================================================================================
 
         async function init() {
             renderizarUIHorarios();
@@ -1512,7 +1521,6 @@
                 if (error) throw error;
 
                 const citas = data || [];
-                // ACTUALIZACIÓN: Renderizar citas en calendario con colores dependiendo de si están pendientes o confirmadas.
                 const eventos = citas.map(c => ({
                     id: c.id, 
                     title: c.estado === 'bloqueado' ? `🛑 ${c.notas || 'Bloqueo'}` : (c.estado === 'pendiente' ? `⏳ ${obtenerTituloCita(c)}` : `✅ ${obtenerTituloCita(c)}`),
