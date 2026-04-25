@@ -942,11 +942,11 @@
                 return;
             }
 
-            const confirmado = await lanzarNotificacion('Confirmar Reserva', `¿Confirmas tu reserva el día ${fecha} a las ${hora}?`, 'info', 'confirmacion');
+            const confirmado = await lanzarNotificacion('Confirmar Solicitud', `¿Enviar tu solicitud de cita el día ${fecha} a las ${hora}?`, 'info', 'confirmacion');
             if (!confirmado) return;
 
             const cont = document.getElementById('contenedor-horarios-libres-index');
-            cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Reservando...</p>';
+            cont.innerHTML = '<p class="text-sm text-tm-dorado animate-pulse col-span-3 text-center font-bold">Enviando solicitud...</p>';
 
             try {
                 const { data: servicioInfo, error: servicioErr } = await clienteSupabase
@@ -1008,7 +1008,7 @@
                         fecha_cita: fecha,
                         hora_inicio: `${hhmmIndex(hora)}:00`,
                         hora_fin: `${hhmmIndex(horaFin)}:00`,
-                        estado: 'confirmada'
+                        estado: 'pendiente' // <--- AHORA ENTRA COMO PENDIENTE INCLUSO SI FALLA LA EDGE FUNCTION
                     }]);
 
                     if (insertError) {
@@ -1039,14 +1039,14 @@
                     textoCita += `*Servicio:* ${nombreServicio}\n`;
                     textoCita += `*Fecha:* ${fecha}\n`;
                     textoCita += `*Hora:* ${hora}\n\n`;
-                    textoCita += `Por favor, confirma de enterado respondiendo a este mensaje y revisa tu panel para más detalles.`;
+                    textoCita += `Por favor, entra a tu panel profesional para ACEPTAR ✅ o RECHAZAR ❌ esta solicitud.`;
 
                     // Abre la ventana de WhatsApp dirigida al profesional
                     window.open(`https://wa.me/${numeroVendedor}?text=${encodeURIComponent(textoCita)}`, '_blank');
                 }
             }
 
-            await lanzarNotificacion("¡Cita Agendada!", "¡Reserva confirmada con éxito!\n\nPuedes revisar los detalles de tu cita en la pestaña de 'Mi Perfil / Panel'.", "success", "entendido");
+            await lanzarNotificacion("¡Solicitud Enviada!", "Tu cita está en estado PENDIENTE.\n\nEl profesional ha sido notificado y deberá confirmar tu solicitud. Puedes revisar el estado en 'Mi Perfil / Panel'.", "success", "entendido");
             cerrarAgenda(); 
         }
 
