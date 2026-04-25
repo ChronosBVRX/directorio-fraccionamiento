@@ -293,7 +293,6 @@
             return [error.message, error.details, error.hint, error.code].filter(Boolean).join(' | ');
         }
 
-        // --- FUNCIÓN LANZAR NOTIFICACIÓN MODIFICADA PARA MEJORAR UX ---
         function lanzarNotificacion(titulo, mensaje, tipo = 'info', modoBotones = 'entendido', urlRastreo = null) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-notificacion');
@@ -329,7 +328,6 @@
                     botonesCont.appendChild(btnConfirmar);
                 } 
                 else if (modoBotones === 'rastreo' && urlRastreo) {
-                    // Botón gigante para ir al rastreo inmediatamente
                     const btnRastrear = document.createElement('a');
                     btnRastrear.href = urlRastreo;
                     btnRastrear.className = "w-full block bg-tm-dorado text-white py-3 rounded-xl font-black text-sm hover:bg-yellow-600 transition shadow-lg uppercase tracking-widest text-center";
@@ -459,6 +457,12 @@
         }
 
         async function cargarDatos() {
+            // PRECAUCIÓN DE SEGURIDAD: Asegurarnos de tener la sesión cargada primero
+            const { data: sesionData } = await clienteSupabase.auth.getSession();
+            if(!usuarioActual && sesionData?.session?.user) {
+                usuarioActual = sesionData.session.user;
+            }
+
             const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
             todosLosAnuncios = data || [];
             
@@ -471,6 +475,28 @@
                 filtrar(filtroActivo);
             } else {
                 filtrar('Todos');
+            }
+
+            // NUEVO CÓDIGO PARA LECTURA DE QR: Abre automáticamente el negocio si viene desde un QR
+            const params = new URLSearchParams(window.location.search);
+            const negocioIdQr = params.get('id');
+            
+            if (negocioIdQr) {
+                const negocioQR = todosLosAnuncios.find(a => String(a.id) === String(negocioIdQr));
+                
+                if (negocioQR) {
+                    const usaComida = CATEGORIAS_TIENDA.includes(negocioQR.categoria) || ['Alimentos', 'Hogar'].includes(negocioQR.categoria);
+                    const usaAgenda = CATEGORIAS_SERVICIO.includes(negocioQR.categoria);
+                    
+                    if (usaComida) {
+                        abrirMenu(negocioQR);
+                    } else if (usaAgenda) {
+                        abrirAgenda(negocioQR);
+                    }
+
+                    // Limpiar el parámetro de la URL para que no se reabra si el usuario refresca la página
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             }
         }
 
@@ -528,7 +554,6 @@
                     `;
                 }
 
-                // NUEVO: LOGICA DEL BADGE DE ENVÍO
                 let badgeEnvio = '';
                 if (usaComida) {
                     badgeEnvio = a.ofrece_domicilio
