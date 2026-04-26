@@ -85,13 +85,14 @@
                 btnCta.innerText = cont.hero.cta || 'Contactar ahora';
                 btnCta.href = `index.html?id=${data.anuncio_id}`;
                 
+                // CORRECCIÓN FONDO HERO
                 const imgFondo = document.getElementById('hero-bg-img');
                 if (cont.hero.imagen_real_banner) {
                     imgFondo.src = cont.hero.imagen_real_banner;
                 } else if (cont.hero.keyword_fondo) {
-                    imgFondo.src = `https://images.unsplash.com/featured/1280x720/?${cont.hero.keyword_fondo},professional`;
+                    imgFondo.src = `https://loremflickr.com/1280/720/${cont.hero.keyword_fondo},business`;
                 } else {
-                    imgFondo.src = `https://images.unsplash.com/featured/1280x720/?business,interior`;
+                    imgFondo.src = `https://loremflickr.com/1280/720/business,interior`;
                 }
 
                 // RENDERIZAR LA GALERÍA DE IMÁGENES
@@ -101,11 +102,21 @@
 
                 if (galeriaArr.length > 0) {
                     seccionGaleria.classList.remove('hidden'); 
-                    galeriaArr.forEach(prod => {
+                    galeriaArr.forEach((prod, index) => {
+                        
+                        // PARCHE MÁGICO: Si la base de datos tiene la ruta rota de Unsplash, la arreglamos aquí mismo
+                        let urlSegura = prod.imagen_url;
+                        if (urlSegura && urlSegura.includes('unsplash.com')) {
+                            // Extraemos el nombre del servicio para buscar una foto similar
+                            let keywordLimpio = prod.nombre.replace(/\s+/g, '').toLowerCase() || 'service';
+                            urlSegura = `https://loremflickr.com/800/600/${keywordLimpio},professional?lock=${index}`;
+                        }
+
+                        // Agregamos un onerror por si la foto falla en cargar, ponga un fondo gris que dice "Servicio"
                         contenedorGaleria.innerHTML += `
                             <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100 flex flex-col">
                                 <div class="h-48 w-full overflow-hidden bg-gray-100 shrink-0">
-                                    <img src="${prod.imagen_url}" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" alt="${prod.nombre}">
+                                    <img src="${urlSegura}" onerror="this.src='https://placehold.co/800x600/f3f4f6/143653?text=Servicio'" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" alt="${prod.nombre}">
                                 </div>
                                 <div class="p-6 flex flex-col flex-grow">
                                     <div class="flex justify-between items-start mb-2 gap-2">
