@@ -176,6 +176,20 @@
         </div>
     </footer>
 
+    <div id="modal-verificacion" class="hidden fixed inset-0 bg-gray-50 z-[200] flex items-center justify-center p-4 transition-opacity">
+        <div id="verificacion-carga" class="p-8 bg-white rounded-2xl shadow-lg flex flex-col items-center max-w-sm w-full text-center border-t-4 border-tm-azul">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-tm-azul mb-6"></div>
+            <h2 class="text-2xl font-black text-tm-azul-oscuro mb-2">Verificando tu cuenta</h2>
+            <p class="text-gray-500 font-medium">Procesando tu inicio de sesión seguro...</p>
+        </div>
+        <div id="verificacion-exito" class="hidden p-8 bg-white rounded-2xl shadow-lg flex flex-col items-center max-w-sm w-full text-center border-t-4 border-green-500">
+            <div class="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <span class="text-3xl">✅</span>
+            </div>
+            <h2 class="text-2xl font-black text-gray-800 mb-2">¡Sesión Iniciada!</h2>
+            <p class="text-gray-500 font-medium">Redirigiéndote al directorio...</p>
+        </div>
+    </div>
     <div id="modal-menu" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl w-[95%] sm:max-w-md relative flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
             <div class="p-3 sm:p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -263,6 +277,39 @@
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- NUEVO CÓDIGO INYECTADO: LÓGICA DE VERIFICACIÓN DE CORREO ---
+        function verificarAccesoDesdeCorreo() {
+            const hash = window.location.hash;
+            // Si la URL tiene un access_token o es de recuperación de cuenta, mostramos la carga
+            if (hash && (hash.includes('access_token') || hash.includes('type=recovery'))) {
+                document.getElementById('modal-verificacion').classList.remove('hidden');
+                document.getElementById('verificacion-carga').classList.remove('hidden');
+                document.getElementById('verificacion-exito').classList.add('hidden');
+
+                // Escuchamos a Supabase. Cuando termine de procesar la URL silenciosamente, nos avisará.
+                const { data: authListenerTemp } = clienteSupabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN') {
+                        // Cambiamos al diseño de éxito
+                        document.getElementById('verificacion-carga').classList.add('hidden');
+                        document.getElementById('verificacion-exito').classList.remove('hidden');
+                        
+                        // Limpiamos la URL para quitar toda la basura del token
+                        window.history.replaceState(null, null, window.location.pathname);
+
+                        // Ocultamos el modal completamente después de 2.5 segundos para que vean el directorio
+                        setTimeout(() => {
+                            document.getElementById('modal-verificacion').classList.add('hidden');
+                        }, 2500);
+                        
+                        // Nos desuscribimos de este evento temporal para no interferir con tu código original
+                        authListenerTemp.subscription.unsubscribe();
+                    }
+                });
+            }
+        }
+        verificarAccesoDesdeCorreo();
+        // --- FIN DE NUEVO CÓDIGO ---
 
         let todosLosAnuncios = [];
         let usuarioActual = null;
@@ -644,7 +691,6 @@
                 usuarioActual = sesionData.session.user;
             }
 
-            // MODIFICACIÓN CLAVE: Buscamos también si existe el slug en la tabla de micrositios
             const { data } = await clienteSupabase.from('anuncios').select('*, micrositios(slug)').order('nivel_pago', { ascending: false });
             todosLosAnuncios = data || [];
             
@@ -659,7 +705,6 @@
                 filtrar('Todos');
             }
 
-            // Lógica para cuando vienen del Micrositio o de un QR
             const params = new URLSearchParams(window.location.search);
             const negocioIdQr = params.get('id');
             
