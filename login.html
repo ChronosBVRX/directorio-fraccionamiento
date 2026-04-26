@@ -17,7 +17,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 font-sans text-tm-gris min-h-screen flex flex-col">
+<body class="bg-gray-50 font-sans text-tm-gris min-h-screen flex flex-col relative">
 
     <header class="bg-white shadow-sm border-b-4 border-tm-azul py-4 px-6 flex justify-center sm:justify-start">
         <a href="index.html">
@@ -28,7 +28,7 @@
     <main class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
             
-            <div class="flex border-b bg-gray-50">
+            <div id="contenedor-tabs" class="flex border-b bg-gray-50">
                 <button onclick="cambiarPestaña('login')" id="tab-login" class="flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white">Iniciar Sesión</button>
                 <button onclick="cambiarPestaña('registro')" id="tab-registro" class="flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition">Crear Cuenta</button>
             </div>
@@ -46,6 +46,11 @@
                         <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Contraseña</label>
                         <input type="password" id="login-password" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
+                    
+                    <div class="flex justify-end mt-1">
+                        <button type="button" onclick="cambiarPestaña('recuperar')" class="text-xs font-bold text-tm-dorado hover:underline">¿Olvidaste tu contraseña?</button>
+                    </div>
+
                     <button type="submit" id="btn-login-submit" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Entrar a mi cuenta</button>
                 </form>
 
@@ -68,20 +73,65 @@
                         <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Contraseña *</label>
                         <input type="password" id="reg-password" minlength="6" placeholder="Mínimo 6 caracteres" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
                     </div>
+
+                    <div class="flex items-start mt-4 bg-gray-50 p-3 rounded-lg border">
+                        <input type="checkbox" id="reg-terminos" required class="mt-1 mr-2 cursor-pointer accent-tm-azul">
+                        <label for="reg-terminos" class="text-xs text-gray-600 leading-tight">
+                            He leído y acepto el <button type="button" onclick="abrirModal()" class="text-tm-azul font-bold hover:underline">Aviso de Privacidad y Términos de Uso</button>. *
+                        </label>
+                    </div>
                     
                     <button type="submit" id="btn-reg-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Comenzar Ahora</button>
                 </form>
+
+                <form id="form-recuperar" onsubmit="event.preventDefault(); procesarRecuperacion();" class="space-y-4 hidden">
+                    <h2 class="text-2xl font-black text-tm-azul-oscuro text-center mb-2">Recuperar Contraseña</h2>
+                    <p class="text-sm text-center text-gray-500 mb-6">Ingresa el correo con el que te registraste y te enviaremos un enlace para crear una nueva contraseña.</p>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Correo Electrónico</label>
+                        <input type="email" id="rec-email" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    
+                    <button type="submit" id="btn-rec-submit" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Enviar Enlace</button>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="cambiarPestaña('login')" class="text-sm font-bold text-gray-500 hover:text-tm-azul transition">Volver a Iniciar Sesión</button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </main>
+
+    <div id="modal-terminos" class="hidden fixed inset-0 bg-tm-azul-oscuro bg-opacity-75 z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 max-h-[85vh] flex flex-col relative">
+            <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 border-b pb-2">Aviso de Privacidad y Términos</h3>
+            
+            <div class="overflow-y-auto flex-grow text-sm text-gray-600 mb-6 pr-2 space-y-4">
+                <p><strong>1. Uso de la Información:</strong> Los datos personales recabados a través de este formulario (Nombre, WhatsApp y Correo) serán utilizados exclusivamente para la gestión de su cuenta y comunicación directa por parte de la administración de Vive Tres Marías.</p>
+                <p><strong>2. Protección de Datos:</strong> Nos comprometemos a mantener su información segura y no compartirla, venderla o rentarla a terceros ajenos a la administración del fraccionamiento sin su consentimiento previo, salvo por requerimientos legales.</p>
+                <p><strong>3. Responsabilidad del Usuario:</strong> Al crear una cuenta, usted se compromete a proporcionar información veraz y a mantener la confidencialidad de su contraseña. El uso de la cuenta es personal e intransferible.</p>
+                <p><strong>4. Modificaciones:</strong> Nos reservamos el derecho de modificar este aviso de privacidad y términos de uso en cualquier momento. Los cambios serán notificados a través de la plataforma.</p>
+            </div>
+            
+            <button type="button" onclick="cerrarModal()" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3 rounded-lg font-bold transition shadow-md">Entendido y Cerrar</button>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Lector de rutas de regreso
+        // Lector de rutas de regreso y eventos de sesión
         clienteSupabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                // Si el usuario llega por el link de recuperar contraseña
+                mostrarMensaje("Por favor, ingresa tu nueva contraseña en el panel de usuario.", false);
+                return;
+            }
+
             if (session) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const rutaRegreso = urlParams.get('returnTo');
@@ -94,31 +144,53 @@
             }
         });
 
+        // Funciones del Modal
+        function abrirModal() {
+            document.getElementById('modal-terminos').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-terminos').classList.add('hidden');
+        }
+
+        // Navegación entre pestañas
         function cambiarPestaña(vista) {
             document.getElementById('auth-msg').classList.add('hidden');
             
+            const contenedorTabs = document.getElementById('contenedor-tabs');
             const btnLogin = document.getElementById('tab-login');
             const btnReg = document.getElementById('tab-registro');
+            
             const formLogin = document.getElementById('form-login');
             const formReg = document.getElementById('form-registro');
+            const formRecuperar = document.getElementById('form-recuperar');
+
+            // Ocultar todos los formularios primero
+            formLogin.classList.replace('block', 'hidden');
+            formReg.classList.replace('block', 'hidden');
+            formRecuperar.classList.replace('block', 'hidden');
 
             if (vista === 'login') {
+                contenedorTabs.classList.remove('hidden');
                 btnLogin.className = "flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white";
                 btnReg.className = "flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition";
                 formLogin.classList.replace('hidden', 'block');
-                formReg.classList.replace('block', 'hidden');
-            } else {
+            } else if (vista === 'registro') {
+                contenedorTabs.classList.remove('hidden');
                 btnReg.className = "flex-1 py-4 font-bold text-tm-azul border-b-2 border-tm-azul bg-white";
                 btnLogin.className = "flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition";
                 formReg.classList.replace('hidden', 'block');
-                formLogin.classList.replace('block', 'hidden');
+            } else if (vista === 'recuperar') {
+                // Ocultar los botones de tabs para centrar la atención en la recuperación
+                contenedorTabs.classList.add('hidden');
+                formRecuperar.classList.replace('hidden', 'block');
             }
         }
 
         function mostrarMensaje(texto, esError) {
             const div = document.getElementById('auth-msg');
             div.innerText = texto;
-            div.className = `w-full p-3 rounded-lg mb-6 text-sm font-bold text-center ${esError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            div.className = `w-full p-3 rounded-lg mb-6 text-sm font-bold text-center ${esError ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-green-100 text-green-700 border border-green-200'}`;
             div.classList.remove('hidden');
         }
 
@@ -128,11 +200,16 @@
             const btn = document.getElementById('btn-login-submit');
             
             btn.disabled = true; btn.innerText = "Verificando...";
+            document.getElementById('auth-msg').classList.add('hidden');
             
             try {
                 const { error } = await clienteSupabase.auth.signInWithPassword({ email, password });
                 if(error) {
-                    if(error.message.includes("Invalid login credentials")) throw new Error("Correo o contraseña incorrectos.");
+                    if(error.message.includes("Invalid login credentials")) {
+                        throw new Error("Correo o contraseña incorrectos.");
+                    } else if (error.message.includes("Email not confirmed")) {
+                        throw new Error("Debes confirmar tu correo electrónico antes de entrar. Revisa tu bandeja de entrada o spam.");
+                    }
                     throw error;
                 }
             } catch (err) {
@@ -146,12 +223,19 @@
             const telefono = document.getElementById('reg-telefono').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const terminosAceptados = document.getElementById('reg-terminos').checked;
             const btn = document.getElementById('btn-reg-submit');
 
-            btn.disabled = true; btn.innerText = "Creando cuenta...";
+            if (!terminosAceptados) {
+                mostrarMensaje("Debes aceptar el Aviso de Privacidad y Términos de Uso.", true);
+                return;
+            }
+
+            btn.disabled = true; btn.innerText = "Procesando...";
+            document.getElementById('auth-msg').classList.add('hidden');
 
             try {
-                const { error } = await clienteSupabase.auth.signUp({
+                const { data, error } = await clienteSupabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -164,10 +248,47 @@
                 
                 if(error) throw error;
                 
-                mostrarMensaje("¡Cuenta creada exitosamente! Entrando...", false);
+                // Validación para saber si el correo ya estaba registrado
+                // Supabase devuelve identidades vacías si el usuario ya existía y la enumeración está protegida
+                if (data?.user?.identities && data.user.identities.length === 0) {
+                    throw new Error("Este correo electrónico ya se encuentra registrado. Por favor, inicia sesión.");
+                }
+                
+                // Si llegamos aquí, el registro fue exitoso
+                mostrarMensaje("¡Registro exitoso! Por favor revisa tu bandeja de entrada o correo no deseado (spam) para confirmar tu cuenta antes de iniciar sesión.", false);
+                
+                // Limpiar el formulario para evitar re-envíos
+                document.getElementById('form-registro').reset();
+                btn.innerText = "Cuenta Creada";
+                
             } catch (err) {
                 mostrarMensaje("Error: " + err.message, true);
                 btn.disabled = false; btn.innerText = "Comenzar Ahora";
+            }
+        }
+
+        async function procesarRecuperacion() {
+            const email = document.getElementById('rec-email').value;
+            const btn = document.getElementById('btn-rec-submit');
+
+            btn.disabled = true; btn.innerText = "Enviando...";
+            document.getElementById('auth-msg').classList.add('hidden');
+
+            try {
+                const { error } = await clienteSupabase.auth.resetPasswordForEmail(email, {
+                    // Reemplaza esta URL si necesitas que el link los lleve a una página específica para cambiar la contraseña
+                    redirectTo: window.location.origin + window.location.pathname, 
+                });
+
+                if(error) throw error;
+
+                mostrarMensaje("Si el correo existe en nuestra base de datos, hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.", false);
+                document.getElementById('form-recuperar').reset();
+                btn.innerText = "Enviado exitosamente";
+
+            } catch (err) {
+                mostrarMensaje("Hubo un error al intentar enviar el correo. Intenta de nuevo.", true);
+                btn.disabled = false; btn.innerText = "Enviar Enlace";
             }
         }
     </script>
