@@ -389,15 +389,24 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between mt-2">
-                        <div>
-                            <h4 class="font-bold text-sm text-tm-azul-oscuro flex items-center gap-1">🛵 Envío a Domicilio</h4>
-                            <p class="text-[10px] text-gray-500 leading-tight mt-1">¿Cuentas con la logística para enviar tus productos directo a la puerta de tu cliente?</p>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Modalidad de Entrega *</label>
+                        <div class="mt-2 grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="admin-domicilio" value="false" class="peer sr-only" checked onchange="actualizarPreview()">
+                                <div class="p-3 bg-white border border-gray-200 rounded-xl text-center peer-checked:border-tm-azul peer-checked:bg-blue-50 peer-checked:text-tm-azul transition shadow-sm hover:bg-gray-50">
+                                    <div class="text-xl mb-1">🚶</div>
+                                    <div class="font-bold text-xs">Pickup / En Tienda</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="admin-domicilio" value="true" class="peer sr-only" onchange="actualizarPreview()">
+                                <div class="p-3 bg-white border border-gray-200 rounded-xl text-center peer-checked:border-tm-dorado peer-checked:bg-yellow-50 peer-checked:text-yellow-700 transition shadow-sm hover:bg-gray-50">
+                                    <div class="text-xl mb-1">🛵</div>
+                                    <div class="font-bold text-xs">A Domicilio</div>
+                                </div>
+                            </label>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
-                            <input type="checkbox" id="admin-envio-domicilio" class="sr-only peer" onchange="actualizarPreview()">
-                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tm-dorado"></div>
-                        </label>
                     </div>
                     </div>
 
@@ -1005,7 +1014,9 @@
       const descripcion = document.getElementById('admin-desc').value || 'Descripción...';
       const imagen = document.getElementById('admin-imagen-url').value || '';
       const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
-      const ofreceEnvio = document.getElementById('admin-envio-domicilio').checked;
+      
+      // SE ACTUALIZA LA LECTURA DEL VALOR CON EL RADIO BUTTON
+      const ofreceEnvio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
 
       document.getElementById('preview-nombre').innerText = nombre;
       document.getElementById('preview-cat').innerText = categoria;
@@ -1226,7 +1237,13 @@
         document.getElementById('admin-wa').value = data.enlace_whatsapp || '';
         document.getElementById('admin-cat').value = data.categoria || 'Alimentos';
         document.getElementById('admin-imagen-url').value = data.imagen_url || '';
-        document.getElementById('admin-envio-domicilio').checked = data.ofrece_domicilio || false;
+        
+        // SELECCIÓN CORRECTA DEL BOTÓN (RADIO)
+        if (data.ofrece_domicilio === true) {
+            document.querySelector('input[name="admin-domicilio"][value="true"]').checked = true;
+        } else {
+            document.querySelector('input[name="admin-domicilio"][value="false"]').checked = true;
+        }
 
         setearHorariosUI(data.horarios || null);
         
@@ -1241,7 +1258,6 @@
         suscribirseRealtimeNegocio();
         prepararMarketing(data);
         
-        // AÑADIDO: Cargar datos de la IA si existen
         await cargarDatosMicrositio();
         
         cambiarTabPrincipal('mi-tienda');
@@ -1268,7 +1284,9 @@
       document.getElementById('admin-imagen-url').value = '';
       document.getElementById('admin-estado-apertura').checked = true;
       document.getElementById('global-toggle-abierto').checked = true;
-      document.getElementById('admin-envio-domicilio').checked = false;
+      
+      // SELECCIÓN POR DEFECTO DEL BOTÓN (RADIO)
+      document.querySelector('input[name="admin-domicilio"][value="false"]').checked = true;
       
       setearHorariosUI(null);
       configurarPermisos(0);
@@ -1280,6 +1298,10 @@
 
     async function guardarNegocioSeguro() {
       const btn = document.getElementById('btn-guardar-admin');
+      
+      // SE LEE CORRECTAMENTE EL VALOR DEL BOTÓN (RADIO)
+      const ofreceDomicilio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
+
       const payload = {
         nombre_negocio: document.getElementById('admin-nombre').value.trim(),
         descripcion: document.getElementById('admin-desc').value.trim(),
@@ -1288,7 +1310,7 @@
         imagen_url: document.getElementById('admin-imagen-url').value || '',
         horarios: obtenerHorariosDeUI(),
         esta_abierto: document.getElementById('global-toggle-abierto').checked,
-        ofrece_domicilio: document.getElementById('admin-envio-domicilio').checked
+        ofrece_domicilio: ofreceDomicilio // AQUÍ ESTÁ EL ARREGLO FINAL
       };
 
       if (!payload.nombre_negocio) { mostrarNotificacion('Escribe el nombre del negocio.', 'error'); return; }
@@ -1473,7 +1495,6 @@
       mostrarNotificacion('Solicitud capturada. Puedes conectar este botón a tu flujo real de revisión.');
     }
 
-    // --- FUNCIONES DE LA IA Y MICROSITIO ---
     async function dispararGeneracionIA() {
         if (!estadoPanel.anuncioId) return mostrarNotificacion("Primero guarda tu tienda en 'Mi Tienda'", "error");
         if (estadoPanel.nivelActual < 2) return alert('Sube a Nivel 2 para usar la IA.');
