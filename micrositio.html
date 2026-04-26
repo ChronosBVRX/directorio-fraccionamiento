@@ -42,10 +42,13 @@
     </footer>
 
     <script>
-        // Tus variables de Supabase
-        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY_PUBLICA'; // Asegúrate de usar la ANON KEY aquí
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Declaramos el cliente de Supabase de una manera segura para evitar el error de "already declared"
+        if (!window.clienteSupabaseMicro) {
+            window.clienteSupabaseMicro = window.supabase.createClient(
+                'https://vlnpefgqodnxcqeztcnh.supabase.co', 
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'
+            );
+        }
 
         async function cargarMicrositio() {
             const params = new URLSearchParams(window.location.search);
@@ -55,7 +58,7 @@
 
             try {
                 // Traemos el contenido y hacemos un JOIN para el WhatsApp del anuncio original
-                const { data, error } = await supabase
+                const { data, error } = await window.clienteSupabaseMicro
                     .from('micrositios')
                     .select('*, anuncios(categoria, enlace_whatsapp)')
                     .eq('slug', slug)
@@ -66,17 +69,21 @@
                 const cont = data.contenido;
                 
                 // Mapear datos al HTML
-                document.title = cont.hero.titulo;
-                if(data.anuncios.categoria) document.getElementById('badge-categoria').innerText = data.anuncios.categoria;
-                document.getElementById('hero-titulo').innerText = cont.hero.titulo;
-                document.getElementById('hero-subtitulo').innerText = cont.hero.subtitulo;
-                document.getElementById('hero-cta').innerText = cont.hero.cta || 'Agenda ahora';
+                document.title = cont.hero.titulo || 'Sitio web';
+                if(data.anuncios && data.anuncios.categoria) {
+                    document.getElementById('badge-categoria').innerText = data.anuncios.categoria;
+                }
+                document.getElementById('hero-titulo').innerText = cont.hero.titulo || '';
+                document.getElementById('hero-subtitulo').innerText = cont.hero.subtitulo || '';
+                document.getElementById('hero-cta').innerText = cont.hero.cta || 'Contactar ahora';
                 
                 document.getElementById('acerca-titulo').innerText = cont.acerca_de.titulo || 'Nuestra Historia';
-                document.getElementById('acerca-parrafo').innerText = cont.acerca_de.parrafo;
+                document.getElementById('acerca-parrafo').innerText = cont.acerca_de.parrafo || '';
 
                 // Llenar beneficios
                 const divBeneficios = document.getElementById('contenedor-beneficios');
+                divBeneficios.innerHTML = ''; // Limpiamos por si acaso
+                
                 if(cont.beneficios && cont.beneficios.length > 0) {
                     cont.beneficios.forEach(b => {
                         divBeneficios.innerHTML += `
@@ -89,17 +96,18 @@
                 }
 
                 // Configurar WhatsApp
-                if(data.anuncios.enlace_whatsapp) {
+                if(data.anuncios && data.anuncios.enlace_whatsapp) {
                     const wsLink = `https://wa.me/${data.anuncios.enlace_whatsapp.replace(/\D/g, '')}`;
                     document.getElementById('btn-whatsapp').href = wsLink;
                 } else {
                     document.getElementById('btn-whatsapp').style.display = 'none';
                 }
 
+                // Quitamos la clase 'hidden' para mostrar la página
                 document.body.classList.remove('hidden');
 
             } catch (err) {
-                console.error(err);
+                console.error("Error cargando el micrositio:", err);
                 mostrarError();
             }
         }
@@ -109,6 +117,7 @@
             document.body.classList.remove('hidden');
         }
 
+        // Ejecutamos cuando cargue el DOM
         document.addEventListener('DOMContentLoaded', cargarMicrositio);
     </script>
 </body>
