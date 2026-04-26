@@ -30,24 +30,22 @@
 
     <section id="seccion-galeria" class="hidden bg-gray-100 py-20 px-6 border-t border-gray-200">
         <div class="max-w-6xl mx-auto">
-            <h3 class="text-3xl font-black text-center mb-4 text-[#143653]">Nuestros Productos Destacados</h3>
+            <h3 class="text-3xl font-black text-center mb-4 text-[#143653]">Nuestros Servicios y Productos</h3>
             <p class="text-center text-gray-500 mb-12">Lo mejor de nuestro catálogo directo para ti.</p>
             
-            <div id="contenedor-galeria" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                </div>
+            <div id="contenedor-galeria" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </div>
     </section>
 
     <section class="bg-white py-20 px-6 border-t border-gray-100">
         <div class="max-w-6xl mx-auto">
             <h3 class="text-3xl font-black text-center mb-12 text-[#143653]">¿Por qué elegirnos?</h3>
-            <div id="contenedor-beneficios" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            </div>
+            <div id="contenedor-beneficios" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </div>
     </section>
 
     <footer id="contacto" class="bg-[#22527b] text-white py-16 text-center">
-        <h3 class="text-2xl font-black mb-6">¿Tienes alguna duda o quieres hacer un pedido?</h3>
+        <h3 class="text-2xl font-black mb-6">¿Tienes alguna duda o quieres agendar?</h3>
         <a id="btn-whatsapp" href="#" target="_blank" class="inline-flex items-center gap-2 bg-[#25D366] text-white font-black px-8 py-4 rounded-xl shadow-lg hover:bg-green-600 transition hover:-translate-y-1">
             <span class="text-xl">📱</span> Enviar WhatsApp
         </a>
@@ -78,62 +76,48 @@
 
                 const cont = data.contenido;
                 
-                // Mapear Textos Básicos
                 document.title = cont.hero.titulo || 'Sitio web';
                 if(data.anuncios && data.anuncios.categoria) document.getElementById('badge-categoria').innerText = data.anuncios.categoria;
                 document.getElementById('hero-titulo').innerText = cont.hero.titulo || '';
                 document.getElementById('hero-subtitulo').innerText = cont.hero.subtitulo || '';
                 
                 const btnCta = document.getElementById('hero-cta');
-                btnCta.innerText = cont.hero.cta || 'Ver opciones';
+                btnCta.innerText = cont.hero.cta || 'Contactar ahora';
                 btnCta.href = `index.html?id=${data.anuncio_id}`;
                 
-                // -------------------------------------------------------------
-                // MAGIA VISUAL 1: EL FONDO DEL HERO
-                // -------------------------------------------------------------
                 const imgFondo = document.getElementById('hero-bg-img');
-                
-                // Si el cliente subió un banner real en su panel, úsalo.
                 if (cont.hero.imagen_real_banner) {
                     imgFondo.src = cont.hero.imagen_real_banner;
-                } 
-                // Si no tiene banner, usa la palabra clave de la IA para buscar en Unsplash
-                else if (cont.hero.keyword_fondo) {
-                    // API Gratuita de imágenes que redirecciona a una foto de la palabra clave
+                } else if (cont.hero.keyword_fondo) {
                     imgFondo.src = `https://images.unsplash.com/featured/1280x720/?${cont.hero.keyword_fondo},professional`;
                 } else {
-                    // Respaldo genérico
                     imgFondo.src = `https://images.unsplash.com/featured/1280x720/?business,interior`;
                 }
 
-                // -------------------------------------------------------------
-                // MAGIA VISUAL 2: LA GALERÍA DE PRODUCTOS REALES
-                // -------------------------------------------------------------
+                // RENDERIZAR LA GALERÍA DE IMÁGENES
                 const galeriaArr = cont.galeria_productos || [];
                 const seccionGaleria = document.getElementById('seccion-galeria');
                 const contenedorGaleria = document.getElementById('contenedor-galeria');
 
                 if (galeriaArr.length > 0) {
-                    seccionGaleria.classList.remove('hidden'); // Mostramos la sección
-                    
+                    seccionGaleria.classList.remove('hidden'); 
                     galeriaArr.forEach(prod => {
                         contenedorGaleria.innerHTML += `
-                            <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100">
-                                <div class="h-48 w-full overflow-hidden bg-gray-100">
+                            <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100 flex flex-col">
+                                <div class="h-48 w-full overflow-hidden bg-gray-100 shrink-0">
                                     <img src="${prod.imagen_url}" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" alt="${prod.nombre}">
                                 </div>
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start mb-2">
+                                <div class="p-6 flex flex-col flex-grow">
+                                    <div class="flex justify-between items-start mb-2 gap-2">
                                         <h4 class="font-black text-lg text-tm-azul-oscuro leading-tight">${prod.nombre}</h4>
-                                        <span class="bg-yellow-50 text-tm-dorado font-black px-2 py-1 rounded text-sm shrink-0">$${prod.precio}</span>
+                                        <span class="bg-yellow-50 text-tm-dorado font-black px-2 py-1 rounded text-sm shrink-0">${prod.precio}</span>
                                     </div>
-                                    <p class="text-sm text-gray-500 line-clamp-2">${prod.descripcion || 'Excelente elección.'}</p>
+                                    <p class="text-sm text-gray-500 line-clamp-3">${prod.descripcion || 'Excelente servicio garantizado.'}</p>
                                 </div>
                             </div>
                         `;
                     });
                 }
-
 
                 document.getElementById('acerca-titulo').innerText = cont.acerca_de.titulo || 'Nuestra Historia';
                 document.getElementById('acerca-parrafo').innerText = cont.acerca_de.parrafo || '';
