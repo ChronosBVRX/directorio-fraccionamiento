@@ -510,6 +510,9 @@
             const usaComida = CATEGORIAS_TIENDA.includes(catBD) || ['Alimentos', 'Hogar'].includes(catBD);
             const usaAgenda = CATEGORIAS_SERVICIO.includes(catBD);
             
+            // EXTRAEMOS EL SLUG DEL MICROSITIO SI EXISTE
+            const slugMicro = Array.isArray(a.micrositios) && a.micrositios.length > 0 ? a.micrositios[0].slug : (a.micrositios && !Array.isArray(a.micrositios) ? a.micrositios.slug : null);
+
             let badgeAntiguedad = '';
             if (a.created_at) {
                 const fechaCreacion = new Date(a.created_at);
@@ -526,7 +529,6 @@
             let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
             const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
-            // CORRECCIÓN DE CALIFICACIONES: Siempre se dibuja usando el promedio
             const promCal = Number(a.calificacion_promedio || 5.0).toFixed(1);
             const totalCal = Number(a.total_calificaciones || 0);
             
@@ -538,15 +540,12 @@
                 </div>
             `;
 
-            // CORRECCIÓN DE ENVÍO: Se aplica a todas las categorías, no solo comida
             let badgeEnvio = '';
             const ofreceDomicilio = a.ofrece_domicilio === true;
             
             if (ofreceDomicilio) {
-                // Si es de comida usa la moto, si es servicio usa el carro
                 badgeEnvio = `<span class="bg-gradient-to-r from-tm-dorado to-yellow-500 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider flex items-center gap-1"><span>${usaComida ? '🛵' : '🚗'}</span> A Domicilio</span>`;
             } else {
-                // Si es de comida dice Pick-up con monito, si es servicio dice En Local con pin de mapa
                 badgeEnvio = `<span class="bg-gray-100 text-gray-500 border border-gray-200 text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1"><span>${usaComida ? '🚶' : '📍'}</span> ${usaComida ? 'Pick-up' : 'En Local'}</span>`;
             }
 
@@ -556,6 +555,11 @@
             const botonContacto = estaAbierto 
                 ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
                 : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+
+            // LÓGICA DEL BOTÓN SECUNDARIO
+            const botonSecundario = slugMicro
+                ? `<a href="micrositio.html?id=${slugMicro}" target="_blank" class="flex-1 text-center border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition shadow-sm">🌐 Página Web</a>`
+                : botonContacto;
 
             if (nivelEfectivo >= 2) {
                 if (usaComida) {
@@ -567,7 +571,7 @@
                         ? `<button onclick="abrirAgendaPorId('${a.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
                         : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
                 }
-                botones += botonContacto;
+                botones += botonSecundario;
             } else if (nivelEfectivo === 1) {
                 botones = `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
                 botones += botonContacto;
@@ -640,7 +644,8 @@
                 usuarioActual = sesionData.session.user;
             }
 
-            const { data } = await clienteSupabase.from('anuncios').select('*').order('nivel_pago', { ascending: false });
+            // MODIFICACIÓN CLAVE: Buscamos también si existe el slug en la tabla de micrositios
+            const { data } = await clienteSupabase.from('anuncios').select('*, micrositios(slug)').order('nivel_pago', { ascending: false });
             todosLosAnuncios = data || [];
             
             const navBtn = document.querySelector('.active-filter');
@@ -654,6 +659,7 @@
                 filtrar('Todos');
             }
 
+            // Lógica para cuando vienen del Micrositio o de un QR
             const params = new URLSearchParams(window.location.search);
             const negocioIdQr = params.get('id');
             
