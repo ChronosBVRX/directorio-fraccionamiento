@@ -114,6 +114,9 @@
                 <button onclick="cambiarTabPrincipal('marketing')" id="tab-main-marketing" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
                     📢 Marketing
                 </button>
+                <button onclick="cambiarTabPrincipal('micrositio')" id="tab-main-micrositio" class="tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm">
+                    🌐 Micrositio
+                </button>
             </div>
         </div>
 
@@ -130,7 +133,6 @@
                 </div>
                 
                 <div id="hoy-contenido">
-                    
                     <div id="seccion-pendientes" class="mb-8 hidden">
                         <h2 class="text-tm-azul-oscuro font-black text-xl mb-4 border-b pb-2 flex items-center gap-2">
                             ⏳ Solicitudes Pendientes <span id="badge-pendientes" class="bg-yellow-500 text-white text-[10px] px-2 py-0.5 rounded-full">0</span>
@@ -175,6 +177,66 @@
                     </div>
 
                     <div id="calendar" class="w-full"></div>
+                </div>
+            </div>
+
+            <div id="vista-main-micrositio" class="hidden space-y-6">
+                <div id="micrositio-bloqueado" class="hidden text-center py-16 bg-white rounded-[2rem] border border-blue-100 shadow-sm">
+                    <div class="text-6xl mb-4">🌐</div>
+                    <h3 class="text-2xl font-black text-tm-azul-oscuro mb-2">Micrositio IA Bloqueado</h3>
+                    <p class="text-gray-500 max-w-md mx-auto mb-6">Sube a Nivel 2 (Premium) para que nuestra IA diseñe y publique tu página web automática.</p>
+                    <a href="panel.html" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-tm-azul-oscuro transition">Actualizar Plan</a>
+                </div>
+
+                <div id="micrositio-contenido" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-200">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 border-b pb-4">
+                            <div>
+                                <h2 class="text-2xl font-black text-tm-azul-oscuro">🚀 Tu Micrositio Inteligente</h2>
+                                <p class="text-sm text-gray-500">Deja que nuestra IA redacte tu página web en segundos.</p>
+                            </div>
+                            <button onclick="dispararGeneracionIA()" id="btn-generar-ia" class="bg-tm-azul text-white px-6 py-3 rounded-xl font-black hover:bg-tm-azul-oscuro transition shadow-lg flex items-center gap-2">
+                                ✨ Generar con IA
+                            </button>
+                        </div>
+
+                        <div id="editor-micrositio" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h3 class="font-black text-tm-azul">✏️ Editar Textos</h3>
+                                
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Título Principal</label>
+                                    <input type="text" id="edit-micro-titulo" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Propuesta de Valor</label>
+                                    <textarea id="edit-micro-subtitulo" rows="2" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none resize-none"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sección "Sobre nosotros"</label>
+                                    <textarea id="edit-micro-acerca" rows="5" class="w-full p-3 bg-gray-50 border rounded-xl mt-1 outline-none resize-none"></textarea>
+                                </div>
+
+                                <button onclick="guardarCambiosMicrositio()" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-black transition">
+                                    Guardar Cambios Manuales
+                                </button>
+                            </div>
+
+                            <div class="bg-[#143653] p-8 rounded-3xl text-white flex flex-col justify-center items-center text-center shadow-xl">
+                                <div class="text-5xl mb-4">🌐</div>
+                                <h3 class="text-xl font-black mb-2">Tu sitio está en vivo</h3>
+                                <p class="text-blue-200 text-sm mb-6">Comparte este enlace para conseguir más clientes.</p>
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/20 w-full mb-6">
+                                    <code id="url-micrositio" class="text-xs text-tm-dorado font-bold break-all">Cargando enlace...</code>
+                                </div>
+                                <a id="btn-ver-sitio" href="#" target="_blank" class="bg-tm-dorado text-tm-azul-oscuro px-6 py-3 rounded-xl font-black hover:bg-yellow-500 transition">
+                                    Ver Sitio Público ↗
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -646,7 +708,23 @@
                 document.getElementById('marketing-contenido').classList.remove('hidden');
             }
 
-            const tabs = ['hoy', 'calendario', 'config', 'metricas', 'marketing'];
+            if (tabId === 'micrositio' && !estadoPanel.anuncioId) {
+                document.getElementById('micrositio-bloqueado').classList.remove('hidden');
+                document.getElementById('micrositio-contenido').classList.add('hidden');
+                document.getElementById('micrositio-bloqueado').querySelector('h3').innerText = "Primero guarda tu consultorio";
+                document.getElementById('micrositio-bloqueado').querySelector('p').innerText = "Crea tu perfil en 'Mi Consultorio' antes de usar la IA.";
+            } else if (tabId === 'micrositio' && estadoPanel.nivelActual < 2) {
+                document.getElementById('micrositio-bloqueado').classList.remove('hidden');
+                document.getElementById('micrositio-contenido').classList.add('hidden');
+                document.getElementById('micrositio-bloqueado').querySelector('h3').innerText = "Micrositio IA Bloqueado";
+                document.getElementById('micrositio-bloqueado').querySelector('p').innerText = "Sube a Nivel 2 (Premium) para que nuestra IA diseñe y publique tu página web automática.";
+            } else if (tabId === 'micrositio' && estadoPanel.nivelActual >= 2) {
+                document.getElementById('micrositio-bloqueado').classList.add('hidden');
+                document.getElementById('micrositio-contenido').classList.remove('hidden');
+            }
+
+            // AÑADIDO: La nueva pestaña de micrositio a la lista de validaciones
+            const tabs = ['hoy', 'calendario', 'config', 'metricas', 'marketing', 'micrositio'];
             tabs.forEach(t => {
                 document.getElementById(`vista-main-${t}`).classList.add('hidden');
                 let classNameInactiva = 'tab-main-inactiva py-4 px-2 whitespace-nowrap transition-all text-sm flex items-center gap-2';
@@ -1319,6 +1397,9 @@
                 else destruirCalendarioSiExiste();
 
                 prepararMarketing(n);
+                
+                // AÑADIDO: Cargar datos del micrositio si existen
+                await cargarDatosMicrositio();
 
                 suscribirseRealtimeConsultorio();
 
@@ -1671,6 +1752,86 @@
                 await lanzarNotificacion('¡Enviado!', 'Tus documentos han sido enviados a revisión exitosamente.', 'success');
                 document.getElementById('form-verif').reset(); btn.disabled = false; btn.innerText = 'Enviar para Revisión';
             }, 1200);
+        }
+
+        // --- AÑADIDO: FUNCIONES DE LA IA Y MICROSITIO ---
+        async function dispararGeneracionIA() {
+            if (!estadoPanel.anuncioId) return mostrarToast("Primero guarda tu perfil en 'Mi Consultorio'", "error");
+            if (estadoPanel.nivelActual < 2) return lanzarNotificacion('Premium Requerido', 'Actualiza a Nivel 2 para usar la IA.', 'warning');
+
+            const btn = document.getElementById('btn-generar-ia');
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '✨ Redactando... ⏳';
+                mostrarOverlay('La IA está diseñando tu micrositio...');
+
+                const { data, error } = await clienteSupabase.functions.invoke('generar-micrositio', {
+                    body: { anuncio_id: parseInt(estadoPanel.anuncioId) }
+                });
+
+                if (error) throw new Error(error.message);
+                if (data && data.error) throw new Error(data.error);
+
+                mostrarToast('¡Micrositio creado con éxito!', 'success');
+                await cargarDatosMicrositio(); 
+
+            } catch (err) {
+                console.error("Error IA:", err);
+                lanzarNotificacion('Error', 'No pudimos generar el micrositio. Revisa la consola.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                ocultarOverlay();
+            }
+        }
+
+        async function cargarDatosMicrositio() {
+            if (!estadoPanel.anuncioId) return;
+
+            const { data, error } = await clienteSupabase
+                .from('micrositios')
+                .select('*')
+                .eq('anuncio_id', estadoPanel.anuncioId)
+                .maybeSingle();
+
+            if (data && data.contenido) {
+                document.getElementById('editor-micrositio').classList.remove('hidden');
+                document.getElementById('btn-generar-ia').innerText = '🔄 Regenerar todo con IA';
+
+                document.getElementById('edit-micro-titulo').value = data.contenido.hero.titulo || '';
+                document.getElementById('edit-micro-subtitulo').value = data.contenido.hero.subtitulo || '';
+                document.getElementById('edit-micro-acerca').value = data.contenido.acerca_de?.parrafo || '';
+
+                const urlFinal = `https://chronosbvrx.github.io/directorio-fraccionamiento/micrositio.html?id=${data.slug}`;
+                document.getElementById('url-micrositio').innerText = urlFinal;
+                document.getElementById('btn-ver-sitio').href = urlFinal;
+            }
+        }
+
+        async function guardarCambiosMicrositio() {
+            mostrarOverlay('Guardando cambios...');
+            
+            const { data: actual } = await clienteSupabase.from('micrositios').select('contenido').eq('anuncio_id', estadoPanel.anuncioId).single();
+            
+            let nuevoContenido = actual ? actual.contenido : {};
+            
+            nuevoContenido.hero = { ...nuevoContenido.hero, titulo: document.getElementById('edit-micro-titulo').value, subtitulo: document.getElementById('edit-micro-subtitulo').value };
+            nuevoContenido.acerca_de = { ...nuevoContenido.acerca_de, parrafo: document.getElementById('edit-micro-acerca').value };
+
+            const { error } = await clienteSupabase
+                .from('micrositios')
+                .update({ contenido: nuevoContenido })
+                .eq('anuncio_id', estadoPanel.anuncioId);
+
+            ocultarOverlay();
+
+            if (error) {
+                mostrarToast('Error al guardar cambios', 'error');
+            } else {
+                mostrarToast('¡Textos actualizados!', 'success');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', init);
