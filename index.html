@@ -34,6 +34,7 @@
         .active-filter .label-categoria { color: white !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .scroll-smooth { scroll-behavior: smooth; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-tm-gris flex flex-col relative">
@@ -138,7 +139,26 @@
             </button>
         </nav>
 
-        <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8 w-full">
+            
+            <div id="seccion-destacados" class="hidden mb-8 sm:mb-12 w-full">
+                <h2 class="text-xl sm:text-2xl font-black text-tm-azul-oscuro mb-4 flex items-center gap-2">
+                    <span class="text-tm-dorado">🌟</span> Negocios Destacados
+                </h2>
+                <div class="relative w-full group" onmouseenter="pausarAutoScroll()" onmouseleave="iniciarAutoScrollCarrusel()">
+                    <button onclick="scrollCarrusel(-1)" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 sm:-ml-4 bg-white text-tm-azul w-10 h-10 rounded-full shadow-lg z-10 hidden sm:flex items-center justify-center hover:bg-gray-50 border border-gray-100 font-bold text-xl transition-transform hover:scale-110">❮</button>
+                    
+                    <div id="carrusel-destacados" class="flex overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-6 pb-4 hide-scrollbar scroll-smooth w-full px-1">
+                        </div>
+                    
+                    <button onclick="scrollCarrusel(1)" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 sm:-mr-4 bg-white text-tm-azul w-10 h-10 rounded-full shadow-lg z-10 hidden sm:flex items-center justify-center hover:bg-gray-50 border border-gray-100 font-bold text-xl transition-transform hover:scale-110">❯</button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-4 mt-2">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-700">Directorio General</h2>
+            </div>
+            
             <div id="contenedor-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
         </main>
     </div>
@@ -216,8 +236,7 @@
             <div id="noti-icono" class="text-5xl mb-3"></div>
             <h3 id="noti-titulo" class="text-xl font-black text-tm-azul-oscuro mb-2"></h3>
             <p id="noti-mensaje" class="text-sm text-gray-600 mb-6 whitespace-pre-line"></p>
-            <div id="noti-botones" class="flex flex-col sm:flex-row gap-3 justify-center w-full">
-                </div>
+            <div id="noti-botones" class="flex flex-col sm:flex-row gap-3 justify-center w-full"></div>
         </div>
     </div>
 
@@ -251,38 +270,19 @@
         let negocioActualPedido = null;
         let negocioActualAgenda = null; 
         let perfilUsuarioActual = null;
+        let intervaloCarrusel = null; // Variable para el carrusel
 
-        // AQUÍ ESTÁ LA CORRECCIÓN 1: Se agregaron las categorías faltantes que tienes en tu base de datos (Salud, Consultorio, Clínica, Odontología)
         const CATEGORIAS_TIENDA = ['Alimentos', 'Restaurante', 'Postres', 'Abarrotes', 'Hogar', 'Ropa', 'Otro Producto'];
         const CATEGORIAS_SERVICIO = ['Medicina General', 'Especialidad Médica', 'Salud Mental', 'Nutrición', 'Belleza y Spa', 'Servicio Técnico', 'Otro Servicio', 'Medicina', 'Servicios', 'Belleza', 'Salud', 'Consultorio', 'Clínica', 'Odontología'];
 
-        function limpiarIdIndex(valor) {
-            return valor === null || valor === undefined ? '' : String(valor).trim();
-        }
-
-        function hhmmIndex(hora) {
-            return hora ? String(hora).substring(0, 5) : '00:00';
-        }
-
-        function minsIndex(hora) {
-            const [hh, mm] = hhmmIndex(hora).split(':').map(Number);
-            return (hh * 60) + mm;
-        }
-
-        function strHoraIndex(mins) {
-            const hh = String(Math.floor(mins / 60)).padStart(2, '0');
-            const mm = String(mins % 60).padStart(2, '0');
-            return `${hh}:${mm}`;
-        }
-
-        function sumarMinutosIndex(hora, minutos) {
-            return strHoraIndex(minsIndex(hora) + Number(minutos || 0));
-        }
-
+        function limpiarIdIndex(valor) { return valor === null || valor === undefined ? '' : String(valor).trim(); }
+        function hhmmIndex(hora) { return hora ? String(hora).substring(0, 5) : '00:00'; }
+        function minsIndex(hora) { const [hh, mm] = hhmmIndex(hora).split(':').map(Number); return (hh * 60) + mm; }
+        function strHoraIndex(mins) { const hh = String(Math.floor(mins / 60)).padStart(2, '0'); const mm = String(mins % 60).padStart(2, '0'); return `${hh}:${mm}`; }
+        function sumarMinutosIndex(hora, minutos) { return strHoraIndex(minsIndex(hora) + Number(minutos || 0)); }
         function hayTraslapeIndex(inicioNuevo, finNuevo, ocupados = []) {
             const nuevoIni = minsIndex(inicioNuevo);
             const nuevoFin = minsIndex(finNuevo);
-
             return ocupados.some((cita) => {
                 const citaIni = minsIndex(cita.hora_inicio);
                 const citaFin = minsIndex(cita.hora_fin);
@@ -468,6 +468,179 @@
             if (negocio) abrirAgenda(negocio);
         }
 
+        // FUNCIONES DE CARRUSEL DESTACADOS
+        function iniciarAutoScrollCarrusel() {
+            pausarAutoScroll(); // Limpia cualquier intervalo existente
+            intervaloCarrusel = setInterval(() => {
+                const carrusel = document.getElementById('carrusel-destacados');
+                if(!carrusel) return;
+                
+                // Si llegó al final, regresa al inicio suavemente
+                if (carrusel.scrollLeft + carrusel.clientWidth >= carrusel.scrollWidth - 10) {
+                    carrusel.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    // Desplaza el tamaño de una tarjeta o el ancho visible
+                    const scrollAmount = carrusel.clientWidth > 400 ? 350 : carrusel.clientWidth * 0.8;
+                    carrusel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
+            }, 3500); // Rota cada 3.5 segundos
+        }
+
+        function pausarAutoScroll() {
+            if(intervaloCarrusel) {
+                clearInterval(intervaloCarrusel);
+                intervaloCarrusel = null;
+            }
+        }
+
+        function scrollCarrusel(direccion) {
+            const carrusel = document.getElementById('carrusel-destacados');
+            const scrollAmount = carrusel.clientWidth > 400 ? 350 : carrusel.clientWidth * 0.8;
+            carrusel.scrollBy({ left: direccion * scrollAmount, behavior: 'smooth' });
+            
+            // Reiniciar el contador automático cuando se interactúa
+            iniciarAutoScrollCarrusel();
+        }
+
+        function generarHTMLTarjeta(a, esDestacado = false) {
+            const nivel = Number(a.nivel_pago || 0);
+            const pagoAlDia = nivel === 0 || !a.subscription_status || ["active", "trialing"].includes(a.subscription_status);
+            const nivelEfectivo = pagoAlDia ? nivel : 0; 
+
+            const estaAbierto = estaAbiertoAhora(a);
+            const textoHorario = stringHorarioHoy(a.horarios);
+            
+            const catBD = a.categoria ? a.categoria.trim() : '';
+            const usaComida = CATEGORIAS_TIENDA.includes(catBD) || ['Alimentos', 'Hogar'].includes(catBD);
+            const usaAgenda = CATEGORIAS_SERVICIO.includes(catBD);
+            
+            let badgeAntiguedad = '';
+            if (a.created_at) {
+                const fechaCreacion = new Date(a.created_at);
+                const ahora = new Date();
+                const mesesDif = (ahora.getFullYear() - fechaCreacion.getFullYear()) * 12 + (ahora.getMonth() - fechaCreacion.getMonth());
+                
+                if (mesesDif >= 3) {
+                    badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="Generando confianza desde ${fechaCreacion.getFullYear()}">⭐ ${mesesDif} MESES</span>`;
+                } else if (mesesDif < 1) {
+                    badgeAntiguedad = `<span class="bg-blue-100 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">NUEVO</span>`;
+                }
+            }
+
+            let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
+            const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
+
+            let badgeCalificacion = '';
+            if (a.total_calificaciones && a.total_calificaciones > 0) {
+                badgeCalificacion = `
+                    <div class="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 shadow-sm shrink-0">
+                        <span class="text-[10px] sm:text-xs">⭐</span>
+                        <span class="text-[10px] sm:text-xs font-black text-yellow-700">${Number(a.calificacion_promedio).toFixed(1)}</span>
+                        <span class="text-[8px] sm:text-[9px] text-yellow-600 font-bold">(${a.total_calificaciones})</span>
+                    </div>
+                `;
+            } else {
+                badgeCalificacion = `
+                    <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 shadow-sm shrink-0">
+                        <span class="text-[10px] sm:text-xs grayscale opacity-50">⭐</span>
+                        <span class="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-wider">Nuevo</span>
+                    </div>
+                `;
+            }
+
+            let badgeEnvio = '';
+            if (usaComida) {
+                badgeEnvio = a.ofrece_domicilio
+                    ? `<span class="bg-gradient-to-r from-tm-dorado to-yellow-500 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider flex items-center gap-1"><span>🛵</span> A Domicilio</span>`
+                    : `<span class="bg-gray-100 text-gray-500 border border-gray-200 text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1"><span>🚶</span> Pick-up</span>`;
+            }
+
+            let botones = '';
+            let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
+            
+            const botonContacto = estaAbierto 
+                ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
+                : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+
+            if (nivelEfectivo >= 2) {
+                if (usaComida) {
+                    botones = estaAbierto 
+                        ? `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
+                        : `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
+                } else { 
+                    botones = estaAbierto
+                        ? `<button onclick="abrirAgendaPorId('${a.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
+                        : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
+                }
+                botones += botonContacto;
+            } else if (nivelEfectivo === 1) {
+                botones = `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
+                botones += botonContacto;
+            } else {
+                botones = botonContacto;
+            }
+
+            // Cambiar las clases base si es de la sección de destacados
+            let clasesExtraWrapper = esDestacado 
+                ? "min-w-[280px] sm:min-w-[320px] max-w-[320px] snap-center shrink-0 border-tm-dorado ring-1 ring-tm-dorado/50 shadow-md transform hover:-translate-y-1" 
+                : (nivelEfectivo === 0 ? "border-gray-200" : (nivelEfectivo >= 2 ? "border-tm-dorado ring-1 ring-tm-dorado/30" : "border-tm-azul"));
+
+            return `
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80 grayscale-[30%]' : ''} ${clasesExtraWrapper}">
+                    ${nivelEfectivo >= 1 && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
+                    <div class="p-4 sm:p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-2 gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
+                                ${badgeEnvio}
+                            </div>
+                            ${badgeCalificacion}
+                        </div>
+                        <h3 class="font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap gap-1">
+                            ${a.nombre_negocio} ${badgeVerificado} ${badgeCerrado} ${badgeAntiguedad}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
+                        ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 flex items-start gap-1">📍 <span>${a.direccion}</span></p>` : ''}
+                        ${textoHorario !== 'Horario no definido' ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start gap-1">🕒 <span>${textoHorario}</span></p>` : ''}
+                        <div class="mt-auto pt-4 border-t border-gray-100 flex gap-2 w-full">${botones}</div>
+                    </div>
+                </div>`;
+        }
+
+        function renderizarDestacados(lista) {
+            const contenedorDestacados = document.getElementById('carrusel-destacados');
+            const seccionDestacados = document.getElementById('seccion-destacados');
+            
+            // Filtrar solo los que tienen nivel >= 2 y pagos activos
+            const destacados = lista.filter(a => {
+                const nivel = Number(a.nivel_pago || 0);
+                const pagoAlDia = nivel === 0 || !a.subscription_status || ["active", "trialing"].includes(a.subscription_status);
+                return pagoAlDia && nivel >= 2;
+            });
+
+            if (destacados.length === 0) {
+                seccionDestacados.classList.add('hidden');
+                return;
+            }
+
+            seccionDestacados.classList.remove('hidden');
+            contenedorDestacados.innerHTML = destacados.map(a => generarHTMLTarjeta(a, true)).join('');
+            
+            iniciarAutoScrollCarrusel();
+        }
+
+        function renderizar(lista) {
+            const contenedor = document.getElementById('contenedor-anuncios');
+            contenedor.innerHTML = '';
+            
+            if (lista.length === 0) {
+                contenedor.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">No hay negocios aquí.</p>`;
+                return;
+            }
+
+            contenedor.innerHTML = lista.map(a => generarHTMLTarjeta(a, false)).join('');
+        }
+
         async function cargarDatos() {
             const { data: sesionData } = await clienteSupabase.auth.getSession();
             if(!usuarioActual && sesionData?.session?.user) {
@@ -496,130 +669,14 @@
                 
                 if (negocioQR) {
                     const usaComida = CATEGORIAS_TIENDA.includes(negocioQR.categoria) || ['Alimentos', 'Hogar'].includes(negocioQR.categoria);
-                    // Usamos la lista expandida para no fallar
-                    const usaAgenda = !usaComida; // Todo lo que no es tienda lo mandamos a agenda como seguridad
-                    
                     if (usaComida) {
                         abrirMenu(negocioQR);
                     } else {
                         abrirAgenda(negocioQR);
                     }
-
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
-        }
-
-        function renderizar(lista) {
-            const contenedor = document.getElementById('contenedor-anuncios');
-            contenedor.innerHTML = '';
-            
-            if (lista.length === 0) {
-                contenedor.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">No hay negocios aquí.</p>`;
-                return;
-            }
-
-            lista.forEach(a => {
-                const nivel = Number(a.nivel_pago || 0);
-                const pagoAlDia = nivel === 0 || !a.subscription_status || ["active", "trialing"].includes(a.subscription_status);
-                const nivelEfectivo = pagoAlDia ? nivel : 0; 
-
-                const estaAbierto = estaAbiertoAhora(a);
-                const textoHorario = stringHorarioHoy(a.horarios);
-                
-                // Formateando nombre de categoría para ignorar mayúsculas/minúsculas y acentos
-                const catBD = a.categoria ? a.categoria.trim() : '';
-                const usaComida = CATEGORIAS_TIENDA.includes(catBD) || ['Alimentos', 'Hogar'].includes(catBD);
-                const usaAgenda = CATEGORIAS_SERVICIO.includes(catBD);
-                
-                let badgeAntiguedad = '';
-                if (a.created_at) {
-                    const fechaCreacion = new Date(a.created_at);
-                    const ahora = new Date();
-                    const mesesDif = (ahora.getFullYear() - fechaCreacion.getFullYear()) * 12 + (ahora.getMonth() - fechaCreacion.getMonth());
-                    
-                    if (mesesDif >= 3) {
-                        badgeAntiguedad = `<span class="bg-gray-800 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap" title="Generando confianza desde ${fechaCreacion.getFullYear()}">⭐ ${mesesDif} MESES</span>`;
-                    } else if (mesesDif < 1) {
-                        badgeAntiguedad = `<span class="bg-blue-100 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">NUEVO</span>`;
-                    }
-                }
-
-                let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
-                const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
-
-                let badgeCalificacion = '';
-                if (a.total_calificaciones && a.total_calificaciones > 0) {
-                    badgeCalificacion = `
-                        <div class="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 shadow-sm shrink-0">
-                            <span class="text-[10px] sm:text-xs">⭐</span>
-                            <span class="text-[10px] sm:text-xs font-black text-yellow-700">${Number(a.calificacion_promedio).toFixed(1)}</span>
-                            <span class="text-[8px] sm:text-[9px] text-yellow-600 font-bold">(${a.total_calificaciones})</span>
-                        </div>
-                    `;
-                } else {
-                    badgeCalificacion = `
-                        <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 shadow-sm shrink-0">
-                            <span class="text-[10px] sm:text-xs grayscale opacity-50">⭐</span>
-                            <span class="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-wider">Nuevo</span>
-                        </div>
-                    `;
-                }
-
-                let badgeEnvio = '';
-                if (usaComida) {
-                    badgeEnvio = a.ofrece_domicilio
-                        ? `<span class="bg-gradient-to-r from-tm-dorado to-yellow-500 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider flex items-center gap-1"><span>🛵</span> A Domicilio</span>`
-                        : `<span class="bg-gray-100 text-gray-500 border border-gray-200 text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1"><span>🚶</span> Pick-up</span>`;
-                }
-
-                let botones = '';
-                let waLink = a.enlace_whatsapp ? `https://wa.me/${a.enlace_whatsapp.replace(/\D/g,'')}` : '#';
-                
-                const botonContacto = estaAbierto 
-                    ? `<a href="${waLink}" target="_blank" class="flex-1 text-center bg-[#25D366] text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-green-600 transition shadow-sm">Contactar</a>`
-                    : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
-
-                // CORRECCIÓN 2: Si tiene nivel >= 2 y no es de comida, por defecto asume que es de Agendar para prevenir que se quede sin botón
-                if (nivelEfectivo >= 2) {
-                    if (usaComida) {
-                        botones = estaAbierto 
-                            ? `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-tm-dorado text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-yellow-600 transition shadow-sm">Menú y Pedir</button>`
-                            : `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 bg-gray-200 text-gray-500 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-gray-300 transition">Ver Menú (Cerrado)</button>`;
-                    } else { // Si no es comida, entonces es agenda
-                        botones = estaAbierto
-                            ? `<button onclick="abrirAgendaPorId('${a.id}')" class="flex-1 bg-tm-azul hover:bg-tm-azul-oscuro text-white py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm transition shadow-sm hover:scale-[1.02]">📅 Agendar</button>`
-                            : `<button class="flex-1 bg-gray-200 text-gray-400 py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm cursor-not-allowed">Cerrado</button>`;
-                    }
-                    botones += botonContacto;
-                } else if (nivelEfectivo === 1) {
-                    botones = `<button onclick="abrirMenuPorId('${a.id}')" class="flex-1 border-2 border-tm-azul text-tm-azul py-1.5 sm:py-2 px-2 rounded font-bold text-xs sm:text-sm hover:bg-blue-50 transition">Ver ${usaAgenda ? 'Servicios' : 'Catálogo'}</button>`;
-                    botones += botonContacto;
-                } else {
-                    botones = botonContacto;
-                }
-
-                contenedor.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border ${nivelEfectivo === 0 ? 'border-gray-200' : (nivelEfectivo >= 2 ? 'border-tm-dorado ring-1 ring-tm-dorado/30' : 'border-tm-azul')} overflow-hidden flex flex-col hover:shadow-md transition ${!estaAbierto ? 'opacity-80 grayscale-[30%]' : ''}">
-                        ${nivelEfectivo >= 1 && a.imagen_url ? `<img src="${a.imagen_url}" class="w-full h-32 sm:h-40 object-cover bg-gray-100">` : ''}
-                        <div class="p-4 sm:p-5 flex flex-col flex-grow">
-                            <div class="flex justify-between items-start mb-2 gap-2">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-[10px] font-bold text-tm-azul bg-blue-50 px-2 py-1 rounded w-max uppercase">${a.categoria}</span>
-                                    ${badgeEnvio}
-                                </div>
-                                ${badgeCalificacion}
-                            </div>
-                            <h3 class="font-bold text-base sm:text-lg text-tm-azul-oscuro leading-tight flex items-center flex-wrap gap-1">
-                                ${a.nombre_negocio} ${badgeVerificado} ${badgeCerrado} ${badgeAntiguedad}
-                            </h3>
-                            <p class="text-xs sm:text-sm text-tm-gris mt-1 font-light line-clamp-2">${a.descripcion}</p>
-                            ${a.direccion ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-2 flex items-start gap-1">📍 <span>${a.direccion}</span></p>` : ''}
-                            ${textoHorario !== 'Horario no definido' ? `<p class="text-[11px] sm:text-xs text-gray-500 mt-1 flex items-start gap-1">🕒 <span>${textoHorario}</span></p>` : ''}
-                            <div class="mt-auto pt-4 border-t border-gray-100 flex gap-2 w-full">${botones}</div>
-                        </div>
-                    </div>`;
-            });
         }
 
         function filtrar(cat) { 
@@ -627,7 +684,10 @@
             const idBtn = cat === 'Salud Mental' ? 'btn-Salud-Mental' : (cat === 'Medicina General' ? 'btn-Medicina' : (cat === 'Belleza y Spa' ? 'btn-Belleza' : `btn-${cat}`));
             document.getElementById(idBtn)?.classList.add('active-filter');
             
-            renderizar(cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat)); 
+            const listaFiltrada = cat === 'Todos' ? todosLosAnuncios : todosLosAnuncios.filter(a => a.categoria === cat);
+            
+            renderizarDestacados(listaFiltrada);
+            renderizar(listaFiltrada); 
         }
 
         async function abrirMenu(negocio) {
