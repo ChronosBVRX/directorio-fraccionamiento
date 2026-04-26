@@ -385,6 +385,25 @@
                                     <textarea id="admin-desc" onkeyup="actualizarPreviewProfesional()" rows="3" class="w-full p-4 bg-white border rounded-2xl mt-1 outline-none resize-none focus:ring-2 focus:ring-tm-azul" placeholder="Describe tus servicios, especialidad o experiencia..."></textarea>
                                 </div>
 
+                                <div>
+                                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Modalidad de Atención *</label>
+                                    <div class="mt-2 grid grid-cols-2 gap-3">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="admin-domicilio" value="false" class="peer sr-only" checked onchange="actualizarPreviewProfesional()">
+                                            <div class="p-3 bg-white border border-gray-200 rounded-xl text-center peer-checked:border-tm-azul peer-checked:bg-blue-50 peer-checked:text-tm-azul transition shadow-sm hover:bg-gray-50">
+                                                <div class="text-xl mb-1">📍</div>
+                                                <div class="font-bold text-xs">En mi Consultorio / Local</div>
+                                            </div>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="admin-domicilio" value="true" class="peer sr-only" onchange="actualizarPreviewProfesional()">
+                                            <div class="p-3 bg-white border border-gray-200 rounded-xl text-center peer-checked:border-tm-dorado peer-checked:bg-yellow-50 peer-checked:text-yellow-700 transition shadow-sm hover:bg-gray-50">
+                                                <div class="text-xl mb-1">🚗</div>
+                                                <div class="font-bold text-xs">A Domicilio</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
                                     <div class="flex items-center justify-between gap-4 mb-4">
                                         <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Horarios de Atención</h4>
@@ -518,7 +537,10 @@
                                     </div>
 
                                     <div class="p-6">
-                                        <span class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">Consultorio / Servicio</span>
+                                        <div class="flex gap-2 flex-wrap mb-2">
+                                            <span class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">Consultorio / Servicio</span>
+                                            <span id="preview-categoria-domicilio" class="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1 w-fit">📍 En Local</span>
+                                        </div>
                                         <h4 id="preview-nombre" class="text-2xl font-black text-tm-azul-oscuro mt-4">Nombre del consultorio</h4>
                                         <p id="preview-desc" class="text-sm text-gray-600 mt-2 leading-relaxed">Descripción de tu perfil...</p>
                                         <p id="preview-nivel" class="text-sm font-bold text-gray-500 mt-2">Plan básico</p>
@@ -723,7 +745,6 @@
                 document.getElementById('micrositio-contenido').classList.remove('hidden');
             }
 
-            // AÑADIDO: La nueva pestaña de micrositio a la lista de validaciones
             const tabs = ['hoy', 'calendario', 'config', 'metricas', 'marketing', 'micrositio'];
             tabs.forEach(t => {
                 document.getElementById(`vista-main-${t}`).classList.add('hidden');
@@ -1132,6 +1153,17 @@
             const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
             const imagen = document.getElementById('admin-imagen-url').value || '';
 
+            // ACTUALIZAR PREVIEW DE MODALIDAD
+            const esDomicilio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
+            const tagModo = document.getElementById('preview-categoria-domicilio');
+            if (esDomicilio) {
+                tagModo.innerHTML = '🚗 A Domicilio';
+                tagModo.className = 'text-[10px] font-black text-yellow-700 uppercase bg-yellow-50 px-3 py-1 rounded-full flex items-center gap-1 w-fit';
+            } else {
+                tagModo.innerHTML = '📍 En Local';
+                tagModo.className = 'text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1 w-fit';
+            }
+
             document.getElementById('preview-nombre').innerText = nombre;
             document.getElementById('preview-desc').innerText = desc;
             document.getElementById('preview-wa').innerText = wa ? wa : 'Sin WhatsApp configurado';
@@ -1262,7 +1294,6 @@
         async function descargarDiseño(elementoId, nombreArchivo) {
             mostrarOverlay('Generando tu imagen en alta calidad...');
             try {
-                // Pausa para asegurar carga de fuentes e imágenes de fondo
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
                 const originalScroll = window.scrollY;
@@ -1378,6 +1409,13 @@
                 document.getElementById('admin-wa').value = n.enlace_whatsapp || '';
                 document.getElementById('admin-imagen-url').value = n.imagen_url || '';
 
+                // CARGAR SI ES A DOMICILIO O EN LOCAL
+                if (n.ofrece_domicilio === true) {
+                    document.querySelector('input[name="admin-domicilio"][value="true"]').checked = true;
+                } else {
+                    document.querySelector('input[name="admin-domicilio"][value="false"]').checked = true;
+                }
+
                 if (n.horarios && typeof n.horarios === 'object') {
                     horariosActuales = n.horarios; setearHorariosUI(n.horarios);
                 } else {
@@ -1397,8 +1435,6 @@
                 else destruirCalendarioSiExiste();
 
                 prepararMarketing(n);
-                
-                // AÑADIDO: Cargar datos del micrositio si existen
                 await cargarDatosMicrositio();
 
                 suscribirseRealtimeConsultorio();
@@ -1422,6 +1458,10 @@
             document.getElementById('admin-imagen-url').value = '';
             document.getElementById('admin-estado-apertura').checked = true;
             document.getElementById('global-toggle-abierto').checked = true;
+            
+            // RESETEAR A EN LOCAL POR DEFECTO
+            document.querySelector('input[name="admin-domicilio"][value="false"]').checked = true;
+
             horariosActuales = {}; setearHorariosUI(null); configurarPermisos(0);
             document.getElementById('estado-panel').classList.add('hidden');
             
@@ -1482,6 +1522,9 @@
                     if (valor.abierto && (!valor.abre || !valor.cierra || valor.abre >= valor.cierra)) return await lanzarNotificacion('Revisa el horario', `Por favor verifica los horarios del día ${DIAS[dia]}`, 'warning');
                 }
 
+                // LEER SI ES A DOMICILIO O NO
+                const ofreceDomicilio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
+
                 const payload = {
                     nombre_negocio: document.getElementById('admin-nombre').value.trim(),
                     descripcion: document.getElementById('admin-desc').value.trim(),
@@ -1489,7 +1532,8 @@
                     imagen_url: document.getElementById('admin-imagen-url').value || '',
                     esta_abierto: document.getElementById('global-toggle-abierto').checked,
                     horarios,
-                    categoria: 'Consultorio'
+                    categoria: 'Consultorio',
+                    ofrece_domicilio: ofreceDomicilio // SE GUARDA EN BASE DE DATOS
                 };
 
                 if (!payload.nombre_negocio) return await lanzarNotificacion('Faltan datos', 'Escribe el nombre del consultorio.', 'warning');
@@ -1754,7 +1798,6 @@
             }, 1200);
         }
 
-        // --- AÑADIDO: FUNCIONES DE LA IA Y MICROSITIO ---
         async function dispararGeneracionIA() {
             if (!estadoPanel.anuncioId) return mostrarToast("Primero guarda tu perfil en 'Mi Consultorio'", "error");
             if (estadoPanel.nivelActual < 2) return lanzarNotificacion('Premium Requerido', 'Actualiza a Nivel 2 para usar la IA.', 'warning');
