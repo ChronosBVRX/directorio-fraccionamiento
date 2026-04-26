@@ -17,7 +17,7 @@
             <span id="badge-categoria" class="text-xs font-black uppercase tracking-widest text-[#d4af37] mb-4 block">Negocio Local</span>
             <h1 id="hero-titulo" class="text-4xl md:text-6xl font-black mb-6 leading-tight drop-shadow-lg"></h1>
             <p id="hero-subtitulo" class="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto font-medium"></p>
-            <a href="#contacto" id="hero-cta" class="inline-block bg-[#d4af37] text-[#143653] font-black px-8 py-4 rounded-xl shadow-xl hover:scale-105 transition transform"></a>
+            <a href="#" id="hero-cta" class="inline-block bg-[#d4af37] text-[#143653] font-black px-8 py-4 rounded-xl shadow-xl hover:scale-105 transition transform"></a>
         </div>
     </header>
 
@@ -35,14 +35,13 @@
     </section>
 
     <footer id="contacto" class="bg-[#22527b] text-white py-12 text-center">
-        <h3 class="text-2xl font-black mb-6">¿Listo para comenzar?</h3>
+        <h3 class="text-2xl font-black mb-6">¿Tienes alguna duda?</h3>
         <a id="btn-whatsapp" href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-black px-8 py-4 rounded-xl shadow-lg hover:bg-green-600 transition">
             Enviar WhatsApp
         </a>
     </footer>
 
     <script>
-        // Declaramos el cliente de Supabase de una manera segura para evitar el error de "already declared"
         if (!window.clienteSupabaseMicro) {
             window.clienteSupabaseMicro = window.supabase.createClient(
                 'https://vlnpefgqodnxcqeztcnh.supabase.co', 
@@ -52,15 +51,14 @@
 
         async function cargarMicrositio() {
             const params = new URLSearchParams(window.location.search);
-            const slug = params.get('id'); // Leemos ?id=slug-del-sitio
+            const slug = params.get('id'); 
 
             if (!slug) return mostrarError();
 
             try {
-                // Traemos el contenido y hacemos un JOIN para el WhatsApp del anuncio original
                 const { data, error } = await window.clienteSupabaseMicro
                     .from('micrositios')
-                    .select('*, anuncios(categoria, enlace_whatsapp)')
+                    .select('*, anuncios(id, categoria, enlace_whatsapp)')
                     .eq('slug', slug)
                     .single();
 
@@ -68,21 +66,23 @@
 
                 const cont = data.contenido;
                 
-                // Mapear datos al HTML
                 document.title = cont.hero.titulo || 'Sitio web';
                 if(data.anuncios && data.anuncios.categoria) {
                     document.getElementById('badge-categoria').innerText = data.anuncios.categoria;
                 }
                 document.getElementById('hero-titulo').innerText = cont.hero.titulo || '';
                 document.getElementById('hero-subtitulo').innerText = cont.hero.subtitulo || '';
-                document.getElementById('hero-cta').innerText = cont.hero.cta || 'Contactar ahora';
+                
+                // MÁGIA AQUÍ: El botón apunta al Index con el ID del anuncio para abrir el modal correspondiente
+                const btnCta = document.getElementById('hero-cta');
+                btnCta.innerText = cont.hero.cta || 'Agendar / Pedir ahora';
+                btnCta.href = `index.html?id=${data.anuncio_id}`;
                 
                 document.getElementById('acerca-titulo').innerText = cont.acerca_de.titulo || 'Nuestra Historia';
                 document.getElementById('acerca-parrafo').innerText = cont.acerca_de.parrafo || '';
 
-                // Llenar beneficios
                 const divBeneficios = document.getElementById('contenedor-beneficios');
-                divBeneficios.innerHTML = ''; // Limpiamos por si acaso
+                divBeneficios.innerHTML = ''; 
                 
                 if(cont.beneficios && cont.beneficios.length > 0) {
                     cont.beneficios.forEach(b => {
@@ -95,7 +95,6 @@
                     });
                 }
 
-                // Configurar WhatsApp
                 if(data.anuncios && data.anuncios.enlace_whatsapp) {
                     const wsLink = `https://wa.me/${data.anuncios.enlace_whatsapp.replace(/\D/g, '')}`;
                     document.getElementById('btn-whatsapp').href = wsLink;
@@ -103,7 +102,6 @@
                     document.getElementById('btn-whatsapp').style.display = 'none';
                 }
 
-                // Quitamos la clase 'hidden' para mostrar la página
                 document.body.classList.remove('hidden');
 
             } catch (err) {
@@ -117,7 +115,6 @@
             document.body.classList.remove('hidden');
         }
 
-        // Ejecutamos cuando cargue el DOM
         document.addEventListener('DOMContentLoaded', cargarMicrositio);
     </script>
 </body>
