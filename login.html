@@ -100,6 +100,22 @@
                     </div>
                 </form>
 
+                <form id="form-nueva-password" onsubmit="event.preventDefault(); procesarNuevaContrasena();" class="space-y-4 hidden">
+                    <h2 class="text-2xl font-black text-tm-azul-oscuro text-center mb-2">Crea tu nueva contraseña</h2>
+                    <p class="text-sm text-center text-gray-500 mb-6">Por favor, escribe tu nueva contraseña para acceder a tu cuenta.</p>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Nueva Contraseña</label>
+                        <input type="password" id="nueva-pass" minlength="6" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confirma-pass" minlength="6" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-tm-azul outline-none">
+                    </div>
+                    
+                    <button type="submit" id="btn-nueva-pass-submit" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white py-3.5 rounded-lg font-bold transition shadow-md mt-4">Actualizar y Entrar</button>
+                </form>
+
             </div>
         </div>
     </main>
@@ -124,34 +140,36 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM'; 
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Variable para controlar que no lo redirija si solo viene a cambiar la clave
+        let enModoRecuperacion = false;
+
         // Lector de rutas de regreso y eventos de sesión
         clienteSupabase.auth.onAuthStateChange((event, session) => {
+            
+            // Si el usuario llega haciendo clic en el correo de recuperar contraseña
             if (event === 'PASSWORD_RECOVERY') {
-                // Si el usuario llega por el link de recuperar contraseña
-                mostrarMensaje("Por favor, ingresa tu nueva contraseña en el panel de usuario.", false);
+                enModoRecuperacion = true;
+                cambiarPestaña('nueva-password');
+                mostrarMensaje("Autenticación exitosa. Por favor, crea tu nueva contraseña.", false);
                 return;
             }
 
-            if (session) {
+            // Si inicia sesión normalmente y NO está intentando recuperar contraseña
+            if (session && !enModoRecuperacion) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const rutaRegreso = urlParams.get('returnTo');
                 
                 if (rutaRegreso) {
                     window.location.href = decodeURIComponent(rutaRegreso);
                 } else {
-                    window.location.href = 'index.html';
+                    window.location.href = 'index.html'; // Lo enviamos al inicio por defecto
                 }
             }
         });
 
         // Funciones del Modal
-        function abrirModal() {
-            document.getElementById('modal-terminos').classList.remove('hidden');
-        }
-
-        function cerrarModal() {
-            document.getElementById('modal-terminos').classList.add('hidden');
-        }
+        function abrirModal() { document.getElementById('modal-terminos').classList.remove('hidden'); }
+        function cerrarModal() { document.getElementById('modal-terminos').classList.add('hidden'); }
 
         // Navegación entre pestañas
         function cambiarPestaña(vista) {
@@ -164,11 +182,13 @@
             const formLogin = document.getElementById('form-login');
             const formReg = document.getElementById('form-registro');
             const formRecuperar = document.getElementById('form-recuperar');
+            const formNuevaPass = document.getElementById('form-nueva-password');
 
             // Ocultar todos los formularios primero
             formLogin.classList.replace('block', 'hidden');
             formReg.classList.replace('block', 'hidden');
             formRecuperar.classList.replace('block', 'hidden');
+            formNuevaPass.classList.replace('block', 'hidden');
 
             if (vista === 'login') {
                 contenedorTabs.classList.remove('hidden');
@@ -181,9 +201,12 @@
                 btnLogin.className = "flex-1 py-4 font-bold text-gray-400 border-b-2 border-transparent hover:text-tm-azul transition";
                 formReg.classList.replace('hidden', 'block');
             } else if (vista === 'recuperar') {
-                // Ocultar los botones de tabs para centrar la atención en la recuperación
                 contenedorTabs.classList.add('hidden');
                 formRecuperar.classList.replace('hidden', 'block');
+            } else if (vista === 'nueva-password') {
+                // Esta vista solo se activa internamente cuando vienen del correo
+                contenedorTabs.classList.add('hidden');
+                formNuevaPass.classList.replace('hidden', 'block');
             }
         }
 
@@ -248,16 +271,11 @@
                 
                 if(error) throw error;
                 
-                // Validación para saber si el correo ya estaba registrado
-                // Supabase devuelve identidades vacías si el usuario ya existía y la enumeración está protegida
                 if (data?.user?.identities && data.user.identities.length === 0) {
                     throw new Error("Este correo electrónico ya se encuentra registrado. Por favor, inicia sesión.");
                 }
                 
-                // Si llegamos aquí, el registro fue exitoso
                 mostrarMensaje("¡Registro exitoso! Por favor revisa tu bandeja de entrada o correo no deseado (spam) para confirmar tu cuenta antes de iniciar sesión.", false);
-                
-                // Limpiar el formulario para evitar re-envíos
                 document.getElementById('form-registro').reset();
                 btn.innerText = "Cuenta Creada";
                 
@@ -276,19 +294,56 @@
 
             try {
                 const { error } = await clienteSupabase.auth.resetPasswordForEmail(email, {
-                    // Reemplaza esta URL si necesitas que el link los lleve a una página específica para cambiar la contraseña
                     redirectTo: window.location.origin + window.location.pathname, 
                 });
 
                 if(error) throw error;
 
-                mostrarMensaje("Si el correo existe en nuestra base de datos, hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.", false);
+                mostrarMensaje("Si el correo existe, hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.", false);
                 document.getElementById('form-recuperar').reset();
                 btn.innerText = "Enviado exitosamente";
 
             } catch (err) {
                 mostrarMensaje("Hubo un error al intentar enviar el correo. Intenta de nuevo.", true);
                 btn.disabled = false; btn.innerText = "Enviar Enlace";
+            }
+        }
+
+        // NUEVO: Función para actualizar la contraseña en Supabase
+        async function procesarNuevaContrasena() {
+            const pass1 = document.getElementById('nueva-pass').value;
+            const pass2 = document.getElementById('confirma-pass').value;
+            const btn = document.getElementById('btn-nueva-pass-submit');
+
+            if (pass1 !== pass2) {
+                mostrarMensaje("Las contraseñas no coinciden. Intenta de nuevo.", true);
+                return;
+            }
+
+            btn.disabled = true; btn.innerText = "Actualizando...";
+            document.getElementById('auth-msg').classList.add('hidden');
+
+            try {
+                // Supabase permite actualizar al usuario porque el enlace de recuperación ya lo autenticó temporalmente
+                const { error } = await clienteSupabase.auth.updateUser({
+                    password: pass1
+                });
+
+                if (error) throw error;
+
+                mostrarMensaje("¡Contraseña actualizada exitosamente! Redirigiendo...", false);
+                
+                // Quitamos el modo recuperación para que el sistema le permita entrar
+                enModoRecuperacion = false;
+                
+                // Esperamos un segundo para que lea el mensaje y recargamos limpiamente o redirigimos
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (err) {
+                mostrarMensaje("Error al actualizar: " + err.message, true);
+                btn.disabled = false; btn.innerText = "Actualizar y Entrar";
             }
         }
     </script>
