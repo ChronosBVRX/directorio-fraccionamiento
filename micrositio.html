@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargando Sitio...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style> body { font-family: 'Montserrat', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 text-gray-800 hidden" id="body-content">
+
+    <header class="bg-[#143653] text-white py-24 px-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="max-w-4xl mx-auto relative z-10">
+            <span id="badge-categoria" class="text-xs font-black uppercase tracking-widest text-[#d4af37] mb-4 block">Negocio Local</span>
+            <h1 id="hero-titulo" class="text-4xl md:text-6xl font-black mb-6 leading-tight drop-shadow-lg"></h1>
+            <p id="hero-subtitulo" class="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto font-medium"></p>
+            <a href="#contacto" id="hero-cta" class="inline-block bg-[#d4af37] text-[#143653] font-black px-8 py-4 rounded-xl shadow-xl hover:scale-105 transition transform"></a>
+        </div>
+    </header>
+
+    <section class="py-20 px-6 max-w-4xl mx-auto text-center">
+        <h2 id="acerca-titulo" class="text-3xl font-black text-[#143653] mb-6">Conócenos</h2>
+        <p id="acerca-parrafo" class="text-gray-600 leading-relaxed text-lg font-medium"></p>
+    </section>
+
+    <section class="bg-white py-20 px-6 border-t border-gray-100">
+        <div class="max-w-6xl mx-auto">
+            <h3 class="text-3xl font-black text-center mb-12 text-[#143653]">¿Por qué elegirnos?</h3>
+            <div id="contenedor-beneficios" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                </div>
+        </div>
+    </section>
+
+    <footer id="contacto" class="bg-[#22527b] text-white py-12 text-center">
+        <h3 class="text-2xl font-black mb-6">¿Listo para comenzar?</h3>
+        <a id="btn-whatsapp" href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-black px-8 py-4 rounded-xl shadow-lg hover:bg-green-600 transition">
+            Enviar WhatsApp
+        </a>
+    </footer>
+
+    <script>
+        // Tus variables de Supabase
+        const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY_PUBLICA'; // Asegúrate de usar la ANON KEY aquí
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function cargarMicrositio() {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('id'); // Leemos ?id=slug-del-sitio
+
+            if (!slug) return mostrarError();
+
+            try {
+                // Traemos el contenido y hacemos un JOIN para el WhatsApp del anuncio original
+                const { data, error } = await supabase
+                    .from('micrositios')
+                    .select('*, anuncios(categoria, enlace_whatsapp)')
+                    .eq('slug', slug)
+                    .single();
+
+                if (error || !data) throw error;
+
+                const cont = data.contenido;
+                
+                // Mapear datos al HTML
+                document.title = cont.hero.titulo;
+                if(data.anuncios.categoria) document.getElementById('badge-categoria').innerText = data.anuncios.categoria;
+                document.getElementById('hero-titulo').innerText = cont.hero.titulo;
+                document.getElementById('hero-subtitulo').innerText = cont.hero.subtitulo;
+                document.getElementById('hero-cta').innerText = cont.hero.cta || 'Agenda ahora';
+                
+                document.getElementById('acerca-titulo').innerText = cont.acerca_de.titulo || 'Nuestra Historia';
+                document.getElementById('acerca-parrafo').innerText = cont.acerca_de.parrafo;
+
+                // Llenar beneficios
+                const divBeneficios = document.getElementById('contenedor-beneficios');
+                if(cont.beneficios && cont.beneficios.length > 0) {
+                    cont.beneficios.forEach(b => {
+                        divBeneficios.innerHTML += `
+                            <div class="bg-blue-50 p-8 rounded-[2rem] text-center shadow-sm hover:shadow-md transition">
+                                <div class="text-4xl mb-4">✨</div>
+                                <p class="font-bold text-[#143653] text-lg">${b}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Configurar WhatsApp
+                if(data.anuncios.enlace_whatsapp) {
+                    const wsLink = `https://wa.me/${data.anuncios.enlace_whatsapp.replace(/\D/g, '')}`;
+                    document.getElementById('btn-whatsapp').href = wsLink;
+                } else {
+                    document.getElementById('btn-whatsapp').style.display = 'none';
+                }
+
+                document.body.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                mostrarError();
+            }
+        }
+
+        function mostrarError() {
+            document.body.innerHTML = '<div class="h-screen flex flex-col items-center justify-center text-center px-4"><h1 class="text-4xl font-black text-gray-800 mb-2">Sitio no encontrado</h1><p class="text-gray-500">Este micrositio no existe o fue eliminado.</p></div>';
+            document.body.classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarMicrositio);
+    </script>
+</body>
+</html>
