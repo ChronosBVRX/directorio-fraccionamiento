@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vive Tres Marías - Directorio</title>
+    <title>Conecta Tres Marías - Directorio</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#22527b">
@@ -12,7 +12,7 @@
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tres Marías">
+    <meta name="apple-mobile-web-app-title" content="Conecta Tres Marías">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -166,7 +166,7 @@
     <footer class="bg-tm-azul-oscuro text-white py-8 mt-auto border-t-4 border-tm-dorado">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm">
             <div class="text-center sm:text-left">
-                <p class="font-bold text-lg mb-1">Vive Tres Marías</p>
+                <p class="font-bold text-lg mb-1">Conecta Tres Marías</p>
                 <p class="text-gray-300">&copy; 2026 Todos los derechos reservados.</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-6 text-center">
@@ -573,7 +573,7 @@
                 }
             }
 
-            let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Vive Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
+            let badgeVerificado = a.es_verificado ? `<span class="text-blue-500 ml-1" title="Negocio Verificado por Conecta Tres Marías"><svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>` : '';
             const badgeCerrado = !estaAbierto ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-2 py-0.5 rounded uppercase ml-1 whitespace-nowrap">Cerrado Ahora</span>` : '';
 
             const promCal = Number(a.calificacion_promedio || 5.0).toFixed(1);
@@ -849,7 +849,7 @@
             let detallesPedido = [];
             const prodList = negocioActualPedido.productosArr;
             
-            let textoPedido = `*NUEVO PEDIDO DE VIVE TRES MARÍAS* 🚀\n\n`;
+            let textoPedido = `*NUEVO PEDIDO DE CONECTA TRES MARÍAS* 🚀\n\n`;
             textoPedido += `*Cliente:* ${nombre}\n*Teléfono:* ${telefono}\n*Dirección:* ${direccion}\n\n*Detalle:*\n`;
             
             for (let i in carritoActual) {
@@ -1151,7 +1151,7 @@
                 if (numeroVendedor) {
                     let clienteNombre = perfilUsuarioActual ? (perfilUsuarioActual.nombre_completo || 'Un paciente') : 'Un paciente';
                     
-                    let textoCita = `*NUEVA SOLICITUD DE CITA - VIVE TRES MARÍAS* 📅\n\n`;
+                    let textoCita = `*NUEVA SOLICITUD DE CITA - CONECTA TRES MARÍAS* 📅\n\n`;
                     textoCita += `*Paciente:* ${clienteNombre}\n`;
                     textoCita += `*Servicio:* ${nombreServicio}\n`;
                     textoCita += `*Fecha:* ${fecha}\n`;
