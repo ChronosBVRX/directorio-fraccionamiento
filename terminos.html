@@ -3,77 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Términos y Condiciones de Uso - Vive Tres Marías</title>
+    <title>Términos y Condiciones de Uso - Conecta Tres Marias</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* Estilos visuales optimizados para iframe (Idénticos al Aviso de Privacidad para mantener coherencia) */
+        /* Estilos visuales optimizados para iframe y móviles (Idénticos al Aviso de Privacidad) */
         :root {
-            --color-texto: #333333;
-            --color-titulo: #2c3e50;
-            --color-acento: #2980b9;
-            --color-enlace: #3498db;
-            --color-fondo: #ffffff;
+            --color-texto: #4b5563; /* Gris oscuro suave para mejor lectura */
+            --color-titulo: #143653; /* ctm-azul */
+            --color-acento: #d4af37; /* ctm-dorado */
+            --color-enlace: #2563eb; /* Azul para links */
+            --color-fondo: transparent; /* Ideal para iframes */
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
             color: var(--color-texto);
             background-color: var(--color-fondo);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .contenedor {
             max-width: 800px;
             margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            font-weight: 900;
             color: var(--color-titulo);
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
         .subtitulo {
             text-align: center;
             font-size: 0.95rem;
-            color: #7f8c8d;
+            font-weight: 500;
+            color: #9ca3af;
             margin-top: 0;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 20px;
         }
 
         h2 {
-            font-size: 1.3rem;
-            color: var(--color-acento);
-            border-bottom: 1px solid #ecf0f1;
-            padding-bottom: 8px;
-            margin-top: 35px;
-            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--color-titulo);
+            border-bottom: 3px solid var(--color-acento);
+            display: inline-block;
+            padding-bottom: 6px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
         }
 
         p {
             font-size: 1rem;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             text-align: justify;
+            font-weight: 400;
         }
 
         ul {
-            margin-bottom: 15px;
-            padding-left: 20px;
+            margin-bottom: 20px;
+            padding-left: 24px;
         }
 
         li {
             font-size: 1rem;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            position: relative;
             text-align: justify;
+        }
+
+        /* Viñetas personalizadas con el color dorado */
+        li::marker {
+            color: var(--color-acento);
+            font-weight: bold;
         }
 
         a {
             color: var(--color-enlace);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: color 0.2s ease;
         }
 
         a:hover {
@@ -81,20 +106,19 @@
             color: var(--color-titulo);
         }
 
-        /* Ajustes para pantallas pequeñas */
+        /* Ajustes responsivos para pantallas pequeñas (móviles) */
         @media (max-width: 600px) {
             body {
-                padding: 15px 10px;
+                padding: 10px;
             }
-            h1 {
-                font-size: 1.5rem;
+            .contenedor {
+                padding: 24px 20px;
+                border-radius: 16px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
             }
-            h2 {
-                font-size: 1.2rem;
-            }
-            p, li {
-                font-size: 0.95rem;
-            }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.25rem; }
+            p, li { font-size: 0.95rem; line-height: 1.6; }
         }
     </style>
 </head>
@@ -103,15 +127,15 @@
     <div class="contenedor">
         <h1>TÉRMINOS Y CONDICIONES DE USO</h1>
         <p class="subtitulo">
-            de la plataforma <strong>Vive Tres Marías</strong><br>
-            Última actualización: 14 de abril de 2026
+            de la plataforma <strong>Conecta Tres Marias</strong><br>
+            Última actualización: 27 de abril de 2026
         </p>
 
         <h2>1. Identificación del operador de la plataforma</h2>
-        <p>Los presentes Términos y Condiciones regulan el acceso, navegación, registro y uso de la plataforma digital Vive Tres Marías, operada por Eduardo Bolaños Vazquez, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, correo de contacto <a href="mailto:noirsysan@gmail.com">noirsysan@gmail.com</a>, teléfono <a href="tel:+524433667106">4433667106</a> y sitio web <a href="https://ViveTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ViveTresMarias.com.mx</a>.</p>
+        <p>Los presentes Términos y Condiciones regulan el acceso, navegación, registro y uso de la plataforma digital Conecta Tres Marias, operada por Eduardo Bolaños Vazquez, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, correo de contacto <a href="mailto:noirsysan@gmail.com">noirsysan@gmail.com</a>, teléfono <a href="tel:+524433667106">4433667106</a> y sitio web <a href="https://ConectaTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ConectaTresMarias.com.mx</a>.</p>
 
         <h2>2. Objeto de la plataforma</h2>
-        <p>Vive Tres Marías es una herramienta digital de intermediación y visibilidad que permite conectar a personas usuarias con negocios, restaurantes, médicos, profesionistas, consultorios, prestadores de servicios y, en su caso, repartidores independientes.</p>
+        <p>Conecta Tres Marias es una herramienta digital de intermediación y visibilidad que permite conectar a personas usuarias con negocios, restaurantes, médicos, profesionistas, consultorios, prestadores de servicios y, en su caso, repartidores independientes.</p>
         <p>La plataforma podrá ofrecer, entre otras funciones:</p>
         <ul>
             <li>directorio de perfiles,</li>
@@ -126,7 +150,7 @@
 
         <h2>3. Naturaleza del servicio</h2>
         <p>La plataforma no es, por regla general, la proveedora final de los bienes o servicios anunciados por terceros dentro del directorio.</p>
-        <p>Salvo que se indique expresamente por escrito en un módulo específico, Vive Tres Marías actúa únicamente como medio digital para facilitar el contacto, la visibilidad y ciertas funciones operativas entre las partes.</p>
+        <p>Salvo que se indique expresamente por escrito en un módulo específico, Conecta Tres Marias actúa únicamente como medio digital para facilitar el contacto, la visibilidad y ciertas funciones operativas entre las partes.</p>
         <p>En consecuencia:</p>
         <ul>
             <li>El negocio, médico, profesionista, consultorio o repartidor anunciado es quien ofrece y ejecuta directamente su servicio.</li>
@@ -171,7 +195,7 @@
         <p>La plataforma no garantiza que toda solicitud sea aceptada, respondida o ejecutada por el tercero correspondiente.</p>
 
         <h2>9. Pagos a terceros y deslinde económico</h2>
-        <p>Salvo en lo relativo a cuotas propias de suscripción o servicios directamente cobrados por la plataforma, Vive Tres Marías no recibe, procesa, resguarda ni administra pagos entre usuarios y terceros anunciados.</p>
+        <p>Salvo en lo relativo a cuotas propias de suscripción o servicios directamente cobrados por la plataforma, Conecta Tres Marias no recibe, procesa, resguarda ni administra pagos entre usuarios y terceros anunciados.</p>
         <p>Por ello:</p>
         <ul>
             <li>cualquier anticipo, pago, liquidación, reembolso, devolución, ajuste o controversia respecto del bien o servicio anunciado será responsabilidad directa de las partes que celebren la operación;</li>
@@ -221,7 +245,7 @@
         <p>La disponibilidad podrá verse afectada por mantenimiento, caídas de proveedores tecnológicos, actualizaciones, incidentes de seguridad, fallas de red, servicios de terceros o eventos de fuerza mayor.</p>
 
         <h2>17. Limitación razonable de responsabilidad</h2>
-        <p>En la máxima medida permitida por la legislación aplicable, Vive Tres Marías será responsable únicamente por los daños directos que deriven de actos propios acreditados y atribuibles directamente a su operación, cuando así corresponda conforme a derecho.</p>
+        <p>En la máxima medida permitida por la legislación aplicable, Conecta Tres Marias será responsable únicamente por los daños directos que deriven de actos propios acreditados y atribuibles directamente a su operación, cuando así corresponda conforme a derecho.</p>
         <p>La plataforma no será responsable por:</p>
         <ul>
             <li>actos, omisiones, incumplimientos, negligencia, mala praxis, fraudes, cancelaciones, cobros, retrasos, mala calidad, daños o conflictos imputables a negocios, médicos, profesionistas, consultorios, repartidores o usuarios terceros;</li>
@@ -239,7 +263,7 @@
         <p>La plataforma podrá contener integraciones o enlaces a servicios externos, incluyendo aplicaciones de mensajería, mapas, redes sociales o sitios de terceros. El acceso y uso de dichos servicios se sujetará a los términos y políticas de cada tercero.</p>
 
         <h2>20. Modificaciones a los términos</h2>
-        <p>La plataforma podrá actualizar estos Términos y Condiciones por cambios legales, operativos, técnicos o comerciales. Las nuevas versiones serán publicadas en <a href="https://ViveTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ViveTresMarias.com.mx</a> y entrarán en vigor a partir de su publicación o de la fecha indicada en la actualización correspondiente.</p>
+        <p>La plataforma podrá actualizar estos Términos y Condiciones por cambios legales, operativos, técnicos o comerciales. Las nuevas versiones serán publicadas en <a href="https://ConectaTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ConectaTresMarias.com.mx</a> y entrarán en vigor a partir de su publicación o de la fecha indicada en la actualización correspondiente.</p>
 
         <h2>21. Legislación aplicable y jurisdicción</h2>
         <p>Estos Términos y Condiciones se interpretarán conforme a las leyes aplicables en los Estados Unidos Mexicanos.</p>
