@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Activar y Asignar Pedido - Conecta Tres Marias</title>
+    <title>Gestión de Pedido - Conecta Tres Marias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 selection:bg-ctm-dorado selection:text-white">
 
     <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full border-t-8 border-ctm-dorado relative overflow-hidden">
-        <h1 class="text-2xl font-black text-ctm-azul mb-1 tracking-tight">Directorio de Repartidores</h1>
+        <h1 class="text-2xl font-black text-ctm-azul mb-1 tracking-tight">Gestión de Pedido</h1>
         <p class="text-xs text-gray-400 mb-6 font-bold uppercase tracking-widest" id="folio-display">Verificando sesión...</p>
         
         <div id="loader" class="my-8 flex justify-center">
@@ -50,13 +50,13 @@
         </div>
 
         <div id="zona-sin-repartidores" class="hidden text-center mb-6">
-            <div class="bg-red-50 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 border border-red-100">
+            <div class="bg-blue-50 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 border border-blue-100">
                 <span class="text-4xl block">🏪</span>
             </div>
-            <p class="text-red-500 font-black text-lg mb-2">No hay repartidores conectados</p>
-            <p class="text-sm text-gray-500 mb-8 font-medium leading-relaxed">Puedes gestionar este pedido tú mismo (entregarlo con tu propio personal o si el cliente pasará a recogerlo).</p>
+            <p class="text-ctm-azul font-black text-lg mb-2">Nuevo Pedido Listo para Preparar</p>
+            <p class="text-sm text-gray-500 mb-8 font-medium leading-relaxed">Confirma de recibido para que el cliente sepa que ya estás trabajando en su orden.</p>
             <button onclick="gestionarPedidoDirecto()" id="btn-gestionar-directo-1" class="w-full bg-ctm-dorado text-ctm-azul font-black py-4 rounded-2xl hover:bg-yellow-400 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm mb-3">
-                ✅ Gestionar Yo Mismo
+                ✅ Aceptar Pedido
             </button>
         </div>
 
@@ -189,6 +189,7 @@
                     return;
                 }
 
+                /* --- INICIO CÓDIGO OCULTO REPARTIDORES ---
                 const { data: repartidores } = await clienteSupabase.from('repartidores')
                     .select('id, nombre, vehiculo, telefono, calificacion_promedio, viajes_completados')
                     .eq('esta_activo', true)
@@ -211,6 +212,11 @@
                 ).join('');
                 
                 zonaAsignacion.classList.remove('hidden');
+                --- FIN CÓDIGO OCULTO REPARTIDORES --- */
+
+                // FORZAMOS LA PANTALLA DE ACEPTAR PEDIDO (Antes zona-sin-repartidores)
+                loader.classList.add('hidden');
+                zonaSinRepartidores.classList.remove('hidden');
 
             } catch (err) {
                 console.error("Error al inicializar la vista:", err);
@@ -257,7 +263,7 @@
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
-                if(btn1) { btn1.innerText = "✅ Gestionar Yo Mismo"; btn1.disabled = false; }
+                if(btn1) { btn1.innerText = "✅ Aceptar Pedido"; btn1.disabled = false; }
                 if(btn2) { btn2.innerText = "Prefiero Gestionarlo Yo"; btn2.disabled = false; }
             } else {
                 document.getElementById('mensaje-final').innerHTML = `
@@ -265,7 +271,7 @@
                         <span class="text-green-600 font-black text-2xl block mb-2">¡Pedido Aceptado! ✅</span>
                         <span class="font-bold text-sm text-green-700 block mt-2 leading-relaxed">El cliente ya fue notificado de que estás preparando su orden.</span>
                         <div class="mt-4 pt-4 border-t border-green-200">
-                            <span class="font-bold text-xs text-green-600 block">Recuerda actualizar el estado desde tu Panel de Negocio cuando esté listo.</span>
+                            <span class="font-bold text-xs text-green-600 block">Recuerda actualizar el estado desde tu Panel de Tienda cuando el pedido esté en camino.</span>
                         </div>
                     </div>
                 `;
@@ -278,7 +284,6 @@
             const repartidorId = document.getElementById('select-repartidor').value;
             const repartidorSeleccionado = listaRepartidores.find(r => r.id === repartidorId);
             
-            // Verificamos de dónde sacar el valor de "pago", puede venir de la zona de asignación normal
             let esPagado = false;
             const radioPago = document.querySelector('input[name="pago"]:checked');
             if(radioPago) {
