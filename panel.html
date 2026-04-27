@@ -726,11 +726,14 @@
                             : `<button onclick="abrirCalificacion('negocio', '${p.id}', '${p.negocio_id}', '${escapeHtml(p.anuncios?.nombre_negocio || 'Negocio')}')" class="text-[10px] bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg font-bold hover:bg-yellow-200 shadow-sm transition">Calificar Negocio ⭐</button>`;
 
                         let htmlRepartidor = '';
-                        // MODIFICACIÓN: Solo pedimos calificar al repartidor si realmente hubo uno (si el negocio no hizo entrega directa)
+                        // MODIFICACIÓN: Funcionalidad de calificación de repartidor oculta temporalmente.
                         if (p.repartidor_id) {
+                            /* --- INICIO CÓDIGO OCULTO REPARTIDORES ---
                             htmlRepartidor = p.calificacion_repartidor
                                 ? `<span class="text-yellow-500 text-[10px] font-bold">Repartidor: ${'★'.repeat(p.calificacion_repartidor)}${'☆'.repeat(5-p.calificacion_repartidor)}</span>`
                                 : `<button onclick="abrirCalificacion('repartidor', '${p.id}', '${p.repartidor_id}', '${escapeHtml(p.repartidores?.nombre || 'Repartidor')}')" class="text-[10px] bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-200 shadow-sm transition">Calificar Repartidor 🛵</button>`;
+                            --- FIN CÓDIGO OCULTO REPARTIDORES --- */
+                            htmlRepartidor = '';
                         }
 
                         seccionCalificacion = `
