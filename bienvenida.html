@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido - Vive Tres Marías</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bienvenido - Conecta Tres Marias</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,54 +13,75 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
-          theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
+          theme: { 
+              extend: { 
+                  fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                  colors: { 
+                      'ctm-azul': '#143653', 
+                      'ctm-secundario': '#22527b', 
+                      'ctm-dorado': '#d4af37', 
+                      'ctm-gris': '#4b5563' 
+                  } 
+              } 
+          }
         }
     </script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans flex flex-col relative">
+<body class="bg-gray-50 min-h-screen font-sans flex flex-col relative selection:bg-ctm-dorado selection:text-white">
 
-    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul relative">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2">
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-ctm-dorado relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
             <a href="index.html" class="flex items-center shrink-0">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Logo" class="h-10 sm:h-14 w-auto object-contain">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" alt="Conecta Tres Marias" class="h-10 sm:h-12 w-auto object-contain drop-shadow-sm">
             </a>
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <button onclick="toggleMenuPrincipal()" class="bg-gray-100 text-tm-azul p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm border border-gray-200">
-                    <span class="text-lg sm:text-xl leading-none">☰</span>
+                <button onclick="toggleMenuPrincipal()" class="bg-gray-50 text-ctm-azul p-2.5 sm:p-3 rounded-xl hover:bg-gray-100 active:scale-95 transition-all flex items-center shadow-sm border border-gray-200">
+                    <span class="text-xl leading-none">☰</span>
                 </button>
             </div>
         </div>
 
-        <div id="dropdown-principal" class="hidden absolute right-3 top-[105%] w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
-            <a href="rastreo.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
-                <span class="text-lg">📍</span> Seguir Pedido
+        <div id="dropdown-principal" class="hidden absolute right-4 top-[105%] w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 transform transition-all">
+            <a href="rastreo.html" class="block px-5 py-4 border-b border-gray-50 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-ctm-azul flex items-center gap-3 transition-colors">
+                <span class="text-xl">📍</span> Seguir Pedido
             </a>
-            <a href="index.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
-                <span class="text-lg">🏪</span> Directorio
+            <a href="index.html" class="block px-5 py-4 border-b border-gray-50 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-ctm-azul flex items-center gap-3 transition-colors">
+                <span class="text-xl">🏪</span> Directorio
             </a>
-            <a href="airbnb-host.html" class="block px-4 py-3 border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition">
-                <span class="text-lg">🏠</span> Panel Airbnb
+            <a href="airbnb-host.html" class="block px-5 py-4 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-ctm-azul flex items-center gap-3 transition-colors">
+                <span class="text-xl">🏠</span> Panel Airbnb
             </a>
         </div>
     </header>
 
-    <main class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-t-8 border-tm-azul">
-            <div class="text-6xl mb-4">🏠</div>
-            <h1 class="text-2xl font-black text-tm-azul-oscuro mb-2">¡Bienvenido!</h1>
-            <div id="loading" class="text-gray-500 animate-pulse">Detectando ubicación...</div>
+    <main class="flex-grow flex items-center justify-center p-5">
+        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center border-t-8 border-ctm-azul relative overflow-hidden">
+            
+            <div class="text-7xl mb-6 drop-shadow-md animate-bounce" style="animation-iteration-count: 1;">🏠</div>
+            <h1 class="text-3xl font-black text-ctm-azul mb-4 tracking-tight">¡Bienvenido!</h1>
+            
+            <div id="loading" class="text-ctm-azul font-bold text-sm animate-pulse bg-blue-50 py-3 px-4 rounded-xl border border-blue-100 inline-block w-full">Detectando ubicación...</div>
             
             <div id="success-content" class="hidden">
-                <p class="text-gray-600 text-sm mb-4">Estamos listos para entregarte en:</p>
-                <div class="bg-blue-50 text-tm-azul font-black p-4 rounded-2xl mb-8 border border-blue-100" id="nombre-airbnb">...</div>
-                <a href="index.html" class="block w-full bg-tm-dorado text-white font-black py-4 rounded-2xl shadow-lg transition hover:scale-105">
-                    Ver Restaurantes
+                <p class="text-gray-500 font-medium text-sm mb-4 leading-relaxed">Estamos listos para entregarte en:</p>
+                <div class="bg-blue-50 text-ctm-azul font-black text-xl p-5 rounded-2xl mb-8 border border-blue-200 shadow-inner" id="nombre-airbnb">...</div>
+                
+                <a href="index.html" class="flex justify-center items-center gap-2 w-full bg-ctm-dorado text-ctm-azul font-black py-4 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 hover:bg-yellow-400 transition-all uppercase tracking-wider text-sm">
+                    <span>🍔</span> Ver Restaurantes
                 </a>
             </div>
 
-            <div id="error-content" class="hidden text-center">
-                <p class="text-red-500 font-bold mb-4">Código QR no válido o expirado</p>
-                <a href="index.html" class="text-sm underline text-tm-azul font-bold">Ir al directorio principal</a>
+            <div id="error-content" class="hidden text-center mt-2">
+                <div class="bg-red-50 border border-red-200 p-5 rounded-2xl mb-6 shadow-sm">
+                    <span class="text-4xl block mb-3">⚠️</span>
+                    <p class="text-red-600 font-black text-sm">Código QR no válido o expirado</p>
+                </div>
+                <a href="index.html" class="text-sm text-ctm-azul font-black hover:underline transition-all flex justify-center items-center gap-1">
+                    <span>←</span> Ir al directorio principal
+                </a>
             </div>
         </div>
     </main>
@@ -81,13 +102,20 @@
             try {
                 const { data, error } = await clienteSupabase.from('airbnbs').select('*').eq('id', id).single();
                 if(data) {
+                    // ATENCIÓN: Mantenemos la clave tm_airbnb_nombre para no romper tu carrito de compras, 
+                    // aunque visualmente todo ya sea Conecta Tres Marias.
                     localStorage.setItem('tm_airbnb_nombre', data.nombre_alojamiento);
                     localStorage.setItem('tm_airbnb_direccion', data.direccion_completa);
+                    
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('success-content').classList.remove('hidden');
                     document.getElementById('nombre-airbnb').innerText = data.nombre_alojamiento;
-                } else { mostrarError(); }
-            } catch (err) { mostrarError(); }
+                } else { 
+                    mostrarError(); 
+                }
+            } catch (err) { 
+                mostrarError(); 
+            }
         };
 
         function mostrarError() {
