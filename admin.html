@@ -3,62 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración General - Vive Tres Marías</title>
+    <title>Panel de Administración General - Conecta Tres Marias</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } } }</script>
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                    colors: { 
+                        'ctm-azul': '#143653', 
+                        'ctm-secundario': '#22527b', 
+                        'ctm-dorado': '#d4af37', 
+                        'ctm-gris': '#4b5563' 
+                    } 
+                } 
+            } 
+        }
+    </script>
 </head>
-<body class="bg-gray-100 font-sans text-tm-gris min-h-screen">
+<body class="bg-gray-50 font-sans text-ctm-gris min-h-screen selection:bg-ctm-dorado selection:text-white">
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <div id="pantalla-carga" class="flex flex-col items-center justify-center h-screen bg-gray-100 absolute inset-0 z-50"><div class="w-12 h-12 border-4 border-tm-azul border-t-tm-dorado rounded-full animate-spin mb-4"></div><h2 class="text-xl font-bold text-tm-azul-oscuro">Verificando credenciales...</h2></div>
-    <div id="pantalla-denegado" class="hidden flex-col items-center justify-center h-screen text-center px-4 bg-gray-100 absolute inset-0 z-40"><div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border-t-4 border-red-500"><span class="text-5xl mb-4 block">🚫</span><h2 class="text-2xl font-black text-tm-azul-oscuro mb-2">Acceso Restringido</h2><p class="text-gray-500 mb-6">Esta área es exclusiva para administradores.</p><a href="index.html" class="bg-tm-azul text-white px-6 py-3 rounded-lg font-bold block w-full">Volver al Inicio</a></div></div>
+    <div id="pantalla-carga" class="flex flex-col items-center justify-center h-screen bg-gray-50 absolute inset-0 z-50">
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-ctm-dorado rounded-full animate-spin mb-6"></div>
+        <h2 class="text-2xl font-black text-ctm-azul tracking-tight">Verificando credenciales...</h2>
+        <p class="text-sm text-gray-400 mt-2 font-medium">Conecta Tres Marias</p>
+    </div>
+
+    <div id="pantalla-denegado" class="hidden flex-col items-center justify-center h-screen text-center px-4 bg-gray-50 absolute inset-0 z-40">
+        <div class="bg-white p-10 rounded-[2rem] shadow-2xl max-w-md w-full border-t-8 border-red-500">
+            <span class="text-6xl mb-6 block drop-shadow-sm">🚫</span>
+            <h2 class="text-3xl font-black text-ctm-azul mb-3 tracking-tight">Acceso Restringido</h2>
+            <p class="text-gray-500 mb-8 font-medium leading-relaxed">Esta área del sistema es exclusiva para personal administrativo autorizado.</p>
+            <a href="index.html" class="bg-ctm-azul text-white px-6 py-4 rounded-xl font-black uppercase tracking-wider block w-full hover:bg-opacity-90 active:scale-95 transition-all shadow-lg">Volver al Inicio</a>
+        </div>
+    </div>
 
     <div id="panel-admin" class="hidden flex h-screen overflow-hidden">
-        <aside class="w-64 bg-tm-azul-oscuro text-white flex flex-col shadow-2xl z-20 hidden md:flex">
-            <div class="p-6 border-b border-white/10 text-center"><h1 class="text-xl font-black text-tm-dorado">Vive Tres Marías</h1></div>
-            <nav class="flex-1 p-4 space-y-2">
-                <button onclick="cambiarVistaAdmin('directorio')" id="nav-directorio" class="w-full flex items-center gap-3 bg-white/10 text-white px-4 py-3 rounded-lg font-bold transition">🏢 Negocios</button>
-                <button onclick="cambiarVistaAdmin('solicitudes')" id="nav-solicitudes" class="w-full flex items-center gap-3 hover:bg-white/5 text-gray-300 hover:text-white px-4 py-3 rounded-lg font-bold transition">🛡️ Verificaciones</button>
+        
+        <aside class="w-72 bg-ctm-azul text-white flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.1)] z-20 hidden md:flex relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none"></div>
+            
+            <div class="p-8 border-b border-white/10 text-center relative z-10">
+                <h1 class="text-2xl font-black text-white tracking-tight leading-tight">Conecta<br><span class="text-ctm-dorado">Tres Marias</span></h1>
+                <p class="text-[10px] uppercase tracking-widest text-blue-200 mt-2 font-bold">Panel de Control</p>
+            </div>
+            
+            <nav class="flex-1 p-5 space-y-3 relative z-10">
+                <button onclick="cambiarVistaAdmin('directorio')" id="nav-directorio" class="w-full flex items-center gap-4 bg-white/10 text-white px-5 py-4 rounded-xl font-bold hover:bg-white/20 transition-all shadow-inner border border-white/5">
+                    <span class="text-xl">🏢</span> Negocios
+                </button>
+                <button onclick="cambiarVistaAdmin('solicitudes')" id="nav-solicitudes" class="w-full flex items-center gap-4 hover:bg-white/10 text-blue-100 hover:text-white px-5 py-4 rounded-xl font-bold transition-all border border-transparent">
+                    <span class="text-xl">🛡️</span> Verificaciones
+                </button>
             </nav>
-            <div class="p-4 border-t border-white/10"><button onclick="cerrarSesion()" class="w-full bg-red-500/20 text-red-100 px-4 py-2 rounded-lg text-sm font-bold">Salir</button></div>
+            
+            <div class="p-6 border-t border-white/10 relative z-10">
+                <button onclick="cerrarSesion()" class="w-full bg-red-500/20 hover:bg-red-500/40 text-red-100 px-5 py-3 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-red-500/30">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8 relative">
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-6 md:p-10 relative">
+            
             <div id="vista-directorio" class="block">
-                <div class="mb-8"><h2 class="text-3xl font-black text-tm-azul-oscuro">Directorio de Negocios</h2></div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead><tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500"><th class="p-4 font-bold">Negocio</th><th class="p-4 font-bold">Categoría</th><th class="p-4 font-bold text-center">Plan</th><th class="p-4 font-bold text-right">Acciones</th></tr></thead>
-                        <tbody id="tabla-negocios" class="divide-y divide-gray-100"></tbody>
-                    </table>
+                <div class="mb-10 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-4xl font-black text-ctm-azul tracking-tight mb-2">Directorio Comercial</h2>
+                        <p class="text-gray-500 font-medium text-sm">Gestiona todos los negocios registrados en la plataforma.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-widest text-gray-400">
+                                    <th class="p-5 font-black">Negocio</th>
+                                    <th class="p-5 font-black">Categoría</th>
+                                    <th class="p-5 font-black text-center">Nivel de Plan</th>
+                                    <th class="p-5 font-black text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-negocios" class="divide-y divide-gray-100 text-gray-700">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="vista-solicitudes" class="hidden">
-                <div class="mb-8"><h2 class="text-3xl font-black text-tm-azul-oscuro">Verificaciones Pendientes</h2></div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead><tr class="bg-blue-50 border-b border-blue-100 text-xs uppercase tracking-wider text-blue-800"><th class="p-4 font-bold">Negocio</th><th class="p-4 font-bold">Responsable Declarado</th><th class="p-4 font-bold text-right">Acción</th></tr></thead>
-                        <tbody id="tabla-solicitudes" class="divide-y divide-gray-100"></tbody>
-                    </table>
+                <div class="mb-10">
+                    <h2 class="text-4xl font-black text-ctm-azul tracking-tight mb-2">Verificaciones Pendientes</h2>
+                    <p class="text-gray-500 font-medium text-sm">Revisa las solicitudes de validación de identidad y documentación.</p>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-blue-50 border-b border-blue-100 text-xs uppercase tracking-widest text-blue-800">
+                                    <th class="p-5 font-black">Negocio Solicitante</th>
+                                    <th class="p-5 font-black">Responsable Declarado</th>
+                                    <th class="p-5 font-black text-right">Acción Requerida</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-solicitudes" class="divide-y divide-gray-100 text-gray-700">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="modal-editar" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-2xl"><button onclick="cerrarModalEditar()" class="absolute top-4 right-4 text-2xl">&times;</button><h2 class="text-xl font-black mb-4">Editar Negocio</h2>
-            <form id="form-editar" onsubmit="event.preventDefault(); guardarEdicion();" class="space-y-4">
-                <input type="hidden" id="edit-id"><input type="hidden" id="edit-horarios-oculto">
-                <div><label class="text-xs font-bold uppercase">Nombre del Negocio</label><input type="text" id="edit-nombre" required class="w-full p-2.5 border rounded-lg mt-1"></div>
-                <div class="grid grid-cols-2 gap-4"><div><label class="text-xs font-bold uppercase">Categoría</label><select id="edit-categoria" class="w-full p-2.5 border rounded-lg mt-1"><option>Alimentos</option><option>Servicios</option><option>Salud</option><option>Hogar</option></select></div><div><label class="text-xs font-bold uppercase">WhatsApp</label><input type="number" id="edit-wa" required class="w-full p-2.5 border rounded-lg mt-1"></div></div>
-                <div><label class="text-xs font-bold uppercase">Nivel de Pago</label><select id="edit-nivel" class="w-full p-2.5 border rounded-lg mt-1 font-bold"><option value="0">0 - Básico</option><option value="1">1 - Pro</option><option value="2">2 - Elite</option></select></div>
-                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100"><div><label class="text-xs font-bold text-blue-800 uppercase">Badge de Verificado ✅</label></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="edit-verificado" class="sr-only peer"><div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label></div>
-                <button type="submit" id="btn-guardar-edicion" class="w-full bg-tm-dorado text-white py-3 rounded-lg font-bold">Guardar Cambios</button>
+    <div id="modal-editar" class="hidden fixed inset-0 bg-ctm-azul/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-lg relative shadow-2xl border border-gray-100 transform transition-transform">
+            <button onclick="cerrarModalEditar()" class="absolute top-6 right-6 text-3xl text-gray-400 hover:text-gray-700 transition-colors leading-none">&times;</button>
+            <h2 class="text-2xl font-black mb-6 text-ctm-azul flex items-center gap-2">
+                <span>✏️</span> Editar Negocio
+            </h2>
+            
+            <form id="form-editar" onsubmit="event.preventDefault(); guardarEdicion();" class="space-y-5">
+                <input type="hidden" id="edit-id">
+                <input type="hidden" id="edit-horarios-oculto">
+                
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                    <input type="text" id="edit-nombre" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-ctm-azul focus:border-ctm-azul font-bold text-gray-800 transition-all">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categoría</label>
+                        <select id="edit-categoria" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-ctm-azul focus:border-ctm-azul font-bold text-gray-800 transition-all appearance-none">
+                            <option>Alimentos</option>
+                            <option>Servicios</option>
+                            <option>Salud</option>
+                            <option>Hogar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp (10 dígitos)</label>
+                        <input type="number" id="edit-wa" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-ctm-azul focus:border-ctm-azul font-bold text-gray-800 transition-all">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nivel de Suscripción</label>
+                    <select id="edit-nivel" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-ctm-azul focus:border-ctm-azul font-bold text-gray-800 transition-all appearance-none">
+                        <option value="0">Nivel 0 - Básico (Gratis)</option>
+                        <option value="1">Nivel 1 - Pro</option>
+                        <option value="2">Nivel 2 - Elite</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center justify-between p-5 bg-blue-50 rounded-xl border border-blue-100 mt-2">
+                    <div>
+                        <label class="text-sm font-black text-blue-900 uppercase tracking-wide">Badge de Verificado</label>
+                        <p class="text-xs text-blue-600 font-medium mt-0.5">Muestra la palomita azul ☑️</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="edit-verificado" class="sr-only peer">
+                        <div class="w-14 h-7 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                    </label>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-100">
+                    <button type="submit" id="btn-guardar-edicion" class="w-full bg-ctm-dorado text-ctm-azul py-4 rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl hover:bg-yellow-400 active:scale-95 transition-all">
+                        Guardar Cambios
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -70,51 +190,141 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             const { data: { session } } = await clienteSupabase.auth.getSession();
-            if (!session) { document.getElementById('pantalla-carga').classList.add('hidden'); document.getElementById('pantalla-denegado').classList.remove('hidden'); return; }
-            const { data: perfil } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', session.user.id).single();
-            if (!perfil || !perfil.es_admin) { document.getElementById('pantalla-carga').classList.add('hidden'); document.getElementById('pantalla-denegado').classList.remove('hidden'); return; }
+            if (!session) { 
+                document.getElementById('pantalla-carga').classList.add('hidden'); 
+                document.getElementById('pantalla-denegado').classList.remove('hidden'); 
+                return; 
+            }
             
-            document.getElementById('pantalla-carga').classList.add('hidden'); document.getElementById('panel-admin').classList.remove('hidden');
+            const { data: perfil } = await clienteSupabase.from('perfiles').select('es_admin').eq('user_id', session.user.id).single();
+            if (!perfil || !perfil.es_admin) { 
+                document.getElementById('pantalla-carga').classList.add('hidden'); 
+                document.getElementById('pantalla-denegado').classList.remove('hidden'); 
+                return; 
+            }
+            
+            document.getElementById('pantalla-carga').classList.add('hidden'); 
+            document.getElementById('panel-admin').classList.remove('hidden');
             cargarTodosLosNegocios();
         });
 
         function cambiarVistaAdmin(vista) {
             document.getElementById('vista-directorio').classList.toggle('hidden', vista !== 'directorio');
             document.getElementById('vista-solicitudes').classList.toggle('hidden', vista !== 'solicitudes');
-            if(vista === 'directorio') cargarTodosLosNegocios(); else cargarSolicitudesPendientes();
+            
+            // Efecto visual en los botones del menú
+            const btnDirectorio = document.getElementById('nav-directorio');
+            const btnSolicitudes = document.getElementById('nav-solicitudes');
+            
+            if(vista === 'directorio') {
+                btnDirectorio.classList.replace('hover:bg-white/10', 'bg-white/10');
+                btnDirectorio.classList.replace('text-blue-100', 'text-white');
+                btnDirectorio.classList.replace('border-transparent', 'border-white/5');
+                
+                btnSolicitudes.classList.replace('bg-white/10', 'hover:bg-white/10');
+                btnSolicitudes.classList.replace('text-white', 'text-blue-100');
+                btnSolicitudes.classList.replace('border-white/5', 'border-transparent');
+                
+                cargarTodosLosNegocios();
+            } else {
+                btnSolicitudes.classList.replace('hover:bg-white/10', 'bg-white/10');
+                btnSolicitudes.classList.replace('text-blue-100', 'text-white');
+                btnSolicitudes.classList.replace('border-transparent', 'border-white/5');
+                
+                btnDirectorio.classList.replace('bg-white/10', 'hover:bg-white/10');
+                btnDirectorio.classList.replace('text-white', 'text-blue-100');
+                btnDirectorio.classList.replace('border-white/5', 'border-transparent');
+                
+                cargarSolicitudesPendientes();
+            }
         }
 
         async function cargarTodosLosNegocios() {
             const { data: negocios } = await clienteSupabase.from('anuncios').select('*').order('id', { ascending: false });
             document.getElementById('tabla-negocios').innerHTML = negocios.map(n => {
-                const badgeVerificado = n.es_verificado ? '<span class="text-blue-500">☑️</span>' : '';
-                return `<tr class="border-b"><td class="p-4 font-bold">${n.nombre_negocio} ${badgeVerificado}</td><td class="p-4 text-sm">${n.categoria}</td><td class="p-4 text-center">Nivel ${n.nivel_pago}</td><td class="p-4 text-right"><button onclick="abrirModalEditar('${encodeURIComponent(JSON.stringify(n))}')" class="text-tm-azul text-xs font-bold mx-2">Editar</button></td></tr>`;
+                const badgeVerificado = n.es_verificado ? '<span class="text-blue-500 ml-1 drop-shadow-sm" title="Verificado">☑️</span>' : '';
+                return `
+                <tr class="border-b transition-colors hover:bg-gray-50">
+                    <td class="p-5 font-black text-gray-800">${n.nombre_negocio} ${badgeVerificado}</td>
+                    <td class="p-5 text-sm font-medium text-gray-500">${n.categoria}</td>
+                    <td class="p-5 text-center"><span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-lg text-xs">Nivel ${n.nivel_pago}</span></td>
+                    <td class="p-5 text-right">
+                        <button onclick="abrirModalEditar('${encodeURIComponent(JSON.stringify(n))}')" class="bg-blue-50 text-ctm-azul hover:bg-blue-100 hover:text-blue-900 border border-blue-100 px-4 py-2 rounded-lg text-xs font-black transition-colors shadow-sm">
+                            Editar
+                        </button>
+                    </td>
+                </tr>`;
             }).join('');
         }
 
         function abrirModalEditar(negocioStr) {
             const n = JSON.parse(decodeURIComponent(negocioStr));
-            document.getElementById('edit-id').value = n.id; document.getElementById('edit-nombre').value = n.nombre_negocio || ''; document.getElementById('edit-categoria').value = n.categoria || 'Servicios';
-            document.getElementById('edit-wa').value = n.enlace_whatsapp || ''; document.getElementById('edit-nivel').value = n.nivel_pago || 0; document.getElementById('edit-verificado').checked = n.es_verificado || false;
+            document.getElementById('edit-id').value = n.id; 
+            document.getElementById('edit-nombre').value = n.nombre_negocio || ''; 
+            document.getElementById('edit-categoria').value = n.categoria || 'Servicios';
+            document.getElementById('edit-wa').value = n.enlace_whatsapp || ''; 
+            document.getElementById('edit-nivel').value = n.nivel_pago || 0; 
+            document.getElementById('edit-verificado').checked = n.es_verificado || false;
             document.getElementById('edit-horarios-oculto').value = JSON.stringify(n.horarios || {}); // Preservar horarios
             document.getElementById('modal-editar').classList.remove('hidden');
         }
 
-        function cerrarModalEditar() { document.getElementById('modal-editar').classList.add('hidden'); }
+        function cerrarModalEditar() { 
+            document.getElementById('modal-editar').classList.add('hidden'); 
+        }
 
         async function guardarEdicion() {
             const id = document.getElementById('edit-id').value;
-            const payloadDatos = { nombre_negocio: document.getElementById('edit-nombre').value, categoria: document.getElementById('edit-categoria').value, enlace_whatsapp: document.getElementById('edit-wa').value, nivel_pago: parseInt(document.getElementById('edit-nivel').value), es_verificado: document.getElementById('edit-verificado').checked, horarios: JSON.parse(document.getElementById('edit-horarios-oculto').value) };
+            const btn = document.getElementById('btn-guardar-edicion');
+            
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+
+            const payloadDatos = { 
+                nombre_negocio: document.getElementById('edit-nombre').value, 
+                categoria: document.getElementById('edit-categoria').value, 
+                enlace_whatsapp: document.getElementById('edit-wa').value, 
+                nivel_pago: parseInt(document.getElementById('edit-nivel').value), 
+                es_verificado: document.getElementById('edit-verificado').checked, 
+                horarios: JSON.parse(document.getElementById('edit-horarios-oculto').value) 
+            };
+            
             await clienteSupabase.functions.invoke('admin-gestionar', { body: { accion: 'editar', id_negocio: id, payload: payloadDatos } });
-            cerrarModalEditar(); cargarTodosLosNegocios();
+            
+            btn.innerText = "Guardar Cambios";
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+            
+            cerrarModalEditar(); 
+            cargarTodosLosNegocios();
         }
 
         async function cargarSolicitudesPendientes() {
             const { data } = await clienteSupabase.from('anuncios').select('*').eq('estado_verificacion', 'pendiente');
-            document.getElementById('tabla-solicitudes').innerHTML = data.map(s => `<tr class="border-b"><td class="p-4 font-bold">${s.nombre_negocio}</td><td class="p-4 text-sm">${s.responsable_nombre}</td><td class="p-4 text-right"><button onclick="alert('Usa tu panel Supabase temporalmente para revisar el bucket de Verificaciones de: ${s.responsable_nombre}')" class="text-blue-600 font-bold text-xs">Revisar INE</button></td></tr>`).join('');
+            
+            if(!data || data.length === 0) {
+                document.getElementById('tabla-solicitudes').innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400 font-bold">No hay solicitudes pendientes en este momento.</td></tr>`;
+                return;
+            }
+
+            document.getElementById('tabla-solicitudes').innerHTML = data.map(s => `
+                <tr class="border-b transition-colors hover:bg-blue-50/50">
+                    <td class="p-5 font-black text-gray-800">${s.nombre_negocio}</td>
+                    <td class="p-5 text-sm font-medium text-gray-600">${s.responsable_nombre}</td>
+                    <td class="p-5 text-right">
+                        <button onclick="alert('Usa tu panel Supabase temporalmente para revisar el bucket de Verificaciones de: ${s.responsable_nombre}')" class="bg-ctm-dorado text-ctm-azul hover:bg-yellow-400 px-4 py-2 rounded-lg font-black text-xs transition-colors shadow-sm">
+                            Revisar INE
+                        </button>
+                    </td>
+                </tr>`
+            ).join('');
         }
 
-        async function cerrarSesion() { await clienteSupabase.auth.signOut(); window.location.href = "index.html"; }
+        async function cerrarSesion() { 
+            await clienteSupabase.auth.signOut(); 
+            window.location.href = "index.html"; 
+        }
     </script>
 </body>
 </html>
