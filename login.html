@@ -121,17 +121,260 @@
     </main>
 
     <div id="modal-terminos" class="hidden fixed inset-0 bg-tm-azul-oscuro bg-opacity-75 z-50 flex items-center justify-center p-4 transition-opacity">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 max-h-[85vh] flex flex-col relative">
-            <h3 class="text-xl font-black text-tm-azul-oscuro mb-4 border-b pb-2">Aviso de Privacidad y Términos</h3>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 sm:p-8 h-[90vh] flex flex-col relative">
             
-            <div class="overflow-y-auto flex-grow text-sm text-gray-600 mb-6 pr-2 space-y-4">
-                <p><strong>1. Uso de la Información:</strong> Los datos personales recabados a través de este formulario (Nombre, WhatsApp y Correo) serán utilizados exclusivamente para la gestión de su cuenta y comunicación directa por parte de la administración de Conecta Tres Marías.</p>
-                <p><strong>2. Protección de Datos:</strong> Nos comprometemos a mantener su información segura y no compartirla, venderla o rentarla a terceros ajenos a la administración del fraccionamiento sin su consentimiento previo, salvo por requerimientos legales.</p>
-                <p><strong>3. Responsabilidad del Usuario:</strong> Al crear una cuenta, usted se compromete a proporcionar información veraz y a mantener la confidencialidad de su contraseña. El uso de la cuenta es personal e intransferible.</p>
-                <p><strong>4. Modificaciones:</strong> Nos reservamos el derecho de modificar este aviso de privacidad y términos de uso en cualquier momento. Los cambios serán notificados a través de la plataforma.</p>
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h3 class="text-2xl font-black text-tm-azul-oscuro">Aviso de Privacidad y Términos de Uso</h3>
+                <button type="button" onclick="cerrarModal()" class="text-gray-400 hover:text-red-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             
-            <button type="button" onclick="cerrarModal()" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-3 rounded-lg font-bold transition shadow-md">Entendido y Cerrar</button>
+            <div class="overflow-y-auto flex-grow text-sm text-gray-600 mb-6 pr-4 space-y-6">
+                
+                <div>
+                    <h2 class="text-xl font-bold text-tm-azul uppercase mb-4 tracking-wide border-b border-gray-200 pb-2">AVISO DE PRIVACIDAD INTEGRAL</h2>
+                    <p class="mb-2"><strong>de Eduardo Bolaños Vazquez para la plataforma Conecta Tres Marías</strong></p>
+                    <p class="mb-4"><em>Última actualización: 14 de abril de 2026</em></p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">1. Identidad y domicilio del responsable</h4>
+                    <p class="mb-3">Eduardo Bolaños Vazquez, en su carácter de responsable del tratamiento de datos personales, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, y portal de internet conectatresmarias.com.mx, pone a disposición de las personas usuarias, negocios, profesionistas, repartidores y demás terceros vinculados con la plataforma Conecta Tres Marías, el presente Aviso de Privacidad Integral. Para cualquier asunto relacionado con datos personales, el titular podrá contactar al responsable en el correo noirsysan@gmail.com y/o al teléfono 4433667106.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">2. Datos personales que podremos recabar</h4>
+                    <p class="mb-2">Dependiendo de la relación que tengas con la plataforma, podremos recabar una o más de las siguientes categorías de datos personales:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li><strong>a) Datos de identificación y contacto:</strong> Nombre completo, nombre comercial, teléfono, WhatsApp, correo electrónico, domicilio, dirección de entrega, colonia, referencias, fotografía de perfil, logotipo comercial, imágenes del negocio, RFC y datos de facturación cuando resulten necesarios.</li>
+                        <li><strong>b) Datos de cuenta y acceso:</strong> Correo de acceso, contraseña cifrada o mecanismos de autenticación, identificadores internos de usuario, historial de sesiones, rol dentro de la plataforma y configuración de perfil.</li>
+                        <li><strong>c) Datos operativos y transaccionales:</strong> Información relacionada con pedidos, solicitudes de contacto, reservas, citas, menús, catálogos, servicios publicados, horarios, disponibilidad, historial de actividad, códigos de pedido, mensajes operativos y estatus de seguimiento.</li>
+                        <li><strong>d) Datos de geolocalización y ubicación:</strong> Ubicación aproximada o precisa, cuando sea necesaria para mostrar la cobertura de entrega, ubicar domicilios, facilitar la logística de pedidos, habilitar mapas o permitir el rastreo de pedidos en curso. En el caso de repartidores, podrá tratarse de geolocalización durante entregas activas o mientras utilicen funciones de rastreo habilitadas por la plataforma.</li>
+                        <li><strong>e) Datos de verificación de perfiles:</strong> En el caso de negocios, profesionistas o repartidores, podremos recabar documentos o datos de respaldo para revisión interna de perfil, tales como identificación, constancias, cédula profesional, acreditaciones, licencias, fotografías o documentación comercial básica, según corresponda.</li>
+                        <li><strong>f) Datos técnicos y de navegación:</strong> Dirección IP, tipo de navegador, sistema operativo, identificadores de dispositivo, fecha y hora de acceso, cookies, almacenamiento local, service workers, registros del sistema, eventos de seguridad y analítica básica de uso.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">3. Datos personales sensibles</h4>
+                    <p class="mb-2">Por regla general, Conecta Tres Marías no solicita datos personales sensibles para el uso ordinario del directorio, el contacto comercial o la gestión básica de pedidos, citas o reservas. No obstante, debido a que la plataforma puede incluir perfiles de médicos, consultorios u otros servicios profesionales, existe la posibilidad de que una persona usuaria proporcione voluntariamente información relacionada con su estado de salud, motivo de consulta o datos clínicos en campos abiertos, mensajes o documentos adjuntos. En esos casos:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>Se solicita a las personas usuarias no ingresar más información sensible de la estrictamente necesaria.</li>
+                        <li>Cualquier dato sensible que sea proporcionado será tratado únicamente para gestionar la cita, canalizar la solicitud o atender la funcionalidad correspondiente.</li>
+                        <li>Cuando legalmente resulte exigible, su tratamiento se sujetará al consentimiento expreso del titular.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">4. Finalidades primarias del tratamiento</h4>
+                    <p class="mb-2">Tus datos personales serán tratados para las siguientes finalidades primarias, necesarias para la operación de la plataforma:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>Crear, administrar y mantener cuentas de usuario.</li>
+                        <li>Permitir el acceso a perfiles, menús, catálogos, agendas, citas, pedidos y funciones relacionadas.</li>
+                        <li>Publicar, editar y mostrar perfiles comerciales, profesionales o de reparto dentro del directorio.</li>
+                        <li>Facilitar el contacto entre personas usuarias y negocios, profesionistas o repartidores, incluso mediante enlaces o canales como WhatsApp.</li>
+                        <li>Gestionar solicitudes de pedido, reservas, citas, disponibilidad y seguimiento operativo.</li>
+                        <li>Habilitar funciones de ubicación, mapas, cálculo de cobertura y rastreo de pedidos cuando proceda.</li>
+                        <li>Revisar documentos para procesos internos de verificación o distintivos de confianza.</li>
+                        <li>Atender soporte, aclaraciones, incidencias, reportes y solicitudes relacionadas con la cuenta o el servicio.</li>
+                        <li>Prevenir fraudes, abusos, accesos no autorizados, usos indebidos de la plataforma o incidentes de seguridad.</li>
+                        <li>Dar cumplimiento a obligaciones legales, fiscales, regulatorias o requerimientos de autoridad competente.</li>
+                        <li>Cobrar, administrar o documentar cuotas, suscripciones o servicios contratados directamente con la plataforma, cuando aplique.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">5. Finalidades secundarias</h4>
+                    <p class="mb-2">De manera adicional, podremos tratar tus datos personales para las siguientes finalidades secundarias:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>Envío de avisos informativos, novedades, mejoras de producto o cambios funcionales.</li>
+                        <li>Encuestas de satisfacción y calidad.</li>
+                        <li>Estadística, analítica interna y mejora de experiencia de uso.</li>
+                        <li>Envío de promociones propias de la plataforma.</li>
+                    </ul>
+                    <p class="mb-3">Si no deseas que tus datos sean tratados para alguna o todas las finalidades secundarias, podrás solicitarlo en cualquier momento al correo noirsysan@gmail.com.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">6. Base de la relación y consentimiento</h4>
+                    <p class="mb-3">El tratamiento de tus datos personales se realizará conforme a la normativa aplicable y a este Aviso de Privacidad. Cuando el tratamiento no requiera consentimiento expreso conforme a la legislación aplicable, el uso continuado de la plataforma y la entrega voluntaria de datos se entenderán como manifestación de voluntad para las finalidades necesarias descritas en este aviso. Tratándose de datos personales sensibles, cuando legalmente corresponda, se recabará el consentimiento expreso del titular por los medios físicos o electrónicos que resulten procedentes.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">7. Transferencias de datos personales</h4>
+                    <p class="mb-2">Tus datos personales podrán ser comunicados a terceros únicamente en los casos necesarios para el cumplimiento de las finalidades descritas en este aviso y/o en los supuestos permitidos por la legislación aplicable. En particular, podremos compartir información con:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>El negocio, restaurante, médico, profesionista, consultorio o prestador de servicios que la persona usuaria seleccione o contacte, cuando ello sea necesario para atender una solicitud, cita, reserva o pedido.</li>
+                        <li>Repartidores vinculados operativamente a una entrega, cuando sea necesario para la logística, localización o cumplimiento del servicio solicitado.</li>
+                        <li>Autoridades competentes, cuando exista requerimiento legal, mandato fundado y motivado o necesidad de cumplir obligaciones jurídicas.</li>
+                        <li>Proveedores tecnológicos que actúen por cuenta del responsable como encargados del tratamiento, incluyendo servicios de hosting, bases de datos, autenticación, almacenamiento, mensajería, mapas, analítica, monitoreo, soporte o infraestructura.</li>
+                    </ul>
+                    <p class="mb-3">Conecta Tres Marías no comercializa ni vende bases de datos personales a terceros.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">8. Uso de cookies y tecnologías similares</h4>
+                    <p class="mb-3">La plataforma puede utilizar cookies, almacenamiento local, service workers, registros de sesión y tecnologías similares para: mantener la sesión iniciada, recordar preferencias, mejorar rendimiento y seguridad, analizar funcionamiento, habilitar notificaciones o funciones progresivas del sitio, facilitar mapas, rastreo y carga de contenido. Podrás modificar la configuración de tu navegador para limitar o bloquear estas tecnologías; sin embargo, algunas funciones podrían dejar de operar correctamente.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">9. Medios para limitar el uso o divulgación de tus datos</h4>
+                    <p class="mb-2">Podrás limitar el uso o divulgación de tus datos personales enviando una solicitud al correo noirsysan@gmail.com, indicando al menos:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>nombre completo del titular,</li>
+                        <li>medio de contacto para responder,</li>
+                        <li>relación con la plataforma,</li>
+                        <li>datos respecto de los cuales solicita la limitación,</li>
+                        <li>alcance de la limitación solicitada.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">10. Derechos ARCO y revocación del consentimiento</h4>
+                    <p class="mb-2">Tienes derecho a acceder a tus datos personales, rectificarlos, cancelarlos u oponerte a su tratamiento, así como a revocar, en su caso, el consentimiento otorgado, en términos de la legislación aplicable. Para ejercer cualquiera de estos derechos, deberás enviar tu solicitud al correo noirsysan@gmail.com, acompañando:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>nombre completo del titular;</li>
+                        <li>documento o datos que acrediten identidad y, en su caso, representación legal;</li>
+                        <li>descripción clara del derecho que deseas ejercer;</li>
+                        <li>datos respecto de los cuales solicitas el ejercicio del derecho;</li>
+                        <li>cualquier elemento que facilite la localización de tu información.</li>
+                    </ul>
+                    <p class="mb-3">Se dará trámite a la solicitud conforme a los plazos y procedimientos establecidos por la normativa vigente.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">11. Conservación de los datos</h4>
+                    <p class="mb-3">Tus datos personales serán conservados únicamente durante el tiempo que resulte necesario para cumplir las finalidades descritas en este aviso, atender obligaciones legales, resolver controversias, mantener registros contables o contractuales, y cumplir con requerimientos de autoridad competente. Una vez concluida la finalidad del tratamiento y cuando no exista obligación legal de conservación, los datos serán suprimidos, eliminados, bloqueados o, en su caso, disociados, conforme a los procedimientos internos aplicables.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">12. Medidas de seguridad</h4>
+                    <p class="mb-3">Se adoptan medidas administrativas, técnicas y físicas razonablemente necesarias para proteger los datos personales contra daño, pérdida, alteración, destrucción, uso, acceso o tratamiento no autorizado. No obstante, ninguna transmisión electrónica o sistema de almacenamiento puede garantizar seguridad absoluta; por ello, en caso de detectarse un incidente que afecte de forma significativa derechos patrimoniales o morales de los titulares, se actuará conforme a la legislación aplicable y a los protocolos internos vigentes.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">13. Plataformas, enlaces y servicios de terceros</h4>
+                    <p class="mb-3">La plataforma puede contener enlaces, botones o integraciones hacia servicios de terceros, como aplicaciones de mensajería, mapas, redes sociales u otros sitios externos. El tratamiento de datos realizado directamente por dichos terceros se sujetará a sus propios términos, avisos y políticas, por lo que Conecta Tres Marías no asume responsabilidad por prácticas de privacidad ajenas a su operación directa.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">14. Menores de edad</h4>
+                    <p class="mb-3">La plataforma no está dirigida de forma principal a menores de edad para la contratación autónoma de servicios. Si un menor proporciona datos personales sin autorización de quien ejerza patria potestad o tutela, la persona responsable podrá solicitar su revisión o eliminación mediante los canales señalados en este aviso.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">15. Cambios al presente aviso de privacidad</h4>
+                    <p class="mb-3">Eduardo Bolaños Vazquez podrá modificar o actualizar este Aviso de Privacidad cuando resulte necesario por cambios legales, regulatorios, operativos, tecnológicos o de modelo de negocio. Las modificaciones estarán disponibles a través de conectatresmarias.com.mx o por los medios que razonablemente determine el responsable.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">16. Aceptación</h4>
+                    <p class="mb-8">El uso de la plataforma, el registro de una cuenta, la carga de datos y/o la continuidad en el uso de los servicios implicará el conocimiento del presente Aviso de Privacidad, sin perjuicio de los consentimientos específicos que deban recabarse cuando legalmente resulten exigibles.</p>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-tm-azul uppercase mb-4 tracking-wide border-b border-gray-200 pb-2">TÉRMINOS Y CONDICIONES DE USO</h2>
+                    <p class="mb-2"><strong>de la plataforma Conecta Tres Marías</strong></p>
+                    <p class="mb-4"><em>Última actualización: 14 de abril de 2026</em></p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">1. Identificación del operador de la plataforma</h4>
+                    <p class="mb-3">Los presentes Términos y Condiciones regulan el acceso, navegación, registro y uso de la plataforma digital Conecta Tres Marías, operada por Eduardo Bolaños Vazquez, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, correo de contacto noirsysan@gmail.com, teléfono 4433667106 y sitio web conectatresmarias.com.mx.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">2. Objeto de la plataforma</h4>
+                    <p class="mb-2">Conecta Tres Marías es una herramienta digital de intermediación y visibilidad que permite conectar a personas usuarias con negocios, restaurantes, médicos, profesionistas, consultorios, prestadores de servicios y, en su caso, repartidores independientes. La plataforma podrá ofrecer, entre otras funciones:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>directorio de perfiles,</li>
+                        <li>publicación de menús, catálogos o servicios,</li>
+                        <li>solicitud de contacto,</li>
+                        <li>agendas, reservas o citas,</li>
+                        <li>seguimiento de pedidos,</li>
+                        <li>paneles de administración de perfil,</li>
+                        <li>procesos internos de verificación limitada,</li>
+                        <li>herramientas de ubicación o rastreo durante servicios activos.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">3. Naturaleza del servicio</h4>
+                    <p class="mb-2">La plataforma no es, por regla general, la proveedora final de los bienes o servicios anunciados por terceros dentro del directorio. Salvo que se indique expresamente por escrito en un módulo específico, Conecta Tres Marías actúa únicamente como medio digital para facilitar el contacto, la visibilidad y ciertas funciones operativas entre las partes. En consecuencia:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>El negocio, médico, profesionista, consultorio o repartidor anunciado es quien ofrece y ejecuta directamente su servicio.</li>
+                        <li>La persona usuaria decide libremente si contrata o no con dicho tercero.</li>
+                        <li>La relación final respecto del bien o servicio anunciado se entiende celebrada entre la persona usuaria y el tercero correspondiente.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">4. Registro y cuentas</h4>
+                    <p class="mb-3">Para usar ciertas funcionalidades, la persona usuaria deberá crear una cuenta y proporcionar información veraz, completa y actualizada. La persona usuaria será responsable de resguardar su contraseña y credenciales, no compartir accesos indebidamente, mantener actualizados sus datos y responder por la actividad realizada desde su cuenta, salvo prueba de uso no autorizado oportunamente reportado. La plataforma podrá solicitar validaciones adicionales de identidad, contacto o seguridad cuando lo considere razonablemente necesario.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">5. Tipos de usuarios</h4>
+                    <p class="mb-2">Podrán existir, entre otros, los siguientes perfiles:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>Usuarios consumidores o solicitantes.</li>
+                        <li>Negocios o comercios.</li>
+                        <li>Médicos, profesionistas o consultorios.</li>
+                        <li>Repartidores.</li>
+                        <li>Administradores internos.</li>
+                    </ul>
+                    <p class="mb-3">Cada perfil deberá utilizar las herramientas exclusivamente para fines lícitos y acordes con su naturaleza.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">6. Publicación de perfiles y contenidos</h4>
+                    <p class="mb-2">Los terceros que publiquen un perfil en la plataforma manifiestan y garantizan, bajo su propia responsabilidad, que:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>cuentan con capacidad legal para ofrecer sus bienes o servicios,</li>
+                        <li>la información que publican es veraz, actualizada y no induce a error,</li>
+                        <li>tienen derecho a usar nombres, marcas, fotografías, menús, logotipos, imágenes o textos que suban,</li>
+                        <li>cuentan con licencias, permisos, autorizaciones o acreditaciones requeridas por la legislación aplicable, cuando corresponda.</li>
+                    </ul>
+                    <p class="mb-3">Queda prohibido publicar información falsa, engañosa, ilegal, discriminatoria, difamatoria, infractora de derechos de terceros o que pueda poner en riesgo a otros usuarios.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">7. Verificación y distintivos</h4>
+                    <p class="mb-3">La plataforma podrá habilitar mecanismos de revisión documental o distintivos visuales, tales como cuentas verificadas o sellos de confianza. No obstante, salvo manifestación expresa en contrario, cualquier verificación realizada por la plataforma será limitada y tendrá únicamente fines informativos o de referencia interna. Dicha revisión no constituye certificación integral, dictamen profesional, garantía de calidad, validación permanente, aval legal ni aseguramiento del cumplimiento futuro del tercero verificado. La permanencia de un perfil o la exhibición de un distintivo no significa que la plataforma garantice identidad, solvencia, ética, calidad, legalidad, resultados, licencias vigentes o inexistencia de quejas.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">8. Pedidos, citas, reservas y contacto</h4>
+                    <p class="mb-3">La plataforma podrá permitir que la persona usuaria solicite pedidos, citas, reservas o contacto con terceros. Estas solicitudes tendrán carácter de canalización o facilitación tecnológica. La aceptación final, disponibilidad real, confirmación, ejecución, modificación, cancelación, tiempo de respuesta, calidad, precio final y cumplimiento del servicio corresponden al tercero que lo ofrece. La plataforma no garantiza que toda solicitud sea aceptada, respondida o ejecutada por el tercero correspondiente.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">9. Pagos a terceros y deslinde económico</h4>
+                    <p class="mb-2">Salvo en lo relativo a cuotas propias de suscripción o servicios directamente cobrados por la plataforma, Conecta Tres Marías no recibe, procesa, resguarda ni administra pagos entre usuarios y terceros anunciados. Por ello:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>cualquier anticipo, pago, liquidación, reembolso, devolución, ajuste o controversia respecto del bien o servicio anunciado será responsabilidad directa de las partes que celebren la operación;</li>
+                        <li>la plataforma no será depositaria, mandataria, comisionista ni intermediaria financiera entre usuario y tercero, salvo acuerdo expreso y escrito en sentido distinto;</li>
+                        <li>la persona usuaria deberá verificar antes de pagar la identidad, condiciones, precio, disponibilidad y términos del tercero con quien contrata.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">10. Suscripciones y servicios cobrados por la plataforma</h4>
+                    <p class="mb-3">Cuando la plataforma ofrezca planes, membresías, niveles de visibilidad, herramientas premium o cuotas mensuales para negocios, consultorios u otros perfiles, dichas suscripciones corresponderán exclusivamente al uso de funcionalidades digitales de la plataforma. Salvo que expresamente se indique, el pago de una suscripción no garantiza ventas, pacientes, pedidos, ingresos, posicionamiento ni resultados comerciales; no implica exclusividad territorial; no obliga a la plataforma a mantener una herramienta idéntica para siempre; y podrá actualizarse prospectivamente, previa comunicación razonable al usuario correspondiente.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">11. Servicios médicos o profesionales</h4>
+                    <p class="mb-3">Cuando en la plataforma existan médicos, consultorios u otros profesionistas, la plataforma no presta por sí misma servicios médicos ni emite diagnósticos, tratamientos, recetas, valoraciones clínicas o recomendaciones profesionales. Toda consulta, intervención, atención, orientación, diagnóstico, tratamiento o acto profesional es responsabilidad exclusiva del profesionista o establecimiento correspondiente. La plataforma no sustituye atención médica de urgencia. En caso de emergencia, la persona usuaria deberá acudir directamente a servicios médicos, autoridades o números de emergencia competentes.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">12. Repartidores y entregas</h4>
+                    <p class="mb-3">Cuando la plataforma habilite funciones de entrega, seguimiento o rastreo, ello tendrá un fin operativo e informativo. Salvo pacto escrito distinto, los repartidores que usen la plataforma lo harán como terceros independientes respecto de la operación concreta del servicio anunciado. La plataforma no garantiza tiempos exactos de entrega, disponibilidad continua de repartidores ni aceptación de todos los servicios. La información de rastreo, ETA, ubicación o estatus tendrá carácter estimado y podrá variar por tráfico, clima, fallas técnicas, decisiones del negocio, errores de captura o eventos fuera de control razonable.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">13. Uso aceptable y prohibiciones</h4>
+                    <p class="mb-2">Queda prohibido usar la plataforma para:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>fines ilícitos o fraudulentos,</li>
+                        <li>suplantación de identidad,</li>
+                        <li>publicación de información falsa o engañosa,</li>
+                        <li>acoso, amenazas, discriminación o abuso,</li>
+                        <li>captación indebida de datos personales de terceros,</li>
+                        <li>acceso no autorizado a cuentas, paneles o sistemas,</li>
+                        <li>manipulación de precios, pedidos, reseñas, ubicación o verificaciones,</li>
+                        <li>distribución de malware, spam o automatizaciones abusivas,</li>
+                        <li>publicación de servicios prohibidos por ley o sin permisos necesarios,</li>
+                        <li>cualquier acto que afecte seguridad, estabilidad o reputación de la plataforma.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">14. Suspensión, limitación o baja de cuentas</h4>
+                    <p class="mb-3">La plataforma podrá, de manera razonable y fundada, suspender, limitar, ocultar o dar de baja cuentas, perfiles, publicaciones o accesos cuando detecte incumplimiento de estos términos, riesgo para otros usuarios, reportes reiterados o verosímiles, documentación falsa o insuficiente, uso indebido de verificaciones, órdenes de autoridad, incidentes de seguridad o fraude. Lo anterior no implica obligación de la plataforma de monitorear exhaustivamente todas las actividades de todos los usuarios en tiempo real.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">15. Propiedad intelectual</h4>
+                    <p class="mb-3">La plataforma, su diseño, código, estructura, textos propios, logotipos, interfaces, elementos gráficos, funcionalidades y demás contenidos propios son propiedad de Eduardo Bolaños Vazquez o de sus respectivos titulares y se encuentran protegidos por la legislación aplicable. Los usuarios conservan los derechos sobre el contenido que legítimamente suban, pero otorgan a la plataforma una licencia no exclusiva, revocable y limitada para alojarlo, reproducirlo, mostrarlo y comunicarlo dentro de la plataforma, únicamente para la operación y difusión del servicio, mientras dicho contenido permanezca publicado o mientras sea necesario para fines operativos o probatorios.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">16. Exactitud de la información y disponibilidad del sistema</h4>
+                    <p class="mb-3">La plataforma procura mantener información y funciones actualizadas; sin embargo, no garantiza que el sitio se encuentre libre de errores, interrupciones, retrasos o inconsistencias en todo momento. La disponibilidad podrá verse afectada por mantenimiento, caídas de proveedores tecnológicos, actualizaciones, incidentes de seguridad, fallas de red, servicios de terceros o eventos de fuerza mayor.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">17. Limitación razonable de responsabilidad</h4>
+                    <p class="mb-2">En la máxima medida permitida por la legislación aplicable, Conecta Tres Marías será responsable únicamente por los daños directos que deriven de actos propios acreditados y atribuibles directamente a su operación, cuando así corresponda conforme a derecho. La plataforma no será responsable por:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li>actos, omisiones, incumplimientos, negligencia, mala praxis, fraudes, cancelaciones, cobros, retrasos, mala calidad, daños o conflictos imputables a negocios, médicos, profesionistas, consultorios, repartidores o usuarios terceros;</li>
+                        <li>pérdidas derivadas de decisiones de contratación adoptadas directamente entre usuarios y terceros;</li>
+                        <li>fallas originadas por plataformas externas, servicios de mensajería, mapas, redes móviles, pasarelas o proveedores tecnológicos ajenos al control razonable de la plataforma;</li>
+                        <li>información falsa proporcionada por terceros, aun cuando posteriormente sea retirada;</li>
+                        <li>pérdida de ganancias, lucro cesante, daño indirecto o daños consecuenciales derivados del uso de la plataforma, salvo que una norma imperativa disponga lo contrario.</li>
+                    </ul>
+                    <p class="mb-3">Nada de lo anterior excluirá responsabilidades que legalmente no puedan limitarse o renunciarse.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">18. Protección de datos personales</h4>
+                    <p class="mb-3">El tratamiento de datos personales se regirá por el Aviso de Privacidad Integral vigente de la plataforma, el cual forma parte complementaria de estos Términos y Condiciones.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">19. Enlaces y servicios de terceros</h4>
+                    <p class="mb-3">La plataforma podrá contener integraciones o enlaces a servicios externos, incluyendo aplicaciones de mensajería, mapas, redes sociales o sitios de terceros. El acceso y uso de dichos servicios se sujetará a los términos y políticas de cada tercero.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">20. Modificaciones a los términos</h4>
+                    <p class="mb-3">La plataforma podrá actualizar estos Términos y Condiciones por cambios legales, operativos, técnicos o comerciales. Las nuevas versiones serán publicadas en conectatresmarias.com.mx y entrarán en vigor a partir de su publicación o de la fecha indicada en la actualización correspondiente.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">21. Legislación aplicable y jurisdicción</h4>
+                    <p class="mb-3">Estos Términos y Condiciones se interpretarán conforme a las leyes aplicables en los Estados Unidos Mexicanos. Cualquier controversia se atenderá, en primer término, mediante comunicación directa entre las partes. Sin perjuicio de los derechos que correspondan a las personas consumidoras conforme a la legislación aplicable, las partes podrán someterse a las autoridades y tribunales competentes de Morelia, Michoacán.</p>
+
+                    <h4 class="font-bold text-tm-azul-oscuro mt-4 mb-1">22. Contacto</h4>
+                    <p class="mb-3">Para dudas, aclaraciones o reportes relacionados con estos Términos y Condiciones, podrás escribir a noirsysan@gmail.com o comunicarte al 4433667106.</p>
+                </div>
+
+            </div>
+            
+            <div class="mt-4 pt-4 border-t">
+                <button type="button" onclick="cerrarModal()" class="w-full bg-tm-azul hover:bg-tm-azul-oscuro text-white py-4 rounded-lg font-bold text-lg transition shadow-md">He leído y entiendo los términos</button>
+            </div>
         </div>
     </div>
 
