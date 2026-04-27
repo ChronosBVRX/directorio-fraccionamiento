@@ -2,88 +2,118 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Airbnb - Vive Tres Marías</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Airbnb - Conecta Tres Marias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
-          theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-azul-oscuro': '#143653', 'tm-dorado': '#d4af37', 'tm-gris': '#4b5563' } } }
+          theme: { 
+              extend: { 
+                  fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                  colors: { 
+                      'ctm-azul': '#143653', 
+                      'ctm-secundario': '#22527b', 
+                      'ctm-dorado': '#d4af37', 
+                      'ctm-gris': '#4b5563' 
+                  } 
+              } 
+          }
         }
     </script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans relative">
+<body class="bg-gray-50 min-h-screen font-sans relative selection:bg-ctm-dorado selection:text-white">
 
-    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-tm-azul p-3 relative">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="index.html">
-                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" class="h-10 sm:h-12">
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b-4 border-ctm-dorado p-3 relative flex items-center justify-center h-20">
+        <div class="max-w-7xl mx-auto flex items-center justify-between w-full px-2">
+            <a href="index.html" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" class="h-10 sm:h-12 drop-shadow-sm" alt="Conecta Tres Marias">
             </a>
-            <button onclick="document.getElementById('dropdown').classList.toggle('hidden')" class="p-2 bg-gray-100 rounded-lg text-tm-azul hover:bg-gray-200 transition">☰</button>
+            <button onclick="document.getElementById('dropdown').classList.toggle('hidden')" class="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-ctm-azul hover:bg-gray-100 active:scale-95 transition-all shadow-sm">
+                <span class="text-xl leading-none">☰</span>
+            </button>
         </div>
-        <div id="dropdown" class="hidden absolute right-3 mt-2 w-48 bg-white shadow-xl rounded-xl border z-50 overflow-hidden">
-            <a href="index.html" class="block p-3 border-b hover:bg-gray-50 text-sm">🏪 Directorio</a>
-            <a href="rastreo.html" class="block p-3 hover:bg-gray-50 text-sm">📍 Rastrear Pedido</a>
+        
+        <div id="dropdown" class="hidden absolute right-5 top-20 mt-2 w-56 bg-white shadow-2xl rounded-2xl border border-gray-100 z-50 overflow-hidden transform transition-all">
+            <a href="index.html" class="block p-4 border-b border-gray-50 hover:bg-blue-50 text-sm font-bold text-gray-700 transition-colors">
+                <span class="mr-2">🏪</span> Directorio
+            </a>
+            <a href="rastreo.html" class="block p-4 hover:bg-blue-50 text-sm font-bold text-gray-700 transition-colors">
+                <span class="mr-2">📍</span> Rastrear Pedido
+            </a>
         </div>
     </header>
 
-    <main class="max-w-xl mx-auto p-4 mt-6 relative z-10">
-        <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-tm-azul-oscuro">
-            <h1 class="text-2xl font-black text-tm-azul-oscuro mb-6 text-center">Panel Airbnb</h1>
+    <main class="max-w-xl mx-auto p-5 mt-6 relative z-10 pb-12">
+        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl border-t-8 border-ctm-azul">
+            <div class="text-center mb-8">
+                <span class="text-5xl block mb-3 drop-shadow-sm">🏠</span>
+                <h1 class="text-3xl font-black text-ctm-azul tracking-tight">Panel Airbnb</h1>
+                <p class="text-sm text-gray-500 mt-2 font-medium">Genera pósters con QR únicos para tus alojamientos.</p>
+            </div>
             
-            <form id="form-airbnb" onsubmit="guardarAirbnb(event)" class="space-y-4">
+            <form id="form-airbnb" onsubmit="guardarAirbnb(event)" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-bold text-tm-gris mb-1">Nombre del Alojamiento</label>
-                    <input type="text" id="airbnb-nombre" placeholder="Ej: Departamento T4 2A" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-tm-dorado" required>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nombre del Alojamiento</label>
+                    <input type="text" id="airbnb-nombre" placeholder="Ej: Departamento T4 2A" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-ctm-azul/10 focus:border-ctm-azul focus:bg-white text-gray-800 font-bold transition-all shadow-inner" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-tm-gris mb-1">Dirección de Entrega</label>
-                    <textarea id="airbnb-direccion" placeholder="Calle, Número, Coto y referencias..." class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-tm-dorado" rows="3" required></textarea>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Dirección de Entrega</label>
+                    <textarea id="airbnb-direccion" placeholder="Calle, Número, Coto y referencias exactas..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-ctm-azul/10 focus:border-ctm-azul focus:bg-white text-gray-800 font-medium transition-all shadow-inner resize-none" rows="3" required></textarea>
                 </div>
-                <button type="submit" id="btn-guardar" class="w-full bg-tm-azul text-white font-black py-4 rounded-xl shadow-lg hover:bg-tm-azul-oscuro transition">
-                    Guardar y Crear Póster
-                </button>
+                
+                <div class="pt-4">
+                    <button type="submit" id="btn-guardar" class="w-full bg-ctm-azul text-white font-black py-4 rounded-2xl shadow-lg hover:shadow-xl hover:bg-opacity-90 active:scale-95 transition-all uppercase tracking-wider text-sm flex justify-center items-center gap-2">
+                        <span>💾</span> Guardar y Crear Póster
+                    </button>
+                </div>
             </form>
 
-            <div id="seccion-pdf" class="hidden mt-8 text-center border-t pt-8">
-                <p class="text-sm text-gray-500 mb-4 font-bold">¡Configuración guardada!</p>
-                <button onclick="generarPosterPDF()" class="w-full bg-gradient-to-r from-tm-dorado to-yellow-600 text-white font-black py-5 rounded-2xl shadow-xl hover:scale-105 transition-all">
-                    🖨️ Descargar Póster (1 Hoja)
+            <div id="seccion-pdf" class="hidden mt-10 text-center border-t border-gray-100 pt-8">
+                <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6">
+                    <p class="text-sm text-green-700 font-bold">¡Configuración guardada con éxito!</p>
+                </div>
+                <button onclick="generarPosterPDF()" class="w-full bg-gradient-to-r from-ctm-dorado to-yellow-500 text-ctm-azul font-black py-5 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 transition-all uppercase tracking-wider text-sm flex justify-center items-center gap-3">
+                    <span class="text-xl">🖨️</span> Descargar Póster (1 Hoja)
                 </button>
             </div>
         </div>
     </main>
 
     <div id="contenedor-poster" style="display: none;">
-        <div id="plantilla-poster" style="width: 800px; height: 1130px; background: white; border: 30px solid #22527b; padding: 70px 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
+        <div id="plantilla-poster" style="width: 800px; height: 1130px; background: white; border: 35px solid #143653; padding: 70px 50px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
             
-            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 300px; margin-bottom: 25px;">
+            <img src="https://raw.githubusercontent.com/ChronosBVRX/directorio-fraccionamiento/main/images/Logo.png" style="width: 320px; margin-bottom: 30px;">
             
-            <h1 style="font-size: 50px; color: #143653; font-weight: 900; margin: 0; line-height: 1.1; text-align: center;">Pide a domicilio</h1>
+            <h1 style="font-size: 55px; color: #143653; font-weight: 900; margin: 0; line-height: 1.1; text-align: center; letter-spacing: -1px;">Pide a domicilio</h1>
             
-            <div style="background: #f3f4f6; border-radius: 20px; padding: 20px; width: 85%; margin: 25px 0; border: 2px dashed #999; text-align: center;">
-                <p style="font-size: 24px; color: #4b5563; font-weight: 600; margin: 0;">📍 Estás en: <br> 
-                    <span id="pdf-nombre" style="font-size: 35px; color: #22527b; font-weight: 900; display: block; margin-top: 8px;"></span>
+            <div style="background: #f8fafc; border-radius: 24px; padding: 25px; width: 85%; margin: 30px 0; border: 3px dashed #cbd5e1; text-align: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
+                <p style="font-size: 26px; color: #64748b; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 2px;">📍 Estás en: <br> 
+                    <span id="pdf-nombre" style="font-size: 40px; color: #143653; font-weight: 900; display: block; margin-top: 10px; text-transform: none; letter-spacing: 0;"></span>
                 </p>
             </div>
 
-            <div style="background: white; padding: 15px; border-radius: 20px; border: 5px solid #e5e7eb; display: inline-block; margin-bottom: 25px;">
+            <div style="background: white; padding: 20px; border-radius: 24px; border: 6px solid #f1f5f9; display: inline-block; margin-bottom: 35px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
                 <div id="qr-container"></div>
             </div>
 
-            <div style="background: #fff8eb; border-left: 12px solid #d4af37; padding: 25px; border-radius: 0 20px 20px 0; width: 85%;">
-                <h3 style="font-size: 28px; color: #d4af37; font-weight: 900; margin: 0 0 10px 0;">Instrucciones:</h3>
-                <p style="font-size: 20px; color: #4b5563; margin: 0 0 8px 0; font-weight: bold;">📱 1. Escanea el código con tu celular.</p>
-                <p style="font-size: 20px; color: #4b5563; margin: 0 0 8px 0; font-weight: bold;">🍔 2. Elige tu comida favorita.</p>
-                <p style="font-size: 20px; color: #22527b; margin: 0; font-weight: 900;">✨ 3. ¡Pide fácil! Tu dirección ya está cargada.</p>
+            <div style="background: #fefce8; border-left: 14px solid #d4af37; padding: 30px; border-radius: 0 24px 24px 0; width: 85%; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                <h3 style="font-size: 32px; color: #b48b1d; font-weight: 900; margin: 0 0 15px 0;">Instrucciones:</h3>
+                <p style="font-size: 22px; color: #334155; margin: 0 0 12px 0; font-weight: bold;">📱 1. Escanea el código con tu celular.</p>
+                <p style="font-size: 22px; color: #334155; margin: 0 0 12px 0; font-weight: bold;">🍔 2. Elige tu comida favorita.</p>
+                <p style="font-size: 22px; color: #143653; margin: 0; font-weight: 900;">✨ 3. ¡Pide fácil! Tu dirección ya está cargada.</p>
             </div>
 
-            <p style="margin-top: 25px; color: #999; font-weight: bold; letter-spacing: 3px; font-size: 14px;">VIVETRESMARIAS.COM</p>
+            <p style="margin-top: 40px; color: #94a3b8; font-weight: 900; letter-spacing: 4px; font-size: 16px;">CONECTATRESMARIAS.COM</p>
         </div>
     </div>
+
     <script>
         const SUPABASE_URL = 'https://vlnpefgqodnxcqeztcnh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbnBlZmdxb2RueGNxZXp0Y25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMzI4NTUsImV4cCI6MjA5MDkwODg1NX0.mhDVhu9xRnFFi1dEevyK2tDnNk1Kc6pPRatQCxt-1NM';
@@ -92,7 +122,9 @@
         async function guardarAirbnb(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-guardar');
-            btn.innerText = "Guardando..."; btn.disabled = true;
+            btn.innerHTML = "<span>⏳</span> Guardando..."; 
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
 
             const nombre = document.getElementById('airbnb-nombre').value;
             const direccion = document.getElementById('airbnb-direccion').value;
@@ -107,22 +139,33 @@
                 
                 const qrCont = document.getElementById('qr-container');
                 qrCont.innerHTML = "";
-                // QR redimensionado a 240px para encajar mejor
-                new QRCode(qrCont, { text: urlMagica, width: 240, height: 240, colorDark: "#143653" });
+                // QR redimensionado a 240px para encajar mejor. Color actualizado a ctm-azul
+                new QRCode(qrCont, { text: urlMagica, width: 240, height: 240, colorDark: "#143653", colorLight: "#ffffff" });
                 
                 document.getElementById('seccion-pdf').classList.remove('hidden');
-                alert("¡Guardado! Ya puedes descargar tu póster.");
+                
+                // Pequeño feedback visual
+                btn.innerHTML = "<span>✅</span> ¡Datos Guardados!";
+                setTimeout(() => {
+                    btn.innerHTML = "<span>💾</span> Actualizar Datos"; 
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
+                }, 2000);
+                
             } else { 
-                alert("Error al guardar en la base de datos."); 
+                alert("Error al guardar en la base de datos: " + (error?.message || "Desconocido")); 
+                btn.innerHTML = "<span>💾</span> Guardar y Crear Póster"; 
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
             }
-            btn.innerText = "Guardar y Crear Póster"; btn.disabled = false;
         }
 
         function generarPosterPDF() {
             const btn = document.querySelector('#seccion-pdf button');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = "⏳ Creando archivo...";
+            btn.innerHTML = "⏳ Creando archivo PDF...";
             btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-wait');
 
             const header = document.querySelector('header');
             header.style.display = 'none';
@@ -154,6 +197,15 @@
                 header.style.display = 'flex'; 
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-wait');
+            }).catch(err => {
+                console.error("Error generando PDF: ", err);
+                alert("Hubo un error al generar el PDF. Intenta nuevamente.");
+                contenedor.style.display = 'none';
+                header.style.display = 'flex'; 
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-wait');
             });
         }
     </script>
