@@ -3,103 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>App Repartidor - Vive Tres Marías</title>
+    <title>App Repartidor - Conecta Tres Marias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#143653', 'tm-dorado': '#d4af37' } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                    colors: { 
+                        'ctm-azul': '#143653', 
+                        'ctm-dorado': '#d4af37' 
+                    } 
+                } 
+            } 
+        }
     </script>
     <style>
         /* Ocultar scrollbar para un look más de "App nativa" */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         body { -webkit-tap-highlight-color: transparent; }
+        /* Efecto de cristal para la navegación */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
+<body class="bg-gray-50 h-screen flex flex-col font-sans overflow-hidden selection:bg-ctm-dorado selection:text-ctm-azul">
 
-    <header class="bg-tm-azul text-white p-4 shadow-md z-20 shrink-0 flex justify-between items-center relative rounded-b-2xl">
+    <header class="bg-ctm-azul text-white p-5 shadow-lg z-20 shrink-0 flex justify-between items-center relative rounded-b-3xl">
         <div>
-            <h1 class="font-black text-xl tracking-tight">Vive Repartidor</h1>
-            <p id="nombre-repartidor" class="text-xs text-blue-200 font-bold mt-0.5">Cargando perfil...</p>
+            <h1 class="font-black text-2xl tracking-tight">Conecta Repartidor</h1>
+            <p id="nombre-repartidor" class="text-sm text-blue-200 font-bold mt-0.5 opacity-90">Cargando perfil...</p>
         </div>
-        <div class="text-right">
-            <div class="text-[10px] font-black text-tm-dorado uppercase tracking-widest mb-1">Reputación</div>
-            <div class="bg-white/10 px-3 py-1 rounded-lg border border-white/20 text-sm font-bold shadow-inner">
+        <div class="text-right flex flex-col items-end">
+            <div class="text-[10px] font-black text-ctm-dorado uppercase tracking-widest mb-1">Reputación</div>
+            <div class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 text-sm font-bold shadow-inner flex items-center gap-1">
                 ⭐ <span id="stats-reputacion">5.0</span>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow overflow-y-auto scrollbar-hide relative pb-24 w-full max-w-md mx-auto">
+    <main class="flex-grow overflow-y-auto scrollbar-hide relative pb-28 w-full max-w-md mx-auto">
         
-        <div id="vista-viajes" class="p-4 space-y-4 block min-h-full flex flex-col">
+        <div id="vista-viajes" class="p-5 space-y-5 block min-h-full flex flex-col">
             
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-200 text-center mb-2 shrink-0">
-                <div id="estado-indicador" class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4 transition-colors">
-                    <div id="estado-punto" class="w-8 h-8 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-colors"></div>
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 text-center mb-2 shrink-0 relative overflow-hidden">
+                <div id="estado-indicador" class="w-20 h-20 mx-auto rounded-full bg-red-50 flex items-center justify-center mb-4 transition-all duration-300">
+                    <div id="estado-punto" class="w-10 h-10 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-colors duration-300"></div>
                 </div>
-                <h2 id="estado-titulo" class="text-2xl font-black text-gray-800 mb-1">Desconectado</h2>
-                <p id="estado-desc" class="text-sm text-gray-500 mb-6">Conéctate para recibir solicitudes.</p>
+                <h2 id="estado-titulo" class="text-2xl font-black text-gray-800 mb-1 tracking-tight">Desconectado</h2>
+                <p id="estado-desc" class="text-sm text-gray-500 mb-6 font-medium">Conéctate para recibir solicitudes.</p>
                 
-                <button id="btn-conexion" onclick="toggleConexion()" class="w-full bg-gray-800 text-white font-black text-lg py-4 rounded-2xl shadow-lg hover:scale-[0.98] active:scale-95 transition-all uppercase tracking-wider">
+                <button id="btn-conexion" onclick="toggleConexion()" class="w-full bg-gray-800 text-white font-black text-lg py-4 rounded-2xl shadow-xl hover:scale-[0.98] active:scale-95 transition-all uppercase tracking-wider">
                     INICIAR TURNO
                 </button>
             </div>
 
-            <div class="flex justify-between items-end px-2 mt-4 hidden" id="header-feed">
-                <h3 class="font-black text-gray-400 uppercase tracking-widest text-xs">Mis Entregas Activas</h3>
-                <button onclick="recargarFeedManual()" class="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg text-xs font-bold active:bg-blue-100 transition">🔄 Actualizar</button>
+            <div class="flex justify-between items-center px-2 mt-4 hidden" id="header-feed">
+                <h3 class="font-black text-gray-400 uppercase tracking-widest text-xs flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Mis Entregas Activas
+                </h3>
+                <button onclick="recargarFeedManual()" class="text-ctm-azul bg-blue-50 px-4 py-2 rounded-xl text-xs font-black active:bg-blue-100 transition shadow-sm flex items-center gap-1">
+                    🔄 Actualizar
+                </button>
             </div>
             
-            <div id="contenedor-pedidos" class="space-y-4 flex-grow">
+            <div id="contenedor-pedidos" class="space-y-5 flex-grow">
                 </div>
         </div>
 
-        <div id="vista-historial" class="p-4 hidden min-h-full flex flex-col">
-            <div class="bg-tm-azul text-white p-6 rounded-[2rem] shadow-lg mb-6 text-center bg-gradient-to-br from-[#143653] to-[#22527b]">
-                <h2 class="text-3xl font-black mb-1" id="historial-contador">0</h2>
-                <p class="text-xs text-blue-200 uppercase tracking-widest font-bold">Viajes Completados</p>
+        <div id="vista-historial" class="p-5 hidden min-h-full flex flex-col">
+            <div class="bg-ctm-azul text-white p-8 rounded-[2.5rem] shadow-xl mb-6 text-center bg-gradient-to-br from-[#143653] to-[#22527b] relative overflow-hidden">
+                <div class="absolute top-0 right-0 opacity-10 text-8xl -mt-4 -mr-4">📋</div>
+                <h2 class="text-5xl font-black mb-2 drop-shadow-md" id="historial-contador">0</h2>
+                <p class="text-sm text-blue-200 uppercase tracking-widest font-bold">Viajes Completados</p>
             </div>
             
             <h3 class="font-black text-gray-400 uppercase tracking-widest text-xs mb-4 ml-2">Tus últimas entregas</h3>
-            <div id="contenedor-historial-lista" class="space-y-3">
+            <div id="contenedor-historial-lista" class="space-y-4">
                 <p class="text-center text-gray-400 mt-10 text-sm font-bold">Cargando historial...</p>
             </div>
         </div>
 
-        <div id="vista-perfil" class="p-4 hidden min-h-full">
+        <div id="vista-perfil" class="p-5 hidden min-h-full">
             <h2 class="font-black text-gray-400 uppercase tracking-widest text-xs mb-4 ml-2">Mis Datos Personales</h2>
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-200">
-                <form id="form-editar-perfil" class="space-y-5">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 mb-6">
+                <form id="form-editar-perfil" class="space-y-6">
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Nombre Completo</label>
-                        <input type="text" id="edit-nombre" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-700">
+                        <label class="block text-xs font-black uppercase text-gray-400 mb-2 ml-1">Nombre Completo</label>
+                        <input type="text" id="edit-nombre" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ctm-azul focus:border-transparent font-bold text-gray-700 transition-all">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Teléfono (WhatsApp)</label>
-                        <input type="tel" id="edit-telefono" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-700">
+                        <label class="block text-xs font-black uppercase text-gray-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
+                        <input type="tel" id="edit-telefono" required class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ctm-azul focus:border-transparent font-bold text-gray-700 transition-all">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Tipo de Vehículo</label>
-                        <select id="edit-vehiculo" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-700">
+                        <label class="block text-xs font-black uppercase text-gray-400 mb-2 ml-1">Tipo de Vehículo</label>
+                        <select id="edit-vehiculo" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-ctm-azul focus:border-transparent font-bold text-gray-700 transition-all appearance-none">
                             <option value="Moto">🏍️ Motocicleta</option>
                             <option value="Bici">🚲 Bicicleta</option>
                             <option value="Auto">🚗 Automóvil</option>
                         </select>
                     </div>
                     
-                    <div class="pt-4 border-t border-gray-100">
-                        <button type="submit" id="btn-guardar-perfil" class="w-full bg-tm-dorado text-white font-black text-sm py-4 rounded-xl shadow-md hover:bg-yellow-600 transition uppercase tracking-wider">
+                    <div class="pt-2">
+                        <button type="submit" id="btn-guardar-perfil" class="w-full bg-ctm-dorado text-ctm-azul font-black text-sm py-4 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 transition-all uppercase tracking-wider">
                             Guardar Cambios
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div class="mt-8">
-                <button onclick="cerrarSesion()" class="w-full bg-red-50 text-red-600 border border-red-200 font-black text-sm py-4 rounded-xl hover:bg-red-100 transition uppercase tracking-wider">
+            <div>
+                <button onclick="cerrarSesion()" class="w-full bg-red-50 text-red-600 border-2 border-red-100 font-black text-sm py-4 rounded-2xl active:bg-red-100 transition-colors uppercase tracking-wider flex justify-center items-center gap-2">
                     Cerrar Sesión
                 </button>
             </div>
@@ -107,27 +129,28 @@
 
     </main>
 
-    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-30 pb-safe">
-        <div class="max-w-md mx-auto flex justify-between px-6 py-3">
-            <button onclick="cambiarTab('viajes')" id="tab-viajes" class="flex flex-col items-center p-2 text-blue-600 transition-colors">
-                <span class="text-2xl mb-1 filter drop-shadow-sm">🛵</span>
+    <nav class="glass-nav border-t border-gray-200 fixed bottom-0 w-full z-30 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)] rounded-t-3xl">
+        <div class="max-w-md mx-auto flex justify-around px-2 py-2">
+            <button onclick="cambiarTab('viajes')" id="tab-viajes" class="flex flex-col items-center p-3 text-ctm-azul transition-all transform tab-activa rounded-2xl">
+                <span class="text-2xl mb-1 filter drop-shadow-sm transition-transform duration-300">🛵</span>
                 <span class="text-[10px] font-black uppercase tracking-widest">Viajes</span>
             </button>
-            <button onclick="cambiarTab('historial')" id="tab-historial" class="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <span class="text-2xl mb-1 filter drop-shadow-sm opacity-60">📋</span>
+            <button onclick="cambiarTab('historial')" id="tab-historial" class="flex flex-col items-center p-3 text-gray-400 hover:text-gray-600 transition-all transform rounded-2xl">
+                <span class="text-2xl mb-1 filter drop-shadow-sm opacity-60 transition-transform duration-300">📋</span>
                 <span class="text-[10px] font-black uppercase tracking-widest">Historial</span>
             </button>
-            <button onclick="cambiarTab('perfil')" id="tab-perfil" class="flex flex-col items-center p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <span class="text-2xl mb-1 filter drop-shadow-sm opacity-60">👤</span>
+            <button onclick="cambiarTab('perfil')" id="tab-perfil" class="flex flex-col items-center p-3 text-gray-400 hover:text-gray-600 transition-all transform rounded-2xl">
+                <span class="text-2xl mb-1 filter drop-shadow-sm opacity-60 transition-transform duration-300">👤</span>
                 <span class="text-[10px] font-black uppercase tracking-widest">Perfil</span>
             </button>
         </div>
     </nav>
 
     <style>
-        .tab-activa { color: #2563eb !important; transform: scale(1.05); }
-        .tab-activa span:first-child { opacity: 1 !important; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        /* Estados mejorados para las tabs */
+        .tab-activa { color: var(--tw-colors-ctm-azul) !important; transform: translateY(-4px); }
+        .tab-activa span:first-child { opacity: 1 !important; transform: scale(1.15); }
+        .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem); }
     </style>
 
     <script>
@@ -142,7 +165,7 @@
 
         async function init() {
             const { data: { session } } = await clienteSupabase.auth.getSession();
-            if (!session) return window.location.href = 'login-repartidor.html'; // Asegúrate de que esta ruta exista
+            if (!session) return window.location.href = 'login-repartidor.html'; 
             usuarioId = session.user.id;
             
             await cargarPerfil();
@@ -228,22 +251,22 @@
             const headerFeed = document.getElementById('header-feed');
 
             if (estaConectado) {
-                indicador.className = 'w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4 transition-colors';
-                punto.className = 'w-8 h-8 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition-colors';
+                indicador.className = 'w-20 h-20 mx-auto rounded-full bg-green-50 flex items-center justify-center mb-4 transition-all duration-300';
+                punto.className = 'w-10 h-10 rounded-full bg-green-500 shadow-[0_0_25px_rgba(34,197,94,0.6)] animate-pulse transition-colors duration-300';
                 titulo.innerText = 'Estás en Línea';
-                titulo.className = 'text-2xl font-black text-green-600 mb-1';
+                titulo.className = 'text-2xl font-black text-green-600 mb-1 tracking-tight';
                 desc.innerText = 'Esperando a que un negocio te asigne un viaje...';
                 btn.innerText = 'FINALIZAR TURNO';
-                btn.className = 'w-full bg-red-100 text-red-600 font-black text-sm py-4 rounded-2xl shadow hover:bg-red-200 transition-all uppercase tracking-wider';
+                btn.className = 'w-full bg-red-50 border-2 border-red-100 text-red-600 font-black text-sm py-4 rounded-2xl shadow hover:bg-red-100 active:scale-95 transition-all uppercase tracking-wider';
                 headerFeed.classList.remove('hidden');
             } else {
-                indicador.className = 'w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4 transition-colors';
-                punto.className = 'w-8 h-8 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-colors';
+                indicador.className = 'w-20 h-20 mx-auto rounded-full bg-red-50 flex items-center justify-center mb-4 transition-all duration-300';
+                punto.className = 'w-10 h-10 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-colors duration-300';
                 titulo.innerText = 'Desconectado';
-                titulo.className = 'text-2xl font-black text-gray-800 mb-1';
+                titulo.className = 'text-2xl font-black text-gray-800 mb-1 tracking-tight';
                 desc.innerText = 'Conéctate para recibir solicitudes.';
                 btn.innerText = 'INICIAR TURNO';
-                btn.className = 'w-full bg-gray-800 text-white font-black text-lg py-4 rounded-2xl shadow-lg hover:bg-gray-900 transition-all uppercase tracking-wider';
+                btn.className = 'w-full bg-gray-800 text-white font-black text-lg py-4 rounded-2xl shadow-xl hover:bg-gray-900 active:scale-95 transition-all uppercase tracking-wider';
                 headerFeed.classList.add('hidden');
             }
         }
@@ -259,7 +282,7 @@
         // --- LÓGICA DE VIAJES EN VIVO ---
         async function recargarFeedManual() {
             if(!estaConectado) return alert("Inicia turno primero para buscar viajes.");
-            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-blue-500 mt-10 text-sm font-bold animate-pulse">Buscando viajes nuevos...</p>';
+            document.getElementById('contenedor-pedidos').innerHTML = '<p class="text-center text-ctm-azul mt-10 text-sm font-bold animate-pulse">Buscando viajes nuevos...</p>';
             await cargarTodosLosPedidos(true);
         }
 
@@ -274,7 +297,7 @@
             
             if (error) {
                 document.getElementById('contenedor-pedidos').innerHTML = `
-                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-center mt-4">
+                    <div class="bg-red-50 border border-red-200 p-5 rounded-2xl text-center mt-4 shadow-sm">
                         <span class="text-red-600 font-black block mb-1">Error de Conexión</span>
                     </div>`;
                 return;
@@ -287,65 +310,68 @@
         function renderizarFeed() {
             const contenedor = document.getElementById('contenedor-pedidos');
             if(pedidosActivos.length === 0) { 
-                contenedor.innerHTML = '<div class="border-2 border-dashed border-gray-300 rounded-[2rem] p-8 text-center mt-4 bg-white/50"><span class="text-4xl block mb-2 opacity-50">☕</span><p class="text-gray-500 font-bold text-sm">Sin viajes asignados por ahora.</p></div>'; 
+                contenedor.innerHTML = '<div class="border-2 border-dashed border-gray-300 rounded-[2.5rem] p-10 text-center mt-4 bg-white/50"><span class="text-5xl block mb-3 opacity-40">🛵</span><p class="text-gray-500 font-bold text-base">Sin viajes asignados por ahora.</p><p class="text-xs text-gray-400 mt-2">Mantente alerta.</p></div>'; 
                 return; 
             }
             
             contenedor.innerHTML = pedidosActivos.map(p => {
                 const pagoTag = p.pago_confirmado 
-                    ? `<div class="bg-green-100 text-green-800 p-3 rounded-xl text-center font-black text-xs mb-3 uppercase border border-green-200">✅ Ya está Pagado (No Cobrar)</div>`
-                    : `<div class="bg-red-100 text-red-800 p-3 rounded-xl text-center font-black text-xs mb-3 uppercase border border-red-200 shadow-sm animate-pulse-once">⚠️ Cobrar $${p.total} EN EFECTIVO</div>`;
+                    ? `<div class="bg-green-100 text-green-800 p-4 rounded-xl text-center font-black text-xs mb-4 uppercase border border-green-200 shadow-inner flex items-center justify-center gap-2"><span>✅</span> Ya está Pagado (No Cobrar)</div>`
+                    : `<div class="bg-red-100 text-red-800 p-4 rounded-xl text-center font-black text-sm mb-4 uppercase border border-red-200 shadow-sm animate-pulse-once flex flex-col items-center justify-center"><span>⚠️ COBRAR EN EFECTIVO</span><span class="text-2xl mt-1">$${p.total}</span></div>`;
 
+                // ESTADO: ASIGNADO (NUEVO VIAJE)
                 if (p.estado === 'asignado') {
                     const waNegocio = p.anuncios?.enlace_whatsapp ? p.anuncios.enlace_whatsapp.replace(/\D/g,'') : '';
                     return `
-                    <div class="bg-white p-5 rounded-[2rem] shadow-lg border-2 border-yellow-400 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase">NUEVO</div>
-                        <h3 class="text-lg font-black text-gray-800 mt-2 mb-1">🍔 ${p.anuncios?.nombre_negocio}</h3>
-                        <p class="text-xs text-gray-500 mb-3 border-b pb-3 line-clamp-1">Llevar a: 📍 ${p.cliente_direccion}</p>
+                    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-2 border-ctm-dorado relative overflow-hidden transform transition-all">
+                        <div class="absolute top-0 right-0 bg-ctm-dorado text-ctm-azul text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase shadow-md">NUEVO VIAJE</div>
+                        <h3 class="text-xl font-black text-gray-800 mt-3 mb-1">🍔 ${p.anuncios?.nombre_negocio}</h3>
+                        <p class="text-sm text-gray-500 mb-4 border-b border-gray-100 pb-4 line-clamp-2 leading-relaxed">Llevar a: 📍 <span class="font-bold text-gray-700">${p.cliente_direccion}</span></p>
                         ${pagoTag}
-                        <div class="flex flex-col gap-2 mt-4">
-                            <button onclick="actualizarEstadoPedido('${p.id}', 'aceptado')" class="w-full bg-yellow-400 text-yellow-900 py-4 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 transition">Aceptar Viaje</button>
-                            <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${waNegocio}')" class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-xs active:bg-gray-200 transition">Rechazar / No puedo</button>
+                        <div class="flex flex-col gap-3 mt-5">
+                            <button onclick="actualizarEstadoPedido('${p.id}', 'aceptado')" class="w-full bg-ctm-dorado text-ctm-azul py-4 rounded-2xl font-black text-base uppercase shadow-lg active:scale-95 transition-all">Aceptar Viaje</button>
+                            <button onclick="rechazarPedido('${p.id}', '${p.folio}', '${waNegocio}')" class="w-full bg-gray-50 text-gray-500 py-3 rounded-2xl border border-gray-200 font-bold text-sm active:bg-gray-100 transition-colors">Rechazar / No puedo</button>
                         </div>
                     </div>`;
                 }
                 
+                // ESTADO: ACEPTADO (RECOLECCIÓN)
                 if (p.estado === 'aceptado') {
                     return `
-                    <div class="bg-blue-50 p-5 rounded-[2rem] shadow border border-blue-200 relative">
-                        <div class="flex justify-between items-center border-b border-blue-200 pb-3 mb-3">
-                            <span class="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase shadow-sm">Fase 1: Recolección</span>
-                            <span class="text-[10px] text-gray-500 font-black uppercase">Folio: ${p.folio}</span>
+                    <div class="bg-blue-50 p-6 rounded-[2.5rem] shadow-md border border-blue-200 relative">
+                        <div class="flex justify-between items-center border-b border-blue-200 pb-4 mb-4">
+                            <span class="bg-blue-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase shadow-sm">Fase 1: Recolección</span>
+                            <span class="text-[10px] text-gray-500 font-black uppercase bg-white px-2 py-1 rounded-lg">Folio: ${p.folio}</span>
                         </div>
                         ${pagoTag}
                         <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-2">Ir a Negocio:</p>
-                        <p class="font-black text-xl text-blue-900 leading-tight mb-1">${p.anuncios?.nombre_negocio}</p>
-                        <p class="text-xs text-blue-700 mb-5 flex items-start gap-1"><span>📍</span> ${p.anuncios?.direccion}</p>
+                        <p class="font-black text-2xl text-blue-900 leading-tight mb-2">${p.anuncios?.nombre_negocio}</p>
+                        <p class="text-sm text-blue-800 mb-6 flex items-start gap-2 bg-blue-100/50 p-3 rounded-xl border border-blue-100"><span class="text-lg">📍</span> ${p.anuncios?.direccion}</p>
                         
-                        <div class="flex gap-2">
-                            <button onclick="abrirMapa('${p.anuncios?.direccion}')" class="w-14 bg-white border border-blue-200 text-blue-600 rounded-xl font-bold text-xl flex justify-center items-center shadow-sm active:bg-gray-50 transition">🗺️</button>
-                            <button onclick="actualizarEstadoPedido('${p.id}', 'en_camino')" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase shadow-md active:bg-blue-700 transition">📦 Ya lo recogí</button>
+                        <div class="flex gap-3">
+                            <button onclick="abrirMapa('${p.anuncios?.direccion}')" class="w-16 h-14 bg-white border border-blue-200 text-blue-600 rounded-2xl font-bold text-2xl flex justify-center items-center shadow-sm active:bg-gray-50 transition-colors">🗺️</button>
+                            <button onclick="actualizarEstadoPedido('${p.id}', 'en_camino')" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase shadow-md active:bg-blue-700 active:scale-95 transition-all">📦 Ya lo recogí</button>
                         </div>
                     </div>`;
                 }
 
+                // ESTADO: EN CAMINO (ENTREGA AL CLIENTE)
                 if (p.estado === 'en_camino') {
                     return `
-                    <div class="bg-green-50 p-5 rounded-[2rem] shadow-lg border-2 border-green-500 relative">
-                        <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase shadow-sm">Fase 2: Entrega</div>
+                    <div class="bg-green-50 p-6 rounded-[2.5rem] shadow-xl border-2 border-green-500 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase shadow-md">Fase 2: Entrega</div>
                         
-                        <div class="mt-4 mb-3">${pagoTag}</div>
+                        <div class="mt-6 mb-4">${pagoTag}</div>
                         
                         <p class="text-[10px] text-green-700 font-black uppercase tracking-widest mt-2">Entregar a:</p>
-                        <p class="font-black text-xl text-green-900 leading-tight mb-1">👤 ${p.cliente_nombre}</p>
-                        <p class="text-xs text-green-800 mb-5 flex items-start gap-1"><span>📍</span> ${p.cliente_direccion}</p>
+                        <p class="font-black text-2xl text-green-900 leading-tight mb-2">👤 ${p.cliente_nombre}</p>
+                        <p class="text-sm text-green-800 mb-6 flex items-start gap-2 bg-green-100/50 p-3 rounded-xl border border-green-100"><span class="text-lg">📍</span> <span class="font-bold">${p.cliente_direccion}</span></p>
                         
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <button onclick="abrirMapa('${p.cliente_direccion}')" class="bg-white border border-green-200 text-green-700 py-3 rounded-xl font-black text-xs flex justify-center items-center gap-2 shadow-sm active:bg-gray-50">🗺️ Navegar</button>
-                            <a href="tel:${p.cliente_telefono}" class="bg-white border border-green-200 text-green-700 py-3 rounded-xl font-black text-xs flex justify-center items-center gap-2 shadow-sm active:bg-gray-50">📞 Llamar</a>
+                        <div class="grid grid-cols-2 gap-3 mb-5">
+                            <button onclick="abrirMapa('${p.cliente_direccion}')" class="bg-white border-2 border-green-200 text-green-700 py-4 rounded-2xl font-black text-sm flex justify-center items-center gap-2 shadow-sm active:bg-green-50 transition-colors">🗺️ Navegar</button>
+                            <a href="tel:${p.cliente_telefono}" class="bg-white border-2 border-green-200 text-green-700 py-4 rounded-2xl font-black text-sm flex justify-center items-center gap-2 shadow-sm active:bg-green-50 transition-colors">📞 Llamar</a>
                         </div>
-                        <button onclick="finalizarPedido('${p.id}')" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm uppercase shadow-lg hover:bg-green-700 active:scale-95 transition">✅ Entregado</button>
+                        <button onclick="finalizarPedido('${p.id}')" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-base uppercase shadow-lg hover:bg-green-700 active:scale-95 transition-all">✅ Pedido Entregado</button>
                     </div>`;
                 }
             }).join('');
@@ -354,7 +380,7 @@
         // --- LÓGICA DE HISTORIAL ---
         async function cargarHistorial() {
             const contenedor = document.getElementById('contenedor-historial-lista');
-            contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm font-bold">Cargando...</p>';
+            contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm font-bold animate-pulse">Cargando datos...</p>';
 
             const { data, error } = await clienteSupabase.from('pedidos')
                 .select('folio, total, creado_en, cliente_nombre, estado, anuncios(nombre_negocio)')
@@ -369,7 +395,7 @@
             }
 
             if (data.length === 0) {
-                contenedor.innerHTML = '<div class="border-2 border-dashed border-gray-300 rounded-[2rem] p-8 text-center mt-4 bg-white"><p class="text-gray-500 font-bold text-sm">Aún no tienes entregas registradas.</p></div>';
+                contenedor.innerHTML = '<div class="border-2 border-dashed border-gray-200 rounded-[2rem] p-8 text-center mt-4 bg-white"><p class="text-gray-500 font-bold text-sm">Aún no tienes entregas registradas.</p></div>';
                 return;
             }
 
@@ -378,15 +404,15 @@
                 const colorTag = esEntregado ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200';
                 
                 return `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex justify-between items-center">
-                    <div>
-                        <p class="font-black text-gray-800 text-sm mb-0.5">${p.anuncios?.nombre_negocio || 'Negocio'}</p>
-                        <p class="text-[10px] text-gray-500 mb-1">${new Date(p.creado_en).toLocaleString('es-MX', {dateStyle:'short', timeStyle:'short'})} | ${p.cliente_nombre}</p>
-                        <span class="${colorTag} border text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">${p.estado}</span>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center transition-shadow hover:shadow-md">
+                    <div class="flex-1">
+                        <p class="font-black text-gray-800 text-base mb-1 truncate pr-2">${p.anuncios?.nombre_negocio || 'Negocio'}</p>
+                        <p class="text-xs text-gray-500 mb-2 font-medium">${new Date(p.creado_en).toLocaleString('es-MX', {dateStyle:'short', timeStyle:'short'})} <br>👤 ${p.cliente_nombre}</p>
+                        <span class="${colorTag} border text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">${p.estado}</span>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-gray-400 uppercase font-black mb-0.5">Folio: ${p.folio}</p>
-                        <p class="font-black text-lg ${esEntregado ? 'text-gray-800' : 'text-gray-300 line-through'}">$${p.total}</p>
+                    <div class="text-right pl-3 border-l border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase font-black mb-1">Folio: <br><span class="text-gray-600">${p.folio}</span></p>
+                        <p class="font-black text-xl ${esEntregado ? 'text-ctm-azul' : 'text-gray-300 line-through'}">$${p.total}</p>
                     </div>
                 </div>`;
             }).join('');
