@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vtm-static-v1';
-const CACHE_DYNAMIC = 'vtm-dynamic-v1';
+const CACHE_STATIC = 'ctm-static-v1';
+const CACHE_DYNAMIC = 'ctm-dynamic-v1';
 
 // Recursos que hacen que la app cargue (la "carcasa")
 const APP_SHELL = [
@@ -18,7 +18,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-    // Limpia cachés viejos si actualizamos la versión (v1 -> v2)
+    // Limpia cachés viejos si actualizamos la versión (ej. borra la versión vieja de VTM y deja la de CTM)
     event.waitUntil(
         caches.keys().then(keys => Promise.all(
             keys.map(key => {
@@ -31,6 +31,9 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    // CORRECCIÓN DE SEGURIDAD: Evitar procesar peticiones que no sean HTTP/HTTPS (como extensiones del navegador)
+    if (!event.request.url.startsWith('http')) return;
+
     const url = new URL(event.request.url);
 
     // 1. Peticiones a Supabase (API) -> Prioridad: Red, Respaldo: Caché
