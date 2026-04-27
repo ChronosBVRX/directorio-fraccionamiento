@@ -1,11 +1,11 @@
 {
-  "name": "Vive Tres Marías - Directorio",
-  "short_name": "V3M",
-  "description": "Directorio comercial y de servicios para tu fraccionamiento.",
+  "name": "Conecta Tres Marias - Directorio",
+  "short_name": "CTM",
+  "description": "Directorio comercial y de servicios de Conecta Tres Marias.",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f9fafb",
-  "theme_color": "#22527b",
+  "theme_color": "#143653",
   "orientation": "portrait-primary",
   "icons": [
     {
