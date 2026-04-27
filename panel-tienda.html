@@ -171,7 +171,7 @@
                 <div class="bg-gray-900 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
                     <div class="absolute -right-10 -top-10 w-32 h-32 bg-tm-dorado/20 blur-2xl rounded-full"></div>
                     <h3 class="font-black text-xl mb-2 text-tm-dorado">Soporte y Ayuda</h3>
-                    <p class="text-sm text-gray-300 mb-4 max-w-md mx-auto">¿Tienes problemas con un pedido, un repartidor o necesitas soporte de plataforma?</p>
+                    <p class="text-sm text-gray-300 mb-4 max-w-md mx-auto">¿Tienes problemas con un pedido o necesitas soporte de la plataforma?</p>
                     <a href="#" class="inline-block bg-white text-gray-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">Contactar a Soporte 📞</a>
                 </div>
             </div>
@@ -743,24 +743,25 @@
             let txtEstado = 'Pendiente';
             let botonAccion = '';
 
+            /* MODIFICACIÓN: Textos y botones ajustados para remover "repartidor" */
             if (p.estado === 'esperando_activacion' || p.estado === 'pendiente') {
                 colorBorde = 'border-red-400 ring-2 ring-red-400/20';
-                txtEstado = '⚠️ SIN ASIGNAR';
-                botonAccion = `<a href="activar_pedido.html?folio=${p.folio}" target="_blank" class="block text-center w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-lg shadow uppercase text-xs">Asignar Repartidor o Yo</a>`;
+                txtEstado = '⚠️ NUEVO PEDIDO PENDIENTE';
+                botonAccion = `<a href="activar_pedido.html?folio=${p.folio}" target="_blank" class="block text-center w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-lg shadow uppercase text-xs">Aceptar y Gestionar Pedido</a>`;
             } 
             else if (p.estado === 'asignado') {
                 colorBorde = 'border-yellow-400';
-                txtEstado = '⏳ Repartidor asignado, esperando...';
-                botonAccion = `<button class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-lg text-xs cursor-wait" disabled>Esperando que acepte...</button>`;
+                txtEstado = '⏳ Procesando asignación...';
+                botonAccion = `<button class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-lg text-xs cursor-wait" disabled>Esperando...</button>`;
             }
             else if (p.estado === 'aceptado') {
                 if (p.repartidor_id) {
                     colorBorde = 'border-blue-400';
-                    txtEstado = '👨‍🍳 PREPARANDO (El repartidor va para allá)';
+                    txtEstado = '👨‍🍳 PREPARANDO (Con Repartidor)';
                     botonAccion = `<div class="bg-blue-50 text-blue-800 p-2 rounded text-xs font-bold text-center">Viene: ${p.repartidores?.nombre || 'Repartidor'}</div>`;
                 } else {
                     colorBorde = 'border-blue-400';
-                    txtEstado = '👨‍🍳 PREPARANDO (Gestión Propia)';
+                    txtEstado = '👨‍🍳 PREPARANDO PEDIDO';
                     botonAccion = `<button onclick="avanzarPedidoDirecto('${p.id}', 'en_camino')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-lg shadow text-xs uppercase transition tracking-wider">🟢 Marcar En Camino / Listo</button>`;
                 }
             }
@@ -1015,7 +1016,6 @@
       const imagen = document.getElementById('admin-imagen-url').value || '';
       const wa = document.getElementById('admin-wa').value.replace(/\D/g, '').trim();
       
-      // SE ACTUALIZA LA LECTURA DEL VALOR CON EL RADIO BUTTON
       const ofreceEnvio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
 
       document.getElementById('preview-nombre').innerText = nombre;
@@ -1238,7 +1238,6 @@
         document.getElementById('admin-cat').value = data.categoria || 'Alimentos';
         document.getElementById('admin-imagen-url').value = data.imagen_url || '';
         
-        // SELECCIÓN CORRECTA DEL BOTÓN (RADIO)
         if (data.ofrece_domicilio === true) {
             document.querySelector('input[name="admin-domicilio"][value="true"]').checked = true;
         } else {
@@ -1285,7 +1284,6 @@
       document.getElementById('admin-estado-apertura').checked = true;
       document.getElementById('global-toggle-abierto').checked = true;
       
-      // SELECCIÓN POR DEFECTO DEL BOTÓN (RADIO)
       document.querySelector('input[name="admin-domicilio"][value="false"]').checked = true;
       
       setearHorariosUI(null);
@@ -1299,7 +1297,6 @@
     async function guardarNegocioSeguro() {
       const btn = document.getElementById('btn-guardar-admin');
       
-      // SE LEE CORRECTAMENTE EL VALOR DEL BOTÓN (RADIO)
       const ofreceDomicilio = document.querySelector('input[name="admin-domicilio"]:checked').value === "true";
 
       const payload = {
@@ -1310,7 +1307,7 @@
         imagen_url: document.getElementById('admin-imagen-url').value || '',
         horarios: obtenerHorariosDeUI(),
         esta_abierto: document.getElementById('global-toggle-abierto').checked,
-        ofrece_domicilio: ofreceDomicilio // AQUÍ ESTÁ EL ARREGLO FINAL
+        ofrece_domicilio: ofreceDomicilio 
       };
 
       if (!payload.nombre_negocio) { mostrarNotificacion('Escribe el nombre del negocio.', 'error'); return; }
