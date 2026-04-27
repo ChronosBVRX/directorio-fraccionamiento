@@ -62,11 +62,11 @@
             <p id="info-folio-display" class="text-3xl font-black text-ctm-azul mb-6 tracking-tight"></p>
             
             <div class="flex justify-around gap-4 border-t border-gray-100 pt-6">
-                <div class="bg-gray-50 rounded-2xl p-3 w-1/2 border border-gray-100">
+                <div class="bg-gray-50 rounded-2xl p-3 w-full border border-gray-100">
                     <p class="text-[10px] uppercase text-gray-400 font-black tracking-wider mb-1">Total</p>
                     <p id="info-total" class="text-xl font-black text-gray-800">$0.00</p>
                 </div>
-                <div class="bg-gray-50 rounded-2xl p-3 w-1/2 border border-gray-100">
+                <div class="hidden bg-gray-50 rounded-2xl p-3 w-1/2 border border-gray-100">
                     <p class="text-[10px] uppercase text-gray-400 font-black tracking-wider mb-1">Repartidor</p>
                     <p id="info-repartidor" class="text-sm font-bold text-ctm-azul mt-1 leading-tight line-clamp-2">Buscando...</p>
                 </div>
@@ -205,13 +205,17 @@
         function actualizarInterfazPedido(pedido) {
             document.getElementById('info-total').innerText = `$${pedido.total}`;
             
+            /* --- INICIO CÓDIGO OCULTO REPARTIDORES ---
             // Lógica condicional por si el pedido no tiene repartidor asignado pero ya fue aceptado
             if (pedido.repartidor_id) {
                 document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Asignando...";
                 document.getElementById('text-step-2-desc').innerText = "Ya tenemos un repartidor asignado. Está recolectando tus productos.";
                 document.getElementById('text-step-3-title').innerText = "En Camino";
                 document.getElementById('text-step-3-desc').innerText = "El repartidor va hacia tu domicilio. ¡Prepárate para recibirlo!";
-            } else if (pedido.estado !== 'pendiente' && pedido.estado !== 'esperando_activacion') {
+            } else 
+            --- FIN CÓDIGO OCULTO REPARTIDORES --- */
+            
+            if (pedido.estado !== 'pendiente' && pedido.estado !== 'esperando_activacion') {
                 document.getElementById('info-repartidor').innerText = "A cargo del Negocio";
                 document.getElementById('text-step-2-desc').innerText = "El negocio está preparando tu pedido directamente.";
                 document.getElementById('text-step-3-title').innerText = "Listo / En Camino";
@@ -266,6 +270,7 @@
                 contCalif.classList.remove('hidden');
                 msgGracias.classList.add('hidden');
 
+                /* --- INICIO CÓDIGO OCULTO REPARTIDORES ---
                 // Validar que EXISTA repartidor antes de pedir calificación
                 if (pedido.repartidor_id && pedido.calificacion_repartidor === null) {
                     cardRep.classList.remove('hidden');
@@ -273,6 +278,8 @@
                 } else {
                     cardRep.classList.add('hidden');
                 }
+                --- FIN CÓDIGO OCULTO REPARTIDORES --- */
+                cardRep.classList.add('hidden');
 
                 // Validar si falta calificar al Negocio
                 if (pedido.negocio_id && pedido.calificacion_negocio === null) {
