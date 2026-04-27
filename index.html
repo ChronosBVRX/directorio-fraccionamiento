@@ -266,7 +266,7 @@
         </div>
     </div>
 
-    <a href="login-repartidor.html" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-tm-azul-oscuro text-white p-2.5 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 border-2 border-tm-dorado group cursor-pointer">
+    <a href="login-repartidor.html" class="hidden fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-tm-azul-oscuro text-white p-2.5 sm:p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:bg-tm-azul hover:scale-105 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 border-2 border-tm-dorado group cursor-pointer">
         <span class="text-xl sm:text-3xl drop-shadow-md">🛵</span>
         <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out font-black text-[11px] sm:text-base tracking-wide">
             Soy Repartidor
@@ -887,7 +887,8 @@
             
             const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
             
-            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para gestionar la entrega o asignar un repartidor:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
+            // MODIFICACIÓN AQUI: Eliminada la mención de asignar repartidor.
+            textoPedido += `_Vendedor: Tras confirmar el pago, da clic en el siguiente enlace para gestionar la entrega:_\n${rutaBase}/activar_pedido.html?folio=${folioVenta}`;
 
             let numeroVendedor = negocioActualPedido.enlace_whatsapp ? negocioActualPedido.enlace_whatsapp.replace(/\D/g,'') : '';
             if(numeroVendedor) {
