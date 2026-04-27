@@ -2,74 +2,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activar y Asignar Pedido - Vive Tres Marías</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Activar y Asignar Pedido - Conecta Tres Marias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Montserrat', sans-serif; } </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: {
+                        'ctm-azul': '#143653',
+                        'ctm-dorado': '#d4af37'
+                    }
+                }
+            }
+        }
+    </script>
+    <style> 
+        body { font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; } 
+        /* Ocultar barra de scroll en el select para un look más limpio */
+        select::-webkit-scrollbar { width: 6px; }
+        select::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        select::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+    </style>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 selection:bg-ctm-dorado selection:text-white">
 
-    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full border-t-4 border-[#d4af37]">
-        <h1 class="text-2xl font-black text-[#143653] mb-2">Directorio de Repartidores</h1>
-        <p class="text-xs text-gray-500 mb-6 font-bold uppercase tracking-wider" id="folio-display">Verificando sesión...</p>
+    <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full border-t-8 border-ctm-dorado relative overflow-hidden">
+        <h1 class="text-2xl font-black text-ctm-azul mb-1 tracking-tight">Directorio de Repartidores</h1>
+        <p class="text-xs text-gray-400 mb-6 font-bold uppercase tracking-widest" id="folio-display">Verificando sesión...</p>
         
-        <div id="loader" class="my-6 flex justify-center">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22527b]"></div>
+        <div id="loader" class="my-8 flex justify-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-ctm-azul"></div>
         </div>
 
         <div id="zona-login" class="hidden text-center my-6">
-            <span class="text-4xl block mb-2">🔒</span>
-            <p class="text-gray-700 font-bold mb-4">Debes iniciar sesión con la cuenta de tu negocio para confirmar este pedido.</p>
-            <a href="login.html" id="btn-ir-login" class="inline-block w-full bg-[#22527b] text-white font-bold py-3 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm">
+            <div class="bg-blue-50 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 border border-blue-100">
+                <span class="text-4xl block">🔒</span>
+            </div>
+            <p class="text-gray-700 font-bold mb-6 text-sm leading-relaxed">Debes iniciar sesión con la cuenta de tu negocio para confirmar este pedido.</p>
+            <a href="login.html" id="btn-ir-login" class="inline-block w-full bg-ctm-azul text-white font-black py-4 rounded-2xl hover:bg-opacity-90 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm">
                 Ir a Iniciar Sesión
             </a>
         </div>
 
         <div id="zona-sin-repartidores" class="hidden text-center mb-6">
-            <span class="text-4xl block mb-2">🏪</span>
-            <p class="text-red-500 font-bold text-lg mb-2">No hay repartidores conectados</p>
-            <p class="text-sm text-gray-600 mb-6">Puedes gestionar este pedido tú mismo (entregarlo con tu propio personal o si el cliente pasará a recogerlo).</p>
-            <button onclick="gestionarPedidoDirecto()" id="btn-gestionar-directo-1" class="w-full bg-[#d4af37] text-white font-black py-4 rounded-lg hover:bg-yellow-600 shadow-md transition uppercase tracking-widest text-sm mb-3">
+            <div class="bg-red-50 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 border border-red-100">
+                <span class="text-4xl block">🏪</span>
+            </div>
+            <p class="text-red-500 font-black text-lg mb-2">No hay repartidores conectados</p>
+            <p class="text-sm text-gray-500 mb-8 font-medium leading-relaxed">Puedes gestionar este pedido tú mismo (entregarlo con tu propio personal o si el cliente pasará a recogerlo).</p>
+            <button onclick="gestionarPedidoDirecto()" id="btn-gestionar-directo-1" class="w-full bg-ctm-dorado text-ctm-azul font-black py-4 rounded-2xl hover:bg-yellow-400 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm mb-3">
                 ✅ Gestionar Yo Mismo
             </button>
         </div>
 
         <div id="zona-asignacion" class="hidden text-left">
-            <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <label class="block text-sm font-bold text-gray-700 mb-3 text-center uppercase">¿Cómo está el pago?</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="cursor-pointer">
+            
+            <div class="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200 shadow-inner">
+                <label class="block text-xs font-black text-gray-500 mb-4 text-center uppercase tracking-widest">¿Cómo está el pago?</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="cursor-pointer group">
                         <input type="radio" name="pago" value="false" checked class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-red-500 peer-checked:bg-red-50 text-gray-400 peer-checked:text-red-600 transition-all uppercase leading-tight">
-                            ❌ Cobrar<br>Efectivo
+                        <div class="p-3 text-center border-2 rounded-xl text-[10px] font-black peer-checked:border-red-500 peer-checked:bg-red-50 text-gray-400 peer-checked:text-red-600 transition-all uppercase leading-tight bg-white shadow-sm group-hover:border-red-200">
+                            <span class="text-lg block mb-1">❌</span> Cobrar<br>Efectivo
                         </div>
                     </label>
-                    <label class="cursor-pointer">
+                    <label class="cursor-pointer group">
                         <input type="radio" name="pago" value="true" class="peer sr-only">
-                        <div class="p-3 text-center border-2 rounded-lg text-[10px] font-black peer-checked:border-green-500 peer-checked:bg-green-50 text-gray-400 peer-checked:text-green-600 transition-all uppercase leading-tight">
-                            ✅ Ya está<br>Pagado
+                        <div class="p-3 text-center border-2 rounded-xl text-[10px] font-black peer-checked:border-green-500 peer-checked:bg-green-50 text-gray-400 peer-checked:text-green-600 transition-all uppercase leading-tight bg-white shadow-sm group-hover:border-green-200">
+                            <span class="text-lg block mb-1">✅</span> Ya está<br>Pagado
                         </div>
                     </label>
                 </div>
             </div>
 
-            <label class="block text-sm font-bold text-gray-700 mb-2">Elige un Repartidor Conectado:</label>
-            <select id="select-repartidor" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#22527b] mb-6 font-bold text-xs h-32" size="4">
+            <label class="block text-xs font-black text-gray-500 mb-3 uppercase tracking-widest pl-1">Elige un Repartidor:</label>
+            <select id="select-repartidor" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-ctm-azul/10 focus:border-ctm-azul mb-6 font-bold text-sm h-36 shadow-inner transition-all" size="4">
                 </select>
 
-            <button onclick="asignarPedido()" id="btn-asignar" class="w-full bg-[#22527b] text-white font-bold py-4 rounded-lg hover:bg-[#143653] shadow-md transition uppercase tracking-widest text-sm mb-3">
-                Confirmar y Enviar WhatsApp
+            <button onclick="asignarPedido()" id="btn-asignar" class="w-full bg-ctm-azul text-white font-black py-4 rounded-2xl shadow-lg hover:bg-opacity-90 active:scale-95 transition-all uppercase tracking-wider text-sm mb-4">
+                Confirmar y Avisar 📱
             </button>
 
-            <button onclick="gestionarPedidoDirecto()" id="btn-gestionar-directo-2" class="w-full bg-gray-200 text-gray-800 font-bold py-3 rounded-lg hover:bg-gray-300 shadow-sm transition uppercase tracking-widest text-xs border border-gray-300">
-                Prefiero Gestionarlo Yo Mismo
+            <button onclick="gestionarPedidoDirecto()" id="btn-gestionar-directo-2" class="w-full bg-white text-gray-500 font-bold py-4 rounded-2xl hover:bg-gray-50 shadow-sm active:scale-95 transition-all uppercase tracking-wider text-xs border-2 border-gray-200">
+                Prefiero Gestionarlo Yo
             </button>
         </div>
 
         <div id="mensaje-final" class="hidden mt-4"></div>
-        <button id="btn-cerrar" class="mt-6 hidden w-full bg-gray-200 text-gray-800 font-bold px-4 py-3 rounded-lg hover:bg-gray-300 transition" onclick="window.close()">Cerrar Pestaña</button>
+        <button id="btn-cerrar" class="mt-6 hidden w-full bg-gray-100 text-gray-600 font-black px-4 py-4 rounded-2xl hover:bg-gray-200 active:scale-95 transition-all uppercase tracking-wider text-xs" onclick="window.close()">Cerrar Pestaña</button>
     </div>
 
     <script>
@@ -140,7 +165,7 @@
                 if (!folioActual) {
                     loader.classList.add('hidden');
                     folioDisplay.innerText = 'Sin Folio';
-                    mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">Error: No se detectó ningún folio en el enlace.</span>`;
+                    mensajeFinal.innerHTML = `<div class="bg-red-50 border border-red-200 p-4 rounded-xl mt-4"><span class="text-red-500 font-bold">Error: No se detectó ningún folio en el enlace.</span></div>`;
                     mensajeFinal.classList.remove('hidden');
                     return;
                 }
@@ -151,14 +176,14 @@
 
                 if (errorPedido || !pedido) {
                     loader.classList.add('hidden');
-                    mensajeFinal.innerHTML = `<span class="text-red-500 font-bold">El pedido no existe o fue eliminado.</span>`;
+                    mensajeFinal.innerHTML = `<div class="bg-red-50 border border-red-200 p-4 rounded-xl mt-4"><span class="text-red-500 font-bold">El pedido no existe o fue eliminado.</span></div>`;
                     mensajeFinal.classList.remove('hidden');
                     return;
                 }
 
                 if (pedido.estado !== 'esperando_activacion' && pedido.estado !== 'pendiente') {
                     loader.classList.add('hidden');
-                    mensajeFinal.innerHTML = `<span class="text-yellow-600 font-bold text-lg">Este pedido ya está en curso o fue asignado.</span><br><span class="text-sm">Estado actual: ${pedido.estado}</span>`;
+                    mensajeFinal.innerHTML = `<div class="bg-yellow-50 border border-yellow-200 p-5 rounded-2xl mt-4"><span class="text-yellow-700 font-black text-lg block mb-1">Este pedido ya está en curso o fue asignado.</span><span class="text-sm text-yellow-600 font-bold uppercase">Estado actual: ${pedido.estado}</span></div>`;
                     mensajeFinal.classList.remove('hidden');
                     document.getElementById('btn-cerrar').classList.remove('hidden');
                     return;
@@ -171,7 +196,6 @@
                     
                 loader.classList.add('hidden');
 
-                // MODIFICACIÓN AQUI: Si no hay repartidores, mostramos la zona alternativa en lugar del error bloqueante
                 if (!repartidores || repartidores.length === 0) {
                     zonaSinRepartidores.classList.remove('hidden');
                     return;
@@ -181,7 +205,7 @@
                 const select = document.getElementById('select-repartidor');
                 
                 select.innerHTML = repartidores.map((r, i) => 
-                    `<option value="${r.id}" ${i === 0 ? 'selected' : ''}>
+                    `<option value="${r.id}" ${i === 0 ? 'selected' : ''} class="p-2 border-b border-gray-100 mb-1 rounded">
                         ${r.nombre} | ⭐ ${r.calificacion_promedio} (${r.viajes_completados} viajes) | 📞 ${r.telefono}
                     </option>`
                 ).join('');
@@ -191,7 +215,7 @@
             } catch (err) {
                 console.error("Error al inicializar la vista:", err);
                 document.getElementById('loader').classList.add('hidden');
-                document.getElementById('mensaje-final').innerHTML = `<span class="text-red-500 font-bold">Hubo un problema al cargar los datos. Intenta recargar.</span>`;
+                document.getElementById('mensaje-final').innerHTML = `<div class="bg-red-50 border border-red-200 p-4 rounded-xl mt-4"><span class="text-red-500 font-bold">Hubo un problema al cargar los datos. Intenta recargar.</span></div>`;
                 document.getElementById('mensaje-final').classList.remove('hidden');
             }
         }
@@ -209,7 +233,6 @@
             window.location.href = `login.html?returnTo=${rutaRegreso}`;
         }
 
-        // FUNCIÓN NUEVA: Para gestionar el pedido sin usar la app de repartidores
         async function gestionarPedidoDirecto() {
             const btn1 = document.getElementById('btn-gestionar-directo-1');
             const btn2 = document.getElementById('btn-gestionar-directo-2');
@@ -228,20 +251,22 @@
 
             if (error) {
                 document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-red-50 border-2 border-red-200 p-5 rounded-2xl text-left mt-4">
+                    <div class="bg-red-50 border-2 border-red-200 p-5 rounded-2xl text-left mt-4 shadow-sm">
                         <span class="text-red-600 font-black text-xl block mb-2">⚠️ Error al Actualizar</span>
                         <span class="font-bold text-sm text-red-500 block leading-snug">${error.message}</span>
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
                 if(btn1) { btn1.innerText = "✅ Gestionar Yo Mismo"; btn1.disabled = false; }
-                if(btn2) { btn2.innerText = "Prefiero Gestionarlo Yo Mismo"; btn2.disabled = false; }
+                if(btn2) { btn2.innerText = "Prefiero Gestionarlo Yo"; btn2.disabled = false; }
             } else {
                 document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl mt-4">
-                        <span class="text-green-600 font-black text-2xl block mb-1">¡Pedido Aceptado! ✅</span>
-                        <span class="font-bold text-sm text-green-700 block mt-2">El cliente ya fue notificado de que estás preparando su orden.</span>
-                        <span class="font-bold text-xs text-gray-500 block mt-2">Recuerda actualizar el estado desde tu Panel de Negocio cuando esté listo.</span>
+                    <div class="bg-green-50 border-2 border-green-200 p-6 rounded-2xl mt-4 shadow-sm">
+                        <span class="text-green-600 font-black text-2xl block mb-2">¡Pedido Aceptado! ✅</span>
+                        <span class="font-bold text-sm text-green-700 block mt-2 leading-relaxed">El cliente ya fue notificado de que estás preparando su orden.</span>
+                        <div class="mt-4 pt-4 border-t border-green-200">
+                            <span class="font-bold text-xs text-green-600 block">Recuerda actualizar el estado desde tu Panel de Negocio cuando esté listo.</span>
+                        </div>
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
@@ -249,7 +274,6 @@
             }
         }
 
-        // FUNCIÓN ORIGINAL INTACTA
         async function asignarPedido() {
             const repartidorId = document.getElementById('select-repartidor').value;
             const repartidorSeleccionado = listaRepartidores.find(r => r.id === repartidorId);
@@ -286,9 +310,9 @@
                 
                 if(mensajeError.toLowerCase().includes('dueño') || mensajeError.toLowerCase().includes('logueado')) {
                     botonInyectado = `
-                        <div class="mt-4 pt-4 border-t border-red-200">
-                            <p class="text-[10px] font-bold uppercase text-red-700 mb-2">¿Iniciaste sesión con la cuenta equivocada?</p>
-                            <button id="btn-cambiar-cuenta" onclick="cerrarYLoguear()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-lg shadow-md transition uppercase tracking-widest text-xs">
+                        <div class="mt-5 pt-5 border-t border-red-200">
+                            <p class="text-[10px] font-black uppercase text-red-700 mb-3 tracking-widest">¿Iniciaste sesión con la cuenta equivocada?</p>
+                            <button id="btn-cambiar-cuenta" onclick="cerrarYLoguear()" class="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black py-4 rounded-xl shadow-md transition-all uppercase tracking-wider text-xs">
                                 🔄 Cambiar de Cuenta
                             </button>
                         </div>
@@ -296,9 +320,9 @@
                 }
                 
                 document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-red-50 border-2 border-red-200 p-5 rounded-2xl text-left mt-4">
+                    <div class="bg-red-50 border-2 border-red-200 p-6 rounded-2xl text-left mt-4 shadow-sm">
                         <span class="text-red-600 font-black text-xl block mb-2">⚠️ Acceso Denegado</span>
-                        <span class="font-bold text-sm text-red-500 block leading-snug">${mensajeError}</span>
+                        <span class="font-bold text-sm text-red-500 block leading-relaxed">${mensajeError}</span>
                         ${botonInyectado}
                     </div>
                 `;
@@ -309,9 +333,9 @@
             } else {
                 document.getElementById('zona-asignacion').classList.add('hidden');
                 document.getElementById('mensaje-final').innerHTML = `
-                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl mt-4">
-                        <span class="text-green-600 font-black text-2xl block mb-1">¡Asignado! ✅</span>
-                        <span class="font-bold text-sm text-green-700">Se abrirá WhatsApp para avisarle al repartidor.</span>
+                    <div class="bg-green-50 border-2 border-green-200 p-6 rounded-2xl mt-4 shadow-sm">
+                        <span class="text-green-600 font-black text-3xl block mb-2">¡Asignado! ✅</span>
+                        <span class="font-bold text-sm text-green-700 block leading-relaxed">Se abrirá WhatsApp para avisarle al repartidor.</span>
                     </div>
                 `;
                 document.getElementById('mensaje-final').classList.remove('hidden');
