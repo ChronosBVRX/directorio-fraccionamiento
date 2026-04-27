@@ -3,76 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviso de Privacidad Integral - Vive Tres Marías</title>
+    <title>Aviso de Privacidad Integral - Conecta Tres Marias</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* Estilos visuales optimizados para iframe */
+        /* Estilos visuales optimizados para iframe y móviles */
         :root {
-            --color-texto: #333333;
-            --color-titulo: #2c3e50;
-            --color-acento: #2980b9;
-            --color-enlace: #3498db;
-            --color-fondo: #ffffff; /* Puedes cambiarlo a transparent si tu index tiene color */
+            --color-texto: #4b5563; /* Gris oscuro suave para mejor lectura */
+            --color-titulo: #143653; /* ctm-azul */
+            --color-acento: #d4af37; /* ctm-dorado */
+            --color-enlace: #2563eb; /* Azul para links */
+            --color-fondo: transparent; /* Ideal para iframes */
+            --color-badge-bg: #f3f4f6;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
             color: var(--color-texto);
             background-color: var(--color-fondo);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .contenedor {
             max-width: 800px;
             margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            font-weight: 900;
             color: var(--color-titulo);
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
         .subtitulo {
             text-align: center;
             font-size: 0.95rem;
-            color: #7f8c8d;
+            font-weight: 500;
+            color: #9ca3af;
             margin-top: 0;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 20px;
         }
 
         h2 {
-            font-size: 1.3rem;
-            color: var(--color-acento);
-            border-bottom: 1px solid #ecf0f1;
-            padding-bottom: 8px;
-            margin-top: 35px;
-            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--color-titulo);
+            border-bottom: 3px solid var(--color-acento);
+            display: inline-block;
+            padding-bottom: 6px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
         }
 
         p {
             font-size: 1rem;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             text-align: justify;
+            font-weight: 400;
         }
 
         ul {
-            margin-bottom: 15px;
-            padding-left: 20px;
+            margin-bottom: 20px;
+            padding-left: 24px;
         }
 
         li {
             font-size: 1rem;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        /* Viñetas personalizadas con el color dorado */
+        li::marker {
+            color: var(--color-acento);
+            font-weight: bold;
         }
 
         a {
             color: var(--color-enlace);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: color 0.2s ease;
         }
 
         a:hover {
@@ -80,28 +106,36 @@
             color: var(--color-titulo);
         }
 
+        /* Estilo tipo "Badge" (etiqueta) para organizar mejor la lectura */
         .categoria-datos {
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.9rem;
             color: var(--color-titulo);
-            display: block;
-            margin-top: 20px;
-            margin-bottom: 5px;
+            background-color: var(--color-badge-bg);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 4px solid var(--color-acento);
         }
 
-        /* Ajustes para pantallas pequeñas */
+        /* Ajustes responsivos para pantallas pequeñas (móviles) */
         @media (max-width: 600px) {
             body {
-                padding: 15px 10px;
+                padding: 10px;
             }
-            h1 {
-                font-size: 1.5rem;
+            .contenedor {
+                padding: 24px 20px;
+                border-radius: 16px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
             }
-            h2 {
-                font-size: 1.2rem;
-            }
-            p, li {
-                font-size: 0.95rem;
-            }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.25rem; }
+            p, li { font-size: 0.95rem; line-height: 1.6; }
+            .categoria-datos { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -110,12 +144,12 @@
     <div class="contenedor">
         <h1>AVISO DE PRIVACIDAD INTEGRAL</h1>
         <p class="subtitulo">
-            de Eduardo Bolaños Vazquez para la plataforma <strong>Vive Tres Marías</strong><br>
-            Última actualización: 14 de abril de 2026
+            de Eduardo Bolaños Vazquez para la plataforma <strong>Conecta Tres Marias</strong><br>
+            Última actualización: 27 de abril de 2026
         </p>
 
         <h2>1. Identidad y domicilio del responsable</h2>
-        <p>Eduardo Bolaños Vazquez, en su carácter de responsable del tratamiento de datos personales, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, y portal de internet <a href="https://ViveTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ViveTresMarias.com.mx</a>, pone a disposición de las personas usuarias, negocios, profesionistas, repartidores y demás terceros vinculados con la plataforma Vive Tres Marías, el presente Aviso de Privacidad Integral.</p>
+        <p>Eduardo Bolaños Vazquez, en su carácter de responsable del tratamiento de datos personales, con domicilio en Pedro Nolasco 87, Torre 4, Departamento 2A, Morelia, Michoacán, México, y portal de internet <a href="https://ConectaTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ConectaTresMarias.com.mx</a>, pone a disposición de las personas usuarias, negocios, profesionistas, repartidores y demás terceros vinculados con la plataforma Conecta Tres Marias, el presente Aviso de Privacidad Integral.</p>
         <p>Para cualquier asunto relacionado con datos personales, el titular podrá contactar al responsable en el correo <a href="mailto:noirsysan@gmail.com">noirsysan@gmail.com</a> y/o al teléfono <a href="tel:+524433667106">4433667106</a>.</p>
 
         <h2>2. Datos personales que podremos recabar</h2>
@@ -140,7 +174,7 @@
         <p>Dirección IP, tipo de navegador, sistema operativo, identificadores de dispositivo, fecha y hora de acceso, cookies, almacenamiento local, service workers, registros del sistema, eventos de seguridad y analítica básica de uso.</p>
 
         <h2>3. Datos personales sensibles</h2>
-        <p>Por regla general, Vive Tres Marías no solicita datos personales sensibles para el uso ordinario del directorio, el contacto comercial o la gestión básica de pedidos, citas o reservas.</p>
+        <p>Por regla general, Conecta Tres Marias no solicita datos personales sensibles para el uso ordinario del directorio, el contacto comercial o la gestión básica de pedidos, citas o reservas.</p>
         <p>No obstante, debido a que la plataforma puede incluir perfiles de médicos, consultorios u otros servicios profesionales, existe la posibilidad de que una persona usuaria proporcione voluntariamente información relacionada con su estado de salud, motivo de consulta o datos clínicos en campos abiertos, mensajes o documentos adjuntos. En esos casos:</p>
         <ul>
             <li>Se solicita a las personas usuarias no ingresar más información sensible de la estrictamente necesaria.</li>
@@ -188,7 +222,7 @@
             <li>Autoridades competentes, cuando exista requerimiento legal, mandato fundado y motivado o necesidad de cumplir obligaciones jurídicas.</li>
             <li>Proveedores tecnológicos que actúen por cuenta del responsable como encargados del tratamiento, incluyendo servicios de hosting, bases de datos, autenticación, almacenamiento, mensajería, mapas, analítica, monitoreo, soporte o infraestructura.</li>
         </ul>
-        <p>Vive Tres Marías no comercializa ni vende bases de datos personales a terceros.</p>
+        <p>Conecta Tres Marias no comercializa ni vende bases de datos personales a terceros.</p>
 
         <h2>8. Uso de cookies y tecnologías similares</h2>
         <p>La plataforma puede utilizar cookies, almacenamiento local, service workers, registros de sesión y tecnologías similares para:</p>
@@ -233,14 +267,14 @@
         <p>No obstante, ninguna transmisión electrónica o sistema de almacenamiento puede garantizar seguridad absoluta; por ello, en caso de detectarse un incidente que afecte de forma significativa derechos patrimoniales o morales de los titulares, se actuará conforme a la legislación aplicable y a los protocolos internos vigentes.</p>
 
         <h2>13. Plataformas, enlaces y servicios de terceros</h2>
-        <p>La plataforma puede contener enlaces, botones o integraciones hacia servicios de terceros, como aplicaciones de mensajería, mapas, redes sociales u otros sitios externos. El tratamiento de datos realizado directamente por dichos terceros se sujetará a sus propios términos, avisos y políticas, por lo que Vive Tres Marías no asume responsabilidad por prácticas de privacidad ajenas a su operación directa.</p>
+        <p>La plataforma puede contener enlaces, botones o integraciones hacia servicios de terceros, como aplicaciones de mensajería, mapas, redes sociales u otros sitios externos. El tratamiento de datos realizado directamente por dichos terceros se sujetará a sus propios términos, avisos y políticas, por lo que Conecta Tres Marias no asume responsabilidad por prácticas de privacidad ajenas a su operación directa.</p>
 
         <h2>14. Menores de edad</h2>
         <p>La plataforma no está dirigida de forma principal a menores de edad para la contratación autónoma de servicios. Si un menor proporciona datos personales sin autorización de quien ejerza patria potestad o tutela, la persona responsable podrá solicitar su revisión o eliminación mediante los canales señalados en este aviso.</p>
 
         <h2>15. Cambios al presente aviso de privacidad</h2>
         <p>Eduardo Bolaños Vazquez podrá modificar o actualizar este Aviso de Privacidad cuando resulte necesario por cambios legales, regulatorios, operativos, tecnológicos o de modelo de negocio.</p>
-        <p>Las modificaciones estarán disponibles a través de <a href="https://ViveTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ViveTresMarias.com.mx</a> o por los medios que razonablemente determine el responsable.</p>
+        <p>Las modificaciones estarán disponibles a través de <a href="https://ConectaTresMarias.com.mx" target="_blank" rel="noopener noreferrer">ConectaTresMarias.com.mx</a> o por los medios que razonablemente determine el responsable.</p>
 
         <h2>16. Aceptación</h2>
         <p>El uso de la plataforma, el registro de una cuenta, la carga de datos y/o la continuidad en el uso de los servicios implicará el conocimiento del presente Aviso de Privacidad, sin perjuicio de los consentimientos específicos que deban recabarse cuando legalmente resulten exigibles.</p>
