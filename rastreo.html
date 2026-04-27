@@ -2,133 +2,155 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado del Pedido - Vive Tres Marías</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Estado del Pedido - Conecta Tres Marias</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { 'tm-azul': '#22527b', 'tm-dorado': '#d4af37' } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] }, 
+                    colors: { 
+                        'ctm-azul': '#22527b', 
+                        'ctm-dorado': '#d4af37' 
+                    } 
+                } 
+            } 
+        }
     </script>
     <style>
-        /* Animaciones para las estrellas */
+        /* Animaciones para las estrellas y scroll nativo */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        body { -webkit-tap-highlight-color: transparent; }
+        
         .star-rep:hover, .star-neg:hover { transform: scale(1.15); }
-        .star-rep, .star-neg { transition: all 0.2s; color: #e2e8f0; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .star-rep, .star-neg { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s; color: #e2e8f0; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-gray-50 font-sans h-screen flex flex-col">
+<body class="bg-gray-50 font-sans h-screen flex flex-col selection:bg-ctm-dorado selection:text-white">
 
-    <header class="bg-tm-azul text-white p-4 flex justify-between items-center shadow-md z-10 shrink-0">
-        <a href="index.html" class="font-bold text-sm hover:text-gray-200">← Volver</a>
-        <h1 class="font-black text-lg">Estado de tu Pedido</h1>
+    <header class="bg-ctm-azul text-white p-5 flex justify-between items-center shadow-lg z-10 shrink-0 rounded-b-3xl relative">
+        <a href="index.html" class="font-bold text-sm hover:text-gray-200 transition-colors flex items-center gap-1">
+            <span class="text-lg">←</span> Volver
+        </a>
+        <h1 class="font-black text-xl tracking-tight">Estado de Pedido</h1>
     </header>
 
-    <div id="pantalla-busqueda" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-t-4 border-tm-dorado">
-            <span class="text-4xl mb-4 block">📦</span>
-            <h2 class="text-xl font-black text-tm-azul mb-2">Rastrea tu Pedido</h2>
-            <p class="text-sm text-gray-500 mb-6">Ingresa el código que te enviamos al generar tu orden</p>
+    <div id="pantalla-busqueda" class="flex-grow flex items-center justify-center p-5">
+        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-sm w-full text-center border-t-4 border-ctm-dorado">
+            <span class="text-5xl mb-5 block drop-shadow-sm">📦</span>
+            <h2 class="text-2xl font-black text-ctm-azul mb-2">Rastrea tu Pedido</h2>
+            <p class="text-sm text-gray-500 mb-8 font-medium">Ingresa el código que te enviamos al generar tu orden</p>
             
-            <input type="text" id="input-folio" placeholder="VTM-XXXXXX" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg text-lg font-bold uppercase outline-none focus:border-tm-azul transition mb-4">
+            <input type="text" id="input-folio" placeholder="CTM-XXXXXX" class="w-full text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-xl font-black uppercase outline-none focus:border-ctm-azul focus:ring-4 focus:ring-ctm-azul/10 transition-all mb-6 text-gray-700">
             
-            <button onclick="buscarPedido()" class="w-full bg-tm-dorado hover:bg-yellow-600 text-white font-black py-3 rounded-lg shadow-md transition uppercase tracking-wider text-sm">Buscar</button>
-            <p id="msg-error" class="text-red-500 text-sm font-bold mt-3 hidden"></p>
+            <button onclick="buscarPedido()" class="w-full bg-ctm-dorado hover:bg-yellow-500 text-white font-black py-4 rounded-2xl shadow-lg hover:shadow-xl active:scale-95 transition-all uppercase tracking-wider text-sm">Buscar Pedido</button>
+            <p id="msg-error" class="text-red-500 text-sm font-bold mt-4 hidden bg-red-50 p-3 rounded-xl border border-red-100"></p>
         </div>
     </div>
 
-    <div id="pantalla-estado" class="hidden flex-grow overflow-y-auto p-4 max-w-md mx-auto w-full pb-10 relative">
+    <div id="pantalla-estado" class="hidden flex-grow overflow-y-auto scrollbar-hide p-5 max-w-md mx-auto w-full pb-12 relative">
         
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 text-center">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Folio</p>
-            <p id="info-folio-display" class="text-2xl font-black text-tm-azul mb-4"></p>
+        <div class="bg-white rounded-[2rem] shadow-md p-8 mb-8 border border-gray-100 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-ctm-azul to-ctm-dorado"></div>
+            <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 mt-2">Folio de Orden</p>
+            <p id="info-folio-display" class="text-3xl font-black text-ctm-azul mb-6 tracking-tight"></p>
             
-            <div class="flex justify-center gap-6 border-t pt-4">
-                <div>
-                    <p class="text-[10px] uppercase text-gray-400 font-bold">Total</p>
-                    <p id="info-total" class="text-lg font-black text-gray-800">$0.00</p>
+            <div class="flex justify-around gap-4 border-t border-gray-100 pt-6">
+                <div class="bg-gray-50 rounded-2xl p-3 w-1/2 border border-gray-100">
+                    <p class="text-[10px] uppercase text-gray-400 font-black tracking-wider mb-1">Total</p>
+                    <p id="info-total" class="text-xl font-black text-gray-800">$0.00</p>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-gray-400 font-bold">Repartidor</p>
-                    <p id="info-repartidor" class="text-sm font-bold text-gray-800 mt-0.5">Buscando...</p>
+                <div class="bg-gray-50 rounded-2xl p-3 w-1/2 border border-gray-100">
+                    <p class="text-[10px] uppercase text-gray-400 font-black tracking-wider mb-1">Repartidor</p>
+                    <p id="info-repartidor" class="text-sm font-bold text-ctm-azul mt-1 leading-tight line-clamp-2">Buscando...</p>
                 </div>
             </div>
         </div>
 
-        <div id="contenedor-calificaciones" class="hidden space-y-4 mb-8">
+        <div id="contenedor-calificaciones" class="hidden space-y-5 mb-10">
             
-            <div id="card-calificar-rep" class="hidden bg-gradient-to-br from-[#143653] to-[#22527b] p-6 rounded-2xl shadow-lg text-center text-white">
-                <h3 class="font-black text-lg mb-1">Tu Repartidor 🛵</h3>
-                <p class="text-xs text-blue-200 mb-4">¿Cómo calificarías a <span id="nombre-repartidor-calif" class="font-bold">tu repartidor</span>?</p>
+            <div id="card-calificar-rep" class="hidden bg-gradient-to-br from-[#143653] to-[#22527b] p-8 rounded-[2.5rem] shadow-xl text-center text-white relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-7xl opacity-10">🛵</div>
+                <h3 class="font-black text-2xl mb-2 relative z-10">Tu Repartidor</h3>
+                <p class="text-sm text-blue-200 mb-6 font-medium relative z-10">¿Cómo calificarías a <span id="nombre-repartidor-calif" class="font-black text-white bg-white/20 px-2 py-0.5 rounded">tu repartidor</span>?</p>
                 
-                <div class="flex justify-center gap-2 mb-4 text-4xl">
-                    <button class="star-rep" onmouseover="iluminarRep(1)" onmouseout="limpiarRep()" onclick="seleccionarRep(1)">★</button>
-                    <button class="star-rep" onmouseover="iluminarRep(2)" onmouseout="limpiarRep()" onclick="seleccionarRep(2)">★</button>
-                    <button class="star-rep" onmouseover="iluminarRep(3)" onmouseout="limpiarRep()" onclick="seleccionarRep(3)">★</button>
-                    <button class="star-rep" onmouseover="iluminarRep(4)" onmouseout="limpiarRep()" onclick="seleccionarRep(4)">★</button>
-                    <button class="star-rep" onmouseover="iluminarRep(5)" onmouseout="limpiarRep()" onclick="seleccionarRep(5)">★</button>
+                <div class="flex justify-center gap-3 mb-6 text-5xl relative z-10">
+                    <button class="star-rep drop-shadow-md" onmouseover="iluminarRep(1)" onmouseout="limpiarRep()" onclick="seleccionarRep(1)">★</button>
+                    <button class="star-rep drop-shadow-md" onmouseover="iluminarRep(2)" onmouseout="limpiarRep()" onclick="seleccionarRep(2)">★</button>
+                    <button class="star-rep drop-shadow-md" onmouseover="iluminarRep(3)" onmouseout="limpiarRep()" onclick="seleccionarRep(3)">★</button>
+                    <button class="star-rep drop-shadow-md" onmouseover="iluminarRep(4)" onmouseout="limpiarRep()" onclick="seleccionarRep(4)">★</button>
+                    <button class="star-rep drop-shadow-md" onmouseover="iluminarRep(5)" onmouseout="limpiarRep()" onclick="seleccionarRep(5)">★</button>
                 </div>
                 
-                <button id="btn-enviar-rep" onclick="enviarCalificacionRepartidor()" class="hidden w-full bg-white text-tm-azul hover:bg-gray-100 font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Calificar Repartidor</button>
+                <button id="btn-enviar-rep" onclick="enviarCalificacionRepartidor()" class="hidden w-full bg-white text-ctm-azul hover:bg-gray-100 active:scale-95 font-black py-4 rounded-2xl shadow-lg uppercase text-sm tracking-wider transition-all relative z-10">Calificar Repartidor</button>
             </div>
 
-            <div id="card-calificar-neg" class="hidden bg-gradient-to-br from-[#d4af37] to-[#b3912a] p-6 rounded-2xl shadow-lg text-center text-white">
-                <h3 class="font-black text-lg mb-1">Tu Pedido 🍔</h3>
-                <p class="text-xs text-yellow-100 mb-4">¿Qué te pareció lo que pediste en <span id="nombre-negocio-calif" class="font-bold border-b border-yellow-200">el negocio</span>?</p>
+            <div id="card-calificar-neg" class="hidden bg-gradient-to-br from-[#d4af37] to-[#b3912a] p-8 rounded-[2.5rem] shadow-xl text-center text-white relative overflow-hidden">
+                <div class="absolute -left-4 -top-4 text-7xl opacity-10">🍔</div>
+                <h3 class="font-black text-2xl mb-2 relative z-10">Tu Pedido</h3>
+                <p class="text-sm text-yellow-50 mb-6 font-medium relative z-10">¿Qué te pareció lo que pediste en <span id="nombre-negocio-calif" class="font-black text-white bg-white/20 px-2 py-0.5 rounded">el negocio</span>?</p>
                 
-                <div class="flex justify-center gap-2 mb-4 text-4xl">
-                    <button class="star-neg" onmouseover="iluminarNeg(1)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(1)">★</button>
-                    <button class="star-neg" onmouseover="iluminarNeg(2)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(2)">★</button>
-                    <button class="star-neg" onmouseover="iluminarNeg(3)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(3)">★</button>
-                    <button class="star-neg" onmouseover="iluminarNeg(4)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(4)">★</button>
-                    <button class="star-neg" onmouseover="iluminarNeg(5)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(5)">★</button>
+                <div class="flex justify-center gap-3 mb-6 text-5xl relative z-10">
+                    <button class="star-neg drop-shadow-md" onmouseover="iluminarNeg(1)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(1)">★</button>
+                    <button class="star-neg drop-shadow-md" onmouseover="iluminarNeg(2)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(2)">★</button>
+                    <button class="star-neg drop-shadow-md" onmouseover="iluminarNeg(3)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(3)">★</button>
+                    <button class="star-neg drop-shadow-md" onmouseover="iluminarNeg(4)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(4)">★</button>
+                    <button class="star-neg drop-shadow-md" onmouseover="iluminarNeg(5)" onmouseout="limpiarNeg()" onclick="seleccionarNeg(5)">★</button>
                 </div>
                 
-                <button id="btn-enviar-neg" onclick="enviarCalificacionNegocio()" class="hidden w-full bg-white text-[#b3912a] hover:bg-gray-100 font-black py-3 rounded-lg shadow uppercase text-sm tracking-wider transition">Calificar Negocio</button>
+                <button id="btn-enviar-neg" onclick="enviarCalificacionNegocio()" class="hidden w-full bg-white text-[#b3912a] hover:bg-gray-100 active:scale-95 font-black py-4 rounded-2xl shadow-lg uppercase text-sm tracking-wider transition-all relative z-10">Calificar Negocio</button>
             </div>
 
         </div>
 
-        <div id="mensaje-gracias-completo" class="hidden bg-green-50 border border-green-200 p-6 rounded-2xl text-center mb-8 shadow-sm">
-            <span class="text-4xl block mb-2">🎉</span>
-            <p class="text-green-600 font-black text-xl mb-1">¡Gracias por calificar!</p>
-            <p class="text-xs text-green-700 font-bold leading-relaxed">Tus opiniones ayudan a mantener la calidad de Vive Tres Marías en lo más alto.</p>
+        <div id="mensaje-gracias-completo" class="hidden bg-green-50 border-2 border-green-200 p-8 rounded-[2rem] text-center mb-10 shadow-sm">
+            <span class="text-6xl block mb-4 animate-bounce">🎉</span>
+            <p class="text-green-700 font-black text-2xl mb-2">¡Gracias por calificar!</p>
+            <p class="text-sm text-green-600 font-medium leading-relaxed">Tus opiniones ayudan a mantener la calidad de Conecta Tres Marias en lo más alto.</p>
         </div>
 
-        <h3 class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4 ml-2">Línea de Tiempo</h3>
+        <h3 class="text-gray-400 font-black text-xs uppercase tracking-widest mb-6 ml-2 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+            Línea de Tiempo
+        </h3>
         
-        <div class="ml-4 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+        <div class="ml-4 space-y-8 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-gray-200 before:via-gray-200 before:to-transparent">
             
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div id="icon-step-1" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">📋</div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm">Pedido Recibido</div>
-                    <div class="text-xs text-slate-500">El negocio tiene tu solicitud de pedido.</div>
+                <div id="icon-step-1" class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-200 text-slate-500 text-xl shadow-md shrink-0 z-10 transition-colors duration-500">📋</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow ml-2">
+                    <div class="font-black text-gray-800 text-base mb-1">Pedido Recibido</div>
+                    <div class="text-xs text-gray-500 font-medium leading-relaxed">El negocio tiene tu solicitud de pedido.</div>
                 </div>
             </div>
             
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div id="icon-step-2" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">👨‍🍳</div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm" id="text-step-2-title">Preparando / Asignado</div>
-                    <div class="text-xs text-slate-500" id="text-step-2-desc">Tu pedido está siendo preparado y organizando la entrega.</div>
+                <div id="icon-step-2" class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-200 text-slate-500 text-xl shadow-md shrink-0 z-10 transition-colors duration-500">👨‍🍳</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow ml-2">
+                    <div class="font-black text-gray-800 text-base mb-1" id="text-step-2-title">Preparando / Asignado</div>
+                    <div class="text-xs text-gray-500 font-medium leading-relaxed" id="text-step-2-desc">Tu pedido está siendo preparado y organizando la entrega.</div>
                 </div>
             </div>
 
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div id="icon-step-3" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">🛵</div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm" id="text-step-3-title">En Camino / Listo</div>
-                    <div class="text-xs text-slate-500" id="text-step-3-desc">El pedido va hacia tu domicilio o está listo para que pases por él.</div>
+                <div id="icon-step-3" class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-200 text-slate-500 text-xl shadow-md shrink-0 z-10 transition-colors duration-500">🛵</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow ml-2">
+                    <div class="font-black text-gray-800 text-base mb-1" id="text-step-3-title">En Camino / Listo</div>
+                    <div class="text-xs text-gray-500 font-medium leading-relaxed" id="text-step-3-desc">El pedido va hacia tu domicilio o está listo para que pases por él.</div>
                 </div>
             </div>
 
             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div id="icon-step-4" class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10 transition-colors duration-300">✅</div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div class="font-bold text-slate-900 text-sm">Entregado</div>
-                    <div class="text-xs text-slate-500">¡Tu pedido ha sido entregado exitosamente!</div>
+                <div id="icon-step-4" class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-200 text-slate-500 text-xl shadow-md shrink-0 z-10 transition-colors duration-500">✅</div>
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow ml-2">
+                    <div class="font-black text-gray-800 text-base mb-1">Entregado</div>
+                    <div class="text-xs text-gray-500 font-medium leading-relaxed">¡Tu pedido ha sido entregado exitosamente!</div>
                 </div>
             </div>
 
@@ -183,7 +205,7 @@
         function actualizarInterfazPedido(pedido) {
             document.getElementById('info-total').innerText = `$${pedido.total}`;
             
-            // MODIFICACIÓN AQUI: Lógica condicional por si el pedido no tiene repartidor asignado pero ya fue aceptado
+            // Lógica condicional por si el pedido no tiene repartidor asignado pero ya fue aceptado
             if (pedido.repartidor_id) {
                 document.getElementById('info-repartidor').innerText = pedido.repartidores ? pedido.repartidores.nombre : "Asignando...";
                 document.getElementById('text-step-2-desc').innerText = "Ya tenemos un repartidor asignado. Está recolectando tus productos.";
@@ -209,7 +231,7 @@
 
             // Lógica Visual del Timeline
             for(let i=1; i<=4; i++) {
-                document.getElementById(`icon-step-${i}`).classList.remove('bg-tm-dorado', 'text-white', 'border-yellow-200', 'bg-green-500', 'border-green-200');
+                document.getElementById(`icon-step-${i}`).classList.remove('bg-ctm-dorado', 'text-white', 'border-yellow-200', 'bg-green-500', 'border-green-200');
                 document.getElementById(`icon-step-${i}`).classList.add('bg-slate-200', 'text-slate-500', 'border-white');
             }
 
@@ -220,14 +242,14 @@
             };
 
             if (pedido.estado === 'esperando_activacion' || pedido.estado === 'pendiente' || pedido.estado === 'asignado') {
-                setActivo('icon-step-1', 'bg-tm-dorado', 'border-yellow-200');
+                setActivo('icon-step-1', 'bg-ctm-dorado', 'border-yellow-200');
             } else if (pedido.estado === 'aceptado') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
-                setActivo('icon-step-2', 'bg-tm-dorado', 'border-yellow-200');
+                setActivo('icon-step-2', 'bg-ctm-dorado', 'border-yellow-200');
             } else if (pedido.estado === 'en_camino') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
-                setActivo('icon-step-3', 'bg-tm-dorado', 'border-yellow-200');
+                setActivo('icon-step-3', 'bg-ctm-dorado', 'border-yellow-200');
             } else if (pedido.estado === 'entregado') {
                 setActivo('icon-step-1', 'bg-green-500', 'border-green-200');
                 setActivo('icon-step-2', 'bg-green-500', 'border-green-200');
@@ -244,7 +266,7 @@
                 contCalif.classList.remove('hidden');
                 msgGracias.classList.add('hidden');
 
-                // MODIFICACIÓN AQUI: Validar que EXISTA repartidor antes de pedir calificación
+                // Validar que EXISTA repartidor antes de pedir calificación
                 if (pedido.repartidor_id && pedido.calificacion_repartidor === null) {
                     cardRep.classList.remove('hidden');
                     calificacionesPendientes++;
